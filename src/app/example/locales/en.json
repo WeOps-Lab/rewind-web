@@ -1,0 +1,12 @@
+{
+  "common": {
+    "monitor": "Monitor",
+    "alarm": "Alarm"
+  },
+  "studio": {
+    "menu": "Studio12"
+  }, 
+  "knowledge": {
+    "menu": "Knowledge345"
+  }
+}

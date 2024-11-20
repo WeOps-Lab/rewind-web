@@ -1,0 +1,6 @@
+{
+  "/provider": {
+    "admin": ["read", "write"]
+  }
+}
+  
