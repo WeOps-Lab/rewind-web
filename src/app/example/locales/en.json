@@ -3,8 +3,10 @@
     "monitor": "Monitor",
     "alarm": "Alarm"
   },
-  "studio": {
-    "menu": "Studio12"
+  "app": {
+    "menu": {
+      "home": "Home"
+    }
   }, 
   "knowledge": {
     "menu": "Knowledge345"
