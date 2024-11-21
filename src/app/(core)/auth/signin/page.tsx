@@ -1,4 +1,4 @@
-import { authOptions } from "../../../constants/authOptions";
+import { authOptions } from "@/constants/authOptions";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
