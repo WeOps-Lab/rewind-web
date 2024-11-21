@@ -40,7 +40,7 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
+    <div className="container mx-auto p-6 min-h-screen">
       <div className="grid grid-cols-4 gap-6">
         {cardData.map((card, index) => (
           <div key={index} className="col-span-1">
