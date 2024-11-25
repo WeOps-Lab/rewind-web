@@ -1,7 +1,7 @@
 .height {
     height: calc(100vh - 100px);
     width: 100%;
-    overflow: auto;
+    overflow: hidden;
     font-weight: 300;
     :global {
         .ant-table-cell-with-append {
@@ -10,8 +10,9 @@
             }
         }
         .ant-input {
-            width: 200px !important;
             min-width: 180px !important;
+            width: 291px !important;
+            height: 26px;
            }
            .ant-table-wrapper .ant-table.ant-table-small{
             color:rgb(90, 90, 90) !important;
