@@ -1,0 +1,27 @@
+.roledescriptionStyle {
+   font-size: small !important;
+   line-height: 1 !important;
+   white-space: wrap;
+   :global{
+      :where(.css-dev-only-do-not-override-yta69t).ant-tag {
+         background-color: red;
+      }
+   }
+   div{
+      line-height: 20px;
+      p{
+         margin-bottom: 0px;
+      }
+      p:nth-child(1){
+        margin-top:10px;
+      }
+   }
+
+}
+.tagheight {
+   :global{
+      :where(.css-dev-only-do-not-override-yta69t).ant-tag {
+         height: 140px;
+      }
+   }
+}
