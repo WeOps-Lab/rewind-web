@@ -277,6 +277,8 @@ const User = () => {
 
   useEffect(() => {
     getuserslistApi();
+  }, []);
+  useEffect(() => {
     getgrouplistApi();
   }, []);
 
@@ -411,6 +413,7 @@ const User = () => {
     const newData = tabledata.filter((item) => item.key !== key);
     setTableData(newData);
     getuserslistApi();
+    message.success('Delete successfully');
   }
 
   const onFormValuesChange = (changedValues: any) => {
@@ -512,7 +515,7 @@ const User = () => {
       })
       message.success(response.message);
     } catch (error: any) {
-      message.error('Error while editing user');
+      message.error('Error while addUser user');
       throw new Error(error?.message || 'Unknown error occurred');
     }
   }
@@ -527,8 +530,9 @@ const User = () => {
       const response: { message: string } = await get(`/lite/group/`)
       message.success(response.message);
     } catch (error: any) {
-      message.error('Error while editing user');
-      throw new Error(error?.message || 'Unknown error occurred');
+      // message.error('Error while getgrouplist',error);
+      console.log(error);
+      // throw new Error(error?.message || 'Unknown error occurred');
     }
   }
   return (
@@ -541,7 +545,7 @@ const User = () => {
       <div className={`flex overflow-hidden`} style={{ height: 'calc(100vh - 160px)' }}>
         {/* 左边 */}
         <div className={`${userInfoStyle.bgColor} w-[230px] flex-shrink-0 flex flex-col justify-items-center items-center r-bg-color mt-4 rounded-md mr-3`}>
-          <Input  className="mx-3 mt-2 w-[204px]" placeholder={`${commonItems.search}...`} />
+          <Input className="mx-3 mt-2 w-[204px]" placeholder={`${commonItems.search}...`} />
           <ConfigProvider
             theme={{
               token: {
@@ -566,7 +570,7 @@ const User = () => {
                 <Input className="mt-2" placeholder={`${commonItems.search}...`} />
               </div>
               <div className="flex">
-                <Button  className="mr-1 mt-2" type="primary" onClick={addData}>
+                <Button className="mr-1 mt-2" type="primary" onClick={addData}>
                   +{commonItems.add}
                 </Button>
                 {/* add弹窗 */}
@@ -578,10 +582,10 @@ const User = () => {
                   cancelText={commonItems.cancel}
                   width={500}
                   footer={[
-                    <Button key="submit" type="primary" onClick={() => onOk() }>
+                    <Button key="submit" type="primary" onClick={() => onOk()}>
                       Confirm
                     </Button>,
-                    <Button key="cancel" onClick={() =>setAddModalOpen(false)}>
+                    <Button key="cancel" onClick={() => setAddModalOpen(false)}>
                       Cancel
                     </Button>,
                   ]}

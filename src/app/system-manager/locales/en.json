@@ -1,14 +1,30 @@
 {
   "common": {
-    "monitor": "Monitor",
-    "alarm": "Alarm"
+    "modifyrole": "Modify Role",
+    "modifydelete": "Modify Delete"
   },
   "app": {
     "menu": {
-      "home": "Home"
+      "user": "User",
+      "teams": "Teams"
     }
   }, 
-  "knowledge": {
-    "menu": "Knowledge345"
+  "tableItem":{
+    "username": "Username",
+    "name": "Name",
+    "email": "Email",
+    "number": "Nunber",
+    "team": "Team",
+    "role": "Role",
+    "actions": "Actions",
+    "administrator": "Administrator",
+    "normalusers": "Normal Users"
+  },
+  "teamItem":{
+    "addsubteams":"Add Sub-Teams",
+    "rename":"Rename",
+    "delete":"Delete",
+    "teams":"Teams",
+    "teaminfo":"You can manage user organizations, including adding and adjusting the organizational structure."
   }
 }

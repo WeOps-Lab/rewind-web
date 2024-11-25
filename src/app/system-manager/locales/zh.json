@@ -1,14 +1,30 @@
 {
   "common": {
-    "monitor": "监控",
-    "alarm": "告警"
+    "modifyrole": "批量修改角色",
+    "modifydelete": "批量删除"
   },
   "app": {
     "menu": {
-      "home": "首页"
+      "user": "用户",
+      "teams": "团队"
     }
   }, 
-  "knowledge": {
-    "menu": "知识库"
+  "tableItem":{
+    "username": "用户名",
+    "name": "姓名",
+    "email": "邮箱",
+    "number": "电话",
+    "team": "团队",
+    "role": "角色",
+    "actions": "操作",
+    "administrator": "管理员",
+    "normalusers": "普通用户"
+  },
+  "teamItem":{
+    "addsubteams":"添加子团队",
+    "rename":"重命名",
+    "delete":"删除",
+    "teams":"团队",
+    "teaminfo":"您可以管理用户组织，包括添加和调整组织结构。"
   }
 }

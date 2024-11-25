@@ -163,7 +163,7 @@ const Teams = () => {
     }
 
   ];
-  const [dataSource, setDataSource] = React.useState<DataType[]>();
+  const [dataSource, setDataSource] = React.useState<DataType[]>([{ key: 'hdhhd', name: 'fhdhfhd' }, { key: 'hd', name: 'chen' }]);
   const [onlykeytable, setOnlykeytable] = useState<string>('6');
 
   const onDragEnd = async ({ active, over }: DragEndEvent) => {
@@ -178,13 +178,13 @@ const Teams = () => {
       }
     }
     //通过api来完成team的拖拽功能
-    const drapteamresult=await dragTeamApi(active.id.toString(), over?.id);
+    const drapteamresult = await dragTeamApi(active.id.toString(), over?.id);
     if (drapteamresult === 'ok') {
       message.success('Drag team success');
     } else {
       message.error('Drag team failed');
     }
-    
+
 
   };
 
@@ -322,6 +322,7 @@ const Teams = () => {
     const newData = deleteNode(dataSource as DataType[], key.key);
     setDataSource(newData);
     deleteteamApi(key.key);
+    message.success('Delete team success');
     getOrganizationalDataApi();
   }
 
@@ -438,7 +439,7 @@ const Teams = () => {
       console.log(error)
     }
   }
-  
+
   async function dragTeamApi(dragactive_id: string, dragover_id: unknown) {
     try {
       const response: { message: string } = await post(`/lite/group/`, {
@@ -457,7 +458,7 @@ const Teams = () => {
   return (
     <div className={`${teamsStyle.height}`} >
       <IntroductionInfo title={teamItem.teams} message={teamItem.teaminfo} />
-      <div className='w-full h-[24px] mt-[19px] mb-[19px]'><Input className='inputwidth' placeholder={`${commonItems.search}...`}  /></div>
+      <div className='w-full h-[24px] mt-[19px] mb-[19px]'><Input className='inputwidth' placeholder={`${commonItems.search}...`} /></div>
       <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
         <SortableContext items={[]} strategy={verticalListSortingStrategy}>
           <ConfigProvider
