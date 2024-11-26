@@ -1,77 +1,25 @@
 'use client';
 import React from 'react';
-import { Input, Form, Radio, Select, message, Popconfirm } from 'antd';
+import { Input, Form, Radio, Select, message, Modal } from 'antd';
 import { Tree } from 'antd';
 import { Button, ConfigProvider } from 'antd';
 import { useState, useEffect, useRef } from 'react';
 import { getRandomColor } from '../utils/common';
-import IntroductionInfo from '../components/introduction-info';
 import OperateModal from '@/components/operate-modal';
 import { Flex, Table, Tag } from 'antd';
 import type { PopconfirmProps, RadioChangeEvent } from 'antd';
 import type { TreeDataNode } from 'antd';
-import type { TableColumnsType, TableProps } from 'antd';
+import type { TableColumnsType } from 'antd';
 import userInfoStyle from './index.module.scss';
-import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
 import RoleDescription from "../components/role-description";
-
-
-
-
-// 定义接口
-interface DataType {
-  key: React.Key;
-  username: string;
-  name: string;
-  email: string;
-  number: string;
-  team: string;
-  role: string;
-}
-
-interface Access {
-  manageGroupMembership: boolean;
-  view: boolean;
-  mapRoles: boolean;
-  impersonate: boolean;
-  manage: boolean;
-}
-
-// 定义 BruteForceStatus 接口
-interface BruteForceStatus {
-  numFailures: number;
-  disabled: boolean;
-  lastIPFailure: string;
-  lastFailure: number;
-}
-
-// 定义 User 接口
-interface User {
-  id: string;
-  createdTimestamp: number;
-  username: string;
-  enabled: boolean;
-  emailVerified: boolean;
-  firstName: string;
-  lastName: string;
-  Number: string;
-  email: string;
-  access: Access;
-  team: string;
-  role: string;
-  bruteForceStatus: BruteForceStatus;
-}
-
-// 定义组织列表的接口
-
-
-type TableRowSelection<T extends object = object> =
-  TableProps<T>['rowSelection'];
-
+import { UserDataType, TransmitUserData, TableRowSelection } from '@/app/system-manager/types/userstypes'
+import { useTranslation } from '@/utils/i18n';
+import WithSideMenuLayout from '@/components/sub-layout/index'
+import TopSection from '@/app/system-manager/components/top-section'
 const User = () => {
   //hook函数
-  const [tabledata, setTableData] = useState<DataType[]>([]);
+  const [tabledata, setTableData] = useState<UserDataType[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   //控制Modal的打开和关闭
   const [addmodalOpen, setAddModalOpen] = useState(false);
@@ -93,36 +41,9 @@ const User = () => {
   const [addroleselect, setAddroleselect] = useState<boolean>(true);
   const [eidtroleselect, setEidtroleselect] = useState<boolean>(true);
   const [modifyroleselect, setModifyroleselect] = useState<boolean>(true);
-
   const { t } = useTranslation();
-  const tableItems =
-  {
-    username: t('tableItem.username'),
-    name: t('tableItem.name'),
-    email: t('tableItem.email'),
-    number: t('tableItem.number'),
-    team: t('tableItem.team'),
-    role: t('tableItem.role'),
-    actions: t('tableItem.actions'),
-    administrator: t('tableItem.administrator'),
-    normalusers: t('tableItem.normalusers'),
+  const { confirm } = Modal;
 
-  }
-
-
-
-  const commonItems = {
-    delete: t('common.delete'),
-    search: t('common.search'),
-    add: t('common.add'),
-    cancel: t('common.cancel'),
-    confirm: t('common.confirm'),
-    edit: t('common.edit'),
-    modifyrole: t('common.modifyrole'),
-    modifydelete: t('common.modifydelete'),
-    addNew: t('common.addNew')
-
-  }
 
   // 数据
   const { DirectoryTree } = Tree;
@@ -180,11 +101,12 @@ const User = () => {
   ];
 
   // 表格数据
-  const columns: TableColumnsType<DataType> = [
+  const columns: TableColumnsType<UserDataType> = [
     {
-      title: 'USERNAME',
+      title: t('userpage.contentright.bottontable.username'),
       dataIndex: 'username',
       width: 185,
+      fixed: 'left',
       render: (text) => {
         const color = getRandomColor();
         return (
@@ -200,12 +122,12 @@ const User = () => {
         );
       },
     },
-    { title: 'NAME', dataIndex: 'name', width: 100 },
-    { title: 'EMAIL', dataIndex: 'email', width: 185 },
-    { title: 'NUMBER', dataIndex: 'number', width: 110 },
-    { title: 'TEAM', dataIndex: 'team', width: 80 },
+    { title: t('userpage.contentright.bottontable.name'), dataIndex: 'name', width: 100 },
+    { title: t('userpage.contentright.bottontable.email'), dataIndex: 'email', width: 185 },
+    { title: t('userpage.contentright.bottontable.number'), dataIndex: 'number', width: 110 },
+    { title: t('userpage.contentright.bottontable.team'), dataIndex: 'team', width: 80 },
     {
-      title: 'ROLE',
+      title: t('userpage.contentright.bottontable.role'),
       dataIndex: 'role',
       width: 110,
       render: (text) => {
@@ -214,9 +136,10 @@ const User = () => {
       },
     },
     {
-      title: 'Actions',
+      title: t('userpage.contentright.bottontable.actions'),
       dataIndex: 'key',
       width: 150,
+      fixed: 'right',
       render: (key) => {
         return (
           <><Button
@@ -226,29 +149,26 @@ const User = () => {
             color="primary"
             variant="link"
           >
-            Edit
+            {t('common.edit')}
           </Button>
-          <Popconfirm
-            title="Do you Want to delete these item?"
-            description="After deletion,the data cannot be recovered."
-            onConfirm={() => { deleteuse(key); }}
-            okText="OK"
-            cancelText="Cancel"
+          {/* 删除的一条用户信息 */}
+          <Button
+            color="primary"
+            variant="link"
+            onClick={() => {
+              showDeleteConfirm(key);
+
+            }}
           >
-            <Button
-              color="primary"
-              variant="link"
-            >
-                Delete
-            </Button>
-          </Popconfirm>
+            {t('common.delete')}
+          </Button>
           </>
         );
       },
     },
   ];
 
-  const dataSource = Array.from<DataType>({ length: 4 }).map<DataType>(
+  const dataSource = Array.from<UserDataType>({ length: 4 }).map<UserDataType>(
     (_, index) => ({
       key: index,
       username: `username${index}`,
@@ -261,8 +181,8 @@ const User = () => {
   );
 
   const options = [
-    { label: tableItems.administrator, value: 'Administrator' },
-    { label: tableItems.normalusers, value: 'Normal users' },
+    { label: t('tableItem.administrator'), value: 'Administrator' },
+    { label: t('tableItem.normalusers'), value: 'Normal users' },
   ];
 
   //useEffect函数
@@ -306,7 +226,7 @@ const User = () => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
-  const rowSelection: TableRowSelection<DataType> = {
+  const rowSelection: TableRowSelection<UserDataType> = {
     selectedRowKeys,
     onChange: onSelectChange,
   };
@@ -366,7 +286,7 @@ const User = () => {
     setModalVisible(false);
   };
   //批量删除用户
-  const confirm: PopconfirmProps['onConfirm'] = () => {
+  const confirmdeleteuser: PopconfirmProps['onConfirm'] = () => {
     const newData = tabledata.filter((item) => !selectedRowKeys.includes(item.key));
     setTableData(newData);
     modifydeleteApi();
@@ -390,7 +310,7 @@ const User = () => {
   }
   //点击确定按钮，将修改数据添加到表格中
   function oneditOk() {
-    const newarr: DataType[] = tabledata.map((item) => {
+    const newarr: UserDataType[] = tabledata.map((item) => {
       //添加key值
       return item.key === editkey
         ? { ...form.getFieldsValue(), key: editkey }
@@ -408,12 +328,11 @@ const User = () => {
   }
 
   //删除用户
-  function deleteuse(key: number) {
+  function deleteuser(key: number) {
     deleteuserApi(key);
     const newData = tabledata.filter((item) => item.key !== key);
     setTableData(newData);
     getuserslistApi();
-    message.success('Delete successfully');
   }
 
   const onFormValuesChange = (changedValues: any) => {
@@ -424,10 +343,10 @@ const User = () => {
       return false;
     }
   };
-  // 单选事件变化
+  // 添加用户的单选事件变化监听事件
   function addradiochang(e: RadioChangeEvent) {
     if (e.target.value === "Administrator") {
-      setEidtroleselect(true);
+      setAddroleselect(true);
     } else {
       setAddroleselect(false);
     }
@@ -446,6 +365,28 @@ const User = () => {
       setModifyroleselect(false);
     }
   }
+  // 删除用户的弹窗确定
+  const showDeleteConfirm = (key: number) => {
+    confirm({
+      title: t('teampage.modal.title'),
+      content: t('teampage.modal.content'),
+      centered: true,
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
+      onOk() {
+        return new Promise(async (resolve) => {
+          try {
+            deleteuser(key)
+            message.success("delete users successfully!");
+            await del(`/api/username`);
+            message.success("delete users successfully!");
+          } finally {
+            resolve(true);
+          }
+        });
+      },
+    });
+  };
 
 
 
@@ -453,8 +394,8 @@ const User = () => {
   //获取用户列表
   async function getuserslistApi() {
     const userslistdata = await get('/lite/user/', { params: { page: 1, page_size: 10 } });
-    const temparr: DataType[] = [];
-    userslistdata.forEach((item: User) => {
+    const temparr: UserDataType[] = [];
+    userslistdata.forEach((item: TransmitUserData) => {
       temparr.push({
         key: item.id,
         username: item.username,
@@ -538,14 +479,11 @@ const User = () => {
   return (
     <div className={`${userInfoStyle.userInfo} ${userInfoStyle.bgHeight}`}>
       {/* {contextHolder} */}
-      <IntroductionInfo
-        message="Display all information.You can maintain user information and assign roles."
-        title="Users"
-      />
-      <div className={`flex overflow-hidden`} style={{ height: 'calc(100vh - 160px)' }}>
+      <TopSection title={t('userpage.topinfo.title')} content={t('userpage.topinfo.desc')}></TopSection>
+      <div className={`flex overflow-hidden mt-[27px]`} style={{ height: 'calc(100vh - 160px)' }}>
         {/* 左边 */}
-        <div className={`${userInfoStyle.bgColor} w-[230px] flex-shrink-0 flex flex-col justify-items-center items-center r-bg-color mt-4 rounded-md mr-3`}>
-          <Input className="mx-3 mt-2 w-[204px]" placeholder={`${commonItems.search}...`} />
+        <div className={`${userInfoStyle.bgColor} w-[230px] flex-shrink-0 flex flex-col justify-items-center items-center r-bg-color  rounded-md mr-[17px]`}>
+          <Input className="mx-3 mt-[17px] w-[204px]" placeholder={`${t('common.search')}...`} />
           <ConfigProvider
             theme={{
               token: {
@@ -563,30 +501,30 @@ const User = () => {
           </ConfigProvider>
         </div>
         {/* 右边 */}
-        <div className="ml-auto mt-4 flex-1 min-w-[640px]" style={{ height: 'calc(100vh - 170px)', width: 'calc(100vw - 310px)' }}>
+        <WithSideMenuLayout showSideMenu={false} menuItems={[]}  >
           <div className="w-full h-11 mb-2">
             <div className="flex justify-between">
               <div className="w-[200px]">
-                <Input className="mt-2" placeholder={`${commonItems.search}...`} />
+                <Input className="" placeholder={`${t('common.search')}...`} />
               </div>
               <div className="flex">
-                <Button className="mr-1 mt-2" type="primary" onClick={addData}>
-                  +{commonItems.add}
+                <Button className="mr-1" type="primary" onClick={addData}>
+                  +{t('common.add')}
                 </Button>
                 {/* add弹窗 */}
                 <OperateModal
-                  title={commonItems.addNew}
+                  title={t('common.addnewuser')}
                   closable={false}
                   open={addmodalOpen}
-                  okText={commonItems.confirm}
-                  cancelText={commonItems.cancel}
+                  okText={t('common.confirm')}
+                  cancelText={t('common.cancel')}
                   width={500}
                   footer={[
                     <Button key="submit" type="primary" onClick={() => onOk()}>
-                      Confirm
+                      {t('common.confirm')}
                     </Button>,
                     <Button key="cancel" onClick={() => setAddModalOpen(false)}>
-                      Cancel
+                      {t('common.cancel')}
                     </Button>,
                   ]}
                 >
@@ -594,12 +532,12 @@ const User = () => {
                     <Form.Item
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
-                      name="username" label={`${tableItems.username}*`} colon={false}>
+                      name="username" label={`${t('tableItem.username')}*`} colon={false}>
                       <Input placeholder="input placeholder" />
                     </Form.Item>
                     <Form.Item
                       name="name"
-                      label={`${tableItems.name}`}
+                      label={`${t('tableItem.name')}`}
                       colon={false}
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
@@ -610,7 +548,7 @@ const User = () => {
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
                       name="email"
-                      label={`${tableItems.email}`}
+                      label={`${t('tableItem.email')}`}
                       colon={false}
                     >
                       <Input placeholder="input placeholder" />
@@ -619,7 +557,7 @@ const User = () => {
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
                       name="number"
-                      label={`${tableItems.number}`}
+                      label={`${t('tableItem.number')}`}
                       colon={false}
                     >
                       <Input placeholder="input placeholder" />
@@ -628,7 +566,7 @@ const User = () => {
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
                       name="team"
-                      label={`${tableItems.team}*`}
+                      label={`${t('tableItem.team')}*`}
                       colon={false}
                     >
                       <Select
@@ -645,7 +583,7 @@ const User = () => {
                     <Form.Item
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
-                      label={`${tableItems.role}*`}
+                      label={`${t('tableItem.role')}*`}
                       name="role" colon={false}>
                       <Radio.Group className={`${userInfoStyle.removeSingleChoiceInterval}`} block options={options} onChange={addradiochang} />
                     </Form.Item>
@@ -663,14 +601,14 @@ const User = () => {
                   closable={false}
                   title={`Edite-${edituseName}`}
                   open={editmodelOpen}
-                  okText={commonItems.confirm}
-                  cancelText={commonItems.cancel}
+                  okText={t('common.confirm')}
+                  cancelText={t('common.cancel')}
                   footer={[
                     <Button key="submit" type="primary" onClick={() => oneditOk()}>
-                      Confirm
+                      {t('common.confirm')}
                     </Button>,
                     <Button key="cancel" onClick={() => oneditCancel()}>
-                      Cancel
+                      {t('common.cancel')}
                     </Button>,
                   ]}
                 >
@@ -678,14 +616,14 @@ const User = () => {
                     <Form.Item
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
-                      name="username" label={`${tableItems.username}*`} colon={false}>
+                      name="username" label={`${t('tableItem.username')}*`} colon={false}>
                       <Input disabled={true} placeholder={edituseName} ></Input>
                     </Form.Item>
                     <Form.Item
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
                       name="name"
-                      label={`${tableItems.name}`}
+                      label={`${t('tableItem.name')}`}
                       colon={false}
                     >
                       <Input placeholder="input placeholder" />
@@ -694,7 +632,7 @@ const User = () => {
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
                       name="email"
-                      label={`${tableItems.email}`}
+                      label={`${t('tableItem.email')}`}
                       colon={false}
                     >
                       <Input placeholder="input placeholder" />
@@ -703,7 +641,7 @@ const User = () => {
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
                       name="number"
-                      label={`${tableItems.number}`}
+                      label={`${t('tableItem.number')}`}
                       colon={false}
                     >
                       <Input placeholder="input placeholder" />
@@ -712,7 +650,7 @@ const User = () => {
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
                       name="team"
-                      label={`${tableItems.team}*`}
+                      label={`${t('tableItem.team')}*`}
                       colon={false}
                     >
                       <Select
@@ -729,7 +667,7 @@ const User = () => {
                     <Form.Item
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
-                      label={`${tableItems.role}*`}
+                      label={`${t('tableItem.role')}*`}
                       name="role" colon={false}>
                       <Radio.Group className={`${userInfoStyle.removeSingleChoiceInterval}`} block options={options} onChange={editradiochang} />
                     </Form.Item>
@@ -745,31 +683,31 @@ const User = () => {
                 {/* 批量修改角色 */}
                 <Button
                   ref={modifyroleuseref}
-                  className="mr-1 mt-2 op-8"
+                  className="mr-1 op-8"
                   onClick={modifyRole}
                 >
-                  {commonItems.modifyrole}
+                  {t('common.modifyrole')}
                 </Button>
                 <OperateModal
                   width={500}
-                  title="Batch Modify Roles"
+                  title={t('common.batchmodifyroles')}
                   closable={false}
                   open={modalVisible}
-                  okText={commonItems.confirm}
-                  cancelText={commonItems.cancel}
+                  okText={t('common.confirm')}
+                  cancelText={t('common.cancel')}
                   footer={[
                     <Button key="submit" type="primary" onClick={() => modifyroleModalOpen()}>
-                      Confirm
+                      {t('common.confirm')}
                     </Button>,
                     <Button key="cancel" onClick={() => handleModalClose()}>
-                      Cancel
+                      {t('common.cancel')}
                     </Button>,
                   ]}
                 >
                   <Form style={{ maxWidth: 600 }} form={form} onValuesChange={onFormValuesChange}>
                     <Form.Item
                       colon={false}>
-                      <span>Selected users:</span>
+                      <span>{t('common.selectedusers')}:</span>
                       <span className="text-[#1890ff]">
                         {username.toString()}
                       </span>
@@ -788,12 +726,12 @@ const User = () => {
                 {/* 批量删除 */}
                 <Button
                   ref={modifydeleteuseref}
-                  className="mr-1 mt-2 red"
+                  className="mr-1"
                   onClick={() => {
                     setModifyRoleOpen(true);
                   }}
                 >
-                  {commonItems.modifydelete}
+                  {t('common.modifydelete')}
 
                 </Button>
 
@@ -802,30 +740,30 @@ const User = () => {
                   title={
                     <>
                       <p className="font-[20px] mt-[16px] ml-[50px] text-center">
-                        Confirm deletion of the selected users?
+                        {t('common.confirmdeleteinfo')}
                       </p>
                     </>
                   }
                   footer={null}
                   closeIcon={null}
-                  okText={commonItems.confirm}
-                  cancelText={commonItems.cancel}
+                  okText={t('common.confirm')}
+                  cancelText={t('common.cancel')}
                 >
-                  <Button className="mt-[20px] ml-[150px]" type="primary" onClick={confirm}>
-                    {commonItems.confirm}
+                  <Button className="mt-[20px] ml-[150px]" type="primary" onClick={confirmdeleteuser}>
+                    {t('common.confirm')}
                   </Button>
                   <Button
                     className="ml-4"
                     type="default"
                     onClick={cancel}
                   >
-                    {commonItems.cancel}
+                    {t('common.cancel')}
                   </Button>
                 </OperateModal>
               </div>
             </div>
           </div>
-          <div className={`${userInfoStyle.bgColor} pt-[29px] pl-[9px] pr-[9px]`}>
+          <div className={`${userInfoStyle.bgColor}`}>
             <Flex gap="middle" vertical>
               <ConfigProvider
                 theme={{
@@ -836,9 +774,10 @@ const User = () => {
                   }
                 }}
               >
-                <Table<DataType>
+                {/* calc(100vh - 360px) */}
+                <Table<UserDataType>
                   size={'middle'}
-                  scroll={{ y: 'calc(100vh - 360px)', x: 'calc(100vw - 250px)' }}
+                  scroll={{ y: '300px', x: 'calc(100vw - 250px)' }}
                   pagination={{ pageSize: 5 }}
                   columns={columns}
                   dataSource={tabledata}
@@ -847,7 +786,7 @@ const User = () => {
               </ConfigProvider>
             </Flex>
           </div>
-        </div>
+        </WithSideMenuLayout>
       </div>
     </div>
   );

@@ -1,7 +1,18 @@
 {
   "common": {
     "modifyrole": "批量修改角色",
-    "modifydelete": "批量删除"
+    "modifydelete": "批量删除",
+    "confirm": "确认",
+    "cancel": "取消",
+    "edit": "编辑",
+    "delete": "删除",
+    "addsubteams": "添加子团队",
+    "rename": "重命名",
+    "addnewuser": "新建",
+    "batchmodifyroles": "批量修改角色",
+    "confirmdeleteinfo": "确认删除所选用户？",
+    "selectedusers": "选定的用户",
+    "add":"添加"
   },
   "app": {
     "menu": {
@@ -9,6 +20,45 @@
       "teams": "团队"
     }
   }, 
+  "userpage":{
+    "topinfo":{
+      "title":"用户",
+      "desc": "显示所有信息，您可以维护用户信息并分配角色。"
+    },
+    "contentleft":{
+      "search":"搜索"},
+    "contentright":{
+      "topinfo":{
+      "add":"添加",
+      "modifyrole":"修改角色",
+      "modifydelete":"修改删除"
+      },
+      "bottontable":{
+        "username":"用户名",
+        "name":"名称",
+        "email":"邮箱",
+        "number":"号码",
+        "team":"团队",
+        "role":"角色",
+        "actions":"操作",
+        "actionsitem":{
+          "edit":"编辑",
+          "delete":"删除"
+        }
+     } 
+  }
+
+} ,
+"teampage":{
+  "topinfo":{
+    "title":"团队",
+    "desc":"显示所有信息，您可以维护用户信息并分配角色。"
+  },
+   "modal":{
+    "title": "您想删除这些项目吗？",
+    "content":"删除后，数据无法恢复。"
+  }
+},
   "tableItem":{
     "username": "用户名",
     "name": "姓名",
@@ -26,5 +76,18 @@
     "delete":"删除",
     "teams":"团队",
     "teaminfo":"您可以管理用户组织，包括添加和调整组织结构。"
+  },
+  "role":{
+    "administrator":{
+      "title":"管理员具有以下权限：",
+      "desc1":"1.在系统设置中管理组织和用户。",
+      "desc2":"2.在其他应用程序中拥有最高权限，可以访问所有数据并执行所有功能操作。"
+    },
+    "normalusers":{
+      "title":"普通用户具有以下权限：",
+      "desc1":"1.无法管理组织和用户。",
+      "desc2":"2.在其他应用程序中，仅对自己的组织拥有数据访问权限。",
+      "desc3":"3.在其他应用程序中，只有使用页面的操作权限，管理页面只有查看权限。"
+    }
   }
 }

@@ -1,14 +1,12 @@
 'use client';
 import React, { useState, useContext, useMemo, useEffect } from 'react';
-import { Button, Input, Form, message, Popconfirm, ConfigProvider } from 'antd';
+import { Button, Input, Form, message, ConfigProvider, Modal } from 'antd';
 import 'antd/dist/reset.css';
-import IntroductionInfo from '../components/introduction-info';
 import OperateModal from '@/components/operate-modal';
 import teamsStyle from './index.module.scss';
 import { CaretDownOutlined, CaretRightOutlined, HolderOutlined } from '@ant-design/icons';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { DndContext } from '@dnd-kit/core';
-import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
   SortableContext,
@@ -17,52 +15,12 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import CustomTable from '@/components/custom-table';
-import { useTranslation } from '@/utils/i18n';
 import { AnyObject } from 'antd/es/_util/type';
 import useApiClient from '@/utils/request';
 import { v4 as uuidv4 } from 'uuid';
-//接口
-interface DataType {
-  key: string;
-  name: string;
-  children?: DataType[];
-}
-
-interface RowContextProps {
-  setActivatorNodeRef?: (element: HTMLElement | null) => void;
-  listeners?: SyntheticListenerMap;
-}
-
-interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
-  'data-row-key': string;
-}
-
-interface Access {
-  view: boolean;
-  viewMembers: boolean;
-  manageMembers: boolean;
-  manage: boolean;
-  manageMembership: boolean;
-}
-
-interface SubGroup {
-  id: string;
-  name: string;
-  path: string;
-  subGroupCount: number;
-  subGroups: SubGroup[];
-  access: Access;
-}
-
-interface Group {
-  id: string;
-  name: string;
-  path: string;
-  subGroupCount: number;
-  subGroups: SubGroup[];
-}
-
-
+import { DataType, RowContextProps, RowProps, Group } from '@/app/system-manager/types/teamstypes'
+import { useTranslation } from '@/utils/i18n';
+import TopSection from '@/app/system-manager/components/top-section'
 const Teams = () => {
   //hook函数
   const RowContext = React.createContext<RowContextProps>({});
@@ -106,57 +64,29 @@ const Teams = () => {
 
   const [datasourcefatherid, setDatasourcefatherid] = useState(['1']);
   const { get, del, put, post } = useApiClient();
-
-
   const { t } = useTranslation();
-  const commonItems = {
-    search: t('common.search'),
-    cancel: t('common.cancel'),
-    confirm: t('common.confirm')
-  }
-
-  const tableItem = {
-    name: t('tableItem.name'),
-    actions: t('tableItem.actions')
-  }
-
-
-  const teamItem = {
-    addsubteams: t('teamItem.addsubteams'),
-    rename: t('teamItem.rename'),
-    delete: t('teamItem.delete'),
-    teams: t('teamItem.teams'),
-    teaminfo: t('teamItem.teaminfo'),
-  }
-
   //数据
   const columns: any = [
     { key: 'sort', align: 'center', width: 28, render: (key: DataType) => (!datasourcefatherid.includes(key.key) ? true : false) ? <DragHandle /> : null },
-    { title: tableItem.name, dataIndex: 'name', width: 450 },
+    { title: t('tableItem.name'), dataIndex: 'name', width: 450 },
     {
-      title: tableItem.actions,
+      title: t('tableItem.actions'),
       dataIndex: 'actions',
       width: 300,
       render: (arr: string[], key: DataType) => (
         <>
           <Button className='mr-[8px]' type='link' onClick={() => { addsubteams(key) }}>
-            {teamItem.addsubteams}
+            {t('common.addsubteams')}
           </Button>
           <Button className='mr-[8px]' type='link' onClick={() => { renameteams(key) }}>
-            {teamItem.rename}
+            {t('common.rename')}
           </Button>
           {!key.children || key.children.length === 0 ? (
-            <Popconfirm
-              title="Do you Want to delete this item?"
-              description="After deletion, the data cannot be recovered."
-              onConfirm={() => { deleteteams(key) }}
-              okText="OK"
-              cancelText="Cancel"
-            >
-              <Button className='mr-[8px]' type='link'>
-                {teamItem.delete}
+            <>
+              <Button className='mr-[8px]' type='link' onClick={() => { deleteteams(key) }}>
+                {t('common.delete')}
               </Button>
-            </Popconfirm>
+            </>
           ) : null}
         </>
       )
@@ -241,6 +171,7 @@ const Teams = () => {
     setExpandedRowKeys([...expandedRowKeysarr, addsubteamkey])
     const newkey = generateUUID();
     setOnlykeytable(newkey);
+    message.success('Add sub-team success');
     setAddSubteammodalOpen(false);
   }
 
@@ -304,6 +235,7 @@ const Teams = () => {
     const newData = renameNode(dataSource as DataType[], renamekey, form.getFieldValue('renameteam'))
     setDataSource(newData);
     renameTeamApi();
+    message.success('Rename team success');
     setRenameteammodalOpen(false);
   }
 
@@ -319,11 +251,11 @@ const Teams = () => {
     });
   };
   function deleteteams(key: { key: string }) {
-    const newData = deleteNode(dataSource as DataType[], key.key);
-    setDataSource(newData);
-    deleteteamApi(key.key);
-    message.success('Delete team success');
-    getOrganizationalDataApi();
+    // const newData = deleteNode(dataSource as DataType[], key.key);
+    // setDataSource(newData);
+    // deleteteamApi(key.key);
+    showDeleteConfirm(key.key);
+    // getOrganizationalDataApi();
   }
 
   const isAncestor = (treeData: DataType[], nodeAKey: string, nodeBKey: string): boolean => {
@@ -381,6 +313,29 @@ const Teams = () => {
     const newUUID = uuidv4();
     return newUUID;
   };
+  // 删除组织的确定的弹窗
+  const { confirm } = Modal;
+  const showDeleteConfirm = (key: string) => {
+    confirm({
+      title: t("teampage.modal.title"),
+      content: t("teampage.modal.content"),
+      centered: true,
+      okText: t("common.confirm"),
+      cancelText: t("common.cancel"),
+      onOk() {
+        return new Promise(async (resolve) => {
+          try {
+            message.success(`${key} "delete teams successfully!"`);
+            await del(`/api/username`);
+            message.success("delete teams successfully!");
+          } finally {
+            resolve(true);
+          }
+        });
+      },
+    });
+  };
+
 
   //api函数
   async function getOrganizationalDataApi() {
@@ -427,18 +382,18 @@ const Teams = () => {
     }
   }
 
-  async function deleteteamApi(group_id: string) {
-    try {
-      const response: { message: string } = await del(`/lite/group/delete_groups/`, {
-        params: {
-          group_id
-        },
-      });
-      message.success(response.message);
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  // async function deleteteamApi(group_id: string) {
+  //   try {
+  //     const response: { message: string } = await del(`/lite/group/delete_groups/`, {
+  //       params: {
+  //         group_id
+  //       },
+  //     });
+  //     console.log(response.message);
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
 
   async function dragTeamApi(dragactive_id: string, dragover_id: unknown) {
     try {
@@ -457,8 +412,9 @@ const Teams = () => {
 
   return (
     <div className={`${teamsStyle.height}`} >
-      <IntroductionInfo title={teamItem.teams} message={teamItem.teaminfo} />
-      <div className='w-full h-[24px] mt-[19px] mb-[19px]'><Input className='inputwidth' placeholder={`${commonItems.search}...`} /></div>
+      <TopSection title={t('teampage.topinfo.title')} content={t('teampage.topinfo.desc')}></TopSection>
+      <div className='w-full h-[24px] mt-[19px] mb-[19px]'><Input className='inputwidth' placeholder={`${t('common.search')}...`} /></div>
+      {/* 拖拽的表格 */}
       <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
         <SortableContext items={[]} strategy={verticalListSortingStrategy}>
           <ConfigProvider
@@ -496,44 +452,46 @@ const Teams = () => {
 
         </SortableContext>
       </DndContext>
+      {/* 添加组织的弹窗 */}
       <OperateModal
-        title={'Add Sub-team'}
+        title={t('common.addsubteams')}
         closable={false}
-        okText={commonItems.confirm}
-        cancelText={commonItems.cancel}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         open={addSubteammodalOpen}
         footer={[
           <Button key="submit" type="primary" onClick={() => onOkaddSubteam()}>
-            Confirm
+            {t('common.confirm')}
           </Button>,
           <Button key="cancel" onClick={() => setAddSubteammodalOpen(false)}>
-            Cancel
+            {t('common.cancel')}
           </Button>,
         ]}
       >
         <Form style={{ maxWidth: 600 }} form={form}>
-          <Form.Item name="teamname" label={`${'Name'}*`} colon={false}>
+          <Form.Item name="teamname" label={`${t('tableItem.name')}*`} colon={false}>
             <Input placeholder="input placeholder" />
           </Form.Item>
         </Form>
       </OperateModal>
+      {/* 修改组织的名字的弹窗 */}
       <OperateModal
-        title={'Rename'}
+        title={t('common.rename')}
         closable={false}
-        okText={commonItems.confirm}
-        cancelText={commonItems.cancel}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         open={renameteammodalOpen}
         footer={[
           <Button key="submit" type="primary" onClick={() => onOkrenameteam()}>
-            Confirm
+            {t('common.confirm')}
           </Button>,
           <Button key="cancel" onClick={() => setRenameteammodalOpen(false)}>
-            Cancel
+            {t('common.cancel')}
           </Button>,
         ]}
       >
         <Form style={{ maxWidth: 600 }} form={form}>
-          <Form.Item name="renameteam" label={`${'Name'}*`} colon={false}>
+          <Form.Item name="renameteam" label={`${t('tableItem.name')}*`} colon={false}>
             <Input placeholder="input placeholder" />
           </Form.Item>
         </Form>
@@ -541,5 +499,5 @@ const Teams = () => {
     </div>
   );
 };
-
 export default Teams;
+

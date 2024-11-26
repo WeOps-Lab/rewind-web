@@ -1,4 +1,6 @@
+// import { useTranslation } from '@/utils/i18n';
 const getMenuItems = (formatMessage: any) => {
+  // const { t } = useTranslation();
   return [
     {
       label: formatMessage({ id: 'User' }),
