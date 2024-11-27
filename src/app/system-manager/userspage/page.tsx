@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getRandomColor } from '../utils/common';
 import OperateModal from '@/components/operate-modal';
 import { Flex, Table, Tag } from 'antd';
-import type { PopconfirmProps, RadioChangeEvent } from 'antd';
+import type { RadioChangeEvent } from 'antd';
 import type { TreeDataNode } from 'antd';
 import type { TableColumnsType } from 'antd';
 import userInfoStyle from './index.module.scss';
@@ -29,7 +29,6 @@ const User = () => {
   const [modalVisible, setModalVisible] = useState(false);
   //主要控制选中的用户名
   const [username, setUsername] = useState(['zhangsan']);
-  const [modifyRoleOpen, setModifyRoleOpen] = useState<boolean>(false);
   const [editkey, setEditkey] = useState(1);
   const [edituseName, setEdituseName] = useState<string>('');
   //表单的数据初始化
@@ -168,6 +167,17 @@ const User = () => {
     },
   ];
 
+  //表格的初始化数据
+  const initialValues: UserDataType = {
+    username: '',
+    name: '',
+    email: '',
+    number: '',
+    team: 'Team 1',
+    role: 'Normal users',
+    key: ''
+  };
+
   const dataSource = Array.from<UserDataType>({ length: 4 }).map<UserDataType>(
     (_, index) => ({
       key: index,
@@ -235,16 +245,18 @@ const User = () => {
     //初始化数据
     setAddModalOpen(true);
     form.resetFields();
-    form.setFieldsValue({ role: 'Administrator', team: 'Team A' });
+    form.setFieldsValue({ role: 'Normal users', team: 'Team A' });
   };
 
   function onOk() {
-    //点击确定按钮，将数据添加到表格中
-    setTableData([...tabledata, { ...form.getFieldsValue(), key: onlykeytable }]);
+    // 点击确定按钮，将数据添加到表格中
+    const temp = handleEmptyFields(form.getFieldsValue());
+    setTableData([...tabledata, { ...temp, key: onlykeytable }]);
     addUserApi(onlykeytable);
     getuserslistApi();
     setOnlykeytable(onlykeytable + 1);
     setAddModalOpen(false);
+    console.log(form.getFieldsValue());
     setSelectedRowKeys([]);
   }
 
@@ -284,18 +296,6 @@ const User = () => {
   // 关闭弹窗
   const handleModalClose = () => {
     setModalVisible(false);
-  };
-  //批量删除用户
-  const confirmdeleteuser: PopconfirmProps['onConfirm'] = () => {
-    const newData = tabledata.filter((item) => !selectedRowKeys.includes(item.key));
-    setTableData(newData);
-    modifydeleteApi();
-    getuserslistApi();
-    setModifyRoleOpen(false);
-  };
-
-  const cancel: PopconfirmProps['onCancel'] = () => {
-    setModifyRoleOpen(false);
   };
 
   //编辑用户
@@ -389,6 +389,41 @@ const User = () => {
   };
 
 
+  // 删除组织的弹窗确定
+  const showDeleteTeamConfirm = (key: number) => {
+    confirm({
+      title: t('teampage.modal.title'),
+      content: t('teampage.modal.content'),
+      centered: true,
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
+      onOk() {
+        const newData = tabledata.filter((item) => !selectedRowKeys.includes(item.key));
+        setTableData(newData);
+        modifydeleteApi();
+        getuserslistApi();
+        return new Promise(async (resolve) => {
+          try {
+            deleteuser(key)
+            message.success("delete users successfully!");
+            await del(`/api/username`);
+            message.success("delete users successfully!");
+          } finally {
+            resolve(true);
+          }
+        });
+      },
+    });
+  };
+
+  // 处理空字段，将其值设为 '--'
+  const handleEmptyFields = (values: UserDataType): UserDataType => {
+    return Object.fromEntries(
+      Object.entries(values).map(([key, value]) => [key, value || '--'])
+    ) as UserDataType;
+  };
+
+
 
   //api接口
   //获取用户列表
@@ -476,6 +511,8 @@ const User = () => {
       // throw new Error(error?.message || 'Unknown error occurred');
     }
   }
+
+
   return (
     <div className={`${userInfoStyle.userInfo} ${userInfoStyle.bgHeight}`}>
       {/* {contextHolder} */}
@@ -493,6 +530,7 @@ const User = () => {
           >
             <DirectoryTree
               className="w-[230px] mt-4 overflow-auto px-3"
+              expandAction={false}
               multiple
               showIcon={false}
               defaultExpandAll
@@ -528,7 +566,11 @@ const User = () => {
                     </Button>,
                   ]}
                 >
-                  <Form style={{ maxWidth: 600 }} form={form}>
+                  <Form
+                    initialValues={initialValues}
+                    style={{ maxWidth: 600 }}
+                    form={form}
+                  >
                     <Form.Item
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 18 }}
@@ -728,38 +770,12 @@ const User = () => {
                   ref={modifydeleteuseref}
                   className="mr-1"
                   onClick={() => {
-                    setModifyRoleOpen(true);
+                    showDeleteTeamConfirm(3);
                   }}
                 >
                   {t('common.modifydelete')}
 
                 </Button>
-
-                <OperateModal
-                  open={modifyRoleOpen}
-                  title={
-                    <>
-                      <p className="font-[20px] mt-[16px] ml-[50px] text-center">
-                        {t('common.confirmdeleteinfo')}
-                      </p>
-                    </>
-                  }
-                  footer={null}
-                  closeIcon={null}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                >
-                  <Button className="mt-[20px] ml-[150px]" type="primary" onClick={confirmdeleteuser}>
-                    {t('common.confirm')}
-                  </Button>
-                  <Button
-                    className="ml-4"
-                    type="default"
-                    onClick={cancel}
-                  >
-                    {t('common.cancel')}
-                  </Button>
-                </OperateModal>
               </div>
             </div>
           </div>
