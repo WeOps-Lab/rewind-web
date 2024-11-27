@@ -1,7 +1,19 @@
 {
   "common": {
     "modifyrole": "Modify Role",
-    "modifydelete": "Modify Delete"
+    "modifydelete": "Modify Delete",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "addsubteams": "Add Sub-Teams",
+    "rename": "Rename",
+    "addnewuser": "Add New",
+    "batchmodifyroles": "Batch Modify Roles",
+    "confirmdeleteinfo": "Confirm deletion of the selected users?",
+    "selectedusers": "Selected Users",
+    "add":"Add"
+
   },
   "app": {
     "menu": {
@@ -9,6 +21,44 @@
       "teams": "Teams"
     }
   }, 
+  "userpage":{
+    "topinfo":{
+      "title":"Users",
+      "desc": "Display all information.You can maintain user information and assign roles."
+    },
+    "contentleft":{
+      "search":"Search"},
+    "contentright":{
+      "topinfo":{
+      "add":"Add",
+      "modifyrole":"Modify Role",
+      "modifydelete":"Modify Delete"
+      },
+      "bottontable":{
+        "username":"USERNAME",
+        "name":"NAME",
+        "email":"EMAIL",
+        "number":"NUMBER",
+        "team":"TEAM",
+        "role":"ROLE",
+        "actions":"ACTIONS",
+        "actionsitem":{
+          "edit":"Edit",
+          "delete":"Delete"
+        }
+     } 
+  }
+}, 
+"teampage":{
+  "topinfo":{
+    "title":"Teams",
+    "desc":"Display all information.You can maintain user information and assign roles."
+  },
+  "modal":{
+    "title": "Do you Want to delete these item?",
+    "content":"After deletion,the data cannot be recovered."
+  }
+},
   "tableItem":{
     "username": "Username",
     "name": "Name",
@@ -26,5 +76,18 @@
     "delete":"Delete",
     "teams":"Teams",
     "teaminfo":"You can manage user organizations, including adding and adjusting the organizational structure."
+  },
+  "role":{
+    "administrator":{
+      "title":"The administrator has the following permissions:",
+      "desc1":"1.Manage organizations and users in system settings.",
+      "desc2":"2.Have the highest privileges in other apps, possessing access to all data and the ability to perform all functionality operations."
+    },
+    "normalusers":{
+      "title":" Normal  users have the following permissions:",
+      "desc1":"1. Cannot manage organizations and users.",
+      "desc2":"2. In other apps, have data access rights only for their own organization.",
+      "desc3":"3. In other apps, have only operational permissions for using pages, with management pages having view-only access."
+    }
   }
 }

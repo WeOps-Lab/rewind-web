@@ -11,9 +11,10 @@
       line-height: 20px;
       p{
          margin-bottom: 0px;
+         margin-left: 13px;
       }
       p:nth-child(1){
-        margin-top:10px;
+        margin-top:13px;
       }
    }
 
@@ -21,7 +22,7 @@
 .tagheight {
    :global{
       :where(.css-dev-only-do-not-override-yta69t).ant-tag {
-         height: 140px;
+         height: 161px;
       }
    }
 }

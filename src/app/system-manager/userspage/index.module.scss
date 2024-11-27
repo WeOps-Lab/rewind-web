@@ -19,6 +19,12 @@
             font-size: small !important;
             font-family: var(--font-family) !important;
         }
+        .ant-table-body{
+            max-height: 220px !important;
+        }
+        .sub-layout_sideMenuLayout__LStLh .sub-layout_sectionContext__6mM_M {
+            overflow: hidden;
+        }
     }
 }
 
@@ -31,6 +37,7 @@
 .bgColor {
     background-color: var(--color-bg);
     border-radius: 6px;
+    height: calc(100vh - 182px);
 }
 .removeSingleChoiceInterval{
     :global{
