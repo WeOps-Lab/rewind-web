@@ -8,6 +8,7 @@ interface UserDataType {
     number: string;
     team: string;
     role: string;
+    [key: string]: unknown; 
   }
 interface Access {
     manageGroupMembership: boolean;

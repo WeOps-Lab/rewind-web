@@ -1,52 +1,50 @@
 'use client';
 import React from 'react';
-import { Input, Form, Radio, Select, message, Modal } from 'antd';
+import { Input, Form, message, Modal } from 'antd';
 import { Tree } from 'antd';
 import { Button, ConfigProvider } from 'antd';
 import { useState, useEffect, useRef } from 'react';
 import { getRandomColor } from '../utils/common';
-import OperateModal from '@/components/operate-modal';
 import { Flex, Table, Tag } from 'antd';
-import type { PopconfirmProps, RadioChangeEvent } from 'antd';
 import type { TreeDataNode } from 'antd';
 import type { TableColumnsType } from 'antd';
 import userInfoStyle from './index.module.scss';
 import useApiClient from '@/utils/request';
-import RoleDescription from "../components/role-description";
 import { UserDataType, TransmitUserData, TableRowSelection } from '@/app/system-manager/types/userstypes'
 import { useTranslation } from '@/utils/i18n';
 import WithSideMenuLayout from '@/components/sub-layout/index'
 import TopSection from '@/app/system-manager/components/top-section'
+import UserModal,{ModalRef} from './userModal';
+
 const User = () => {
   //hook函数
   const [tabledata, setTableData] = useState<UserDataType[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   //控制Modal的打开和关闭
-  const [addmodalOpen, setAddModalOpen] = useState(false);
-  //编辑的Modal的打开和关闭
-  const [editmodelOpen, setEditmodalOpen] = useState(false);
-  //控制修改角色的弹窗
-  const [modalVisible, setModalVisible] = useState(false);
-  //主要控制选中的用户名
-  const [username, setUsername] = useState(['zhangsan']);
-  const [modifyRoleOpen, setModifyRoleOpen] = useState<boolean>(false);
-  const [editkey, setEditkey] = useState(1);
-  const [edituseName, setEdituseName] = useState<string>('');
+  // const [addmodalOpen, setAddModalOpen] = useState(false);
+  // //编辑的Modal的打开和关闭
+  // const [editmodelOpen, setEditmodalOpen] = useState(false);
+  // //控制修改角色的弹窗
+  // const [modalVisible, setModalVisible] = useState(false);
+  // //主要控制选中的用户名
+  // const [username, setUsername] = useState(['zhangsan']);
+  // const [editkey, setEditkey] = useState(1);
+  // const [edituseName, setEdituseName] = useState<string>('');
   //表单的数据初始化
   const [form] = Form.useForm();
-  const [onlykeytable, setOnlykeytable] = useState<number>(tabledata.length);
+  // const [onlykeytable, setOnlykeytable] = useState<number>(tabledata.length);
   const modifydeleteuseref = useRef<HTMLButtonElement>(null);
   const modifyroleuseref = useRef<HTMLButtonElement>(null);
-  const { get, del, post, put } = useApiClient();
-  const [addroleselect, setAddroleselect] = useState<boolean>(true);
-  const [eidtroleselect, setEidtroleselect] = useState<boolean>(true);
-  const [modifyroleselect, setModifyroleselect] = useState<boolean>(true);
+  const { get, del} = useApiClient();
+  // const [addroleselect, setAddroleselect] = useState<boolean>(true);
+  // const [eidtroleselect, setEidtroleselect] = useState<boolean>(true);
+  // const [modifyroleselect, setModifyroleselect] = useState<boolean>(true);
   const { t } = useTranslation();
   const { confirm } = Modal;
-
-
+  const userRef = useRef<ModalRef>(null);
   // 数据
   const { DirectoryTree } = Tree;
+  //组织树形数据
   const treeData: TreeDataNode[] = [
     {
       title: '默认目录1',
@@ -100,7 +98,7 @@ const User = () => {
     },
   ];
 
-  // 表格数据
+  // 用户表格数据
   const columns: TableColumnsType<UserDataType> = [
     {
       title: t('userpage.contentright.bottontable.username'),
@@ -144,7 +142,27 @@ const User = () => {
         return (
           <><Button
             onClick={() => {
-              editeuser(key);
+              // 将要回显示的数据传给user的弹窗组件
+              // tabledata.map((item) => {
+              //   if(item.key === key){
+              //     setEdituserdata(() => ((item) => {
+              //       console.log(item)
+              //       return item;
+              //     })() as unknown as UserDataType)
+              //     console.log(edituserdata)
+              //   }
+              // })
+              openUerModal('edit', {
+                username: 'chen',
+                name: 'chen',
+                email: 'chen',
+                number: 'chen',
+                team: 'Team 1',
+                role: 'Normal users',
+                key: ''
+              });
+
+              // editeuser(key);
             }}
             color="primary"
             variant="link"
@@ -167,7 +185,6 @@ const User = () => {
       },
     },
   ];
-
   const dataSource = Array.from<UserDataType>({ length: 4 }).map<UserDataType>(
     (_, index) => ({
       key: index,
@@ -179,12 +196,6 @@ const User = () => {
       role: 'Administrator',
     })
   );
-
-  const options = [
-    { label: t('tableItem.administrator'), value: 'Administrator' },
-    { label: t('tableItem.normalusers'), value: 'Normal users' },
-  ];
-
   //useEffect函数
 
   useEffect(() => {
@@ -194,14 +205,13 @@ const User = () => {
   useEffect(() => {
     form.setFieldsValue({ role: `Administrator` });
   }, []);
-
+  // 接口请求
   useEffect(() => {
     getuserslistApi();
   }, []);
   useEffect(() => {
     getgrouplistApi();
   }, []);
-
 
   useEffect(() => {
     const disableButton = (ref: React.RefObject<HTMLButtonElement>, condition: boolean) => {
@@ -219,7 +229,7 @@ const User = () => {
 
   const init = () => {
     setTableData(dataSource);
-    setOnlykeytable(dataSource.length);
+    // setOnlykeytable(dataSource.length);
   }
   //普通的方法
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -231,101 +241,91 @@ const User = () => {
     onChange: onSelectChange,
   };
   //添加添加数据的功能
-  const addData = () => {
-    //初始化数据
-    setAddModalOpen(true);
-    form.resetFields();
-    form.setFieldsValue({ role: 'Administrator', team: 'Team A' });
-  };
+  // const addData = () => {
+  //   //初始化数据
+  //   setAddModalOpen(true);
+  //   form.resetFields();
+  //   form.setFieldsValue({ role: 'Normal users', team: 'Team A' });
+  // };
 
-  function onOk() {
-    //点击确定按钮，将数据添加到表格中
-    setTableData([...tabledata, { ...form.getFieldsValue(), key: onlykeytable }]);
-    addUserApi(onlykeytable);
-    getuserslistApi();
-    setOnlykeytable(onlykeytable + 1);
-    setAddModalOpen(false);
-    setSelectedRowKeys([]);
-  }
+  // function onOk() {
+  //   // 点击确定按钮，将数据添加到表格中
+  //   const temp = handleEmptyFields(form.getFieldsValue());
+  //   setTableData([...tabledata, { ...temp, key: onlykeytable }]);
+  //   addUserApi(onlykeytable);
+  //   getuserslistApi();
+  //   setOnlykeytable(onlykeytable + 1);
+  //   setAddModalOpen(false);
+  //   console.log(form.getFieldsValue());
+  //   setSelectedRowKeys([]);
+  // }
 
   //批量修改用户的权限
-  function modifyRole() {
-    //初始化数据
-    setModalVisible(true);
-    form.resetFields();
-    form.setFieldsValue({ role: 'Administrator' });
-    const arr = [...selectedRowKeys];
-    //获取名字
-    const newarr: string[] = [];
-    arr.forEach((item) => {
-      tabledata.find((itemname) => {
-        if (itemname.key === item) {
-          newarr.push(itemname.username);
-        }
-      });
-    });
-    setUsername(newarr);
-  }
+  // function modifyRole() {
+  //   //初始化数据
+  //   setModalVisible(true);
+  //   form.resetFields();
+  //   form.setFieldsValue({ role: 'Administrator' });
+  //   const arr = [...selectedRowKeys];
+  //   //获取名字
+  //   const newarr: string[] = [];
+  //   arr.forEach((item) => {
+  //     tabledata.find((itemname) => {
+  //       if (itemname.key === item) {
+  //         newarr.push(itemname.username);
+  //       }
+  //     });
+  //   });
+  //   setUsername(newarr);
+  // }
   // 点击确定按钮，将修改数据添加到表格中
-  const modifyroleModalOpen = () => {
-    const newRole = form.getFieldsValue().role;
-    const newData = tabledata.map((item) => {
-      if (selectedRowKeys.includes(item.key)) {
-        return { ...item, role: newRole };
-      }
-      return item;
-    });
-    setTableData(newData);
-    modifyroleApi();
-    getuserslistApi();
-    setModalVisible(false);
-    setSelectedRowKeys([]);
-  };
+  // const modifyroleModalOpen = () => {
+  //   const newRole = form.getFieldsValue().role;
+  //   const newData = tabledata.map((item) => {
+  //     if (selectedRowKeys.includes(item.key)) {
+  //       return { ...item, role: newRole };
+  //     }
+  //     return item;
+  //   });
+  //   setTableData(newData);
+  //   modifyroleApi();
+  //   getuserslistApi();
+  //   setModalVisible(false);
+  //   setSelectedRowKeys([]);
+  // };
   // 关闭弹窗
-  const handleModalClose = () => {
-    setModalVisible(false);
-  };
-  //批量删除用户
-  const confirmdeleteuser: PopconfirmProps['onConfirm'] = () => {
-    const newData = tabledata.filter((item) => !selectedRowKeys.includes(item.key));
-    setTableData(newData);
-    modifydeleteApi();
-    getuserslistApi();
-    setModifyRoleOpen(false);
-  };
-
-  const cancel: PopconfirmProps['onCancel'] = () => {
-    setModifyRoleOpen(false);
-  };
+  // const handleModalClose = () => {
+  //   setModalVisible(false);
+  // };
 
   //编辑用户
-  function editeuser(key: number) {
-    setEditkey(key);
-    setEditmodalOpen(true);
-    form.resetFields();
-    const [editfinishdata] = tabledata.filter((item) => item.key === key);
-    form.setFieldsValue({ ...editfinishdata });
-    console.log(form.getFieldsValue());
-    setEdituseName(editfinishdata.username);
-  }
-  //点击确定按钮，将修改数据添加到表格中
-  function oneditOk() {
-    const newarr: UserDataType[] = tabledata.map((item) => {
-      //添加key值
-      return item.key === editkey
-        ? { ...form.getFieldsValue(), key: editkey }
-        : item;
-    });
-    setTableData(newarr);
-    editUserApi(editkey);
-    getuserslistApi();
-    setEditmodalOpen(false);
-    setSelectedRowKeys([]);
-  }
+  // function editeuser(key: number) {
+  //   setEditkey(key);
+  //   setEditmodalOpen(true);
+  //   form.resetFields();
+  //   const [editfinishdata] = tabledata.filter((item) => item.key === key);
+  //   form.setFieldsValue({ ...editfinishdata });
+  //   console.log(form.getFieldsValue());
+  //   setEdituseName(editfinishdata.username);
+  // }
+  // //点击确定按钮，将修改数据添加到表格中
+  // function oneditOk() {
+  //   const newarr: UserDataType[] = tabledata.map((item) => {
+  //     //添加key值
+  //     return item.key === editkey
+  //       ? { ...form.getFieldsValue(), key: editkey }
+  //       : item;
+  //   });
+  //   setTableData(newarr);
+  //   editUserApi(editkey);
+  //   getuserslistApi();
+  //   setEditmodalOpen(false);
+  //   setSelectedRowKeys([]);
+  // }
 
-  function oneditCancel() {
-    setEditmodalOpen(false);
-  }
+  // function oneditCancel() {
+  //   setEditmodalOpen(false);
+  // }
 
   //删除用户
   function deleteuser(key: number) {
@@ -335,36 +335,36 @@ const User = () => {
     getuserslistApi();
   }
 
-  const onFormValuesChange = (changedValues: any) => {
-    // 得到当前选中的值
-    if (changedValues.role === "Administrator") {
-      setAddroleselect(true);
-    } else {
-      return false;
-    }
-  };
+  // const onFormValuesChange = (changedValues: any) => {
+  //   // 得到当前选中的值
+  //   if (changedValues.role === "Administrator") {
+  //     setAddroleselect(true);
+  //   } else {
+  //     return false;
+  //   }
+  // };
   // 添加用户的单选事件变化监听事件
-  function addradiochang(e: RadioChangeEvent) {
-    if (e.target.value === "Administrator") {
-      setAddroleselect(true);
-    } else {
-      setAddroleselect(false);
-    }
-  }
-  function editradiochang(e: RadioChangeEvent) {
-    if (e.target.value === "Administrator") {
-      setEidtroleselect(true);
-    } else {
-      setEidtroleselect(false);
-    }
-  }
-  function modifyroleradiochang(e: RadioChangeEvent) {
-    if (e.target.value === "Administrator") {
-      setModifyroleselect(true);
-    } else {
-      setModifyroleselect(false);
-    }
-  }
+  // function addradiochang(e: RadioChangeEvent) {
+  //   if (e.target.value === "Administrator") {
+  //     setAddroleselect(true);
+  //   } else {
+  //     setAddroleselect(false);
+  //   }
+  // }
+  // function editradiochang(e: RadioChangeEvent) {
+  //   if (e.target.value === "Administrator") {
+  //     setEidtroleselect(true);
+  //   } else {
+  //     setEidtroleselect(false);
+  //   }
+  // }
+  // function modifyroleradiochang(e: RadioChangeEvent) {
+  //   if (e.target.value === "Administrator") {
+  //     setModifyroleselect(true);
+  //   } else {
+  //     setModifyroleselect(false);
+  //   }
+  // }
   // 删除用户的弹窗确定
   const showDeleteConfirm = (key: number) => {
     confirm({
@@ -389,6 +389,41 @@ const User = () => {
   };
 
 
+  // 删除组织的弹窗确定
+  const showDeleteTeamConfirm = (key: number) => {
+    confirm({
+      title: t('teampage.modal.title'),
+      content: t('teampage.modal.content'),
+      centered: true,
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
+      onOk() {
+        const newData = tabledata.filter((item) => !selectedRowKeys.includes(item.key));
+        setTableData(newData);
+        modifydeleteApi();
+        getuserslistApi();
+        return new Promise(async (resolve) => {
+          try {
+            deleteuser(key)
+            message.success("delete users successfully!");
+            await del(`/api/username`);
+            message.success("delete users successfully!");
+          } finally {
+            resolve(true);
+          }
+        });
+      },
+    });
+  };
+
+  //根据传入的值打开对应的用户弹窗（添加用户弹窗和编辑用户的弹窗）
+  const openUerModal = (type: string, row: { username: string; name: string; email: string; number: string; team: string; role: string; key: string; } ) => {
+    userRef.current?.showModal({
+      type,
+      form: row,
+    });
+  };
+
 
   //api接口
   //获取用户列表
@@ -409,28 +444,28 @@ const User = () => {
     setTableData(temparr);
   }
 
-  async function editUserApi(id: number) {
-    try {
-      const response: { message: string } = await put(`/lite/user/${id}/`, {
-        ...form.getFieldsValue()
-      })
-      message.success(response.message);
-    } catch (error: any) {
-      message.error('Error while editing user');
-      throw new Error(error?.message || 'Unknown error occurred');
-    }
-  }
+  // async function editUserApi(id: number) {
+  //   try {
+  //     const response: { message: string } = await put(`/lite/user/${id}/`, {
+  //       ...form.getFieldsValue()
+  //     })
+  //     message.success(response.message);
+  //   } catch (error: any) {
+  //     message.error('Error while editing user');
+  //     throw new Error(error?.message || 'Unknown error occurred');
+  //   }
+  // }
 
-  async function modifyroleApi() {
-    try {
-      const response: { message: string } = await put('/lite/modifyrole', {
-        selectedRowKeys
-      })
-      message.success(response.message);
-    } catch (error: any) {
-      console.log(error);
-    }
-  }
+  // async function modifyroleApi() {
+  //   try {
+  //     const response: { message: string } = await put('/lite/modifyrole', {
+  //       selectedRowKeys
+  //     })
+  //     message.success(response.message);
+  //   } catch (error: any) {
+  //     console.log(error);
+  //   }
+  // }
 
   async function modifydeleteApi() {
     try {
@@ -446,22 +481,21 @@ const User = () => {
     }
   }
 
-  async function addUserApi(key: number) {
-    try {
-      const response: { message: string } = await post(`/lite/user/`, {
-        params: {
-          ...form.getFieldsValue(),
-          key
-        }
-      })
-      message.success(response.message);
-    } catch (error: any) {
-      message.error('Error while addUser user');
-      throw new Error(error?.message || 'Unknown error occurred');
-    }
-  }
+  // async function addUserApi(key: number) {
+  //   try {
+  //     const response: { message: string } = await post(`/lite/user/`, {
+  //       params: {
+  //         ...form.getFieldsValue(),
+  //         key
+  //       }
+  //     })
+  //     message.success(response.message);
+  //   } catch (error: any) {
+  //     message.error('Error while addUser user');
+  //     throw new Error(error?.message || 'Unknown error occurred');
+  //   }
+  // }
 
-  // const [ contextHolder] = message.useMessage();
   async function deleteuserApi(key: number) {
     const delmessage = await del(`/lite/user/${key}/`);
     message.success(delmessage.repmessage);
@@ -476,9 +510,9 @@ const User = () => {
       // throw new Error(error?.message || 'Unknown error occurred');
     }
   }
+
   return (
     <div className={`${userInfoStyle.userInfo} ${userInfoStyle.bgHeight}`}>
-      {/* {contextHolder} */}
       <TopSection title={t('userpage.topinfo.title')} content={t('userpage.topinfo.desc')}></TopSection>
       <div className={`flex overflow-hidden mt-[27px]`} style={{ height: 'calc(100vh - 160px)' }}>
         {/* 左边 */}
@@ -493,6 +527,7 @@ const User = () => {
           >
             <DirectoryTree
               className="w-[230px] mt-4 overflow-auto px-3"
+              expandAction={false}
               multiple
               showIcon={false}
               defaultExpandAll
@@ -500,7 +535,7 @@ const User = () => {
             />
           </ConfigProvider>
         </div>
-        {/* 右边 */}
+        {/* 右边内容区域 */}
         <WithSideMenuLayout showSideMenu={false} menuItems={[]}  >
           <div className="w-full h-11 mb-2">
             <div className="flex justify-between">
@@ -508,258 +543,46 @@ const User = () => {
                 <Input className="" placeholder={`${t('common.search')}...`} />
               </div>
               <div className="flex">
-                <Button className="mr-1" type="primary" onClick={addData}>
+                {/* 添加用户的按钮 */}
+                <Button className="mr-1" type="primary" onClick={() => { openUerModal('add',{
+                  key: 'fdfd',
+                  username: '',
+                  name:'',
+                  email: '',
+                  number: '',
+                  team: 'Team1',
+                  role: 'Normal users',
+                }) }}>
                   +{t('common.add')}
                 </Button>
-                {/* add弹窗 */}
-                <OperateModal
-                  title={t('common.addnewuser')}
-                  closable={false}
-                  open={addmodalOpen}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                  width={500}
-                  footer={[
-                    <Button key="submit" type="primary" onClick={() => onOk()}>
-                      {t('common.confirm')}
-                    </Button>,
-                    <Button key="cancel" onClick={() => setAddModalOpen(false)}>
-                      {t('common.cancel')}
-                    </Button>,
-                  ]}
-                >
-                  <Form style={{ maxWidth: 600 }} form={form}>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="username" label={`${t('tableItem.username')}*`} colon={false}>
-                      <Input placeholder="input placeholder" />
-                    </Form.Item>
-                    <Form.Item
-                      name="name"
-                      label={`${t('tableItem.name')}`}
-                      colon={false}
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                    >
-                      <Input placeholder="input placeholder" />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="email"
-                      label={`${t('tableItem.email')}`}
-                      colon={false}
-                    >
-                      <Input placeholder="input placeholder" />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="number"
-                      label={`${t('tableItem.number')}`}
-                      colon={false}
-                    >
-                      <Input placeholder="input placeholder" />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="team"
-                      label={`${t('tableItem.team')}*`}
-                      colon={false}
-                    >
-                      <Select
-                        style={{ width: 120 }}
-                        defaultValue="team1"
-                        allowClear
-                        options={[
-                          { value: 'team1', label: 'team1' },
-                          { value: 'team2', label: 'team2' },
-                        ]}
-                        placeholder="select it"
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      label={`${t('tableItem.role')}*`}
-                      name="role" colon={false}>
-                      <Radio.Group className={`${userInfoStyle.removeSingleChoiceInterval}`} block options={options} onChange={addradiochang} />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      label={'  '}
-                      name="comment" colon={false}>
-                      <RoleDescription modifyRoleSelect={addroleselect} />
-                    </Form.Item>
-                  </Form>
-                </OperateModal>
-                {/* edit */}
-                <OperateModal
-                  closable={false}
-                  title={`Edite-${edituseName}`}
-                  open={editmodelOpen}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                  footer={[
-                    <Button key="submit" type="primary" onClick={() => oneditOk()}>
-                      {t('common.confirm')}
-                    </Button>,
-                    <Button key="cancel" onClick={() => oneditCancel()}>
-                      {t('common.cancel')}
-                    </Button>,
-                  ]}
-                >
-                  <Form style={{ maxWidth: 600 }} form={form}>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="username" label={`${t('tableItem.username')}*`} colon={false}>
-                      <Input disabled={true} placeholder={edituseName} ></Input>
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="name"
-                      label={`${t('tableItem.name')}`}
-                      colon={false}
-                    >
-                      <Input placeholder="input placeholder" />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="email"
-                      label={`${t('tableItem.email')}`}
-                      colon={false}
-                    >
-                      <Input placeholder="input placeholder" />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="number"
-                      label={`${t('tableItem.number')}`}
-                      colon={false}
-                    >
-                      <Input placeholder="input placeholder" />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      name="team"
-                      label={`${t('tableItem.team')}*`}
-                      colon={false}
-                    >
-                      <Select
-                        style={{ width: 120 }}
-                        defaultValue="team A"
-                        allowClear
-                        options={[
-                          { value: 'team A', label: 'team A' },
-                          { value: 'team B', label: 'team B' },
-                        ]}
-                        placeholder="select it"
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      label={`${t('tableItem.role')}*`}
-                      name="role" colon={false}>
-                      <Radio.Group className={`${userInfoStyle.removeSingleChoiceInterval}`} block options={options} onChange={editradiochang} />
-                    </Form.Item>
-                    <Form.Item
-                      labelCol={{ span: 4 }}
-                      wrapperCol={{ span: 18 }}
-                      label={'  '}
-                      name="comment" colon={false}>
-                      {<RoleDescription modifyRoleSelect={eidtroleselect} ></RoleDescription>}
-                    </Form.Item>
-                  </Form>
-                </OperateModal>
-                {/* 批量修改角色 */}
+                {/* 添加用户和编辑用户的弹窗组件 */}
+                <UserModal ref={userRef} onSuccess={(successuserdata,reptype)=>{console.log('我是一个成功的回调',successuserdata,reptype)}} ></UserModal>
+                {/* 批量修改用户角色 */}
                 <Button
                   ref={modifyroleuseref}
                   className="mr-1 op-8"
-                  onClick={modifyRole}
+                  onClick={() => { openUerModal('modifyrole',{
+                    key: 'fdfd',
+                    username: 'ffffff',
+                    name:'',
+                    email: '',
+                    number: '',
+                    team: 'Team1',
+                    role: 'Normal users',
+                  }) }}
                 >
                   {t('common.modifyrole')}
                 </Button>
-                <OperateModal
-                  width={500}
-                  title={t('common.batchmodifyroles')}
-                  closable={false}
-                  open={modalVisible}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                  footer={[
-                    <Button key="submit" type="primary" onClick={() => modifyroleModalOpen()}>
-                      {t('common.confirm')}
-                    </Button>,
-                    <Button key="cancel" onClick={() => handleModalClose()}>
-                      {t('common.cancel')}
-                    </Button>,
-                  ]}
-                >
-                  <Form style={{ maxWidth: 600 }} form={form} onValuesChange={onFormValuesChange}>
-                    <Form.Item
-                      colon={false}>
-                      <span>{t('common.selectedusers')}:</span>
-                      <span className="text-[#1890ff]">
-                        {username.toString()}
-                      </span>
-                    </Form.Item>
-                    <Form.Item
-                      name="role" colon={false}>
-                      <Radio.Group className={`${userInfoStyle.removeSingleChoiceInterval}`} block options={options} onChange={modifyroleradiochang} />
-                    </Form.Item>
-                    <Form.Item
-
-                      label={''} name="comment" colon={false}>
-                      <RoleDescription modifyRoleSelect={modifyroleselect}></RoleDescription>
-                    </Form.Item>
-                  </Form>
-                </OperateModal>
                 {/* 批量删除 */}
                 <Button
                   ref={modifydeleteuseref}
                   className="mr-1"
                   onClick={() => {
-                    setModifyRoleOpen(true);
+                    showDeleteTeamConfirm(3);
                   }}
                 >
                   {t('common.modifydelete')}
-
                 </Button>
-
-                <OperateModal
-                  open={modifyRoleOpen}
-                  title={
-                    <>
-                      <p className="font-[20px] mt-[16px] ml-[50px] text-center">
-                        {t('common.confirmdeleteinfo')}
-                      </p>
-                    </>
-                  }
-                  footer={null}
-                  closeIcon={null}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                >
-                  <Button className="mt-[20px] ml-[150px]" type="primary" onClick={confirmdeleteuser}>
-                    {t('common.confirm')}
-                  </Button>
-                  <Button
-                    className="ml-4"
-                    type="default"
-                    onClick={cancel}
-                  >
-                    {t('common.cancel')}
-                  </Button>
-                </OperateModal>
               </div>
             </div>
           </div>
@@ -774,7 +597,7 @@ const User = () => {
                   }
                 }}
               >
-                {/* calc(100vh - 360px) */}
+                {/* 用户的表单页面 */}
                 <Table<UserDataType>
                   size={'middle'}
                   scroll={{ y: '300px', x: 'calc(100vw - 250px)' }}

@@ -3,13 +3,13 @@ const getMenuItems = (formatMessage: any) => {
   // const { t } = useTranslation();
   return [
     {
-      label: formatMessage({ id: 'User' }),
-      icon: 'icon-yonghu',
+      label: formatMessage({ id: 'app.menu.user' }),
+      icon: 'yonghuguanli',
       path: '/system-manager/userspage',
     },
     {
-      label: formatMessage({ id: 'Team' }),
-      icon: 'icon-tuandui',
+      label: formatMessage({ id: 'app.menu.teams' }),
+      icon: 'zuzhiguanli',
       path: '/system-manager/teamspage',
     },
   ];

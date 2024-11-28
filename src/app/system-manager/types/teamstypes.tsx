@@ -4,6 +4,8 @@ interface DataType {
     key: string;
     name: string;
     children?: DataType[];
+    fathernode?: string;
+    childrenleght?: 0;
   }
   
   interface RowContextProps {

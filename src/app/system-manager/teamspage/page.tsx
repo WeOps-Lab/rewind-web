@@ -1,10 +1,10 @@
 'use client';
-import React, { useState, useContext, useMemo, useEffect } from 'react';
+import React, { useState,  useMemo, useEffect } from 'react';
 import { Button, Input, Form, message, ConfigProvider, Modal } from 'antd';
 import 'antd/dist/reset.css';
 import OperateModal from '@/components/operate-modal';
 import teamsStyle from './index.module.scss';
-import { CaretDownOutlined, CaretRightOutlined, HolderOutlined } from '@ant-design/icons';
+import { CaretDownOutlined, CaretRightOutlined} from '@ant-design/icons';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { DndContext } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -21,7 +21,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { DataType, RowContextProps, RowProps, Group } from '@/app/system-manager/types/teamstypes'
 import { useTranslation } from '@/utils/i18n';
 import TopSection from '@/app/system-manager/components/top-section'
+// import traversetree from "@/app/system-manager/utils/traversetree"
 const Teams = () => {
+
   //hook函数
   const RowContext = React.createContext<RowContextProps>({});
   const Row: React.FC<RowProps> = (props) => {
@@ -61,13 +63,14 @@ const Teams = () => {
   const [addsubteamkey, setAddsubteamkey] = useState('6');
   const [sortablearr, setSortablearr] = useState(['1', '2', '3', '4', '5']);
   const [expandedRowKeysarr, setExpandedRowKeys] = useState(['0']);
+  const [addteammodalOpen,setAddteammodalOpen]=useState(false);
 
-  const [datasourcefatherid, setDatasourcefatherid] = useState(['1']);
+  // const [ setDatasourcefatherid] = useState(['1']);
   const { get, del, put, post } = useApiClient();
   const { t } = useTranslation();
   //数据
   const columns: any = [
-    { key: 'sort', align: 'center', width: 28, render: (key: DataType) => (!datasourcefatherid.includes(key.key) ? true : false) ? <DragHandle /> : null },
+    // { key: 'sort', align: 'center', width: 28, render: (key: DataType) => (!datasourcefatherid.includes(key.key) ? true : false) ? <DragHandle /> : null },
     { title: t('tableItem.name'), dataIndex: 'name', width: 450 },
     {
       title: t('tableItem.actions'),
@@ -93,7 +96,7 @@ const Teams = () => {
     }
 
   ];
-  const [dataSource, setDataSource] = React.useState<DataType[]>([{ key: 'hdhhd', name: 'fhdhfhd' }, { key: 'hd', name: 'chen' }]);
+  const [dataSource, setDataSource] = React.useState<DataType[]>([{ key: 'hdhhd', name: 'fhdhfhd', children: [] }, { key: 'hd', name: 'chen', children: [] }]);
   const [onlykeytable, setOnlykeytable] = useState<string>('6');
 
   const onDragEnd = async ({ active, over }: DragEndEvent) => {
@@ -107,6 +110,8 @@ const Teams = () => {
         setExpandedRowKeys([...expandedRowKeysarr, over?.id.toString()])
       }
     }
+
+
     //通过api来完成team的拖拽功能
     const drapteamresult = await dragTeamApi(active.id.toString(), over?.id);
     if (drapteamresult === 'ok') {
@@ -123,24 +128,29 @@ const Teams = () => {
   useEffect(() => {
     getOrganizationalDataApi();
   }, [])
+  // useEffect(() => {
+  //   const arr: string[] = [];
+  //   traversetree(dataSource as DataType[], (item: DataType) => arr.push(item.key));
+  //   setDatasourcefatherid(arr)
 
+  // }, [])
 
 
   //普通函数
-  const DragHandle: React.FC = () => {
-    const { setActivatorNodeRef, listeners } = useContext(RowContext);
-    return (
-      <Button
-        type="text"
-        size="small"
-        icon={<HolderOutlined />}
-        style={{ cursor: 'move' }}
-        ref={setActivatorNodeRef}
-        {...listeners}
-      />
-    );
-  };
-
+  // 拖拽图标的实现
+  // const DragHandle: React.FC = () => {
+  //   const { setActivatorNodeRef, listeners } = useContext(RowContext);
+  //   return (
+  //     <Button
+  //       type="text"
+  //       size="small"
+  //       icon={<HolderOutlined />}
+  //       style={{ cursor: 'move' }}
+  //       ref={setActivatorNodeRef}
+  //       {...listeners}
+  //     />
+  //   );
+  // };
   const addNode = (treeData: DataType[], targetKey: string, newNode: DataType): DataType[] => {
     return treeData.map(node => {
       if (node.key === targetKey) {
@@ -164,7 +174,8 @@ const Teams = () => {
     form.resetFields();
   }
   function onOkaddSubteam() {
-    const newData = addNode(dataSource as DataType[], addsubteamkey, { key: onlykeytable, name: form.getFieldValue('teamname') })
+    const newData = addNode(dataSource as DataType[], addsubteamkey, { key: onlykeytable, name: form.getFieldValue('teamname') !== undefined ? form.getFieldValue('teamname') : '--' })
+    console.log(form.getFieldValue('teamname'));
     setDataSource(newData);
     addSubTeamApi(onlykeytable);
     setSortablearr([...sortablearr, onlykeytable])
@@ -337,6 +348,7 @@ const Teams = () => {
   };
 
 
+
   //api函数
   async function getOrganizationalDataApi() {
     const data = await get('/lite/group/', {
@@ -350,7 +362,7 @@ const Teams = () => {
     arr.forEach((item: DataType) => {
       datasourcefatherid.push(item.key);
     });
-    setDatasourcefatherid(datasourcefatherid)
+    // setDatasourcefatherid(datasourcefatherid)
   }
 
 
@@ -413,7 +425,30 @@ const Teams = () => {
   return (
     <div className={`${teamsStyle.height}`} >
       <TopSection title={t('teampage.topinfo.title')} content={t('teampage.topinfo.desc')}></TopSection>
-      <div className='w-full h-[24px] mt-[19px] mb-[19px]'><Input className='inputwidth' placeholder={`${t('common.search')}...`} /></div>
+      <div className='w-full h-[32px] mt-[23px] mb-[23px] flex justify-between'><Input className='inputwidth' placeholder={`${t('common.search')}...`} /> <Button type='primary' onClick={()=>{setAddteammodalOpen(true)}}>+{t('common.add')}</Button></div>
+      {/* 添加父组织的弹窗 */}
+      <OperateModal
+        title={t('common.add')}
+        closable={false}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        open={addteammodalOpen}
+        footer={[
+          <Button key="submit" type="primary" onClick={() => {setAddteammodalOpen(false)}}>
+            {t('common.confirm')}
+          </Button>,
+          <Button key="cancel" onClick={() => {setAddteammodalOpen(false)}}>
+            {t('common.cancel')}
+          </Button>,
+        ]}
+      >
+        <Form style={{ maxWidth: 600 }} form={form}>
+          <Form.Item name="teamname" label={`${t('tableItem.name')}*`} colon={false}>
+            <Input placeholder="input placeholder" />
+          </Form.Item>
+        </Form>
+      </OperateModal>
+      {/* 修改组织的名字的弹窗 */}
       {/* 拖拽的表格 */}
       <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
         <SortableContext items={[]} strategy={verticalListSortingStrategy}>
@@ -423,6 +458,7 @@ const Teams = () => {
                 Table: {
                   headerSplitColor: "#fafafa",
                   selectionColumnWidth: 10,
+                  bodySortBg: '#787878'
                 }
               }
             }}
@@ -433,17 +469,18 @@ const Teams = () => {
               expandedRowKeys={expandedRowKeysarr}
               onExpand={(expanded, record) => { onExpand(expanded, record) }}
               size="small"
-              expandIconColumnIndex={1}
               scroll={{ y: 'calc(100vh - 300px)', x: 'calc(100vw-100px)' }}
               components={{ body: { row: Row } }}
               columns={columns}
               expandable={{
                 expandIcon: ({ expanded, onExpand, record }) =>
-                  expanded ? (
-                    <CaretDownOutlined onClick={e => onExpand(record, e)} />
-                  ) : (
-                    <CaretRightOutlined onClick={e => onExpand(record, e)} />
-                  ),
+                  record.children && record.children.length > 0 ? (
+                    expanded ? (
+                      <CaretDownOutlined onClick={e => onExpand(record, e)} />
+                    ) : (
+                      <CaretRightOutlined onClick={e => onExpand(record, e)} />
+                    )
+                  ) : null,
                 indentSize: 22,
               }}
               dataSource={dataSource}
@@ -452,7 +489,7 @@ const Teams = () => {
 
         </SortableContext>
       </DndContext>
-      {/* 添加组织的弹窗 */}
+      {/* 添加子组织的弹窗 */}
       <OperateModal
         title={t('common.addsubteams')}
         closable={false}
