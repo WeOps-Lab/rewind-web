@@ -528,7 +528,6 @@ const User = () => {
             <DirectoryTree
               className="w-[230px] mt-4 overflow-auto px-3"
               expandAction={false}
-              expandAction={false}
               multiple
               showIcon={false}
               defaultExpandAll
