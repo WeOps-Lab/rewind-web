@@ -63,6 +63,7 @@ const Teams = () => {
   const [addsubteamkey, setAddsubteamkey] = useState('6');
   const [sortablearr, setSortablearr] = useState(['1', '2', '3', '4', '5']);
   const [expandedRowKeysarr, setExpandedRowKeys] = useState(['0']);
+  const [addteammodalOpen,setAddteammodalOpen]=useState(false);
 
   // const [ setDatasourcefatherid] = useState(['1']);
   const { get, del, put, post } = useApiClient();
@@ -424,7 +425,30 @@ const Teams = () => {
   return (
     <div className={`${teamsStyle.height}`} >
       <TopSection title={t('teampage.topinfo.title')} content={t('teampage.topinfo.desc')}></TopSection>
-      <div className='w-full h-[24px] mt-[19px] mb-[19px]'><Input className='inputwidth' placeholder={`${t('common.search')}...`} /></div>
+      <div className='w-full h-[32px] mt-[23px] mb-[23px] flex justify-between'><Input className='inputwidth' placeholder={`${t('common.search')}...`} /> <Button type='primary' onClick={()=>{setAddteammodalOpen(true)}}>+{t('common.add')}</Button></div>
+      {/* 添加父组织的弹窗 */}
+      <OperateModal
+        title={t('common.add')}
+        closable={false}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        open={addteammodalOpen}
+        footer={[
+          <Button key="submit" type="primary" onClick={() => {setAddteammodalOpen(false)}}>
+            {t('common.confirm')}
+          </Button>,
+          <Button key="cancel" onClick={() => {setAddteammodalOpen(false)}}>
+            {t('common.cancel')}
+          </Button>,
+        ]}
+      >
+        <Form style={{ maxWidth: 600 }} form={form}>
+          <Form.Item name="teamname" label={`${t('tableItem.name')}*`} colon={false}>
+            <Input placeholder="input placeholder" />
+          </Form.Item>
+        </Form>
+      </OperateModal>
+      {/* 修改组织的名字的弹窗 */}
       {/* 拖拽的表格 */}
       <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
         <SortableContext items={[]} strategy={verticalListSortingStrategy}>
@@ -465,7 +489,7 @@ const Teams = () => {
 
         </SortableContext>
       </DndContext>
-      {/* 添加组织的弹窗 */}
+      {/* 添加子组织的弹窗 */}
       <OperateModal
         title={t('common.addsubteams')}
         closable={false}

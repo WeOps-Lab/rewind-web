@@ -4,12 +4,12 @@ const getMenuItems = (formatMessage: any) => {
   return [
     {
       label: formatMessage({ id: 'app.menu.user' }),
-      icon: 'yonghu',
+      icon: 'yonghuguanli',
       path: '/system-manager/userspage',
     },
     {
       label: formatMessage({ id: 'app.menu.teams' }),
-      icon: 'tuandui',
+      icon: 'zuzhiguanli',
       path: '/system-manager/teamspage',
     },
   ];
