@@ -31,6 +31,7 @@ const preview: Preview = {
       </SessionProvider>
     ),
   ],
+  tags: ['autodocs'],
   parameters: {
     controls: {
       matchers: {

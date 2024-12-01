@@ -12,7 +12,7 @@ type Story = StoryObj<typeof ContentDrawer>;
 
 export const Default: Story = {
   args: {
-    visible: true,
+    visible: false,
     content: 'This is a content drawer',
   },
 };

@@ -21,11 +21,11 @@ interface SideMenuProps {
   onBackButtonClick?: () => void;
 }
 
-const SideMenu: React.FC<SideMenuProps> = ({ 
-  menuItems, 
-  children, 
+const SideMenu: React.FC<SideMenuProps> = ({
+  menuItems,
+  children,
   showBackButton = true,
-  onBackButtonClick 
+  onBackButtonClick
 }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -36,6 +36,8 @@ const SideMenu: React.FC<SideMenuProps> = ({
   };
 
   const isActive = (path: string): boolean => {
+    if (pathname === null) return false;
+    
     return pathname.startsWith(path);
   };
 
