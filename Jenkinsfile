@@ -39,6 +39,7 @@ pipeline {
             steps {
                 script {
                     sh """
+                    rm -Rf ./src/app/example
                     sudo docker build -f ./Dockerfile -t ${IMAGE_NAME}:${IMAGE_TAG} .
                     """
                 }

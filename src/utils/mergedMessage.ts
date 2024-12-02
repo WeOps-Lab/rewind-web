@@ -5,7 +5,7 @@ import flattenMessages from '@/utils/flattenMessage';
 import baseEnMessages from '@/locales/en.json';
 import baseZhMessages from '@/locales/zh.json';
 
-const EXCLUDED_DIRECTORIES = ['api', 'auth'];
+const EXCLUDED_DIRECTORIES = ['(core)'];
 
 let cachedMessages: { [locale: string]: any } | null = null;
 
