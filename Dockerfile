@@ -10,7 +10,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 
 ADD . .
-COPY --from=builder .env.example ./.env
+COPY .env.example .env
 
 RUN npm run build
 
