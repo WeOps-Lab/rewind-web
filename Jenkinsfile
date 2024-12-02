@@ -22,7 +22,7 @@ pipeline {
                     -d '{
                         "msgtype": "text",
                         "text": {
-                            "content": "[${BRANCH_NAME}]: 🚀 开始构建"
+                            "content": "[${BRANCH_NAME}-web]: 🚀 开始构建"
                         }
                     }'
                 """
@@ -71,7 +71,7 @@ pipeline {
                 -d '{
                     "msgtype": "text",
                     "text": {
-                        "content": "[${BRANCH_NAME}]: 🎉 构建成功"
+                        "content": "[${BRANCH_NAME}-web]: 🎉 构建成功"
                     }
                 }'
             """
@@ -83,7 +83,7 @@ pipeline {
                 -d '{
                     "msgtype": "text",
                     "text": {
-                        "content": "[${BRANCH_NAME}]: ❌ 构建失败"
+                        "content": "[${BRANCH_NAME}-web]: ❌ 构建失败"
                     }
                 }'
             """
