@@ -1,7 +1,7 @@
 import type { TableProps } from 'antd';
 // 定义接口
 interface UserDataType {
-    key: React.Key;
+    key: string;
     username: string;
     name: string;
     email: string;
@@ -42,8 +42,15 @@ interface TransmitUserData {
     role: string;
     bruteForceStatus: BruteForceStatus;
   }
+// 定义数据转换后的组织树的接口
+  interface ConvertedtreeGroup {
+    key: string;
+    title: string;
+    children?:[ ConvertedtreeGroup[]];
+    [key: string]: unknown;
+  }
   
 // 定义组织列表的接口
 type TableRowSelection<T extends object = object> =
     TableProps<T>['rowSelection'];
-export type { UserDataType, TransmitUserData, TableRowSelection,Access, BruteForceStatus };
+export type { UserDataType, TransmitUserData, TableRowSelection,Access, BruteForceStatus,ConvertedtreeGroup };

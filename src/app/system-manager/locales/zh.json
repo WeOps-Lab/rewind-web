@@ -6,7 +6,7 @@
     "cancel": "取消",
     "edit": "编辑",
     "delete": "删除",
-    "addsubteams": "添加子团队",
+    "addsubGroups": "添加子团队",
     "rename": "重命名",
     "addnewuser": "新建",
     "batchmodifyroles": "批量修改角色",
@@ -17,7 +17,7 @@
   "app": {
     "menu": {
       "user": "用户",
-      "teams": "团队"
+      "Groups": "团队"
     }
   }, 
   "userpage":{
@@ -71,10 +71,10 @@
     "normalusers": "普通用户"
   },
   "teamItem":{
-    "addsubteams":"添加子团队",
+    "addsubGroups":"添加子团队",
     "rename":"重命名",
     "delete":"删除",
-    "teams":"团队",
+    "Groups":"团队",
     "teaminfo":"您可以管理用户组织，包括添加和调整组织结构。"
   },
   "role":{

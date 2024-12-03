@@ -14,13 +14,13 @@ const apiClient = axios.create({
 });
 
 const handleResponse = (response: AxiosResponse, onError?: () => void) => {
-  const { result, message: msg, data } = response.data;
-  if (!result) {
-    message.error(msg);
+  const { status,statusText,data } = response;
+  if (status !== 200) {
+    message.error(statusText);
     if (onError) {
       onError();
     }
-    throw new Error(msg);
+    throw new Error(statusText);
   }
   return data;
 };

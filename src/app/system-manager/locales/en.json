@@ -6,7 +6,7 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
-    "addsubteams": "Add Sub-Teams",
+    "addsubGroups": "Add Sub-Groups",
     "rename": "Rename",
     "addnewuser": "Add New",
     "batchmodifyroles": "Batch Modify Roles",
@@ -17,8 +17,8 @@
   },
   "app": {
     "menu": {
-      "user": "User",
-      "teams": "Teams"
+      "user": "Users",
+      "Groups": "Groups"
     }
   }, 
   "userpage":{
@@ -51,7 +51,7 @@
 }, 
 "teampage":{
   "topinfo":{
-    "title":"Teams",
+    "title":"Groups",
     "desc":"Display all information.You can maintain user information and assign roles."
   },
   "modal":{
@@ -71,10 +71,10 @@
     "normalusers": "Normal Users"
   },
   "teamItem":{
-    "addsubteams":"Add Sub-Teams",
+    "addsubGroups":"Add Sub-Groups",
     "rename":"Rename",
     "delete":"Delete",
-    "teams":"Teams",
+    "Groups":"Groups",
     "teaminfo":"You can manage user organizations, including adding and adjusting the organizational structure."
   },
   "role":{

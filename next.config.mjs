@@ -16,7 +16,7 @@ const nextConfig = withBundleAnalyzer({
       {
         source: '/reqApi/:path*',
         destination: `${process.env.NEXTAPI_URL}/:path*/`, // 代理到后台服务器
-      },
+      }
     ];
   },
 });
