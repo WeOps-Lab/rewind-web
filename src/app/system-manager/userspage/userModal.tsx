@@ -14,10 +14,11 @@ import { useTranslation } from '@/utils/i18n';
 import { UserDataType } from '@/app/system-manager/types/userstypes';
 import RoleDescription from '@/app/system-manager/components/role-description';
 import userInfoStyle from './index.module.scss'
+import { useUsernamegeApi } from "@/app/system-manager/api/usermanageapi/usernamegeapi";
 
 //传入modal的参数类型
 interface ModalProps {
-  onSuccess: (successuserdata: UserDataType, reptype: string) => void;
+  onSuccess: () => void;
 }
 interface ModalConfig {
   type: string;
@@ -44,6 +45,10 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
 
     });
     const [eidtroleselect, setEidtroleselect] = useState<boolean>(true);
+    const {
+      addUserApi,
+      editUserApi
+    } = useUsernamegeApi();
     //
     useImperativeHandle(ref, () => ({
       showModal: ({ type, form }) => {
@@ -72,7 +77,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
             setUserForm(form);
             break;
         }
-        console.log(type);
       },
 
     }));
@@ -95,13 +99,21 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
     }, [userVisible, userForm]);
 
 
-    //关闭用户的弹窗
+    //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
       setUserVisible(false);
     };
-    const handleConfirm = () => {
-      const successuserdata = handleEmptyFields(userForm);
-      onSuccess(successuserdata, type);
+    const handleConfirm = async () => {
+      const successuserdata = handleEmptyFields(formRef.current?.getFieldsValue());
+      if (type === 'add') {
+        //添加用户的操作
+        await addUserApi(successuserdata.username, successuserdata.email, successuserdata.name, successuserdata.name);
+      } else {
+        //修改用户的操作
+        console.log(userForm.key.toLocaleString(),'dfdfd')
+        editUserApi(userForm.key.toLocaleString(),successuserdata);
+      }
+      onSuccess();
       setUserVisible(false);
     };
 
@@ -120,7 +132,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
         Object.entries(values).map(([key, value]) => [key, value || '--'])
       ) as UserDataType;
     };
-
 
     return (
       <div>
@@ -261,6 +272,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
   }
 );
 UserModal.displayName = 'RuleModal';
-export default UserModal ;
+export default UserModal;
 export type { ModalRef };
 

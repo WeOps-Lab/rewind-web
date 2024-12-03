@@ -8,9 +8,9 @@ const getMenuItems = (formatMessage: any) => {
       path: '/system-manager/userspage',
     },
     {
-      label: formatMessage({ id: 'app.menu.teams' }),
+      label: formatMessage({ id: 'app.menu.Groups' }),
       icon: 'zuzhiguanli',
-      path: '/system-manager/teamspage',
+      path: '/system-manager/groupspage',
     },
   ];
 };
