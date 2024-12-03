@@ -1,23 +1,13 @@
 'use client';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState,  useEffect } from 'react';
 import { Button, Input, Form, message, ConfigProvider, Modal } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import GroupsStyle from './index.module.scss';
 import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { DndContext } from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import CustomTable from '@/components/custom-table';
 import { AnyObject } from 'antd/es/_util/type';
 import {
   DataType,
-  RowContextProps,
-  RowProps,
   OriginalGroup,
   ConvertedGroup,
 } from '@/app/system-manager/types/groupstypes';
@@ -26,38 +16,7 @@ import TopSection from '@/app/system-manager/components/top-section';
 import { useApiTeam } from '@/app/system-manager/api/teammanageapi/teammanageapi';
 
 const Groups = () => {
-  //hook函数
-  const RowContext = React.createContext<RowContextProps>({});
-  const Row: React.FC<RowProps> = (props) => {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      setActivatorNodeRef,
-      transform,
-      transition,
-      isDragging,
-    } = useSortable({ id: props['data-row-key'] });
-
-    const style: React.CSSProperties = {
-      ...props.style,
-      transform: CSS.Translate.toString(transform),
-      transition,
-      ...(isDragging ? { position: 'relative', zIndex: 9999 } : {}),
-    };
-
-    const contextValue = useMemo<RowContextProps>(
-      () => ({ setActivatorNodeRef, listeners }),
-      [setActivatorNodeRef, listeners]
-    );
-
-    return (
-      <RowContext.Provider value={contextValue}>
-        <tr {...props} ref={setNodeRef} style={style} {...attributes} />
-      </RowContext.Provider>
-    );
-  };
-
+  
   const [form] = Form.useForm();
   //修改的组织的key和添加子组织的key
   const [addsubteamkey, setAddsubteamkey] = useState('6');
@@ -326,48 +285,44 @@ const Groups = () => {
       </OperateModal>
       {/* 修改组织的名字的弹窗 */}
       {/* 拖拽的表格 */}
-      <DndContext modifiers={[restrictToVerticalAxis]}>
-        <SortableContext items={[]} strategy={verticalListSortingStrategy}>
-          <ConfigProvider
-            theme={{
-              components: {
-                Table: {
-                  headerSplitColor: '#fafafa',
-                  selectionColumnWidth: 10,
-                  bodySortBg: '#787878',
-                },
-              },
-            }}
-          >
-            <CustomTable
-              rowKey="key"
-              pagination={false}
-              expandedRowKeys={expandedRowKeysarr}
-              onExpand={(expanded, record) => {
-                onExpand(expanded, record);
-              }}
-              size="small"
-              scroll={{ y: 'calc(100vh - 300px)', x: 'calc(100vw-100px)' }}
-              components={{ body: { row: Row } }}
-              columns={columns}
-              expandable={{
-                expandIcon: ({ expanded, onExpand, record }) =>
-                  record.children && record.children.length > 0 ? (
-                    expanded ? (
-                      <CaretDownOutlined onClick={(e) => onExpand(record, e)} />
-                    ) : (
-                      <CaretRightOutlined
-                        onClick={(e) => onExpand(record, e)}
-                      />
-                    )
-                  ) : null,
-                indentSize: 22,
-              }}
-              dataSource={dataSource}
-            />
-          </ConfigProvider>
-        </SortableContext>
-      </DndContext>
+      <ConfigProvider
+        theme={{
+          components: {
+            Table: {
+              headerSplitColor: '#fafafa',
+              selectionColumnWidth: 10,
+              bodySortBg: '#787878',
+            },
+          },
+        }}
+      >
+        <CustomTable
+          rowKey="key"
+          pagination={false}
+          expandedRowKeys={expandedRowKeysarr}
+          onExpand={(expanded, record) => {
+            onExpand(expanded, record);
+          }}
+          size="small"
+          scroll={{ y: 'calc(100vh - 300px)', x: 'calc(100vw-100px)' }}
+          // components={{ body: { row: Row } }}
+          columns={columns}
+          expandable={{
+            expandIcon: ({ expanded, onExpand, record }) =>
+              record.children && record.children.length > 0 ? (
+                expanded ? (
+                  <CaretDownOutlined onClick={(e) => onExpand(record, e)} />
+                ) : (
+                  <CaretRightOutlined
+                    onClick={(e) => onExpand(record, e)}
+                  />
+                )
+              ) : null,
+            indentSize: 22,
+          }}
+          dataSource={dataSource}
+        />
+      </ConfigProvider>
       {/* 添加子组织的弹窗 */}
       <OperateModal
         title={t('common.addsubGroups')}

@@ -1,4 +1,4 @@
-import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+
 //接口
 interface DataType {
     key: string;
@@ -8,10 +8,6 @@ interface DataType {
     childrenleght?: 0;
   }
   
-  interface RowContextProps {
-    setActivatorNodeRef?: (element: HTMLElement | null) => void;
-    listeners?: SyntheticListenerMap;
-  }
   
   interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
     'data-row-key': string;
@@ -64,5 +60,5 @@ interface ConvertedGroup {
   childrenGroups?: ConvertedGroup[];
 }
 
-export type { DataType, RowContextProps, RowProps, Access, SubGroup, Group ,OriginalGroup,ConvertedGroup};
+export type { DataType, RowProps, Access, SubGroup, Group ,OriginalGroup,ConvertedGroup};
   
