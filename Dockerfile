@@ -1,19 +1,11 @@
-FROM node:18-alpine AS deps
-WORKDIR /app
-RUN npm install -g pnpm
-COPY package*.json .
-ARG NODE_ENV
-ENV NODE_ENV $NODE_ENV
-RUN pnpm install
-
 FROM node:18-alpine AS builder
+
 WORKDIR /app
+
 RUN npm install -g pnpm
-COPY --from=deps /app/node_modules ./node_modules
-
 ADD . .
-COPY .env.example .env
-
+RUN pnpm install
+RUN cp ./.env.example ./.env
 RUN pnpm run build
 
 FROM node:18-alpine
