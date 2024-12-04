@@ -1,0 +1,12 @@
+{
+  "zh": {
+    "label": "首页",
+    "icon": "jiqiren2",
+    "path": "/example"
+  },
+  "en": {
+    "label": "Home",
+    "icon": "jiqiren2",
+    "path": "/example"
+  }
+}

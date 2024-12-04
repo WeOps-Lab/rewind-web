@@ -25,12 +25,23 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await fetch(`/api/locales?locale=${locale}`);
       if (!response.ok) {
-        throw new Error(`Failed to fetch locale ${locale}`);
+        throw new Error(`Failed to fetch locale ${locale} from api`);
       }
       const data = await response.json();
       setMessages(data);
     } catch (error) {
-      console.error('Failed to load locale messages:', error);
+      console.error('Failed to load locale messages form api:', error);
+      try {
+        const localeResponse = await fetch(`/locales/${locale}.json`);
+        if (!localeResponse.ok) {
+          throw new Error(`Failed to fetch locale ${locale} from local`);
+        }
+        const localData = await localeResponse.json();
+        setMessages(localData);
+      }
+      catch {
+        console.error('Failed to load locale messages form local:', error);
+      }
     } finally {
       setIsLoading(false);
     }
