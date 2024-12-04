@@ -51,3 +51,7 @@ yarn.lock
 
 .idea/
 *storybook.log
+
+# public locales and menus
+/public/locales/*
+/public/menus/*

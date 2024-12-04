@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-const EXCLUDED_DIRECTORIES = ['(core)', 'api', 'auth'];
+const EXCLUDED_DIRECTORIES = ['(core)'];
 
 const mergeMessages = (target, source) => {
   for (const key in source) {
@@ -85,8 +85,8 @@ const combineMenus = async () => {
           const menu = await fs.readJSON(menuPath);
 
           if (menu.en && menu.zh) {
-            allMenusEn.push(menu.en);
-            allMenusZh.push(menu.zh);
+            allMenusEn = allMenusEn.concat(menu.en);
+            allMenusZh = allMenusZh.concat(menu.zh);
           }
         }
       } catch (err) {

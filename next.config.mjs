@@ -1,16 +1,21 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import { combineLocales, combineMenus } from './src/utils/dynamicsMerged.mjs';
 
+let hasCombinedLocalesAndMenus = false;
+
 const withCombineLocalesAndMenus = (nextConfig = {}) => {
   return {
     ...nextConfig,
     webpack(config, { isServer, dev }) {
-      if (!dev && isServer) {
+      if (!dev && isServer && !hasCombinedLocalesAndMenus) {
         config.plugins.push({
           apply: (compiler) => {
             compiler.hooks.beforeCompile.tapPromise('CombineLocalesAndMenusPlugin', async (compilation) => {
-              await combineLocales();
-              await combineMenus();
+              if (!hasCombinedLocalesAndMenus) {
+                await combineLocales();
+                await combineMenus();
+                hasCombinedLocalesAndMenus = true;
+              }
             });
           },
         });

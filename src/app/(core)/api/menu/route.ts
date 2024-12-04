@@ -8,7 +8,7 @@ const getMenuItems = async (locale: string) => {
   const dirPath = path.join(process.cwd(), 'src', 'app');
   const directories = await fs.readdir(dirPath, { withFileTypes: true });
 
-  const allMenuItems: any[] = [];
+  let allMenuItems: any[] = [];
 
   for (const dirent of directories) {
     if (dirent.isDirectory() && !EXCLUDED_DIRECTORIES.includes(dirent.name)) {
@@ -18,7 +18,7 @@ const getMenuItems = async (locale: string) => {
         await fs.access(menuPath);
         const menuContent = await fs.readFile(menuPath, 'utf-8');
         const menu = JSON.parse(menuContent);
-        allMenuItems.push(menu[locale]);
+        allMenuItems = allMenuItems.concat(menu[locale]);
       } catch (err) {
         console.error(`Failed to load menu for ${dirent.name}:`, err);
       }
