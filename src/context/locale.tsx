@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { IntlProvider } from 'react-intl';
 import { useTranslation } from '@/utils/i18n';
+import Spin from '@/components/spin';
 
 const LocaleContext = createContext<{
   locale: string;
@@ -56,7 +57,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
   return (
     <LocaleContext.Provider value={{ locale, setLocale: changeLocale }}>
       {isLoading ? (
-        <div>Loading...</div>
+        <Spin></Spin>
       ) : (
         <IntlProvider locale={locale} messages={messages}>
           {children}
