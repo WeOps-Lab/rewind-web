@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/context/theme';
 import AuthProvider from '@/context/auth';
 import TopMenu from '@/components/top-menu';
 import { PermissionsProvider } from '@/context/permission';
+import { ConfigProvider } from "antd";
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,23 +24,25 @@ export default function RootLayout({
         <Script src="/iconfont.js" strategy="afterInteractive" />
       </head>
       <body className={inter.className}>
-        <SessionProvider refetchInterval={ 30 * 60 }>
-          <LocaleProvider>
-            <ThemeProvider>
-              <AuthProvider>
-                <PermissionsProvider>
-                  <div className="flex flex-col min-h-screen">
-                    <header className="sticky top-0 left-0 right-0 flex justify-between items-center header-bg">
-                      <TopMenu />
-                    </header>
-                    <main className="flex-1 p-4 h-full flex">
-                      <AntdRegistry>{children}</AntdRegistry>
-                    </main>
-                  </div>
-                </PermissionsProvider>
-              </AuthProvider>
-            </ThemeProvider>
-          </LocaleProvider>
+        <SessionProvider refetchInterval={30 * 60}>
+          <ConfigProvider>
+            <LocaleProvider>
+              <ThemeProvider>
+                <AuthProvider>
+                  <PermissionsProvider>
+                    <div className="flex flex-col min-h-screen">
+                      <header className="sticky top-0 left-0 right-0 flex justify-between items-center header-bg">
+                        <TopMenu />
+                      </header>
+                      <main className="flex-1 p-4 h-full flex">
+                        <AntdRegistry>{children}</AntdRegistry>
+                      </main>
+                    </div>
+                  </PermissionsProvider>
+                </AuthProvider>
+              </ThemeProvider>
+            </LocaleProvider>
+          </ConfigProvider>
         </SessionProvider>
       </body>
     </html>
