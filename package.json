@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "preinstall": "npx -y only-allow pnpm",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -15,7 +16,6 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@ant-design/charts": "^2.2.3",
     "@ant-design/icons": "^5.5.1",
     "@ant-design/nextjs-registry": "^1.0.2",
     "antd": "^5.21.5",
@@ -53,6 +53,7 @@
     "eslint-plugin-storybook": "^0.11.1",
     "fs-extra": "^11.2.0",
     "husky": "^9.1.7",
+    "only-allow": "^1.2.1",
     "postcss": "^8",
     "react-devtools": "^6.0.1",
     "sass": "^1.81.0",
