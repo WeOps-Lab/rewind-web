@@ -27,7 +27,8 @@
     "next-auth": "^4.24.10",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-intl": "^7.0.1"
+    "react-intl": "^7.0.1",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "3.2.2",
