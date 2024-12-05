@@ -1,26 +1,26 @@
 {
   "zh": [
     {
-      "label": "用户",
-      "icon": "yonghuguanli",
-      "path": "/system-manager/userspage"
-    },
-    {
-      "label": "组织",
-      "icon": "zuzhiguanli",
-      "path": "/system-manager/teamspage"
-    }
-  ],
+    "label": "用户",
+    "icon": "yonghuguanli",
+    "path": "/system-manager/userspage"
+  },
+  {
+    "label": "组织",
+    "icon": "zuzhiguanli",
+    "path": "/system-manager/groupspage"
+  }],
   "en": [
     {
-      "label": "User",
-      "icon": "yonghuguanli",
-      "path": "/system-manager/userspage"
-    },
-    {
-      "label": "Oranization",
-      "icon": "zuzhiguanli",
-      "path": "/system-manager/teamspage"
-    }
-  ]
+    "label": "Users",
+    "icon": "yonghuguanli",
+    "path": "/system-manager/userspage"
+  },
+  {
+    "label": "Groups",
+    "icon": "zuzhiguanli",
+    "path": "/system-manager/groupspage"
+  }
+]
 }
+

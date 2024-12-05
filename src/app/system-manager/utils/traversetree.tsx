@@ -1,4 +1,4 @@
-import  {DataType}  from '@/app/system-manager/types/teamstypes';
+import  {DataType}  from '@/app/system-manager/types/groupstypes';
 const traverseTree = (nodes:DataType[], callback: (node: DataType) => void) => {
   for (const node of nodes) {
     callback(node);

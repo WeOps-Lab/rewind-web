@@ -1,4 +1,4 @@
-import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+
 //接口
 interface DataType {
     key: string;
@@ -8,10 +8,6 @@ interface DataType {
     childrenleght?: 0;
   }
   
-  interface RowContextProps {
-    setActivatorNodeRef?: (element: HTMLElement | null) => void;
-    listeners?: SyntheticListenerMap;
-  }
   
   interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
     'data-row-key': string;
@@ -42,5 +38,27 @@ interface DataType {
     subGroups: SubGroup[];
   }
 
-export type { DataType, RowContextProps, RowProps, Access, SubGroup, Group };
+//原始的组织列表的接口
+interface OriginalGroup {
+  id: string;
+  name: string;
+  path: string;
+  subGroups: OriginalGroup[];
+  access: {
+    manage: boolean;
+    manageMembers: boolean;
+    manageMembership: boolean;
+    view: boolean;
+    viewMembers: boolean;
+  };
+}
+
+// 转换后的组织列表的接口
+interface ConvertedGroup {
+  key: string;
+  name: string;
+  childrenGroups?: ConvertedGroup[];
+}
+
+export type { DataType, RowProps, Access, SubGroup, Group ,OriginalGroup,ConvertedGroup};
   
