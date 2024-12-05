@@ -1,32 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
-import { createIntl, createIntlCache } from 'react-intl';
-import { getMergedMessages } from '@/utils/mergedMessage';
 
-const EXCLUDED_DIRECTORIES = ['api', 'auth'];
-
-interface MergedMessages {
-  [key: string]: any;
-  en?: any;
-  zh?: any;
-}
-
-const getIntl = async (locale: string) => {
-  const mergedMessages: MergedMessages = await getMergedMessages();
-  const messages = mergedMessages[locale];
-  const cache = createIntlCache();
-  const intl = createIntl({
-    locale,
-    messages
-  }, cache);
-  return intl;
-};
+const EXCLUDED_DIRECTORIES = ['(core)'];
 
 const getMenuItems = async (locale: string) => {
-  const intl = await getIntl(locale);
-  const formatMessage = intl.formatMessage;
-
   const dirPath = path.join(process.cwd(), 'src', 'app');
   const directories = await fs.readdir(dirPath, { withFileTypes: true });
 
@@ -34,13 +12,13 @@ const getMenuItems = async (locale: string) => {
 
   for (const dirent of directories) {
     if (dirent.isDirectory() && !EXCLUDED_DIRECTORIES.includes(dirent.name)) {
-      const menuPath = path.join(dirPath, dirent.name, 'constants', 'menu.ts');
+      const menuPath = path.join(dirPath, dirent.name, 'constants', 'menu.json');
 
       try {
         await fs.access(menuPath);
-        const { default: getMenuItems } = await import(`@/app/${dirent.name}/constants/menu`);
-        const menuItems = getMenuItems(formatMessage);
-        allMenuItems = allMenuItems.concat(menuItems);
+        const menuContent = await fs.readFile(menuPath, 'utf-8');
+        const menu = JSON.parse(menuContent);
+        allMenuItems = allMenuItems.concat(menu[locale]);
       } catch (err) {
         console.error(`Failed to load menu for ${dirent.name}:`, err);
       }

@@ -4,6 +4,7 @@ import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 import { createContext, useContext, useEffect, useState } from 'react';
+import Spin from '@/components/spin';
 
 interface AuthContextType {
   token: string | null;
@@ -37,10 +38,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   if (status === 'loading' || !isAuthenticated) {
     return (
-      <div className='first-loader-wrapper'>
-        <div className='loading-arc'></div>
-        <h1><span>LOADING</span></h1>
-      </div>
+      <Spin></Spin>
     );
   }
 
