@@ -194,11 +194,6 @@ const Groups = () => {
     }
   }
 
-  const testwww = async () => {
-    const res =await getTeamDataApi();
-    console.log(res, 'teamdata');
-  };
-
   // 删除组织的确定的弹窗
   const { confirm } = Modal;
   const showDeleteConfirm = (key: string) => {
@@ -227,7 +222,6 @@ const Groups = () => {
 
   return (
     <div className={`${GroupsStyle.height}`}>
-      <button onClick={testwww}>test</button>
       <TopSection
         title={t('teampage.topinfo.title')}
         content={t('teampage.topinfo.desc')}
