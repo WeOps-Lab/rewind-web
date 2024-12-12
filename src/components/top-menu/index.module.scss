@@ -8,3 +8,20 @@
     background: var(--color-components-nav-button-bg-active);
   }
 }
+.nav {
+  background-color: var(--color-text-hover);
+  margin-left: 16px !important;
+  .icons {
+    color: var(--color-text-4);
+  }
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+ .navApp {
+  background-color: var(--color-fill-1);
+  color: var(--color-text-3);
+  &:hover {
+    color: var(--color-primary);
+  }
+}
