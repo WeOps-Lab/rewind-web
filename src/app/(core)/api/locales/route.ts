@@ -33,13 +33,7 @@ const deepMerge = (target: any, source: any) => {
   return target;
 };
 
-let cachedMessages: { [locale: string]: any } | null = null;
-
 const getMergedMessages = async () => {
-  if (cachedMessages) {
-    return cachedMessages;
-  }
-
   const localesDir = path.resolve(process.cwd(), 'src', 'app');
 
   // Load base messages
@@ -78,7 +72,6 @@ const getMergedMessages = async () => {
     }
   }
 
-  cachedMessages = mergedMessages;
   return mergedMessages;
 };
 
