@@ -1,24 +1,76 @@
-import React from "react";
-import { Table, TableProps } from "antd";
-import customTableStyle from "./index.module.scss";
+import React, { useRef } from 'react';
+import { Table, TableProps } from 'antd';
+import { SettingFilled } from '@ant-design/icons';
+import customTableStyle from './index.module.scss';
+import FieldSettingModal from './fieldSettingModal';
+import { ColumnItem } from '@/types/index';
 
-interface CustomTableProps<T> extends Omit<TableProps<T>, "bordered" | "size"> {
+interface CustomTableProps
+  extends Omit<
+    TableProps,
+    'bordered' | 'size' | 'fieldSetting' | 'onSelectFields'
+  > {
   bordered?: boolean;
-  size?: "large" | "middle" | "small";
+  size?: 'large' | 'middle' | 'small';
+  fieldSetting?: {
+    showSetting: boolean;
+    displayFieldKeys: string[];
+    choosableFields: ColumnItem[];
+  };
+  onSelectFields?: (fields: string[]) => void;
 }
 
-const CustomTable = <T extends object>({
+interface FieldRef {
+  showModal: () => void;
+}
+
+const CustomTable: React.FC<CustomTableProps> = ({
+  // 可在此处统一设置表格某属性的默认值，如果传该属性，以传入为准
   bordered = false,
-  size = "large",
-  ...tableProps
-}: CustomTableProps<T>) => {
+  size = 'large',
+  fieldSetting = {
+    showSetting: false,
+    displayFieldKeys: [],
+    choosableFields: [],
+  },
+  onSelectFields = () => [],
+  pagination,
+  ...TableProps
+}) => {
+  const fieldRef = useRef<FieldRef>(null);
+
+  const showFeildSetting = () => {
+    fieldRef.current?.showModal();
+  };
+
+  const paginationConfig = !pagination
+    ? false
+    : {
+      ...pagination,
+      hideOnSinglePage: true,
+    };
+
   return (
-    <Table
-      className={customTableStyle.customTable}
-      bordered={bordered}
-      size={size}
-      {...tableProps}
-    />
+    <div className={customTableStyle.customTable}>
+      <Table
+        bordered={bordered}
+        size={size}
+        pagination={paginationConfig}
+        {...TableProps}
+      />
+      {fieldSetting.showSetting ? (
+        <SettingFilled
+          className={customTableStyle.setting}
+          onClick={showFeildSetting}
+        />
+      ) : null}
+      <FieldSettingModal
+        ref={fieldRef}
+        choosableFields={fieldSetting.choosableFields || []}
+        displayFieldKeys={fieldSetting.displayFieldKeys}
+        onConfirm={onSelectFields}
+      />
+    </div>
   );
 };
 

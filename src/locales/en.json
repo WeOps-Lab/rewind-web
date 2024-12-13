@@ -62,6 +62,10 @@
     "open": "Open",
     "close": "Close",
     "navigation": "Navigation",
-    "appList": "App List"
+    "appList": "App List",
+    "clear": "Clear",
+    "selectAll": "Select All",
+    "selected": "Selected",
+    "items": "Items"
   }
 }
