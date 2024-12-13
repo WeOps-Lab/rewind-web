@@ -62,6 +62,10 @@
     "open": "开启",
     "close": "关闭",
     "navigation": "工作台",
-    "appList": "应用列表"
+    "appList": "应用列表",
+    "clear": "清空",
+    "selectAll": "全选",
+    "selected": "已选",
+    "items": "项"
   }
 }
