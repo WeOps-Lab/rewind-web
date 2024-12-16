@@ -66,6 +66,7 @@
     "clear": "Clear",
     "selectAll": "Select All",
     "selected": "Selected",
-    "items": "Items"
+    "items": "Items",
+    "actions": "ACTIONS"
   }
 }
