@@ -1,0 +1,27 @@
+.justifyend {
+  justify-content: end;
+}
+.card{
+  border-radius: 6px;
+}
+.pfontcolor{
+ color: #9A9797;
+ opacity: 0.9;
+ font-weight: 300;
+}
+.collection{
+  height: calc(100vh - 88px);
+  width: 100%;
+  :global {
+    .custom-tabs {
+      background: transparent;
+      color: var(--color-text-1);
+    }
+    .custom-tabs .ant-segmented-item {
+      margin-right: 8px;
+    }
+    .custom-tabs .ant-segmented-item-selected {
+      color: var(--color-primary);
+    }
+  }
+}

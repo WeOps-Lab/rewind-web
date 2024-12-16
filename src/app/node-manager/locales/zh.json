@@ -1,0 +1,19 @@
+{
+  "common": {
+    "monitor": "监控",
+    "alarm": "告警"
+  },
+  "node-manager":{
+    "cloudregion":{
+
+
+
+
+    },
+    "collector":{
+      "title": "采集器"
+
+
+    }
+  }
+}
