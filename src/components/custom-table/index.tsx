@@ -46,8 +46,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const paginationConfig = !pagination
     ? false
     : {
-      ...pagination,
-      hideOnSinglePage: true,
+      ...pagination
     };
 
   return (
