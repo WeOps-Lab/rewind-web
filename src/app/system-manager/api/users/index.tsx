@@ -4,9 +4,9 @@ export const useUsernamegeApi = () => {
   const { get, post, del, put } = useApiClient();
 
   //获取用户列表的api
-  function getuserslistApi(page = 1, page_size = 10) {
+  function getuserslistApi(params: any) {
     try {
-      return get('/user-manager/internal/user/list', { params: { page, page_size } });
+      return get('/user-manager/internal/user/list', { params });
     } catch (error) {
       throw error;
     }

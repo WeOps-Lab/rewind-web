@@ -2,24 +2,24 @@
   "zh": [
     {
     "label": "用户",
-    "icon": "yonghuguanli",
-    "path": "/system-manager/userspage"
+    "icon": "yonghu",
+    "path": "/system-manager/users"
   },
   {
     "label": "组织",
-    "icon": "zuzhiguanli",
-    "path": "/system-manager/groupspage"
+    "icon": "chatgpt",
+    "path": "/system-manager/groups"
   }],
   "en": [
     {
     "label": "Users",
-    "icon": "yonghuguanli",
-    "path": "/system-manager/userspage"
+    "icon": "yonghu",
+    "path": "/system-manager/users"
   },
   {
     "label": "Groups",
-    "icon": "zuzhiguanli",
-    "path": "/system-manager/groupspage"
+    "icon": "chatgpt",
+    "path": "/system-manager/groups"
   }
 ]
 }

@@ -10,13 +10,13 @@ import {
   DataType,
   OriginalGroup,
   ConvertedGroup,
-} from '@/app/system-manager/types/groupstypes';
+} from '@/app/system-manager/types/groups';
 import { useTranslation } from '@/utils/i18n';
-import TopSection from '@/app/system-manager/components/top-section';
-import { useApiTeam } from '@/app/system-manager/api/teammanageapi/teammanageapi';
+import TopSection from '@/components/top-section';
+import { useApiTeam } from '@/app/system-manager/api/groups/index';
 
 const Groups = () => {
-  
+
   const [form] = Form.useForm();
   //修改的组织的key和添加子组织的key
   const [addsubteamkey, setAddsubteamkey] = useState('6');
@@ -39,9 +39,9 @@ const Groups = () => {
   } = useApiTeam();
   //团队的列表渲染的样式
   const columns: any = [
-    { title: t('tableItem.name'), dataIndex: 'name', width: 450 },
+    { title: t('system.users.form.name'), dataIndex: 'name', width: 450 },
     {
-      title: t('tableItem.actions'),
+      title: t('common.actions'),
       dataIndex: 'actions',
       width: 300,
       render: (arr: string[], data: DataType) => (
@@ -53,7 +53,7 @@ const Groups = () => {
               addsubGroups(data.key);
             }}
           >
-            {t('common.addsubGroups')}
+            {t('system.groups.addsubGroups')}
           </Button>
           <Button
             className="mr-[8px]"
@@ -62,7 +62,7 @@ const Groups = () => {
               renameGroups(data.key);
             }}
           >
-            {t('common.rename')}
+            {t('system.groups.rename')}
           </Button>
           {!data.children || data.children.length === 0 ? (
             <>
@@ -198,8 +198,8 @@ const Groups = () => {
   const { confirm } = Modal;
   const showDeleteConfirm = (key: string) => {
     confirm({
-      title: t('teampage.modal.title'),
-      content: t('teampage.modal.content'),
+      title: t('common.delConfirm'),
+      content: t('common.delConfirmCxt'),
       centered: true,
       okText: t('common.confirm'),
       cancelText: t('common.cancel'),
@@ -223,8 +223,8 @@ const Groups = () => {
   return (
     <div className={`${GroupsStyle.height}`}>
       <TopSection
-        title={t('teampage.topinfo.title')}
-        content={t('teampage.topinfo.desc')}
+        title={t('system.groups.title')}
+        content={t('system.groups.desc')}
       ></TopSection>
       <div className="w-full h-[32px] mt-[23px] mb-[23px] flex justify-between">
         <Input
@@ -270,7 +270,7 @@ const Groups = () => {
         <Form style={{ maxWidth: 600 }} form={form}>
           <Form.Item
             name="teamname"
-            label={`${t('tableItem.name')}*`}
+            label={`${t('system.users.form.name')}*`}
             colon={false}
           >
             <Input placeholder="input placeholder" />
@@ -319,7 +319,7 @@ const Groups = () => {
       </ConfigProvider>
       {/* 添加子组织的弹窗 */}
       <OperateModal
-        title={t('common.addsubGroups')}
+        title={t('system.groups.addsubGroups')}
         closable={false}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
@@ -336,7 +336,7 @@ const Groups = () => {
         <Form style={{ maxWidth: 600 }} form={form}>
           <Form.Item
             name="teamname"
-            label={`${t('tableItem.name')}*`}
+            label={`${t('system.users.form.name')}*`}
             colon={false}
           >
             <Input placeholder="input placeholder" />
@@ -345,7 +345,7 @@ const Groups = () => {
       </OperateModal>
       {/* 修改组织的名字的弹窗 */}
       <OperateModal
-        title={t('common.rename')}
+        title={t('system.groups.rename')}
         closable={false}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
@@ -362,7 +362,7 @@ const Groups = () => {
         <Form style={{ maxWidth: 600 }} form={form}>
           <Form.Item
             name="renameteam"
-            label={`${t('tableItem.name')}*`}
+            label={`${t('system.users.form.name')}*`}
             colon={false}
           >
             <Input placeholder="input placeholder" />

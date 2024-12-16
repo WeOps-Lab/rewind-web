@@ -6,22 +6,22 @@ interface RoleDescriptionProps {
   modifyRoleSelect: boolean;
 }
 
-const RoleDescription: React.FC<RoleDescriptionProps> = ({ modifyRoleSelect }) => {   
+const RoleDescription: React.FC<RoleDescriptionProps> = ({ modifyRoleSelect }) => {
   const { t } = useTranslation();
   return (
     <div className={`${roledescriptionStyle.tagheight}`}>
       <Tag className={`${roledescriptionStyle.roledescriptionStyle}`}>
         {modifyRoleSelect ? (
           <div className='w-[349px] h-[106px]'>
-            <p>{t("role.administrator.title")}</p>
-            <p>{t("role.administrator.desc1")}</p>
-            <p>{t("role.administrator.desc2")}</p>
+            <p>{t("system.users.admin.title")}</p>
+            <p>{t("system.users.admin.desc1")}</p>
+            <p>{t("system.users.admin.desc2")}</p>
           </div>
         ) : (<div className='w-[349px] h-[106px]'>
-          <p>{t("role.normalusers.title")}</p>
-          <p>{t("role.normalusers.desc1")}</p>
-          <p>{t("role.normalusers.desc2")}</p>
-          <p>{t("role.normalusers.desc3")}</p>
+          <p>{t("system.users.normal.title")}</p>
+          <p>{t("system.users.normal.desc1")}</p>
+          <p>{t("system.users.normal.desc2")}</p>
+          <p>{t("system.users.normal.desc3")}</p>
         </div>
         )}
       </Tag>
