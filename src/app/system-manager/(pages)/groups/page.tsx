@@ -1,8 +1,7 @@
 'use client';
-import React, { useState,  useEffect } from 'react';
-import { Button, Input, Form, message, ConfigProvider, Modal } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Input, Form, message, Modal } from 'antd';
 import OperateModal from '@/components/operate-modal';
-import GroupsStyle from './index.module.scss';
 import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
 import CustomTable from '@/components/custom-table';
 import { AnyObject } from 'antd/es/_util/type';
@@ -15,21 +14,21 @@ import { useTranslation } from '@/utils/i18n';
 import TopSection from '@/components/top-section';
 import { useApiTeam } from '@/app/system-manager/api/groups/index';
 
-const Groups = () => {
+const { Search } = Input;
 
+const Groups = () => {
   const [form] = Form.useForm();
-  //修改的组织的key和添加子组织的key
-  const [addsubteamkey, setAddsubteamkey] = useState('6');
-  const [renamekey, setRenamekey] = useState('1');
-  // const [sortablearr, setSortablearr] = useState(['1', '2', '3', '4', '5']);
-  const [expandedRowKeysarr, setExpandedRowKeys] = useState(['0']);
-  //添加组织，添加子组织，修改组织的弹窗的状态
+  // 修改的组织的key和添加子组织的key
+  const [addsubteamkey, setAddsubteamkey] = useState('');
+  const [renamekey, setRenamekey] = useState('');
+  const [expandedRowKeysarr, setExpandedRowKeys] = useState<string[]>([]);
+  // 添加组织，添加子组织，修改组织的弹窗的状态
   const [addteammodalOpen, setAddteammodalOpen] = useState(false);
   const [addSubteammodalOpen, setAddSubteammodalOpen] = useState(false);
   const [renameteammodalOpen, setRenameteammodalOpen] = useState(false);
 
   const { t } = useTranslation();
-  //获取接口
+  // 获取接口
   const {
     getTeamDataApi,
     addTeamDataApi,
@@ -37,7 +36,7 @@ const Groups = () => {
     renameTeamApi,
     deleteteamApi,
   } = useApiTeam();
-  //团队的列表渲染的样式
+  // 团队的列表渲染的样式
   const columns: any = [
     { title: t('system.users.form.name'), dataIndex: 'name', width: 450 },
     {
@@ -81,19 +80,22 @@ const Groups = () => {
       ),
     },
   ];
-  //组织的数据
-  const [dataSource, setDataSource] = React.useState<DataType[]>();
+  // 组织的数据
+  const [dataSource, setDataSource] = useState<DataType[]>();
 
-  //组件挂载获取组织数据
+  // 组件挂载获取组织数据
   useEffect(() => {
-    getTeamDataApi().then((teamdata) => {
-      const newData = convertGroups(teamdata);
-      console.log(newData, 'hdhfhd');
-      setDataSource(newData);
-    });
+    fetchData();
   }, []);
 
-  //转换组织列表的数据
+  // 获取组织数据
+  const fetchData = useCallback(async () => {
+    const teamdata = await getTeamDataApi();
+    const newData = convertGroups(teamdata);
+    setDataSource(newData);
+  }, [getTeamDataApi]);
+
+  // 转换组织列表的数据
   const convertGroups = (groups: OriginalGroup[]): ConvertedGroup[] => {
     return groups.map((group) => ({
       key: group.id,
@@ -101,55 +103,64 @@ const Groups = () => {
       childrenGroups: convertGroups(group.subGroups), // 递归转换子组
     }));
   };
-  //添加父组织的触发事件
-  function addGroups() {
+
+  // 搜索组织
+  const handleInputSearchChange = async (value: string) => {
+    const teamdata = await getTeamDataApi();
+    const filteredData = teamdata.filter((group: any) => group.name.includes(value));
+    const newData = convertGroups(filteredData);
+    setDataSource(newData);
+  };
+
+  // 添加父组织的触发事件
+  const addGroups = () => {
     setAddteammodalOpen(true);
     form.resetFields();
-  }
-  async function onOkaddteam() {
-    setAddteammodalOpen(false);
-    await addTeamDataApi(form.getFieldValue('teamname')).then((res) => {
-      console.log(res, 'res');
-    });
-    await getTeamDataApi().then((teamdata) => {
-      const newData = convertGroups(teamdata);
-      setDataSource(newData);
-    });
-    message.success('add Groups successfully!');
-  }
+  };
 
-  //添加子组织的触发事件
-  function addsubGroups(key: string) {
+  const onOkaddteam = async () => {
+    try {
+      await form.validateFields();
+      setAddteammodalOpen(false);
+      await addTeamDataApi(form.getFieldValue('teamname'));
+      await fetchData();
+      message.success(t('system.groups.addSuccess'));
+    } catch (errorInfo) {
+      console.log('Failed:', errorInfo);
+    }
+  };
+
+  // 添加子组织的触发事件
+  const addsubGroups = (key: string) => {
     setAddSubteammodalOpen(true);
     setAddsubteamkey(key);
     form.resetFields();
-  }
-  //添加子组织的确定事件
-  async function onOkaddSubteam() {
-    await addSubTeamApi(
-      addsubteamkey,
-      form.getFieldValue('teamname')
-    ).then((res) => {
-      message.success(res.message);
-    });
-    await getTeamDataApi().then((teamdata) => {
-      const newData = convertGroups(teamdata);
-      setDataSource(newData);
-    });
-    message.success('add SubGroups successfully!');
-    //设置张开的节点
-    setExpandedRowKeys([...expandedRowKeysarr, addsubteamkey]);
-    setAddSubteammodalOpen(false);
-  }
+  };
 
-  //修改组织的触发事件
-  function renameGroups(key: string) {
+  // 添加子组织的确定事件
+  const onOkaddSubteam = async () => {
+    try {
+      await form.validateFields();
+      const teamname = form.getFieldValue('teamname');
+      await addSubTeamApi(addsubteamkey, teamname);
+      await fetchData();
+      message.success(t('system.groups.addSubSuccess'));
+      setExpandedRowKeys((prev) => [...prev, addsubteamkey]);
+      setAddSubteammodalOpen(false);
+    } catch (errorInfo) {
+      console.log('Failed:', errorInfo);
+    }
+  };
+
+  // 修改组织的触发事件
+  const renameGroups = (key: string) => {
     setRenameteammodalOpen(true);
     setRenamekey(key);
     form.resetFields();
     findNode(dataSource as DataType[], key);
-  }
-  //查找要修改的组织，回显其数据
+  };
+
+  // 查找要修改的组织，回显其数据
   const findNode = (treeData: DataType[], targetKey: string): DataType[] => {
     return treeData.map((node) => {
       if (node.key === targetKey) {
@@ -164,27 +175,26 @@ const Groups = () => {
     });
   };
 
-  //修改组织的确定事件
-  async function onOkrenameteam() {
-    console.log(renamekey, 'renamekey');
-    const rename = form.getFieldValue('renameteam');
-    await renameTeamApi(rename, renamekey).then((res) => {
-      console.log(res, 'res');
-    });
-    await getTeamDataApi().then((teamdata) => {
-      const newData = convertGroups(teamdata);
-      setDataSource(newData);
-    });
-    message.success('renameGroups successfully!');
-    setRenameteammodalOpen(false);
-  }
+  // 修改组织的确定事件
+  const onOkrenameteam = async () => {
+    try {
+      await form.validateFields();
+      const rename = form.getFieldValue('renameteam');
+      await renameTeamApi(rename, renamekey);
+      await fetchData();
+      message.success(t('system.groups.renameSuccess'));
+      setRenameteammodalOpen(false);
+    } catch (errorInfo) {
+      console.log('Failed:', errorInfo);
+    }
+  };
 
-  //删除组织事件
-  function deleteGroups(key: string) {
+  // 删除组织事件
+  const deleteGroups = (key: string) => {
     showDeleteConfirm(key);
-  }
+  };
 
-  function onExpand(expanded: boolean, record: AnyObject) {
+  const onExpand = (expanded: boolean, record: AnyObject) => {
     if (expanded) {
       setExpandedRowKeys([...expandedRowKeysarr, record.key]);
     } else {
@@ -192,50 +202,41 @@ const Groups = () => {
         expandedRowKeysarr.filter((item) => item !== record.key)
       );
     }
-  }
+  };
 
   // 删除组织的确定的弹窗
-  const { confirm } = Modal;
   const showDeleteConfirm = (key: string) => {
-    confirm({
+    Modal.confirm({
       title: t('common.delConfirm'),
       content: t('common.delConfirmCxt'),
       centered: true,
       okText: t('common.confirm'),
       cancelText: t('common.cancel'),
-      onOk() {
-        return new Promise(async (resolve) => {
-          try {
-            await deleteteamApi(key);
-            await getTeamDataApi().then((teamdata) => {
-              const newData = convertGroups(teamdata);
-              setDataSource(newData);
-            });
-            message.success('deleteGroups successfully!');
-          } finally {
-            resolve(true);
-          }
-        });
+      onOk: async () => {
+        await deleteteamApi(key);
+        await fetchData();
+        message.success(t('system.groups.deleteSuccess'));
       },
     });
   };
 
   return (
-    <div className={`${GroupsStyle.height}`}>
+    <div className="w-full">
       <TopSection
         title={t('system.groups.title')}
         content={t('system.groups.desc')}
-      ></TopSection>
-      <div className="w-full h-[32px] mt-[23px] mb-[23px] flex justify-between">
-        <Input
-          className="inputwidth"
+      />
+      <div className="w-full mt-4 mb-4 flex justify-end">
+        <Search
+          allowClear
+          enterButton
+          className="w-60 mr-[8px]"
+          onSearch={handleInputSearchChange}
           placeholder={`${t('common.search')}...`}
-        />{' '}
+        />
         <Button
           type="primary"
-          onClick={() => {
-            addGroups();
-          }}
+          onClick={addGroups}
         >
           +{t('common.add')}
         </Button>
@@ -251,17 +252,13 @@ const Groups = () => {
           <Button
             key="submit"
             type="primary"
-            onClick={() => {
-              onOkaddteam();
-            }}
+            onClick={onOkaddteam}
           >
             {t('common.confirm')}
           </Button>,
           <Button
             key="cancel"
-            onClick={() => {
-              setAddteammodalOpen(false);
-            }}
+            onClick={() => setAddteammodalOpen(false)}
           >
             {t('common.cancel')}
           </Button>,
@@ -270,53 +267,38 @@ const Groups = () => {
         <Form style={{ maxWidth: 600 }} form={form}>
           <Form.Item
             name="teamname"
-            label={`${t('system.users.form.name')}*`}
+            label={t('system.users.form.name')}
             colon={false}
+            rules={[{ required: true, message: t('common.inputErrorMessage') }]}
           >
-            <Input placeholder="input placeholder" />
+            <Input placeholder={t('common.inputPlaceholder')} />
           </Form.Item>
         </Form>
       </OperateModal>
-      {/* 修改组织的名字的弹窗 */}
-      {/* 拖拽的表格 */}
-      <ConfigProvider
-        theme={{
-          components: {
-            Table: {
-              headerSplitColor: '#fafafa',
-              selectionColumnWidth: 10,
-              bodySortBg: '#787878',
-            },
-          },
+      <CustomTable
+        rowKey="key"
+        pagination={false}
+        expandedRowKeys={expandedRowKeysarr}
+        onExpand={(expanded, record) => {
+          onExpand(expanded, record);
         }}
-      >
-        <CustomTable
-          rowKey="key"
-          pagination={false}
-          expandedRowKeys={expandedRowKeysarr}
-          onExpand={(expanded, record) => {
-            onExpand(expanded, record);
-          }}
-          size="small"
-          scroll={{ y: 'calc(100vh - 300px)', x: 'calc(100vw-100px)' }}
-          // components={{ body: { row: Row } }}
-          columns={columns}
-          expandable={{
-            expandIcon: ({ expanded, onExpand, record }) =>
-              record.children && record.children.length > 0 ? (
-                expanded ? (
-                  <CaretDownOutlined onClick={(e) => onExpand(record, e)} />
-                ) : (
-                  <CaretRightOutlined
-                    onClick={(e) => onExpand(record, e)}
-                  />
-                )
-              ) : null,
-            indentSize: 22,
-          }}
-          dataSource={dataSource}
-        />
-      </ConfigProvider>
+        scroll={{ y: 'calc(100vh - 300px)' }}
+        columns={columns}
+        expandable={{
+          expandIcon: ({ expanded, onExpand, record }) =>
+            record.children && record.children.length > 0 ? (
+              expanded ? (
+                <CaretDownOutlined onClick={(e) => onExpand(record, e)} />
+              ) : (
+                <CaretRightOutlined
+                  onClick={(e) => onExpand(record, e)}
+                />
+              )
+            ) : null,
+          indentSize: 22,
+        }}
+        dataSource={dataSource}
+      />
       {/* 添加子组织的弹窗 */}
       <OperateModal
         title={t('system.groups.addsubGroups')}
@@ -325,7 +307,7 @@ const Groups = () => {
         cancelText={t('common.cancel')}
         open={addSubteammodalOpen}
         footer={[
-          <Button key="submit" type="primary" onClick={() => onOkaddSubteam()}>
+          <Button key="submit" type="primary" onClick={onOkaddSubteam}>
             {t('common.confirm')}
           </Button>,
           <Button key="cancel" onClick={() => setAddSubteammodalOpen(false)}>
@@ -336,10 +318,11 @@ const Groups = () => {
         <Form style={{ maxWidth: 600 }} form={form}>
           <Form.Item
             name="teamname"
-            label={`${t('system.users.form.name')}*`}
+            label={t('system.users.form.name')}
             colon={false}
+            rules={[{ required: true, message: t('common.inputErrorMessage') }]}
           >
-            <Input placeholder="input placeholder" />
+            <Input placeholder={t('common.inputPlaceholder')} />
           </Form.Item>
         </Form>
       </OperateModal>
@@ -351,7 +334,7 @@ const Groups = () => {
         cancelText={t('common.cancel')}
         open={renameteammodalOpen}
         footer={[
-          <Button key="submit" type="primary" onClick={() => onOkrenameteam()}>
+          <Button key="submit" type="primary" onClick={onOkrenameteam}>
             {t('common.confirm')}
           </Button>,
           <Button key="cancel" onClick={() => setRenameteammodalOpen(false)}>
@@ -362,14 +345,16 @@ const Groups = () => {
         <Form style={{ maxWidth: 600 }} form={form}>
           <Form.Item
             name="renameteam"
-            label={`${t('system.users.form.name')}*`}
+            label={t('system.users.form.name')}
             colon={false}
+            rules={[{ required: true, message: t('common.inputErrorMessage') }]}
           >
-            <Input placeholder="input placeholder" />
+            <Input placeholder={t('common.inputPlaceholder')} />
           </Form.Item>
         </Form>
       </OperateModal>
     </div>
   );
 };
+
 export default Groups;

@@ -117,7 +117,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
       <div>
         {type === 'modifyrole' ? (
           <OperateModal
-            width={500}
+            width={650}
             title={t('system.common.batchmodifyroles')}
             closable={false}
             open={userVisible}
@@ -152,7 +152,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
             open={userVisible}
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
-            width={500}
+            width={650}
             footer={[
               <Button key="submit" type="primary" onClick={handleConfirm}>
                 {t('common.confirm')}
@@ -200,7 +200,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
                 rules={[{ required: true, message: t('system.users.form.team') + ' is required' }]}
               >
                 <Select
-                  style={{ width: 120 }}
+                  style={{ width: '100%' }}
                   options={[
                     { value: 'team1', label: 'team1' },
                     { value: 'team2', label: 'team2' },
@@ -215,12 +215,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
                 rules={[{ required: true, message: t('system.users.form.role') + ' is required' }]}
               >
                 <Radio.Group options={options} onChange={radiochang} />
-              </Form.Item>
-              <Form.Item
-                name="comment"
-                label="  "
-                colon={false}
-              >
                 <RoleDescription modifyRoleSelect={eidtroleselect} />
               </Form.Item>
             </Form>
