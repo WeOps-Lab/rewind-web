@@ -135,7 +135,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
             <Form ref={formRef}>
               <Form.Item colon={false}>
                 <span>{t('system.common.selectedusers')}:</span>
-                <span className="text-[#1890ff]">{userForm.username}</span>
+                <span className="text-[var(--color-primary)]">{userForm.username}</span>
               </Form.Item>
               <Form.Item name="role" colon={false}>
                 <Radio.Group options={options} onChange={radiochang} />
@@ -166,38 +166,38 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
               <Form.Item
                 name="username"
                 label={t('system.users.form.username')}
-                rules={[{ required: true, message: t('system.users.form.username') + ' is required' }]}
+                rules={[{ required: true, message: t('common.inputRequired') }]}
                 colon={false}
               >
-                <Input placeholder="input placeholder" disabled={type !== 'add'} />
+                <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.username')}`} disabled={type !== 'add'} />
               </Form.Item>
               <Form.Item
                 name="name"
                 label={t('system.users.form.name')}
                 colon={false}
               >
-                <Input placeholder="input placeholder" />
+                <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.name')}`} />
               </Form.Item>
               <Form.Item
                 name="email"
                 label={t('system.users.form.email')}
                 colon={false}
-                rules={[{ required: true, message: t('system.users.form.email') + ' is required' }]}
+                rules={[{ required: true, message: t('common.inputRequired') }]}
               >
-                <Input placeholder="input placeholder" />
+                <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.email')}`} />
               </Form.Item>
               <Form.Item
                 name="number"
                 label={t('system.users.form.number')}
                 colon={false}
               >
-                <Input placeholder="input placeholder" />
+                <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.number')}`} />
               </Form.Item>
               <Form.Item
                 name="team"
                 label={t('system.users.form.team')}
                 colon={false}
-                rules={[{ required: true, message: t('system.users.form.team') + ' is required' }]}
+                rules={[{ required: true, message: t('common.inputRequired') }]}
               >
                 <Select
                   style={{ width: '100%' }}
@@ -212,7 +212,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
                 name="role"
                 label={t('system.users.form.role')}
                 colon={false}
-                rules={[{ required: true, message: t('system.users.form.role') + ' is required' }]}
+                rules={[{ required: true, message: t('common.inputRequired') }]}
               >
                 <Radio.Group options={options} onChange={radiochang} />
                 <RoleDescription modifyRoleSelect={eidtroleselect} />

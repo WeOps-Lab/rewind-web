@@ -18,17 +18,14 @@ const { Search } = Input;
 
 const Groups = () => {
   const [form] = Form.useForm();
-  // 修改的组织的key和添加子组织的key
   const [addsubteamkey, setAddsubteamkey] = useState('');
   const [renamekey, setRenamekey] = useState('');
   const [expandedRowKeysarr, setExpandedRowKeys] = useState<string[]>([]);
-  // 添加组织，添加子组织，修改组织的弹窗的状态
   const [addteammodalOpen, setAddteammodalOpen] = useState(false);
   const [addSubteammodalOpen, setAddSubteammodalOpen] = useState(false);
   const [renameteammodalOpen, setRenameteammodalOpen] = useState(false);
 
   const { t } = useTranslation();
-  // 获取接口
   const {
     getTeamDataApi,
     addTeamDataApi,
@@ -36,7 +33,6 @@ const Groups = () => {
     renameTeamApi,
     deleteteamApi,
   } = useApiTeam();
-  // 团队的列表渲染的样式
   const columns: any = [
     { title: t('system.users.form.name'), dataIndex: 'name', width: 450 },
     {
@@ -80,15 +76,12 @@ const Groups = () => {
       ),
     },
   ];
-  // 组织的数据
   const [dataSource, setDataSource] = useState<DataType[]>();
 
-  // 组件挂载获取组织数据
   useEffect(() => {
     fetchData();
   }, []);
 
-  // 获取组织数据
   const fetchData = useCallback(async () => {
     const teamdata = await getTeamDataApi();
     const newData = convertGroups(teamdata);
@@ -100,11 +93,10 @@ const Groups = () => {
     return groups.map((group) => ({
       key: group.id,
       name: group.name,
-      childrenGroups: convertGroups(group.subGroups), // 递归转换子组
+      childrenGroups: convertGroups(group.subGroups),
     }));
   };
 
-  // 搜索组织
   const handleInputSearchChange = async (value: string) => {
     const teamdata = await getTeamDataApi();
     const filteredData = teamdata.filter((group: any) => group.name.includes(value));
@@ -112,7 +104,6 @@ const Groups = () => {
     setDataSource(newData);
   };
 
-  // 添加父组织的触发事件
   const addGroups = () => {
     setAddteammodalOpen(true);
     form.resetFields();
@@ -130,15 +121,13 @@ const Groups = () => {
     }
   };
 
-  // 添加子组织的触发事件
   const addsubGroups = (key: string) => {
     setAddSubteammodalOpen(true);
     setAddsubteamkey(key);
     form.resetFields();
   };
 
-  // 添加子组织的确定事件
-  const onOkaddSubteam = async () => {
+  const onAddSubTeam = async () => {
     try {
       await form.validateFields();
       const teamname = form.getFieldValue('teamname');
@@ -160,7 +149,6 @@ const Groups = () => {
     findNode(dataSource as DataType[], key);
   };
 
-  // 查找要修改的组织，回显其数据
   const findNode = (treeData: DataType[], targetKey: string): DataType[] => {
     return treeData.map((node) => {
       if (node.key === targetKey) {
@@ -175,8 +163,7 @@ const Groups = () => {
     });
   };
 
-  // 修改组织的确定事件
-  const onOkrenameteam = async () => {
+  const onRenameTeam = async () => {
     try {
       await form.validateFields();
       const rename = form.getFieldValue('renameteam');
@@ -204,7 +191,6 @@ const Groups = () => {
     }
   };
 
-  // 删除组织的确定的弹窗
   const showDeleteConfirm = (key: string) => {
     Modal.confirm({
       title: t('common.delConfirm'),
@@ -269,9 +255,9 @@ const Groups = () => {
             name="teamname"
             label={t('system.users.form.name')}
             colon={false}
-            rules={[{ required: true, message: t('common.inputErrorMessage') }]}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={t('common.inputPlaceholder')} />
+            <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.name')}`} />
           </Form.Item>
         </Form>
       </OperateModal>
@@ -307,7 +293,7 @@ const Groups = () => {
         cancelText={t('common.cancel')}
         open={addSubteammodalOpen}
         footer={[
-          <Button key="submit" type="primary" onClick={onOkaddSubteam}>
+          <Button key="submit" type="primary" onClick={onAddSubTeam}>
             {t('common.confirm')}
           </Button>,
           <Button key="cancel" onClick={() => setAddSubteammodalOpen(false)}>
@@ -320,9 +306,9 @@ const Groups = () => {
             name="teamname"
             label={t('system.users.form.name')}
             colon={false}
-            rules={[{ required: true, message: t('common.inputErrorMessage') }]}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={t('common.inputPlaceholder')} />
+            <Input placeholder={`${t('system.users.form.name')}${t('common.inputMsg')}`} />
           </Form.Item>
         </Form>
       </OperateModal>
@@ -334,7 +320,7 @@ const Groups = () => {
         cancelText={t('common.cancel')}
         open={renameteammodalOpen}
         footer={[
-          <Button key="submit" type="primary" onClick={onOkrenameteam}>
+          <Button key="submit" type="primary" onClick={onRenameTeam}>
             {t('common.confirm')}
           </Button>,
           <Button key="cancel" onClick={() => setRenameteammodalOpen(false)}>
@@ -347,9 +333,9 @@ const Groups = () => {
             name="renameteam"
             label={t('system.users.form.name')}
             colon={false}
-            rules={[{ required: true, message: t('common.inputErrorMessage') }]}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={t('common.inputPlaceholder')} />
+            <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.name')}`} />
           </Form.Item>
         </Form>
       </OperateModal>

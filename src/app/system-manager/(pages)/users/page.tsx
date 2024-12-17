@@ -113,8 +113,8 @@ const User = () => {
       setTableData(data);
       setTotal(res.count);
     } catch (error) {
-      console.error('Failed to fetch users:', error);
-      message.error('Failed to fetch users list.');
+      console.error(t('common.fetchFailed'), error);
+      message.error(t('common.fetchFailed'));
     }
   };
 
@@ -125,7 +125,7 @@ const User = () => {
   useEffect(() => {
     getorgtreeApi()
       .then((res) => setTreaData(convertGroups(res) as TreeDataNode[]))
-      .catch((error) => console.error('Failed to fetch org tree:', error));
+      .catch((error) => console.error(t('common.fetchFailed'), error));
   }, []);
 
   useEffect(() => {
@@ -173,10 +173,10 @@ const User = () => {
         try {
           await deleteUserApi(key);
           fetchUsers();
-          message.success("Delete user successfully!");
+          message.success(t('common.delSuccess'));
         } catch (error) {
-          console.error('Failed to delete user:', error);
-          message.error('Failed to delete user.');
+          console.error(t('common.delFailed'), error);
+          message.error(t('common.delFailed'));
         }
       },
     });
@@ -195,10 +195,10 @@ const User = () => {
           await Promise.all(promises);
           setSelectedRowKeys([]);
           fetchUsers();
-          message.success("Delete users successfully!");
+          message.success(t('common.delSuccess'));
         } catch (error) {
-          console.error('Failed to delete users:', error);
-          message.error('Failed to delete users.');
+          console.error(t('common.delFailed'), error);
+          message.error(t('common.delFailed'));
         }
       },
     });
@@ -211,7 +211,7 @@ const User = () => {
     });
   };
 
-  const onsuccessusermodal = () => {
+  const onSuccessUserModal = () => {
     message.success("Operation successful!");
     fetchUsers();
   };
@@ -268,7 +268,7 @@ const User = () => {
               >
                 +{t('common.add')}
               </Button>
-              <UserModal ref={userRef} onSuccess={onsuccessusermodal} />
+              <UserModal ref={userRef} onSuccess={onSuccessUserModal} />
               <Button
                 ref={modifyroleuseref}
                 className="mr-[8px] op-8"
