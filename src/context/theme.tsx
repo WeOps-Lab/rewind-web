@@ -2,9 +2,12 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { ConfigProvider } from 'antd';
+import dayjs from 'dayjs';
 import { ThemeConfig } from 'antd/es/config-provider/context';
-import { lightTheme, darkTheme } from '@/constants/theme'
+import { lightTheme, darkTheme } from '@/constants/theme';
 import { useTranslation } from '@/utils/i18n';
+import { locales, LocaleKey } from '@/constants/locales';
+import { dayjsLocales } from '@/constants/dayjsLocales';
 
 const ThemeContext = createContext<{
   theme: ThemeConfig;
@@ -13,6 +16,7 @@ const ThemeContext = createContext<{
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState(lightTheme);
+  const [locale, setLocale] = useState(locales.en);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -22,6 +26,15 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setTheme(lightTheme);
       document.documentElement.classList.remove('dark');
+    }
+
+    const savedLocale = localStorage.getItem('locale') as LocaleKey;
+    if (savedLocale && locales[savedLocale]) {
+      setLocale(locales[savedLocale]);
+      dayjs.locale(dayjsLocales[savedLocale]);
+    } else {
+      setLocale(locales.en);
+      dayjs.locale(dayjsLocales['en']);
     }
   }, []);
 
@@ -34,7 +47,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme: changeTheme }}>
-      <ConfigProvider theme={theme}>
+      <ConfigProvider theme={theme} locale={locale}>
         {children}
       </ConfigProvider>
     </ThemeContext.Provider>

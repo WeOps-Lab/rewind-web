@@ -19,6 +19,7 @@ const OperateModal: React.FC<CustomModalProps> = ({
 }) => {
   return (
     <Modal
+      styles={{ body: { overflowY: 'auto', maxHeight: 'calc(80vh - 108px)' } }}
       className={customModalStyle.customModal}
       classNames={{
         body: customModalStyle.customModalBody,
