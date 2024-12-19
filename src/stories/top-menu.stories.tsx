@@ -9,4 +9,14 @@ export default meta;
 
 type Story = StoryObj<typeof TopMenu>;
 
-export const Default: Story = {};
+const mockMenuItems = [
+  { label: 'Home', icon: 'home', path: '/' },
+  { label: 'About', icon: 'info', path: '/about' },
+  { label: 'Contact', icon: 'contact', path: '/contact' },
+];
+
+export const Default: Story = {
+  args: {
+    menuItems: mockMenuItems,
+  },
+};

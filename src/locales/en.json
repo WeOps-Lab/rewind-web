@@ -66,6 +66,19 @@
     "clear": "Clear",
     "selectAll": "Select All",
     "selected": "Selected",
-    "items": "Items"
+    "items": "Items",
+    "actions": "ACTIONS",
+    "timeSelector": {
+      "15Minutes": "The past 15 minutes",
+      "30Minutes": "The past 30 minutes",
+      "1Hour": "The past 1 hour",
+      "6Hours": "The past 6 hours",
+      "12Hours": "The past 12 hours",
+      "1Day": "The past 1 day",
+      "7Days": "The past 7 days",
+      "30Days": "The past 30 days",
+      "custom": "Custom",
+      "off": "off"
+    }
   }
 }

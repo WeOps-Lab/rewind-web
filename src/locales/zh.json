@@ -66,6 +66,19 @@
     "clear": "清空",
     "selectAll": "全选",
     "selected": "已选",
-    "items": "项"
+    "items": "项",
+    "actions": "操作",
+    "timeSelector": {
+      "15Minutes": "最近15分钟",
+      "30Minutes": "最近30分钟",
+      "1Hour": "最近1小时",
+      "6Hours": "最近6小时",
+      "12Hours": "最近12小时",
+      "1Day": "最近1天",
+      "7Days": "最近7天",
+      "30Days": "最近30天",
+      "custom": "自定义",
+      "off": "关闭"
+    }
   }
 }
