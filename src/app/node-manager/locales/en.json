@@ -5,7 +5,7 @@
     "Actions": "ACTIONS",
     "modifydelete": "Modify Delete",
     "variable": "Variable",
-    "config": "Configuration",
+    "configuration": "Configuration",
     "node": "Node",
     "topdes": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars."
   },
@@ -18,26 +18,25 @@
         "Introduction": "Introduction"
       },
       "node": {
-        "title": "Node",
+        "node": "Node",
         "desc": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars.",
         "ip": "IP",
-        "system": "OPERATING SYSTEM",
-        "sidecar": "SIDECAR",
-        "Sidecar": {
-          "title": "Sidecar",
-          "install": "Install Sidecar",
-          "uninstall": "Uninstall Sidecar",
-          "ipaddress": "IP Address",
-          "system": "Operating System",
-          "guide": "Installation Guide"
-        },
-        "Collector": {
-          "title": "Collector",
-          "start": "Start Collector",
-          "updata": "Updata Collector",
-          "stop": "Stop Collector",
-          "config": "Configuration"
-        }
+        "System": "OPERATING SYSTEM",
+        "Sidecar": "SIDECAR",
+        "sidecar": "Sidecar",
+        "install": "Install Sidecar",
+        "uninstall": "Uninstall Sidecar",
+        "ipaddress": "IP Address",
+        "system": "Operating System",
+        "guide": "Installation Guide",
+        "collector": "Collector",
+        "start": "Start Collector",
+        "updata": "Updata Collector",
+        "stop": "Stop Collector",
+        "config": "Configuration",
+        "btntext1": "If you do not have the configuration file you need, please click",
+        "btntext2": "here",
+        "btntext3": "to create one."
       },
       "Configuration": {
         "name": "NAME",

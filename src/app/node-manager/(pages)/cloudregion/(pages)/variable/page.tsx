@@ -1,102 +1,31 @@
 "use client";
 import React, { useRef } from "react";
-import { Button, Input, message, Popconfirm } from "antd";
-import { Table } from "antd";
-import type { TableColumnsType, TableProps } from "antd";
+import { Button, Input, message } from "antd";
+import CustomTable from '@/components/custom-table/index';
+import type { TableProps } from "antd";
 import { useTranslation } from "@/utils/i18n";
-import VariableModal, { ModalRef, VariableForm } from "./variableModal";
-import { VariableDataType } from "@/app/node-manager/types/cloudregion"
-import type { GetProps, PopconfirmProps } from 'antd';
+import VariableModal from "./variableModal";
+import { ModalRef } from "@/app/node-manager/types/common";
+import { data } from "@/app/node-manager/mockdata/variable";
+import { useVarColumns } from "./useVarColumns";
+import type { GetProps } from 'antd';
+import type { TableDataItem } from "@/app/node-manager/types/common";
 type SearchProps = GetProps<typeof Input.Search>;
+const { Search } = Input;
 
 function Variable() {
   const variableRef = useRef<ModalRef>(null);
   const { t } = useTranslation();
-  // 表格数据
-  const columns: TableColumnsType<VariableDataType> = [
-    {
-      title: t("node-manager.cloudregion.variable.Name"),
-      dataIndex: "name",
-      width: 180,
-      render: (text: string) => <a>{text}</a>,
-    },
-    {
-      title: t("node-manager.cloudregion.variable.Value"),
-      dataIndex: "value",
-      width: 150,
-    },
-    {
-      title: t("node-manager.cloudregion.variable.Desc"),
-      dataIndex: "description",
-      width: 200,
-    },
-    {
-      title: t("common.actions"),
-      dataIndex: "key",
-      width: 200,
-      fixed: "right",
-      render: (key: string) => (
-        <div>
-          <Button
-            onClick={() => {
-              openUerModal("edit", getFormDataById(key) as VariableForm);
-            }}
-            color="primary"
-            variant="link"
-          >
-            {t("common.edit")}
-          </Button>
-
-          <Popconfirm
-            title={t("node-manager.cloudregion.variable.deletevariable")}
-            description={t("node-manager.cloudregion.variable.deleteinfo")}
-            onConfirm={delconfirm}
-            onCancel={delcancel}
-            okText={t("common.confirm")}
-            cancelText={t("common.cancel")}
-          >
-            <Button
-              color="primary"
-              variant="link"
-            >
-              {t("common.delete")}
-            </Button>
-          </Popconfirm>
-        </div>
-      ),
-    },
-  ];
-
-  const data: VariableDataType[] = [
-    {
-      key: "1",
-      name: "${sidecar.operatingSystem}",
-      value: "55",
-      description: "这是描述",
-    },
-    {
-      key: "2",
-      name: "${sidecar.operatingSystem}",
-      value: "55",
-      description: "这是描述",
-    },
-    {
-      key: "3",
-      name: "${sidecar.operatingSystem}",
-      value: "55",
-      description: "这是描述",
-    },
-    {
-      key: "4",
-      name: "${sidecar.operatingSystem}",
-      value: "55",
-      description: "这是描述",
-    },
-  ];
+  const columns = useVarColumns({
+    openUerModal,
+    getFormDataById,
+    delconfirm,
+    delcancel
+  })
 
   //处理多选触发的事件逻辑
-  const rowSelection: TableProps<VariableDataType>["rowSelection"] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: VariableDataType[]) => {
+  const rowSelection: TableProps<TableDataItem>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: TableDataItem[]) => {
       console.log(
         `selectedRowKeys: ${selectedRowKeys}`,
         "selectedRows: ",
@@ -105,13 +34,16 @@ function Variable() {
     },
   };
   //遍历数据，取出要回显的数据
-  const getFormDataById = (key: string) => {
+  function getFormDataById(key: string) {
     const formData = data.find((item) => item.key === key);
+    if (!formData) {
+      throw new Error(`Form data not found for key: ${key}`);
+    }
     return formData;
   };
 
   //根据传入的值打开对应的用户弹窗（添加用户弹窗和编辑用户的弹窗）
-  const openUerModal = (type: string, form: VariableForm) => {
+  function openUerModal(type: string, form: TableDataItem) {
     variableRef.current?.showModal({
       type,
       form,
@@ -120,22 +52,22 @@ function Variable() {
   const onsuccessvariablemodal = () => {
     console.log("onsuccessvariablemodal,成功的回调函数");
   };
-  const { Search } = Input;
   const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
   //删除的确定的弹窗
-  const delconfirm: PopconfirmProps['onConfirm'] = (e) => {
+  function delconfirm(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     console.log(e);
     message.success('Click on Yes');
   };
 
-  const delcancel: PopconfirmProps['onCancel'] = (e) => {
+
+  function delcancel(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     console.log(e);
     message.error('Click on No');
   };
   return (
     <div className="w-full h-full">
       <div className="flex justify-end mb-4">
-        <Search className="w-64 mr-[8px]" placeholder="input search text" onSearch={onSearch} enterButton />
+        <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
         <Button
           type="primary"
           onClick={() => {
@@ -152,7 +84,7 @@ function Variable() {
 
       </div>
       <div className="overflow-x-auto">
-        <Table<VariableDataType>
+        <CustomTable
           scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
           columns={columns}
           dataSource={data}
@@ -166,6 +98,4 @@ function Variable() {
     </div>
   );
 }
-
-
 export default Variable;

@@ -2,22 +2,25 @@
 import React from "react";
 import SubLayout from "@/components/sub-layout";
 import { useTranslation } from "@/utils/i18n";
-import Collectorintro from "@/app/node-manager/(pages)/cloudregion/components/collectorintro";
+import { usePathname } from "next/navigation";
+import Collectorintro from "@/app/node-manager/components/collectorintro";
 
 function Collector({ children }: Readonly<{
   children: React.ReactNode;
 }>) {
   const { t } = useTranslation();
-  //顶部的介绍栏
   function Topsection() {
+    const pathname = usePathname();
+    function getTitle() {
+      const temp = pathname.split("/")[3];
+      return t(`common.${temp}`);
+    }
     return (
-      <div className="flex justify-between h-[90px]">
-        <div className="mt-[4px]">
-          <h1 className="pl-[20px] mt-4">{t("common.node")}</h1>
-          <p className="text-[13px] text-[#666666] pl-[20px] overflow-hidden w-full min-w-[1000px] mt-2">
-            {t("common.topdes")}
-          </p>
-        </div>
+      <div className="flex flex-col h-[90px] p-4 overflow-hidden">
+        <h1 className="text-lg">{getTitle()}</h1>
+        <p className="text-sm overflow-hidden w-full min-w-[1000px] mt-[8px]">
+          {t("common.topdes")}
+        </p>
       </div>
     );
   }

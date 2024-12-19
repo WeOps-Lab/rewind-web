@@ -11,34 +11,14 @@ import OperateModal from "@/components/operate-modal";
 import type { FormInstance } from "antd";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/utils/i18n";
+import { ModalSuccess, ModalRef } from "@/app/node-manager/types/common"
 
-//传入modal的参数类型成功的回调
-interface ModalProps {
-  onSuccess: () => void;
-}
-//调用弹窗接口传入的类型
-interface ModalConfig {
-  type: string;
-  form: ConfigurationForm;
-}
-//调用弹窗的类型
-interface ModalRef {
-  showModal: (config: ModalConfig) => void;
-}
 
-interface ConfigurationForm {
-  name: string;
-  key: string;
-  cllector: string;
-  operatingsystem: string;
-  nodecount: string;
-}
-
-const ConfigurationModal = forwardRef<ModalRef, ModalProps>(
+const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
-    const configurationformRef = useRef<FormInstance>(null);
+    const collectorformRef = useRef<FormInstance>(null);
     //设置弹窗状态
-    const [configurationVisible, setConfigurationVisible] =
+    const [collectorVisible, setCollectorVisible] =
       useState<boolean>(false);
     //创建一个路由对象
     const router = useRouter();
@@ -48,7 +28,7 @@ const ConfigurationModal = forwardRef<ModalRef, ModalProps>(
     useImperativeHandle(ref, () => ({
       showModal: ({ type }) => {
         // 开启弹窗的交互
-        setConfigurationVisible(true);
+        setCollectorVisible(true);
         setType(type);
       },
     }));
@@ -57,152 +37,75 @@ const ConfigurationModal = forwardRef<ModalRef, ModalProps>(
 
     //初始化表单的数据
     useEffect(() => {
-      configurationformRef.current?.resetFields();
-    }, [configurationVisible]);
+      collectorformRef.current?.resetFields();
+    }, [collectorVisible]);
 
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
-      setConfigurationVisible(false);
+      setCollectorVisible(false);
     };
     const handleConfirm = () => {
       if (type === 'stop') {
-        message.success("Successfully");
+        message.success("停止成功");
         onSuccess();
-        setConfigurationVisible(false);
+        setCollectorVisible(false);
         return;
       }
-      setConfigurationVisible(false);
+      setCollectorVisible(false);
       message.success("Successfully");
       onSuccess();
-      setConfigurationVisible(false);
+      setCollectorVisible(false);
     };
 
     //选择操作系统
     function handleChangestartcollector(value: string) {
       console.log('选择的操作系统是', value)
     }
-    //选择采集器
-
-
-    function showConfigurationForm(type: string) {
-      switch (type) {
-        case "start":
-          return (<Form ref={configurationformRef} layout="vertical" colon={false}>
-            <Form.Item
-              name="Collector"
-              label={t("node-manager.cloudregion.node.Collector.title")}
-            >
-              <Select
-                defaultValue="采集器列表"
-                options={[
-                  { value: 'collector1', label: '采集器1' },
-                  { value: 'collector2', label: '采集器2' }
-                ]}
-                onChange={handleChangestartcollector}
-              >
-              </Select>
-
-            </Form.Item>
-            <Form.Item
-              name="configration"
-              label={t("node-manager.cloudregion.node.Collector.config")}
-            >
-              <Select
-                defaultValue="配置文件列表"
-                options={[
-                  { value: 'configration', label: '配置文件1' },
-                  { value: 'configration1', label: '配置文件2' },
-                  { value: 'configration2', label: '配置文件3' }
-                ]}
-                onChange={handleChangestartcollector}
-              >
-              </Select>
-              <p>{t('collectorform.pinfo1')}<Button className="p-0" type="link" onClick={() => { router.push("/system-manager/managenode/cloudregion/configuration") }}>{t('collectorform.pinfo2')}</Button>{t('collectorform.pinfo3')}</p>
-            </Form.Item>
-
-          </Form>);
-        case "updata":
-          return (
-            <Form ref={configurationformRef} layout="vertical" colon={false}>
-              <Form.Item
-                name="Collector"
-                label={t("node-manager.cloudregion.node.Collector.title")}
-              >
-                <Select
-                  defaultValue="采集器列表"
-                  options={[
-
-                    { value: 'collector1', label: '采集器1' },
-                    { value: 'collector2', label: '采集器2' }
-                  ]}
-                  onChange={handleChangestartcollector}
-                >
-                </Select>
-              </Form.Item>
-              <Form.Item
-                name="configration"
-                label={t("node-manager.cloudregion.node.Collector.config")}
-              >
-                <Select
-                  defaultValue="配置文件列表"
-                  options={[
-                    { value: 'configuration1', label: '配置文件1' },
-                    { value: 'configuration2', label: '配置文件2' }
-                  ]}
-                  onChange={handleChangestartcollector}
-                >
-                </Select>
-                <p>{t('collectorform.pinfo1')}<Button className="p-0 mx-1" type="link" onClick={() => { router.push("/system-manager/managenode/cloudregion/configuration") }}>{t('collectorform.pinfo2')}</Button>{t('collectorform.pinfo3')}</p>
-              </Form.Item>
-
-            </Form>
-          );
-        case "stop":
-          return (
-            <Form ref={configurationformRef} layout="vertical" colon={false}>
-              <Form.Item
-                name="Collector"
-                label={t("node-manager.cloudregion.node.Collector.title")}
-              >
-                <Select
-                  defaultValue="采集器列表"
-                  options={[
-                    { value: 'collector1', label: '采集器1' },
-                    { value: 'collector2', label: '采集器2' }
-                  ]}
-                  onChange={handleChangestartcollector}
-                >
-                </Select>
-              </Form.Item>
-            </Form>
-          );
-      }
-    }
-
-    function getOperateModaltitle(type: string) {
-      if (type === "start") {
-        return t("node-manager.cloudregion.node.Collector.start");
-      } else if (type === "updata") {
-        return t("node-manager.cloudregion.node.Collector.updata");
-      } else {
-        return t("node-manager.cloudregion.node.Collector.stop");
-      }
-    }
 
     return (
       <OperateModal
-        title={getOperateModaltitle(type)}
-        visible={configurationVisible}
-        onCancel={handleCancel}
-        onOk={handleConfirm}
+        title={t(`node-manager.cloudregion.node.${type}`)}
+        visible={collectorVisible}
         okText={t("common.confirm")}
         cancelText={t("common.cancel")}
+        onOk={handleConfirm}
+        onCancel={handleCancel}
       >
-        {showConfigurationForm(type)}
+        <Form ref={collectorformRef} layout="vertical" colon={false}>
+          <Form.Item
+            name="Collector"
+            label={t("node-manager.cloudregion.node.collector")}
+          >
+            <Select
+              defaultValue="采集器列表"
+              options={[
+                { value: 'collector1', label: '采集器1' },
+                { value: 'collector2', label: '采集器2' }
+              ]}
+              onChange={handleChangestartcollector}
+            >
+            </Select>
+          </Form.Item>
+          {type !== 'stop' && <Form.Item
+            name="configration"
+            label={t("node-manager.cloudregion.node.config")}
+          >
+            <Select
+              defaultValue="配置文件列表"
+              options={[
+                { value: 'configuration1', label: '配置文件1' },
+                { value: 'configuration2', label: '配置文件2' }
+              ]}
+              onChange={handleChangestartcollector}
+            >
+            </Select>
+            <p>{t('node-manager.cloudregion.node.btntext1')}<Button className="p-0 mx-1" type="link" onClick={() => { router.push("/node-manager/cloudregion/configuration") }}>{t('node-manager.cloudregion.node.btntext2')}</Button>{t('node-manager.cloudregion.node.btntext3')}</p>
+          </Form.Item>
+          }
+        </Form>
       </OperateModal>
     );
   }
 );
-ConfigurationModal.displayName = "RuleModal";
-export default ConfigurationModal;
-export type { ModalRef, ConfigurationForm };
+CollectorModal.displayName = "RuleModal";
+export default CollectorModal;

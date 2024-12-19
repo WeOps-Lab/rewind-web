@@ -1,5 +1,5 @@
 'use client'
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, {useEffect, useRef, useState } from "react";
 import { FormInstance, Input } from "antd";
 import Icon from "@/components/icon";
 import OperateModal from '@/components/operate-modal'
@@ -8,24 +8,17 @@ import cloudregionstyle from './index.module.scss'
 import { useRouter } from "next/navigation";
 import { MoreOutlined } from "@ant-design/icons";
 import { useTranslation } from "@/utils/i18n";
+import {CouldregionCardProps} from "@/app/node-manager/types/cloudregion"
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
-
+const { Search } = Input;
 
 function Cloudregion() {
-  interface CouldregionCardProps {
-    height?: number;
-    width?: number;
-    title: ReactNode;
-    children?: ReactNode;
-  }
   const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
   const [cloudregiondata, setCloudregiondata] = useState<string>('这个是云区域的描述');
   const cloudregionformRef = useRef<FormInstance>(null);
   const divref = useRef(null);
   const { t } = useTranslation();
-  const { Search } = Input;
-  const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
   useEffect(() => {
     cloudregionformRef.current?.resetFields();
     cloudregionformRef.current?.setFieldsValue({
@@ -72,9 +65,12 @@ function Cloudregion() {
     const values = cloudregionformRef.current?.getFieldsValue();
     setCloudregiondata(values?.user?.introduction);
   }
+
+  const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
+  
   return (
     <div ref={divref} className={`${cloudregionstyle.cloudregion} w-full h-full`}>
-      <div className="flex justify-end mb-4"> <Search className="w-64 mr-[8px]" placeholder="input search text" onSearch={onSearch} enterButton /></div>
+      <div className="flex justify-end mb-4"> <Search className="w-64 mr-[8px]" placeholder="input search text"  enterButton onSearch={onSearch} /></div>
       <div className="flex">
         <div>
           <div className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col justify-center`}
@@ -83,7 +79,7 @@ function Cloudregion() {
           </div>
         </div>
         <div className="ml-[45px]">
-          <CouldregionCard title={<Cloudregiontitle></Cloudregiontitle>}><p className="mt-[15px] crp h-[40px] textclip">{cloudregiondata}</p> </CouldregionCard>
+          <CouldregionCard title={<Cloudregiontitle></Cloudregiontitle>}><p className="mt-4 crp h-[40px] textclip">{cloudregiondata}</p> </CouldregionCard>
         </div>
       </div>
       {/* 编辑默认云区域弹窗 */}

@@ -1,9 +1,4 @@
 .node{
-   :globle(.tablewidth){
-      width: calc(100% - 10px);
-      background: red;
-   }
-   
    :global{
       .ant-table-cell{
          .ant-tag.ant-tag-error{

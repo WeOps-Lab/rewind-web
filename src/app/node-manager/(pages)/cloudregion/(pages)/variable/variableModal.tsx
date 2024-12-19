@@ -10,33 +10,13 @@ import { Input, Form } from "antd";
 import OperateModal from "@/components/operate-modal";
 import type { FormInstance } from "antd";
 import { useTranslation } from "@/utils/i18n";
-
-//传入modal的参数类型成功的回调
-interface ModalProps {
-  onSuccess: () => void;
-}
-//调用弹窗接口传入的类型
-interface ModalConfig {
-  type: string;
-  form: VariableForm;
-}
-//调用弹窗的类型
-interface ModalRef {
-  showModal: (config: ModalConfig) => void;
-}
-
-interface VariableForm {
-  name: string;
-  key: string;
-  value: string;
-  description: string;
-}
-
-const VariableModal = forwardRef<ModalRef, ModalProps>(({ }, ref) => {
+import { ModalSuccess, ModalRef } from "@/app/node-manager/types/common";
+import type { TableDataItem } from "@/app/node-manager/types/common";
+const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ }, ref) => {
   const formRef = useRef<FormInstance>(null);
   //设置弹窗状态
   const [variableVisible, setVariableVisible] = useState<boolean>(false);
-  const [variableFormData, setVariableFormData] = useState<VariableForm>();
+  const [variableFormData, setVariableFormData] = useState<TableDataItem>();
   const [type, setType] = useState<string>("");
   const { t } = useTranslation();
   useImperativeHandle(ref, () => ({
@@ -44,11 +24,7 @@ const VariableModal = forwardRef<ModalRef, ModalProps>(({ }, ref) => {
       // 开启弹窗的交互
       setVariableVisible(true);
       setType(type);
-      if (type === "add") {
-        setVariableFormData(form);
-      } else {
-        setVariableFormData(form);
-      }
+      setVariableFormData(form);
     },
   }));
 
@@ -70,11 +46,10 @@ const VariableModal = forwardRef<ModalRef, ModalProps>(({ }, ref) => {
     <OperateModal
       title={type === "add" ? t("common.add") : t("common.edit")}
       visible={variableVisible}
-      onCancel={handleCancel}
-      onOk={handleConfirm}
       okText={t("common.confirm")}
       cancelText={t("common.cancel")}
-
+      onCancel={handleCancel}
+      onOk={handleConfirm}
     >
       <Form ref={formRef} layout="vertical" colon={false}>
         <Form.Item
@@ -107,4 +82,3 @@ const VariableModal = forwardRef<ModalRef, ModalProps>(({ }, ref) => {
 });
 VariableModal.displayName = "RuleModal";
 export default VariableModal;
-export type { ModalRef, VariableForm };

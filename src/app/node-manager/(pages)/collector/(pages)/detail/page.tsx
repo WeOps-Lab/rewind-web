@@ -8,13 +8,11 @@ function Collectordetail() {
   //顶部的组件
   function Topsection() {
     return (
-      <div className="flex justify-between h-[90px]">
-        <div className="mt-[4px]">
-          <h1 className="pl-[20px] mt-4">{t('node-manager.collector.title')}</h1>
-          <p className="pl-[20px] overflow-hidden w-full min-w-[1000px] mt-2">
-            {t('node-manager.collector.desc')}
-          </p>
-        </div>
+      <div className="flex flex-col h-[90px] p-4 overflow-hidden">
+        <h1 className="text-lg">{t('node-manager.collector.title')}</h1>
+        <p className="text-sm overflow-hidden w-full min-w-[1000px] mt-[8px]">
+          {t('node-manager.collector.desc')}
+        </p>
       </div>
     );
   }
@@ -51,7 +49,7 @@ function Collectordetail() {
 function Collectorintro() {
   return (
     <div className="h-[58px] flex flex-col justify-items-center">
-      <div className="flex justify-center mb-2">
+      <div className="flex justify-center mb-[8px]">
         <Icon type="caijiqizongshu" style={{ height: '34px', width: '34px' }}></Icon>
       </div>
       <div className="flex justify-center">

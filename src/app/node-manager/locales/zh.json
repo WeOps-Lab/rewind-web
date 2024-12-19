@@ -1,19 +1,72 @@
 {
   "common": {
-    "monitor": "监控",
-    "alarm": "告警"
+    "actions": "操作",
+    "apply": "应用",
+    "Actions": "操作",
+    "modifydelete": "批量删除",
+    "variable": "变量",
+    "config": "配置",
+    "node": "节点",
+    "topdes": "节点管理主要用于在每个节点上安装探针,并通过探针管理各种类型的收集器。"
   },
-  "node-manager":{
-    "cloudregion":{
-
-
-
-
+  "node-manager": {
+    "cloudregion": {
+      "title": "默认云区域",
+      "editform": {
+        "title": "编辑云区域",
+        "Name": "名字",
+        "Introduction": "介绍"
+      },
+      "node": {
+        "node": "节点",
+        "desc": "节点管理主要用于在每个节点上安装探针,并通过探针管理各种类型的收集器。",
+        "ip": "IP",
+        "System": "操作系统",
+        "Sidecar": "探针",
+        "sidecar": "探针",
+        "install": "安装探针",
+        "uninstall": "卸载探针",
+        "ipaddress": "IP地址",
+        "system": "操作系统",
+        "guide": "安装指南",
+        "collector": "采集器",
+        "start": "开启采集器",
+        "updata": "更新采集器",
+        "stop": "停止采集器",
+        "config": "配置", 
+        "btntext1": "如果您没有所需的配置文件，请单击",
+        "btntext2": "这里",
+        "btntext3": "创建一个。"
+      },
+      "Configuration": {
+        "name": "姓名",
+        "Collector": "采集器",
+        "System": "操作系统",
+        "count": "节点总数",
+        "Name": "姓名",
+        "system": "操作系统",
+        "collector": "采集器",
+        "ip": "IP",
+        "sidecar": "探针",
+        "modifydeltitle": "批量删除配置",
+        "modifydelinfo": "您确定要删除此配置吗？",
+        "deltitle": "删除配置",
+        "deleteinfo": "您确定要删除此配置吗？"
+      },
+      "variable": {
+        "Name": "名字",
+        "Value": "数值",
+        "Desc": "描述",
+        "name": "名字",
+        "value": "数值",
+        "desc": "描述",
+        "deletevariable": "删除变量",
+        "deleteinfo": "您确定要删除此变量吗？"
+      }
     },
-    "collector":{
-      "title": "采集器"
-
-
+    "collector": {
+      "title": "概述",
+      "desc": "介绍每个收集器，包括基本信息、使用场景和收集的数据。"
     }
   }
 }

@@ -1,13 +1,7 @@
-
-//节点的类型
-interface nodeDataType {
-  key: React.Key;
-  ip: string;
-  operatingsystem: string;
-  sidecar: string;
-}
+import { ReactNode } from 'react';
+import type { TableDataItem } from '@/app/node-manager/types/common';
 //配置文件的类型
-interface ConfigurationDataType{
+interface ConfigurationData {
   key: React.Key;
   name: string;
   collector?: string;
@@ -15,40 +9,42 @@ interface ConfigurationDataType{
   nodecount?: number | string;
 }
 
-//传入modal的参数类型成功的回调
-interface ConfigurationModalSuccess {
-  onSuccess: () => void;
-}
-//调用弹窗接口传入的类型
-interface ModalConfig {
-  type: string;
-  form?:ConfigurationDataType;
-  key?: string;
-}
-//子组件暴露的方法
-interface ModalRefConfiguration {
-  showModal: (config: ModalConfig) => void;
-}
-
 interface SidecardForm {
-  key:React.Key;
+  key: React.Key;
   ip: string;
   operatingsystem: string;
   sidecar: string;
 }
 
-interface sidecarinfotype{
-  sidecar:string,
-  [key:string]:string
+interface sidecarinfotype {
+  sidecar: string;
+  [key: string]: string;
 }
-// 变量的类型
-interface VariableDataType {
-  key: React.Key;
-  name: string;
-  value: string | number;
-  description: string;
+//配置页面的table的列定义
+interface ConfigHookParams {
+  configurationClick: (key: string) => void;
+  applyconfigurationClick: (key: string) => void;
+  deleteconfirm: (e?: React.MouseEvent<HTMLElement>) => void;
+  delcancel: (e?: React.MouseEvent<HTMLElement>) => void;
+}
+interface VariableProps {
+  openUerModal: (type: string, form: TableDataItem) => void;
+  getFormDataById: (key: string) => TableDataItem;
+  delconfirm: (e: any) => void;
+  delcancel: (e: any) => void;
+}
+
+interface CouldregionCardProps {
+  height?: number;
+  width?: number;
+  title: ReactNode;
+  children?: ReactNode;
 }
 export type {
-  VariableDataType, nodeDataType, ConfigurationDataType, ConfigurationModalSuccess,
-  ModalRefConfiguration, SidecardForm,sidecarinfotype
-}
+  ConfigurationData,
+  SidecardForm,
+  sidecarinfotype,
+  ConfigHookParams,
+  VariableProps,
+  CouldregionCardProps,
+};
