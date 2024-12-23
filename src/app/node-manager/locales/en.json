@@ -1,0 +1,76 @@
+{
+  "common": {
+    "actions": "Actions",
+    "apply": "Apply",
+    "Actions": "ACTIONS",
+    "modifydelete": "Modify Delete",
+    "variable": "Variable",
+    "configuration": "Configuration",
+    "node": "Node",
+    "topdes": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars."
+  },
+  "node-manager": {
+    "cloudregion": {
+      "title": "Default Cloud Region",
+      "editform": {
+        "title": "Edit Cloud Region",
+        "Name": "Name",
+        "Introduction": "Introduction"
+      },
+      "node": {
+        "node": "Node",
+        "desc": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars.",
+        "ip": "IP",
+        "System": "OPERATING SYSTEM",
+        "Sidecar": "SIDECAR",
+        "sidecar": "Sidecar",
+        "install": "Install Sidecar",
+        "uninstall": "Uninstall Sidecar",
+        "ipaddress": "IP Address",
+        "system": "Operating System",
+        "guide": "Installation Guide",
+        "collector": "Collector",
+        "start": "Start Collector",
+        "restart": "Restart Collector",
+        "stop": "Stop Collector",
+        "config": "Configuration",
+        "btntext1": "If you do not have the configuration file you need, please click",
+        "btntext2": "here",
+        "btntext3": "to create one.",
+        "bindconfig": "Bind Configuration",
+        "updataconfig": "Update Configuration",
+        "restarinfo": "Are you sure to restart the collector?",
+        "stopinfo": "Are you sure to stop the collector?"
+      },
+      "Configuration": {
+        "name": "NAME",
+        "Collector": "COLLECTOR",
+        "System": "OPERATING SYSTEM",
+        "count": "NODE COUNT",
+        "Name": "Name",
+        "system": "Operating System",
+        "collector": "Collector",
+        "ip": "IP",
+        "sidecar": "SIDECAR",
+        "modifydeltitle": "Modify Delete Configurations",
+        "modifydelinfo": "Are you sure to delete this Configurations?",
+        "deltitle": "Delete Configuration",
+        "deleteinfo": "Are you sure to delete this Configuration?"
+      },
+      "variable": {
+        "Name": "NAME",
+        "Value": "VALUE",
+        "Desc": "DESCRIPTION",
+        "name": "Name",
+        "value": "Value",
+        "desc": "Description",
+        "deletevariable": "Delete Variable",
+        "deleteinfo": "Are you sure to delete this variable?"
+      }
+    },
+    "collector": {
+      "title": "Overview",
+      "desc": "Introduce each collector, including basic information, usage scenarios, and collected data."
+    }
+  }
+}
