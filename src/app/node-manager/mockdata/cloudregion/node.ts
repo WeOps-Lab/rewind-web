@@ -1,3 +1,5 @@
+import type { MenuProps } from "antd";
+
 const data = [
   {
     key: '1',
@@ -60,4 +62,19 @@ const data = [
     sidecar: 'Error',
   },
 ];
-export default data;
+
+const updateitems: MenuProps['items'] = [
+  {
+    key: '1',
+    label: '文件1',
+  },
+  {
+    key: '2',
+    label: '文件2',
+  },
+  {
+    key: '3',
+    label: '文件3',
+  },
+];
+export{data,updateitems};

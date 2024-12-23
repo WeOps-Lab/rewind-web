@@ -1,6 +1,6 @@
 import { useTranslation } from "@/utils/i18n";
 import { Button, Popconfirm, type TableColumnsType } from "antd";
-import type { TableDataItem } from "@/app/node-manager/types/common";
+import type { TableDataItem } from "@/app/node-manager/types/index";
 import { VariableProps } from "@/app/node-manager/types/cloudregion";
 export const useVarColumns = ({
   openUerModal,

@@ -31,12 +31,16 @@
         "guide": "Installation Guide",
         "collector": "Collector",
         "start": "Start Collector",
-        "updata": "Updata Collector",
+        "restart": "Restart Collector",
         "stop": "Stop Collector",
         "config": "Configuration",
         "btntext1": "If you do not have the configuration file you need, please click",
         "btntext2": "here",
-        "btntext3": "to create one."
+        "btntext3": "to create one.",
+        "bindconfig": "Bind Configuration",
+        "updataconfig": "Update Configuration",
+        "restarinfo": "Are you sure to restart the collector?",
+        "stopinfo": "Are you sure to stop the collector?"
       },
       "Configuration": {
         "name": "NAME",

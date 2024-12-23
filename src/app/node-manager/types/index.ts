@@ -26,4 +26,12 @@ interface ModalRef {
   showModal: (config: ModalConfig) => void;
 }
 
-export type { ConfigItem, TableDataItem, ModalSuccess, ModalRef, ModalConfig };
+interface TopSectionProps {
+  width?: number;
+  height?: number;
+  title?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+
+export type { ConfigItem, TableDataItem, ModalSuccess, ModalRef, ModalConfig ,TopSectionProps};

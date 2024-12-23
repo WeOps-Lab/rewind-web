@@ -6,12 +6,12 @@ import React, {
   useImperativeHandle,
   useEffect,
 } from "react";
-import { Form, Select, message, Button } from "antd";
+import { Form, Select, message, Button, Popconfirm } from "antd";
 import OperateModal from "@/components/operate-modal";
 import type { FormInstance } from "antd";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/utils/i18n";
-import { ModalSuccess, ModalRef } from "@/app/node-manager/types/common"
+import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index"
 
 
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
@@ -25,6 +25,8 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     //设置表当的数据
     const [type, setType] = useState<string>("");
     const { t } = useTranslation();
+    const configarr = ["bindconfig", "updataconfig"]
+    const Popconfirmarr = ["restart", "stop"]
     useImperativeHandle(ref, () => ({
       showModal: ({ type }) => {
         // 开启弹窗的交互
@@ -33,18 +35,22 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
       },
     }));
 
-
-
     //初始化表单的数据
     useEffect(() => {
       collectorformRef.current?.resetFields();
     }, [collectorVisible]);
 
+
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
       setCollectorVisible(false);
     };
+    //点击确定按钮的相关逻辑处理
     const handleConfirm = () => {
+      if (Popconfirmarr.includes(type)) {
+
+        return
+      }
       if (type === 'stop') {
         message.success("停止成功");
         onSuccess();
@@ -58,18 +64,41 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     };
 
     //选择操作系统
-    function handleChangestartcollector(value: string) {
+    const handleChangestartcollector = (value: string) => {
       console.log('选择的操作系统是', value)
     }
-
+    //二次确认的弹窗
+    const secondconfirm = () => {
+      setCollectorVisible(false);
+      message.success("Successfully");
+    }
     return (
       <OperateModal
         title={t(`node-manager.cloudregion.node.${type}`)}
         visible={collectorVisible}
         okText={t("common.confirm")}
         cancelText={t("common.cancel")}
-        onOk={handleConfirm}
         onCancel={handleCancel}
+        footer={[
+          <Button
+            key="back"
+            onClick={handleCancel}>{t('common.cancel')}</Button>,
+          Popconfirmarr.includes(type) ?
+            <Popconfirm
+              title={t(`node-manager.cloudregion.node.${type}`)}
+              description={t(`node-manager.cloudregion.node.${type}info`)}
+              okText={t("common.confirm")}
+              cancelText={t("common.cancel")}
+              onConfirm={secondconfirm}
+            >
+              <Button
+                type="primary"
+              >
+                {t("common.confirm")}
+              </Button>
+            </Popconfirm>
+            : <Button type="primary" onClick={handleConfirm}>{t('common.confirm')}</Button>
+        ]}
       >
         <Form ref={collectorformRef} layout="vertical" colon={false}>
           <Form.Item
@@ -86,7 +115,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
             >
             </Select>
           </Form.Item>
-          {type !== 'stop' && <Form.Item
+          {configarr.includes(type) && <Form.Item
             name="configration"
             label={t("node-manager.cloudregion.node.config")}
           >

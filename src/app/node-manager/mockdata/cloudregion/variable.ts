@@ -1,4 +1,4 @@
-import type { TableDataItem } from "@/app/node-manager/types/common";
+import type { TableDataItem } from "@/app/node-manager/types/index";
 export const data: TableDataItem[] = [
   {
     key: "1",

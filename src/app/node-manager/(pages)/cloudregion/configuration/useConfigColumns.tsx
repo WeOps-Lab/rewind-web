@@ -2,7 +2,7 @@ import { useTranslation } from "@/utils/i18n";
 import { Button, Popconfirm } from "antd";
 import type { TableColumnsType } from "antd";
 import { ConfigHookParams } from "@/app/node-manager/types/cloudregion";
-import { TableDataItem } from "@/app/node-manager/types/common";
+import { TableDataItem } from "@/app/node-manager/types/index";
 export const useConfigColumns = ({
   configurationClick,
   applyconfigurationClick,
@@ -77,6 +77,5 @@ export const useConfigColumns = ({
       ),
     },
   ];
-
   return columns;
 };

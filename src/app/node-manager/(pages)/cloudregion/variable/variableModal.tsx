@@ -10,8 +10,8 @@ import { Input, Form } from "antd";
 import OperateModal from "@/components/operate-modal";
 import type { FormInstance } from "antd";
 import { useTranslation } from "@/utils/i18n";
-import { ModalSuccess, ModalRef } from "@/app/node-manager/types/common";
-import type { TableDataItem } from "@/app/node-manager/types/common";
+import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index";
+import type { TableDataItem } from "@/app/node-manager/types/index";
 const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ }, ref) => {
   const formRef = useRef<FormInstance>(null);
   //设置弹窗状态

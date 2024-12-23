@@ -1,19 +1,19 @@
 'use client'
-import React, {useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FormInstance, Input } from "antd";
 import Icon from "@/components/icon";
 import OperateModal from '@/components/operate-modal'
 import { Form } from "antd";
 import cloudregionstyle from './index.module.scss'
 import { useRouter } from "next/navigation";
-import { MoreOutlined } from "@ant-design/icons";
+import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { useTranslation } from "@/utils/i18n";
-import {CouldregionCardProps} from "@/app/node-manager/types/cloudregion"
+import { CouldregionCardProps } from "@/app/node-manager/types/cloudregion"
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
-function Cloudregion() {
+const Cloudregion = () => {
   const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
   const [cloudregiondata, setCloudregiondata] = useState<string>('这个是云区域的描述');
   const cloudregionformRef = useRef<FormInstance>(null);
@@ -28,8 +28,8 @@ function Cloudregion() {
     });
   }, [openeditcloudregion])
   // 标题组件
-  function Cloudregiontitle() {
-    function editeiinfo(e: { stopPropagation: () => void; }) {
+  const Cloudregiontitle = () => {
+    const editeiinfo = (e: { stopPropagation: () => void; }) => {
       setOpeneditcloudregion(true)
       e.stopPropagation()
     }
@@ -60,22 +60,22 @@ function Cloudregion() {
     </div>);
   };
 
-  function handleFormOkClick() {
+  const handleFormOkClick = () => {
     setOpeneditcloudregion(false);
     const values = cloudregionformRef.current?.getFieldsValue();
     setCloudregiondata(values?.user?.introduction);
   }
 
   const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
-  
+
   return (
     <div ref={divref} className={`${cloudregionstyle.cloudregion} w-full h-full`}>
-      <div className="flex justify-end mb-4"> <Search className="w-64 mr-[8px]" placeholder="input search text"  enterButton onSearch={onSearch} /></div>
+      <div className="flex justify-end mb-4"> <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} /></div>
       <div className="flex">
         <div>
           <div className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col justify-center`}
             style={{ width: `262px`, height: `127px` }} >
-            <div>+{t('common.add')}</div>
+            <div><PlusOutlined className="mr-[8px]"></PlusOutlined>{t('common.add')}</div>
           </div>
         </div>
         <div className="ml-[45px]">

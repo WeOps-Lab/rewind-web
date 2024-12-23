@@ -10,8 +10,9 @@ import { Input, Form, Select, message } from "antd";
 import OperateModal from "@/components/operate-modal";
 import { useTranslation } from "@/utils/i18n";
 import type { FormInstance } from "antd";
-import { ModalSuccess, ModalRef } from "@/app/node-manager/types/common";
-import type { TableDataItem } from "@/app/node-manager/types/common";
+import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index";
+import type { TableDataItem } from "@/app/node-manager/types/index";
+const { TextArea } = Input;
 
 const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
@@ -51,18 +52,26 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
     };
 
     //选择操作系统
-    function handleChangeOperatingsystem(value: string) {
+    const handleChangeOperatingsystem = (value: string) => {
       console.log('选择的操作系统是', value)
     }
 
-    function showSidecarForm(type: string) {
+    const showSidecarForm = (type: string) => {
       if (type === 'uninstall') {
         return (
           <div>
             <h1>1.Windows</h1>
-            <div className="border border-black w-[466px] h-[120px] mt-2">我是展示的区域</div>
+            <TextArea
+              rows={8}
+              style={{ resize: 'none' }}
+              disabled={true}
+            />
             <h1 className="mt-2">2.Linux</h1>
-            <div className="border border-black w-[466px] h-[120px] mt-2">我是展示的区域</div>
+            <TextArea
+              rows={8}
+              style={{ resize: 'none' }}
+              disabled={true}
+            />
           </div>
         );
       }
@@ -91,7 +100,11 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
           name="installationguide"
           label={t("node-manager.cloudregion.node.guide")}
         >
-          <div className="border-2 border-black-100 h-[121px]">我是一个展示的区域</div>
+          <TextArea
+            rows={8}
+            style={{ resize: 'none' }}
+            disabled={true}
+          />
         </Form.Item>
       </Form>);
     }

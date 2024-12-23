@@ -7,7 +7,7 @@ import { Segmented } from "antd";
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
-function Collector() {
+const Collector = () => {
   const [value, setValue] = useState<string | number>('All(20)');
   const cards = Array(5).fill(0);
   const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);

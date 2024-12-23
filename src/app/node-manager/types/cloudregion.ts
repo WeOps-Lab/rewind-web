@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import type { TableDataItem } from '@/app/node-manager/types/common';
+import type { TableDataItem } from '@/app/node-manager/types/index';
 //配置文件的类型
 interface ConfigurationData {
   key: React.Key;

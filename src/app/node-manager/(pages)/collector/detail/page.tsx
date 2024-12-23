@@ -3,10 +3,10 @@ import React from "react";
 import SubLayout from "@/components/sub-layout";
 import Icon from '@/components/icon';
 import { useTranslation } from "@/utils/i18n";
-function Collectordetail() {
+const Collectordetail = () => {
   const { t } = useTranslation();
   //顶部的组件
-  function Topsection() {
+  const Topsection = () => {
     return (
       <div className="flex flex-col h-[90px] p-4 overflow-hidden">
         <h1 className="text-lg">{t('node-manager.collector.title')}</h1>
@@ -46,7 +46,7 @@ function Collectordetail() {
 
 
 
-function Collectorintro() {
+const Collectorintro = () => {
   return (
     <div className="h-[58px] flex flex-col justify-items-center">
       <div className="flex justify-center mb-[8px]">

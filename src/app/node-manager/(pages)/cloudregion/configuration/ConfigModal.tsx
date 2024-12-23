@@ -10,14 +10,15 @@ import { Input, Form, Select, message } from "antd";
 import CustomTable from '@/components/custom-table'
 import OperateModal from "@/components/operate-modal";
 import type { FormInstance } from "antd";
-import data from "@/app/node-manager/mockdata/node";
-import { ModalSuccess, TableDataItem, ModalRef } from "@/app/node-manager/types/common";
+import { data } from "@/app/node-manager/mockdata/cloudregion/node";
+import { ModalSuccess, TableDataItem, ModalRef } from "@/app/node-manager/types/index";
 import type { SidecardForm } from "@/app/node-manager/types/cloudregion"
 import { useTranslation } from '@/utils/i18n';
 import type { GetProps } from 'antd';
 import { useApplyColumns } from "./useApplyColumns";
 type SearchProps = GetProps<typeof Input.Search>;
-const { Search } = Input;
+const { Search, TextArea } = Input;
+
 
 
 const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
@@ -31,6 +32,11 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const [applydata, setApplydata] = useState<SidecardForm[]>([])
     const [type, setType] = useState<string>("");
     const { t } = useTranslation();
+    //处理应用的事件
+    const handleApply = () => {
+      setConfigVisible(false);
+      message.success('apply success!')
+    }
     const applycolumns = useApplyColumns({ handleApply })
 
     useImperativeHandle(ref, () => ({
@@ -68,23 +74,18 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
 
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
 
-    //处理应用的事件
-    function handleApply() {
-      setConfigVisible(false);
-      message.success('apply success!')
-    }
 
     //选择操作系统
-    function handleChangeOperatingsystem(value: string) {
+    const handleChangeOperatingsystem = (value: string) => {
       console.log('选择的操作系统是', value)
     }
     //选择采集器
-    function handleChangeCollector(value: string) {
+    const handleChangeCollector = (value: string) => {
       console.log('选择的采集器是', value)
     }
 
     //对操作系统过滤
-    function filterSystem(key: string) {
+    const filterSystem = (key: string) => {
       const selectedItem = data.find((item) => item.key === key);
       if (!selectedItem) {
         return;
@@ -94,7 +95,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       setApplydata(temporaryformdata);
     }
 
-    function showConfigForm(type: string) {
+    const showConfigForm = (type: string) => {
       if (type === "apply") {
         return (
           <div className="w-full h-full">
@@ -146,10 +147,14 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           </Select>
         </Form.Item>
         <Form.Item
-          name="collector"
+          name="configinfo"
           label=" "
         >
-          <div className="h-[231px] bg-orange-200"></div>
+          <TextArea
+            rows={8}
+            style={{ resize: 'none' }}
+            disabled={true}
+          />
         </Form.Item>
       </Form>);
     }

@@ -31,12 +31,16 @@
         "guide": "安装指南",
         "collector": "采集器",
         "start": "开启采集器",
-        "updata": "更新采集器",
+        "restart": "重启采集器",
         "stop": "停止采集器",
         "config": "配置", 
         "btntext1": "如果您没有所需的配置文件，请单击",
         "btntext2": "这里",
-        "btntext3": "创建一个。"
+        "btntext3": "创建一个。",
+        "bindconfig": "绑定配置",
+        "updataconfig": "更新配置",
+        "restarinfo": "您确定要重新启动收集器吗？",
+        "stopinfo": "您确定要停止收集器吗？"
       },
       "Configuration": {
         "name": "姓名",

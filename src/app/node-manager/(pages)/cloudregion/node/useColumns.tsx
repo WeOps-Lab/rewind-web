@@ -1,7 +1,7 @@
 import { useTranslation } from "@/utils/i18n";
 import { Tag } from "antd";
 import type { TableColumnsType } from 'antd';
-import { TableDataItem } from "@/app/node-manager/types/common"
+import { TableDataItem } from "@/app/node-manager/types/index"
 interface HookParams {
   toggleExpandRow: (key: string) => void;
 }

@@ -5,13 +5,13 @@ import { useTranslation } from "@/utils/i18n";
 import { usePathname } from "next/navigation";
 import Collectorintro from "@/app/node-manager/components/collectorintro";
 
-function Collector({ children }: Readonly<{
+const CollectorLayout = ({ children }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   const { t } = useTranslation();
-  function Topsection() {
+  const Topsection = () => {
     const pathname = usePathname();
-    function getTitle() {
+    const getTitle = () => {
       const temp = pathname.split("/")[3];
       return t(`common.${temp}`);
     }
@@ -52,4 +52,4 @@ function Collector({ children }: Readonly<{
     </div>
   );
 }
-export default Collector;
+export default CollectorLayout;
