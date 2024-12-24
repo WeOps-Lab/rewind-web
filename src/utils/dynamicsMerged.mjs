@@ -103,4 +103,25 @@ const combineMenus = async () => {
   console.log('Menus combined successfully to public/menus directory');
 };
 
-export { mergeMessages, flattenMessages, combineLocales, combineMenus };
+const copyPublicDirectories = () => {
+  const srcDir = path.resolve(process.cwd(), 'src/app');
+  const apps = fs.readdirSync(srcDir).filter(file => fs.lstatSync(path.join(srcDir, file)).isDirectory() && !EXCLUDED_DIRECTORIES.includes(file));
+
+  apps.forEach(app => {
+    const sourcePath = path.join(srcDir, app, 'public');
+    const destinationPath = path.resolve(process.cwd(), 'public');
+
+    if (fs.existsSync(sourcePath)) {
+      fs.copySync(sourcePath, destinationPath, {
+        dereference: true,
+        overwrite: false,
+        errorOnExist: true,
+      });
+      console.log(`Copied contents of ${sourcePath} to ${destinationPath}`);
+    } else {
+      console.log(`No public directory found for ${app}`);
+    }
+  });
+};
+
+export { mergeMessages, flattenMessages, combineLocales, combineMenus, copyPublicDirectories };
