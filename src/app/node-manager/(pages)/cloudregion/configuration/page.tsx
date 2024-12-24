@@ -5,12 +5,15 @@ import type { TableProps } from "antd";
 import CustomTable from "@/components/custom-table"
 import ConfigModal from "./ConfigModal";
 import { ModalRef } from "@/app/node-manager/types/index";
+import {IConfiglistprops} from '@/app/node-manager/types/cloudregion'
 import { useTranslation } from "@/utils/i18n";
 import type { GetProps } from 'antd';
-import { data } from "@/app/node-manager/mockdata/cloudregion/config";
+// import { data } from "@/app/node-manager/mockdata/cloudregion/config";
 import { useConfigColumns } from "./useConfigColumns"
 import Mainlayout from '../mainlayout/layout';
 import { PlusOutlined } from "@ant-design/icons";
+import useApiClient from "@/utils/request";
+import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 const Configration = () => {
@@ -18,7 +21,17 @@ const Configration = () => {
     useState<React.Key[]>([]);
   const configurationRef = useRef<ModalRef>(null);
   const modifydeleteconfigurationref = useRef<HTMLButtonElement>(null);
+  const [data, setData] = useState( [ {
+    key: '1',
+    name: '文件1',
+    collector: 'Metricbeat1',
+    operatingsystem: 'Windows',
+    nodecount: 3,
+  }])
   const { t } = useTranslation();
+  const {isLoading}=useApiClient();
+  const {getconfiglist}=useApiCloudRegion();
+
   //点击编辑配置文件的触发事件
   const configurationClick = (key: string) => {
     const configurationformdata = data.filter((item) => item.key === key);
@@ -28,6 +41,7 @@ const Configration = () => {
       form: configurationform,
     });
   }
+
   //点击应用的配置文件的触发事件
   const applyconfigurationClick = (key: string) => {
     configurationRef.current?.showModal({
@@ -36,6 +50,7 @@ const Configration = () => {
       key: key,
     });
   }
+
   //删除的确定的弹窗
   const deleteconfirm = (e: any) => {
     console.log(e);
@@ -46,6 +61,7 @@ const Configration = () => {
     console.log(e);
     message.error('Click on No');
   }
+
   // 表格的列
   const columns = useConfigColumns({
     configurationClick,
@@ -61,6 +77,24 @@ const Configration = () => {
     operatingsystem: "",
     nodecount: "",
   };
+
+  useEffect(() => {
+    if(!isLoading){
+      return
+    }
+    getconfiglist(1).then((res) => {
+      const data=res.map((item: IConfiglistprops) => {
+        return {
+          key: item.id,
+          name: item.name,
+          collector: item.collector,
+          operatingsystem: item.operating_system,
+          nodecount: item.node_count,
+        }
+      })
+      setData(data)
+    })
+  }, []);
 
   //组价初始渲染
   useEffect(() => {
@@ -93,13 +127,6 @@ const Configration = () => {
   const addconfigurationClick = () => {
     configurationRef.current?.showModal({
       type: "add",
-      form: {
-        name: "fddf",
-        operatingsystem: "linux",
-        collector: 'mericbeat',
-        configinfo: '我是一个需要展示内容的区域'
-
-      },
     });
   }
 

@@ -68,6 +68,10 @@
     "selected": "已选",
     "items": "项",
     "actions": "操作",
+    "version": "版本",
+    "noVersionLogs": "暂无版本日志",
+    "group": "分组",
+    "theme": "主题",
     "timeSelector": {
       "15Minutes": "最近15分钟",
       "30Minutes": "最近30分钟",

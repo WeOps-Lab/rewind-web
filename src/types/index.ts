@@ -13,3 +13,9 @@ export interface ListItem {
   id?: string | number;
   value?: string | number;
 }
+
+export interface groupProps {
+  id: string,
+  name: string,
+  path: string
+}
