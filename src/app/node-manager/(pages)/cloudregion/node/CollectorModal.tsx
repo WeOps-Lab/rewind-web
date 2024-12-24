@@ -48,17 +48,13 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     //点击确定按钮的相关逻辑处理
     const handleConfirm = () => {
       if (Popconfirmarr.includes(type)) {
-
         return
       }
-      if (type === 'stop') {
-        message.success("停止成功");
-        onSuccess();
-        setCollectorVisible(false);
-        return;
+      //处理绑定配置，更新配置，启动探针
+      if(type==="bindconfig"){
+        message.success("Successfully");
       }
       setCollectorVisible(false);
-      message.success("Successfully");
       onSuccess();
       setCollectorVisible(false);
     };

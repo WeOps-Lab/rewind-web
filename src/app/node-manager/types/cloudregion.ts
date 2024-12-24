@@ -33,13 +33,22 @@ interface VariableProps {
   delconfirm: (e: any) => void;
   delcancel: (e: any) => void;
 }
-
 interface CouldregionCardProps {
   height?: number;
   width?: number;
   title: ReactNode;
   children?: ReactNode;
 }
+//api返回的配置文件列表的类型
+interface IConfiglistprops {
+  id: string;
+  name: string;
+  collector: string;
+  operating_system: string;
+  node_count: string;
+  config_template?: string;
+}
+
 export type {
   ConfigurationData,
   SidecardForm,
@@ -47,4 +56,5 @@ export type {
   ConfigHookParams,
   VariableProps,
   CouldregionCardProps,
+  IConfiglistprops
 };

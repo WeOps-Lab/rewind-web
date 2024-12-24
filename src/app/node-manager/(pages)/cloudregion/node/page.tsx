@@ -8,7 +8,7 @@ import nodeStyle from "./index.module.scss";
 import { Dropdown } from "antd";
 import SidecarModal from "./SidecarModal";
 import CollectorModal from "./CollectorModal";
-import { data, updateitems } from "@/app/node-manager/mockdata/cloudregion/node";
+import { updateitems } from "@/app/node-manager/mockdata/cloudregion/node";
 import { useRouter } from 'next/navigation';
 import { useTranslation } from "@/utils/i18n";
 import type { GetProps } from 'antd';
@@ -16,6 +16,8 @@ import { ModalRef, TableDataItem } from "@/app/node-manager/types/index";
 import CustomTable from "@/components/custom-table/index"
 import { useColumns } from "./useColumns"
 import Mainlayout from '../mainlayout/layout'
+import useApiClient from '@/utils/request';
+import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 type OperationKey = 'startcollector' | 'restartcollector' | 'stopcollector' | 'bindingconfig' | 'updateconfig';
 type TableRowSelection<T extends object = object> =
   TableProps<T>["rowSelection"];
@@ -23,6 +25,7 @@ type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
 const Node = () => {
+  const [nodelist, setNodelist] = useState<TableDataItem[]>([])
   // 选中的用户状态
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   //设置展开行的状态
@@ -32,6 +35,9 @@ const Node = () => {
   //创建一个路由实例
   const router = useRouter();
   const { t } = useTranslation();
+  const {isLoading } = useApiClient();
+  const {getnodelist}= useApiCloudRegion();
+
   // 展开行的触发的事件
   const toggleExpandRow = (key: React.Key) => {
     const newExpandedRowKeys = expandedRowKeys.includes(key)
@@ -39,6 +45,7 @@ const Node = () => {
       : [...expandedRowKeys, key];
     setExpandedRowKeys(newExpandedRowKeys);
   };
+
   const getMokData = (num: number) => {
     const data = [];
     for (let i = 0; i < num; i++) {
@@ -91,7 +98,23 @@ const Node = () => {
     },
   ];
 
-
+  useEffect(() => {
+    if (isLoading) {
+      getnodelist(1).then((res) => {
+        const data= res.map((item:any) => {
+          return{
+            key: item.id,
+            ip: item.ip,
+            operatingsystem: item.operating_system,
+            sidecar: item.status.status==="1"?"Running":"Error",
+          }
+        })
+        setNodelist(data)
+      }).catch((error) => {
+        console.error('Error fetching cloud region data:', error);
+      });
+    }
+  }, [isLoading]);
   useEffect(() => {
     if (selectedRowKeys.length === 0) {
       setColbtnshow(true);
@@ -244,7 +267,7 @@ const Node = () => {
           <div className="tablewidth">{/* 表格的部分 */}
             <CustomTable
               columns={columns}
-              dataSource={data}
+              dataSource={nodelist}
               className="min-h-[274px]"
               scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
               expandable={{
