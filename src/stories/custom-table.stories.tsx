@@ -52,7 +52,6 @@ export const Default: Story = {
 export const TableWithButton: Story = {
   args: {
     bordered: true,
-    size: "middle",
     dataSource: [
       {
         key: '1',
