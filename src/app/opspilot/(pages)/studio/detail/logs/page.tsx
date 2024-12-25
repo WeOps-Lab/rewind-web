@@ -197,8 +197,8 @@ const StudioLogsPage: React.FC = () => {
           <TimeSelector
             onlyTimeSelect
             defaultValue={{
-              timeRangeValue: 1440,
-              timesValue: null
+              selectValue: 1440,
+              rangePickerVaule: null
             }}
             onChange={handleDateChange}
           />
