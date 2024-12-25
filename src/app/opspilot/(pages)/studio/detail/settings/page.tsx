@@ -30,6 +30,7 @@ const StudioSettingsPage: React.FC = () => {
   const [channels, setChannels] = useState<{ id: number; name: string, enabled: boolean }[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<number[]>([]);
   const [selectedChannels, setSelectedChannels] = useState<number[]>([]);
+  const [originChannels, setOriginChannels] = useState<number[]>([]);
   const [isSkillModalVisible, setIsSkillModalVisible] = useState(false);
   const [isDomainEnabled, setIsDomainEnabled] = useState(false);
   const [isPortMappingEnabled, setIsPortMappingEnabled] = useState(false);
@@ -39,6 +40,13 @@ const StudioSettingsPage: React.FC = () => {
   const [online, setOnline] = useState(false);
   const searchParams = useSearchParams();
   const botId = searchParams.get('id');
+
+  const IconMap: any = {
+    enterprise_wechat: 'qiwei',
+    wechat_official_account: 'gongzhonghao',
+    ding_talk: 'dingding1',
+    web: 'wangye'
+  }
 
   useEffect(() => {
     if (!botId) return;
@@ -71,6 +79,7 @@ const StudioSettingsPage: React.FC = () => {
         setOnline(botData.online);
         setSelectedSkills(botData.llm_skills);
         setSelectedChannels(botData.channels);
+        setOriginChannels(botData.channels);
         setIsDomainEnabled(botData.enable_bot_domain);
         setEnableSsl(botData.enable_ssl);
         setIsPortMappingEnabled(botData.enable_node_port);
@@ -114,6 +123,7 @@ const StudioSettingsPage: React.FC = () => {
 
       if (isPublish) {
         setOnline(true);
+        setOriginChannels(selectedChannels);
       }
     } catch (error) {
       console.error(error);
@@ -136,8 +146,6 @@ const StudioSettingsPage: React.FC = () => {
       message.error(t('common.saveFailed'));
     }
   };
-
-  const getTypeIcon = (name: string) => name === 'enterprise_wechat' ? 'qiwei' : name === 'ding_talk' ? 'dingding1' : 'wangye';
 
   const handleConfigureChannels = () => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -177,7 +185,7 @@ const StudioSettingsPage: React.FC = () => {
 
   const allChannelsDisabled = channels.every(channel => !channel.enabled);
 
-  const showCustomChat = channels.filter(channel => selectedChannels.includes(channel.id)).some(channel => channel.name === 'web') && online;
+  const showCustomChat = channels.filter(channel => originChannels.includes(channel.id)).some(channel => channel.name === 'web') && online;
 
   const handleSendMessage = async (newMessage: CustomChatMessage[], lastUserMessage?: CustomChatMessage): Promise<CustomChatMessage[]> => {
     return new Promise(async (resolve) => {
@@ -354,7 +362,7 @@ const StudioSettingsPage: React.FC = () => {
                               ${channel.enabled ? '' : styles.disabledCommonItem}`
                             }
                           >
-                            <Icon type={getTypeIcon(channel.name)} className="text-3xl mr-[5px]" />
+                            <Icon type={IconMap[channel.name]} className="text-3xl mr-[5px]" />
                             {channel.name}
                             {isSelected && <CheckOutlined className={`${styles.checkedIcon}`} />}
                             {!channel.enabled && <StopOutlined className={`${styles.disabledIcon}`} />}

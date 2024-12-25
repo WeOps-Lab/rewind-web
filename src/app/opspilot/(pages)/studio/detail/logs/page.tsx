@@ -220,7 +220,7 @@ const StudioLogsPage: React.FC = () => {
         )}
       </div>
       <div className='fixed bottom-8 right-8'>
-        {!loading && (
+        {!loading && total > 0 && (
           <Pagination
             total={total}
             showSizeChanger
