@@ -18,6 +18,7 @@ interface SideMenuProps {
   children?: React.ReactNode;
   showBackButton?: boolean;
   showProgress?: boolean;
+  taskProgressComponent?: React.ReactNode;
   onBackButtonClick?: () => void;
 }
 
@@ -25,7 +26,9 @@ const SideMenu: React.FC<SideMenuProps> = ({
   menuItems,
   children,
   showBackButton = true,
-  onBackButtonClick
+  showProgress = false,
+  taskProgressComponent,
+  onBackButtonClick,
 }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -37,9 +40,10 @@ const SideMenu: React.FC<SideMenuProps> = ({
 
   const isActive = (path: string): boolean => {
     if (pathname === null) return false;
-
     return pathname.startsWith(path);
   };
+
+  console.log('taskProgressComponent', taskProgressComponent);
 
   return (
     <aside className={`w-[216px] pr-4 flex flex-shrink-0 flex-col h-full ${sideMenuStyle.sideMenu}`}>
@@ -61,6 +65,11 @@ const SideMenu: React.FC<SideMenuProps> = ({
             </li>
           ))}
         </ul>
+        {showProgress && (
+          <>
+            {taskProgressComponent}
+          </>
+        )}
         {showBackButton && (
           <button
             className="absolute bottom-4 left-4 flex items-center py-2 rounded-md text-sm"
