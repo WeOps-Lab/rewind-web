@@ -1,23 +1,34 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Input, message } from "antd";
 import CustomTable from '@/components/custom-table/index';
 import type { TableProps } from "antd";
 import { useTranslation } from "@/utils/i18n";
 import VariableModal from "./variableModal";
 import { ModalRef } from "@/app/node-manager/types/index";
-import { data } from "@/app/node-manager/mockdata/cloudregion/variable";
 import { useVarColumns } from "./useVarColumns";
 import type { GetProps } from 'antd';
 import type { TableDataItem } from "@/app/node-manager/types/index";
 import Mainlayout from '../mainlayout/layout'
 import { PlusOutlined } from "@ant-design/icons";
+import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
+import useApiClient from "@/utils/request";
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
 const Variable = () => {
+  const { getvariablelist, deletevariable } = useApiCloudRegion();
+  const { isLoading } = useApiClient();
   const variableRef = useRef<ModalRef>(null);
   const { t } = useTranslation();
+  const [data, setData] = useState<TableDataItem[]>([]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      return;
+    }
+    getVariablelist();
+  }, [])
 
   //根据传入的值打开对应的用户弹窗（添加用户弹窗和编辑用户的弹窗）
   const openUerModal = (type: string, form: TableDataItem) => {
@@ -35,11 +46,16 @@ const Variable = () => {
     return formData;
   };
   //删除的确定的弹窗
-  const delconfirm = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    console.log(e);
-    message.success('Click on Yes');
+  const delconfirm = (key: string) => {
+    deletevariable(key).then((res) => {
+      debugger
+      message.success(res.message);
+    }).catch((error) => {
+      message.error(error.message);
+    }).finally(() => {
+      getVariablelist();
+    });
   };
-
 
   const delcancel = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     console.log(e);
@@ -62,10 +78,44 @@ const Variable = () => {
       );
     },
   };
+
+  //添加和编辑成功后，重新获取表格数据
   const onsuccessvariablemodal = () => {
-    console.log("onsuccessvariablemodal,成功的回调函数");
+    getVariablelist();
   };
-  const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
+
+  //搜索框的事件
+  const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
+    const id = 1;
+    getvariablelist(id, value).then((res) => {
+      const tempdata = res.map((item: any) => {
+        return {
+          key: item.id,
+          name: item.key,
+          value: item.value,
+          description: item.description,
+        }
+      })
+      setData(tempdata);
+    })
+    console.log(value, _e, info);
+  };
+
+  //获取表格数据
+  const getVariablelist = () => {
+    const id = 1;
+    getvariablelist(id).then((res) => {
+      const tempdata = res.map((item: any) => {
+        return {
+          key: item.id,
+          name: item.key,
+          value: item.value,
+          description: item.description,
+        }
+      })
+      setData(tempdata);
+    });
+  }
 
   return (
     <Mainlayout>

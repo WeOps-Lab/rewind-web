@@ -25,18 +25,18 @@ type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
 const Node = () => {
-  const [nodelist, setNodelist] = useState<TableDataItem[]>([])
-  // 选中的用户状态
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  //设置展开行的状态
-  const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
   const sidecarRef = useRef<ModalRef>(null)
   const collectorRef = useRef<ModalRef>(null)
   //创建一个路由实例
   const router = useRouter();
   const { t } = useTranslation();
-  const {isLoading } = useApiClient();
-  const {getnodelist}= useApiCloudRegion();
+  const { isLoading } = useApiClient();
+  const { getnodelist } = useApiCloudRegion();
+  const [nodelist, setNodelist] = useState<TableDataItem[]>([])
+  // 选中的用户状态
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  //设置展开行的状态
+  const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
   // 展开行的触发的事件
   const toggleExpandRow = (key: React.Key) => {
@@ -101,12 +101,12 @@ const Node = () => {
   useEffect(() => {
     if (isLoading) {
       getnodelist(1).then((res) => {
-        const data= res.map((item:any) => {
-          return{
+        const data = res.map((item: any) => {
+          return {
             key: item.id,
             ip: item.ip,
             operatingsystem: item.operating_system,
-            sidecar: item.status.status==="1"?"Running":"Error",
+            sidecar: item.status.status === "1" ? "Running" : "Error",
           }
         })
         setNodelist(data)
@@ -125,7 +125,7 @@ const Node = () => {
 
   //点击下拉菜单触发的事件
   const handleSidecarMenuClick: MenuProps["onClick"] = (e) => {
-    if (selectedRowKeys.length === 0 && e.key === "installCollector") {
+    if (!selectedRowKeys.length && e.key === "installCollector") {
       message.info("Please select a node first");
       return
     }

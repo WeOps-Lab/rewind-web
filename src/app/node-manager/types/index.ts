@@ -13,7 +13,7 @@ interface ConfigItem<T> {
 
 //传入modal的参数类型成功的回调
 interface ModalSuccess {
-  onSuccess: () => void;
+  onSuccess: () => void
 }
 //调用弹窗接口传入的类型
 interface ModalConfig {

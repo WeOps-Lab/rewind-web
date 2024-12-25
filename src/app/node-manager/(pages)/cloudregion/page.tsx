@@ -23,13 +23,13 @@ interface CloudregioncardProps {
 }
 
 const Cloudregion = () => {
-  const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
   const cloudregionformRef = useRef<FormInstance>(null);
   const divref = useRef(null);
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
   const { getcloudlist, updatecloudintro } = useApiCloudRegion();
   const [selectedRegion, setSelectedRegion] = useState<CloudregioncardProps | null>(null);
+  const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
 
   // 获取相关的接口
   const fetchCloudRegions = async () => {
@@ -99,7 +99,7 @@ const Cloudregion = () => {
       const titleElement = event.currentTarget.querySelector('.card-title');
       event.stopPropagation();
       if (!titleElement || !titleElement.contains(event.target as Node)) {
-        router.push('/node-manager/cloudregion/node');
+        router.push('/node-manager/cloudregion/node?cloud_region_id=1');
       }
     };
 

@@ -1,15 +1,17 @@
 import { useTranslation } from "@/utils/i18n";
-import { Button, Popconfirm } from "antd";
+import { Button, message, Popconfirm } from "antd";
 import type { TableColumnsType } from "antd";
 import { ConfigHookParams } from "@/app/node-manager/types/cloudregion";
 import { TableDataItem } from "@/app/node-manager/types/index";
+import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
+import { useEffect, useState } from "react";
 export const useConfigColumns = ({
   configurationClick,
   applyconfigurationClick,
-  deleteconfirm,
-  delcancel
-}: ConfigHookParams): TableColumnsType<TableDataItem> => {
+}: ConfigHookParams) => {
   const { t } = useTranslation();
+  const { deletecollector } = useApiCloudRegion();
+  const [deletestate, setDeletestate] = useState<boolean>(false);
   const columns: TableColumnsType<TableDataItem> = [
     {
       title: t("node-manager.cloudregion.Configuration.name"),
@@ -63,7 +65,7 @@ export const useConfigColumns = ({
             description={t("node-manager.cloudregion.Configuration.deleteinfo")}
             okText={t("common.confirm")}
             cancelText={t("common.cancel")}
-            onConfirm={deleteconfirm}
+            onConfirm={() => { deleteconfirm(key) }}
             onCancel={delcancel}
           >
             <Button
@@ -77,5 +79,31 @@ export const useConfigColumns = ({
       ),
     },
   ];
-  return columns;
+
+  useEffect(() => {
+    setDeletestate(false);
+  }, [])
+  //删除的确定的弹窗(删除单个配置接口实现)
+  const deleteconfirm = (key: any) => {
+    message.success({
+      content: 'success delete',
+      duration: 1,
+    });
+    deletecollector(key);
+    setDeletestate(true);
+  }
+
+  const delcancel = (e: any) => {
+    console.log(e);
+    message.error('Click on No');
+  }
+  const handleDeleteCollector = (deleted: boolean) => {
+    setDeletestate(deleted);
+  }
+
+  return {
+    columns,
+    deletestate,
+    handleDeleteCollector
+  };
 };

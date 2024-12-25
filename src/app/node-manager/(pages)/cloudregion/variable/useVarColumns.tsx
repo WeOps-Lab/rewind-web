@@ -31,7 +31,7 @@ export const useVarColumns = ({
       dataIndex: "key",
       width: 200,
       fixed: "right",
-      render: (key: string) => (
+      render: (key: string, text) => (
         <div>
           <Button
             onClick={() => {
@@ -48,7 +48,7 @@ export const useVarColumns = ({
             description={t("node-manager.cloudregion.variable.deleteinfo")}
             okText={t("common.confirm")}
             cancelText={t("common.cancel")}
-            onConfirm={delconfirm}
+            onConfirm={() => { delconfirm(key, text) }}
             onCancel={delcancel}
           >
             <Button

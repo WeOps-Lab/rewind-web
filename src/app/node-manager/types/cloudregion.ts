@@ -23,14 +23,12 @@ interface sidecarinfotype {
 //配置页面的table的列定义
 interface ConfigHookParams {
   configurationClick: (key: string) => void;
-  applyconfigurationClick: (key: string) => void;
-  deleteconfirm: (e?: React.MouseEvent<HTMLElement>) => void;
-  delcancel: (e?: React.MouseEvent<HTMLElement>) => void;
+  applyconfigurationClick: (key: string) => void
 }
 interface VariableProps {
   openUerModal: (type: string, form: TableDataItem) => void;
   getFormDataById: (key: string) => TableDataItem;
-  delconfirm: (e: any) => void;
+  delconfirm: (key:string,text:any) => void;
   delcancel: (e: any) => void;
 }
 interface CouldregionCardProps {

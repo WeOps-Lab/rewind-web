@@ -17,11 +17,9 @@ import { useTranslation } from '@/utils/i18n';
 import type { GetProps } from 'antd';
 import { useApplyColumns } from "./useApplyColumns";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
-import {IConfiglistprops} from '@/app/node-manager/types/cloudregion';
+import { IConfiglistprops } from '@/app/node-manager/types/cloudregion';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search, TextArea } = Input;
-
-
 
 const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
@@ -30,13 +28,12 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const [configVisible, setConfigVisible] =
       useState<boolean>(false);
     //设置表当的数据
+    const { t } = useTranslation();
+    const { createconfig, getconfiglist } = useApiCloudRegion();
     const [configForm, setConfigForm] = useState<TableDataItem>();
     const [applydata, setApplydata] = useState<SidecardForm[]>([]);
     const [colselectitems, setColselectitems] = useState<SidecardForm[]>([])
     const [type, setType] = useState<string>("");
-    const { t } = useTranslation();
-    const {createconfig,getconfiglist}=useApiCloudRegion();
-
     //处理应用的事件
     const handleApply = () => {
       setConfigVisible(true);
@@ -54,33 +51,37 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
             filterSystem(key)
             return
           }
+          return
         }
         setConfigForm(form)
       },
     }));
 
-
     //初始化表单的数据
     useEffect(() => {
-      // configformRef.current?.resetFields();
-      configformRef.current?.setFieldsValue(configForm);
-     
-    }, [configVisible]);
+      if (type === 'apply') {
+        return
+      }
+      if (configVisible) {
+        configformRef.current?.resetFields();
+        configformRef.current?.setFieldsValue(configForm);
+      }
+    }, [configVisible, configForm]);
 
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
       setConfigVisible(false);
     };
+
+    //添加配置文件
     const handleConfirm = async () => {
-      const data = await configformRef.current?.validateFields();
-      if(type==='add'){
-        console.log('fdhhf')
+      if (type === 'add') {
         createconfig({
-          name:data.name,
-          collector_id:data.collector,
-          cloud_region_id:1,
-          config_template:'fdfdfd'})
-        return
+          name: configformRef.current?.getFieldValue('name'),
+          collector_id: configformRef.current?.getFieldValue('collector'),
+          cloud_region_id: 1,
+          config_template: configformRef.current?.getFieldValue('configinfo')
+        })
       }
       setConfigVisible(false);
       onSuccess();
@@ -88,26 +89,25 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
 
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
 
-
     //选择操作系统
     const handleChangeOperatingsystem = (value: string) => {
       getconfiglist(1).then((res) => {
-        const temporaryformdata = res.filter((item:IConfiglistprops) =>{
-          if(item.operating_system === value){
+        const temporaryformdata = res.filter((item: IConfiglistprops) => {
+          if (item.operating_system === value) {
             return {
-              Collector:item.collector,
-              configinfo:item.config_template
+              Collector: item.collector,
+              configinfo: item.config_template
             }
           }
         });
-        const temdata=temporaryformdata.map((item:IConfiglistprops)=>{
+        const temdata = temporaryformdata.map((item: IConfiglistprops) => {
           return { value: item.collector, label: item.collector }
         })
         //设置采集器
         setColselectitems(temdata);
         console.log('temporaryformdata', temporaryformdata)
       })
-      
+
     }
     //选择采集器
     const handleChangeCollector = (value: string) => {

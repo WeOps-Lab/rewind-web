@@ -18,6 +18,8 @@ const { TextArea } = Input;
 const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
     const sidecarformRef = useRef<FormInstance>(null);
+    const { t } = useTranslation();
+    const { getsidecarstep } = useApiCloudRegion();
     //设置弹窗状态
     const [SidecarVisible, setSidecarVisible] =
       useState<boolean>(false);
@@ -25,8 +27,6 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
     const [sidecarFormData, setSidecarFormData] =
       useState<TableDataItem>();
     const [type, setType] = useState<string>("");
-    const { t } = useTranslation();
-    const {getsidecarstep}= useApiCloudRegion();
 
     useImperativeHandle(ref, () => ({
       showModal: ({ type }) => {
@@ -54,13 +54,13 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
       setSidecarVisible(false);
     };
     const handleConfirm = () => {
-      const ip=sidecarformRef.current?.getFieldValue('ipaddress');
-      const operating_system=sidecarformRef.current?.getFieldValue('operatingsystem');
-      getsidecarstep(ip,operating_system).then((res) => {
+      const ip = sidecarformRef.current?.getFieldValue('ipaddress');
+      const operating_system = sidecarformRef.current?.getFieldValue('operatingsystem');
+      getsidecarstep(ip, operating_system).then((res) => {
         sidecarformRef.current?.setFieldsValue({
           installationguide: res
         })
-        
+
       })
       message.success("查询成功");
       onSuccess();

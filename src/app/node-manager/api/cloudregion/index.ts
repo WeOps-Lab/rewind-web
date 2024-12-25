@@ -37,7 +37,7 @@ const useApiCloudRegion = () => {
   const getconfiglist = async (cloud_region_id: number) => {
     return await get('/api/configuration/', { params: { cloud_region_id } });
   };
-  
+
   //创建一个配置文件
   const createconfig = async (data: {
     name: string;
@@ -81,6 +81,38 @@ const useApiCloudRegion = () => {
     return await post('/api/configuration/bulk_delete/', data);
   };
 
+  //变量的模块
+  //获取变量列表
+  const getvariablelist = async (cloud_region_id: number,search?:string) => {
+    return await get('/api/sidecar_env/', { params: { cloud_region_id,search } });
+  };
+
+  //创建环境变量
+  const createvariable = async (data: {
+    key: string;
+    value: string;
+    description?: string;
+    cloud_region_id: number;
+  }) => {
+    return await post('/api/sidecar_env/', data);
+  };
+
+  //部分更新环境变量
+  const updatevariable = async (
+    id: number,
+    data: {
+      key: string;
+      value: string;
+      description?: string;
+    }
+  ) => {
+    return await patch(`/api/sidecar_env/${id}/`, data);
+  };
+
+  //删除环境变量
+  const deletevariable = async (id: string) => {
+    return await del(`/api/sidecar_env/${id}/`);
+  };
   return {
     getcloudlist,
     updatecloudintro,
@@ -92,6 +124,10 @@ const useApiCloudRegion = () => {
     deletecollector,
     applyconfig,
     batchdeletecollector,
+    getvariablelist,
+    createvariable,
+    updatevariable,
+    deletevariable,
   };
 };
 export default useApiCloudRegion;
