@@ -1,0 +1,56 @@
+{
+  "zh": [
+    {
+      "label": "机器人",
+      "icon": "jiqiren2",
+      "path": "/opspilot/studio"
+    },
+    {
+      "label": "技能",
+      "icon": "weibiaoti3",
+      "path": "/opspilot/skill"
+    },
+    {
+      "label": "知识库",
+      "icon": "zhishiku1",
+      "path": "/opspilot/knowledge"
+    },
+    {
+      "label": "提供者",
+      "icon": "moxing2",
+      "path": "/opspilot/provider"
+    },
+    {
+      "label": "设置",
+      "icon": "moxing2",
+      "path": "/opspilot/settings"
+    }
+  ],
+  "en": [
+    {
+      "label": "Studio",
+      "icon": "jiqiren2",
+      "path": "/opspilot/studio"
+    },
+    {
+      "label": "Skill",
+      "icon": "weibiaoti3",
+      "path": "/opspilot/skill"
+    },
+    {
+      "label": "Knowledge",
+      "icon": "zhishiku1",
+      "path": "/opspilot/knowledge"
+    },
+    {
+      "label": "Provider",
+      "icon": "moxing2",
+      "path": "/opspilot/provider"
+    },
+    {
+      "label": "Settings",
+      "icon": "moxing2",
+      "path": "/opspilot/settings"
+    }
+  ]
+}
