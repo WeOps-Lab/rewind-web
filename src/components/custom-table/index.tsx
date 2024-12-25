@@ -101,7 +101,7 @@ const CustomTable = <T extends object>({
         pagination={false}
         {...TableProps}
       />
-      {pagination && !loading && (<div className="absolute right-0 bottom-0 flex justify-end">
+      {pagination && !loading && !!pagination.total && (<div className="absolute right-0 bottom-0 flex justify-end">
         <Pagination
           total={pagination?.total}
           showSizeChanger
