@@ -8,7 +8,7 @@ const withCombineLocalesAndMenus = (nextConfig = {}) => {
   return {
     ...nextConfig,
     webpack(config, { isServer, dev }) {
-      if (!hasCombinedLocalesAndMenus) {
+      if (!dev && isServer && !hasCombinedLocalesAndMenus) {
         config.plugins.push({
           apply: (compiler) => {
             compiler.hooks.beforeCompile.tapPromise('CombineLocalesAndMenusPlugin', async (compilation) => {

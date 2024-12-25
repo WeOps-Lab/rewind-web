@@ -105,19 +105,28 @@ const combineMenus = async () => {
 
 const copyPublicDirectories = () => {
   const srcDir = path.resolve(process.cwd(), 'src/app');
-  const apps = fs.readdirSync(srcDir).filter(file => fs.lstatSync(path.join(srcDir, file)).isDirectory() && !EXCLUDED_DIRECTORIES.includes(file));
+  const apps = fs.readdirSync(srcDir).filter(file =>
+    fs.lstatSync(path.join(srcDir, file)).isDirectory() && !EXCLUDED_DIRECTORIES.includes(file)
+  );
+
+  const mainDestinationPath = path.resolve(process.cwd(), 'public', 'app');
+  fs.ensureDirSync(mainDestinationPath);
 
   apps.forEach(app => {
     const sourcePath = path.join(srcDir, app, 'public');
-    const destinationPath = path.resolve(process.cwd(), 'public');
+    const destinationPath = path.join(mainDestinationPath);
 
     if (fs.existsSync(sourcePath)) {
-      fs.copySync(sourcePath, destinationPath, {
-        dereference: true,
-        overwrite: false,
-        errorOnExist: true,
-      });
-      console.log(`Copied contents of ${sourcePath} to ${destinationPath}`);
+      try {
+        fs.ensureDirSync(destinationPath);
+        fs.copySync(sourcePath, destinationPath, {
+          dereference: true,
+          overwrite: false,
+        });
+        console.log(`Copied contents of ${sourcePath} to ${destinationPath}`);
+      } catch (err) {
+        console.error(`Failed to copy contents of ${sourcePath} to ${destinationPath}:`, err);
+      }
     } else {
       console.log(`No public directory found for ${app}`);
     }

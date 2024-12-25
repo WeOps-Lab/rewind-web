@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const fullPath = path.join(process.cwd(), 'public', filePath);
+    const fullPath = path.join(process.cwd(), 'public', 'app', filePath);
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     return NextResponse.json({ content: fileContents }, { status: 200 });
   } catch {

@@ -7,7 +7,7 @@ export const GET = async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const locale = searchParams.get('locale') || 'en';
 
-    const versionsDirectory = path.join(process.cwd(), `public/versions/${locale}`);
+    const versionsDirectory = path.join(process.cwd(), `public/app/versions/${locale}`);
     const versionFiles = fs.readdirSync(versionsDirectory).map(file => file.replace('.md', ''));
 
     return NextResponse.json({ versionFiles });
