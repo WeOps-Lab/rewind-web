@@ -13,8 +13,8 @@ type Story = StoryObj<typeof TimeSelector>;
 export const Default: Story = {
   args: {
     defaultValue: {
-      timeRangeValue: 15,
-      timesValue: null,
+      selectValue: 15,
+      rangePickerVaule: null,
     },
     onFrequenceChange: (frequency: number) => {
       console.log('Frequency changed:', frequency);
@@ -28,8 +28,8 @@ export const Default: Story = {
 export const OnlyTimeSelect: Story = {
   args: {
     defaultValue: {
-      timeRangeValue: 15,
-      timesValue: null,
+      selectValue: 15,
+      rangePickerVaule: null,
     },
     onlyTimeSelect: true,
   },
@@ -47,8 +47,8 @@ export const OnlyRefresh: Story = {
 export const CustomFrequencyList: Story = {
   args: {
     defaultValue: {
-      timeRangeValue: 15,
-      timesValue: [dayjs().subtract(1, 'hour'), dayjs()],
+      selectValue: 15,
+      rangePickerVaule: [dayjs().subtract(1, 'hour'), dayjs()],
     },
     customFrequencyList: [
       { label: '1s', value: 1 },
@@ -64,8 +64,8 @@ export const CustomFrequencyList: Story = {
 export const CustomTimeRangeList: Story = {
   args: {
     defaultValue: {
-      timeRangeValue: 15,
-      timesValue: [dayjs().subtract(1, 'day'), dayjs()],
+      selectValue: 15,
+      rangePickerVaule: [dayjs().subtract(1, 'day'), dayjs()],
     },
     customTimeRangeList: [
       { label: 'Last 24 hours', value: 1440 },
