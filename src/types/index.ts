@@ -1,3 +1,9 @@
+import { Dayjs } from 'dayjs';
+export interface TimeSelectorDefaultValue {
+  selectValue: number | null;
+  rangePickerVaule: [Dayjs, Dayjs] | null;
+}
+
 export interface ColumnItem {
   title: string;
   dataIndex: string;
