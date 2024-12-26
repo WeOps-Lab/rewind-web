@@ -1,17 +1,16 @@
-import React, { useRef } from 'react';
-import { Table, TableProps } from 'antd';
+import React, { useRef, useState, useEffect } from 'react';
+import { Table, TableProps, Pagination } from 'antd';
 import { SettingFilled } from '@ant-design/icons';
 import customTableStyle from './index.module.scss';
 import FieldSettingModal from './fieldSettingModal';
 import { ColumnItem } from '@/types/index';
 
-interface CustomTableProps
+interface CustomTableProps<T>
   extends Omit<
-    TableProps,
+    TableProps<T>,
     'bordered' | 'size' | 'fieldSetting' | 'onSelectFields'
   > {
   bordered?: boolean;
-  size?: 'large' | 'middle' | 'small';
   fieldSetting?: {
     showSetting: boolean;
     displayFieldKeys: string[];
@@ -24,39 +23,93 @@ interface FieldRef {
   showModal: () => void;
 }
 
-const CustomTable: React.FC<CustomTableProps> = ({
-  // 可在此处统一设置表格某属性的默认值，如果传该属性，以传入为准
+const CustomTable = <T extends object>({
   bordered = false,
-  size = 'large',
   fieldSetting = {
     showSetting: false,
     displayFieldKeys: [],
     choosableFields: [],
   },
   onSelectFields = () => [],
+  loading,
+  scroll,
   pagination,
   ...TableProps
-}) => {
+}: CustomTableProps<T>) => {
   const fieldRef = useRef<FieldRef>(null);
+  const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const updateTableHeight = () => {
+      if (scroll?.y) {
+        setTableHeight(parseCalcY(scroll.y as string));
+      }
+    }
+    updateTableHeight();
+    window.addEventListener('resize', updateTableHeight);
+    return () => {
+      window.removeEventListener('resize', updateTableHeight);
+    };
+  }, [scroll]);
+
+  const parseCalcY = (value: string): number => {
+    console.log('parseCalcY');
+    if (!pagination) return 0;
+    const vh = window.innerHeight;
+    let total = 0;
+
+    // 分析表达式的正则表达式以捕获运算符、数字和单位
+    const calcRegex = /([-+]?)\s*(\d*\.?\d+)(vh|px)/g;
+    let match: RegExpExecArray | null;
+
+    while ((match = calcRegex.exec(value)) !== null) {
+      const sign = match[1] || '+';
+      const numValue = parseFloat(match[2]);
+      const unit = match[3];
+
+      let result = 0;
+      if (unit === 'vh') {
+        result = (numValue / 100) * vh;
+      } else if (unit === 'px') {
+        result = numValue;
+      }
+
+      if (sign === '-') {
+        total -= result;
+      } else {
+        total += result;
+      }
+    }
+
+    const PAGE_HEIGHT = 50;
+    const TABLE_HEADER_HEIGHT = 55;
+    return total + PAGE_HEIGHT + TABLE_HEADER_HEIGHT;
+  };
 
   const showFeildSetting = () => {
     fieldRef.current?.showModal();
   };
 
-  const paginationConfig = !pagination
-    ? false
-    : {
-      ...pagination
-    };
-
   return (
-    <div className={customTableStyle.customTable}>
+    <div
+      className={`relative ${customTableStyle.customTable}`}
+      style={{ height: tableHeight ? `${tableHeight}px` : 'auto' }}>
       <Table
         bordered={bordered}
-        size={size}
-        pagination={paginationConfig}
+        scroll={scroll}
+        loading={loading}
+        pagination={false}
         {...TableProps}
       />
+      {pagination && !loading && (<div className="absolute right-0 bottom-0 flex justify-end">
+        <Pagination
+          total={pagination?.total}
+          showSizeChanger
+          current={pagination?.current}
+          pageSize={pagination?.pageSize}
+          onChange={pagination?.onChange}
+        />
+      </div>)}
       {fieldSetting.showSetting ? (
         <SettingFilled
           className={customTableStyle.setting}

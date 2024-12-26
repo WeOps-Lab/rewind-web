@@ -23,23 +23,30 @@ interface sidecarinfotype {
 //配置页面的table的列定义
 interface ConfigHookParams {
   configurationClick: (key: string) => void;
-  applyconfigurationClick: (key: string) => void;
-  deleteconfirm: (e?: React.MouseEvent<HTMLElement>) => void;
-  delcancel: (e?: React.MouseEvent<HTMLElement>) => void;
+  applyconfigurationClick: (key: string) => void
 }
 interface VariableProps {
   openUerModal: (type: string, form: TableDataItem) => void;
   getFormDataById: (key: string) => TableDataItem;
-  delconfirm: (e: any) => void;
+  delconfirm: (key:string,text:any) => void;
   delcancel: (e: any) => void;
 }
-
 interface CouldregionCardProps {
   height?: number;
   width?: number;
   title: ReactNode;
   children?: ReactNode;
 }
+//api返回的配置文件列表的类型
+interface IConfiglistprops {
+  id: string;
+  name: string;
+  collector: string;
+  operating_system: string;
+  node_count: string;
+  config_template?: string;
+}
+
 export type {
   ConfigurationData,
   SidecardForm,
@@ -47,4 +54,5 @@ export type {
   ConfigHookParams,
   VariableProps,
   CouldregionCardProps,
+  IConfiglistprops
 };

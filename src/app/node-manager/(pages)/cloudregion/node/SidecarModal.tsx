@@ -12,11 +12,14 @@ import { useTranslation } from "@/utils/i18n";
 import type { FormInstance } from "antd";
 import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index";
 import type { TableDataItem } from "@/app/node-manager/types/index";
+import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 const { TextArea } = Input;
 
 const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
     const sidecarformRef = useRef<FormInstance>(null);
+    const { t } = useTranslation();
+    const { getsidecarstep } = useApiCloudRegion();
     //设置弹窗状态
     const [SidecarVisible, setSidecarVisible] =
       useState<boolean>(false);
@@ -24,20 +27,26 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
     const [sidecarFormData, setSidecarFormData] =
       useState<TableDataItem>();
     const [type, setType] = useState<string>("");
-    const { t } = useTranslation();
+
     useImperativeHandle(ref, () => ({
-      showModal: ({ type, form }) => {
-        debugger
+      showModal: ({ type }) => {
         // 开启弹窗的交互
         setSidecarVisible(true);
         setType(type);
-        setSidecarFormData(form);
+        setSidecarFormData({
+          ipaddress: '',
+          operatingsystem: 'linux',
+          installationguide: ''
+        });
       },
     }));
 
     //初始化表单的数据
     useEffect(() => {
-      sidecarformRef.current?.resetFields()
+      sidecarformRef.current?.resetFields();
+      if (sidecarFormData) {
+        sidecarformRef.current?.setFieldsValue(sidecarFormData);
+      }
     }, [SidecarVisible, sidecarFormData]);
 
     //关闭用户的弹窗(取消和确定事件)
@@ -45,8 +54,15 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
       setSidecarVisible(false);
     };
     const handleConfirm = () => {
-      setSidecarVisible(false);
-      message.success("成功添加节点成功");
+      const ip = sidecarformRef.current?.getFieldValue('ipaddress');
+      const operating_system = sidecarformRef.current?.getFieldValue('operatingsystem');
+      getsidecarstep(ip, operating_system).then((res) => {
+        sidecarformRef.current?.setFieldsValue({
+          installationguide: res
+        })
+
+      })
+      message.success("查询成功");
       onSuccess();
       setSidecarVisible(false);
     };
@@ -87,7 +103,6 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
           label={t("node-manager.cloudregion.node.system")}
         >
           <Select
-            defaultValue="linux"
             options={[
               { value: 'linux', label: 'Linux' },
               { value: 'windows', label: 'Windows' }

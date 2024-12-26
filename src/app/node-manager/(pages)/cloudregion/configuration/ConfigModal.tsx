@@ -16,10 +16,10 @@ import type { SidecardForm } from "@/app/node-manager/types/cloudregion"
 import { useTranslation } from '@/utils/i18n';
 import type { GetProps } from 'antd';
 import { useApplyColumns } from "./useApplyColumns";
+import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
+import { IConfiglistprops } from '@/app/node-manager/types/cloudregion';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search, TextArea } = Input;
-
-
 
 const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
@@ -28,13 +28,15 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const [configVisible, setConfigVisible] =
       useState<boolean>(false);
     //设置表当的数据
-    const [configForm, setConfigForm] = useState<TableDataItem>();
-    const [applydata, setApplydata] = useState<SidecardForm[]>([])
-    const [type, setType] = useState<string>("");
     const { t } = useTranslation();
+    const { createconfig, getconfiglist } = useApiCloudRegion();
+    const [configForm, setConfigForm] = useState<TableDataItem>();
+    const [applydata, setApplydata] = useState<SidecardForm[]>([]);
+    const [colselectitems, setColselectitems] = useState<SidecardForm[]>([])
+    const [type, setType] = useState<string>("");
     //处理应用的事件
     const handleApply = () => {
-      setConfigVisible(false);
+      setConfigVisible(true);
       message.success('apply success!')
     }
     const applycolumns = useApplyColumns({ handleApply })
@@ -49,35 +51,63 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
             filterSystem(key)
             return
           }
+          return
         }
         setConfigForm(form)
       },
     }));
 
-
     //初始化表单的数据
     useEffect(() => {
-      configformRef.current?.resetFields();
-      configformRef.current?.setFieldsValue(configForm);
-    }, [configVisible, configformRef]);
+      if (type === 'apply') {
+        return
+      }
+      if (configVisible) {
+        configformRef.current?.resetFields();
+        configformRef.current?.setFieldsValue(configForm);
+      }
+    }, [configVisible, configForm]);
 
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
       setConfigVisible(false);
     };
+
+    //添加配置文件
     const handleConfirm = async () => {
-      const data = await configformRef.current?.validateFields();
-      console.log('数据', data)
-      onSuccess();
+      if (type === 'add') {
+        createconfig({
+          name: configformRef.current?.getFieldValue('name'),
+          collector_id: configformRef.current?.getFieldValue('collector'),
+          cloud_region_id: 1,
+          config_template: configformRef.current?.getFieldValue('configinfo')
+        })
+      }
       setConfigVisible(false);
+      onSuccess();
     };
 
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
 
-
     //选择操作系统
     const handleChangeOperatingsystem = (value: string) => {
-      console.log('选择的操作系统是', value)
+      getconfiglist(1).then((res) => {
+        const temporaryformdata = res.filter((item: IConfiglistprops) => {
+          if (item.operating_system === value) {
+            return {
+              Collector: item.collector,
+              configinfo: item.config_template
+            }
+          }
+        });
+        const temdata = temporaryformdata.map((item: IConfiglistprops) => {
+          return { value: item.collector, label: item.collector }
+        })
+        //设置采集器
+        setColselectitems(temdata);
+        console.log('temporaryformdata', temporaryformdata)
+      })
+
     }
     //选择采集器
     const handleChangeCollector = (value: string) => {
@@ -138,10 +168,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           label={t('node-manager.cloudregion.Configuration.collector')}
         >
           <Select
-            options={[
-              { value: 'mericbeat', label: 'Mericbeat' },
-              { value: 'mericbeat1', label: 'Mericbeat1' },
-            ]}
+            options={colselectitems}
             onChange={handleChangeCollector}
           >
           </Select>

@@ -13,18 +13,17 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "@/utils/i18n";
 import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index"
 
-
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
     const collectorformRef = useRef<FormInstance>(null);
-    //设置弹窗状态
-    const [collectorVisible, setCollectorVisible] =
-      useState<boolean>(false);
     //创建一个路由对象
     const router = useRouter();
     //设置表当的数据
-    const [type, setType] = useState<string>("");
     const { t } = useTranslation();
+    const [type, setType] = useState<string>("");
+    //设置弹窗状态
+    const [collectorVisible, setCollectorVisible] =
+      useState<boolean>(false);
     const configarr = ["bindconfig", "updataconfig"]
     const Popconfirmarr = ["restart", "stop"]
     useImperativeHandle(ref, () => ({
@@ -48,17 +47,13 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     //点击确定按钮的相关逻辑处理
     const handleConfirm = () => {
       if (Popconfirmarr.includes(type)) {
-
         return
       }
-      if (type === 'stop') {
-        message.success("停止成功");
-        onSuccess();
-        setCollectorVisible(false);
-        return;
+      //处理绑定配置，更新配置，启动探针
+      if (type === "bindconfig") {
+        message.success("Successfully");
       }
       setCollectorVisible(false);
-      message.success("Successfully");
       onSuccess();
       setCollectorVisible(false);
     };

@@ -37,7 +37,7 @@ const SideMenu: React.FC<SideMenuProps> = ({
 
   const isActive = (path: string): boolean => {
     if (pathname === null) return false;
-    
+
     return pathname.startsWith(path);
   };
 

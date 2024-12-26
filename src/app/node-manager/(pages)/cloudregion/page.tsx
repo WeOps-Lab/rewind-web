@@ -1,85 +1,162 @@
-'use client'
-import React, { useEffect, useRef, useState } from "react";
-import { FormInstance, Input } from "antd";
-import Icon from "@/components/icon";
-import OperateModal from '@/components/operate-modal'
-import { Form } from "antd";
-import cloudregionstyle from './index.module.scss'
-import { useRouter } from "next/navigation";
-import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
-import { useTranslation } from "@/utils/i18n";
-import { CouldregionCardProps } from "@/app/node-manager/types/cloudregion"
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
+import { FormInstance, Input } from 'antd';
+import Icon from '@/components/icon';
+import OperateModal from '@/components/operate-modal';
+import useApiClient from '@/utils/request';
+import { Form } from 'antd';
+import cloudregionstyle from './index.module.scss';
+import { useRouter } from 'next/navigation';
+import { MoreOutlined, PlusOutlined } from '@ant-design/icons';
+import { useTranslation } from '@/utils/i18n';
+import { CouldregionCardProps } from '@/app/node-manager/types/cloudregion';
+import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
+interface CloudregioncardProps {
+  id: number;
+  name: string;
+  introduction: string;
+  [key: string]: any;
+}
+
 const Cloudregion = () => {
-  const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
-  const [cloudregiondata, setCloudregiondata] = useState<string>('这个是云区域的描述');
   const cloudregionformRef = useRef<FormInstance>(null);
   const divref = useRef(null);
   const { t } = useTranslation();
+  const { isLoading } = useApiClient();
+  const { getcloudlist, updatecloudintro } = useApiCloudRegion();
+  const [selectedRegion, setSelectedRegion] = useState<CloudregioncardProps | null>(null);
+  const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
+
+  // 获取相关的接口
+  const fetchCloudRegions = async () => {
+    try {
+      const res = await getcloudlist();
+      if (res && res.length > 0) {
+        setSelectedRegion(res[0]);
+      } else {
+        console.error('No data received');
+      }
+    } catch (error) {
+      console.error('Error fetching cloud region data:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoading) {
+      fetchCloudRegions();
+    }
+  }, [isLoading]);
+
   useEffect(() => {
     cloudregionformRef.current?.resetFields();
     cloudregionformRef.current?.setFieldsValue({
       user: {
-        introduction: cloudregiondata,
+        introduction: selectedRegion?.introduction,
       },
     });
-  }, [openeditcloudregion])
+  }, [openeditcloudregion]);
+
   // 标题组件
   const Cloudregiontitle = () => {
-    const editeiinfo = (e: { stopPropagation: () => void; }) => {
-      setOpeneditcloudregion(true)
-      e.stopPropagation()
-    }
+    const editeiinfo = (e: { stopPropagation: () => void }) => {
+      setOpeneditcloudregion(true);
+      e.stopPropagation();
+    };
+
     return (
-      <div className="flex">
-        <div className="flex justify-center items-center w-[50px] h-[50px]"><Icon type="yunquyu" style={{ height: '35px', width: '35px' }}></Icon></div>
-        <div className="flex justify-items-center items-center"><div>{t('node-manager.cloudregion.title')}</div></div>
-        <div className="relative w-[16px] h-[24px]"><div className="absolute" style={{ top: '-7px', left: '9px' }} onClick={editeiinfo}><MoreOutlined /></div></div>
+      <div className="flex relative">
+        <div className="flex justify-center items-center w-[50px] h-[50px]">
+          <Icon type="yunquyu" style={{ height: '35px', width: '35px' }}></Icon>
+        </div>
+        <div className="flex justify-items-center items-center">
+          <div>{selectedRegion?.name}</div>
+        </div>
+        <div className="w-[16px] h-[24px]">
+          <div
+            className="absolute"
+            style={{ top: '-7px', left: '218px' }}
+            onClick={editeiinfo}
+          >
+            <MoreOutlined />
+          </div>
+        </div>
       </div>
-    )
-  }
-  const CouldregionCard: React.FC<CouldregionCardProps> = ({ height = 127, width = 262, title, children }) => {
+    );
+  };
+
+  const CouldregionCard: React.FC<CouldregionCardProps> = ({
+    height = 127,
+    width = 262,
+    title,
+    children,
+  }) => {
     const router = useRouter();
     const handleCardClick = (event: any) => {
       const titleElement = event.currentTarget.querySelector('.card-title');
       event.stopPropagation();
-
       if (!titleElement || !titleElement.contains(event.target as Node)) {
-        router.push('/node-manager/cloudregion/node');
+        router.push('/node-manager/cloudregion/node?cloud_region_id=1');
       }
     };
-    return (<div className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col`}
-      style={{ width: `${width}px`, height: `${height}px` }} onClick={handleCardClick}>
-      <div className="w-full">
-        <div>{title}</div>
+
+    return (
+      <div
+        className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col`}
+        style={{ width: `${width}px`, height: `${height}px` }}
+        onClick={handleCardClick}
+      >
+        <div className="w-full">
+          <div>{title}</div>
+        </div>
+        <div className="w-full">{children}</div>
       </div>
-      <div className="w-full">{children}</div>
-    </div>);
+    );
   };
 
   const handleFormOkClick = () => {
-    setOpeneditcloudregion(false);
     const values = cloudregionformRef.current?.getFieldsValue();
-    setCloudregiondata(values?.user?.introduction);
-  }
+    updatecloudintro('1', { introduction: values?.user?.introduction });
+    setOpeneditcloudregion(false);
+    fetchCloudRegions();
+  };
 
-  const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
+  const onSearch: SearchProps['onSearch'] = (value, _e, info) =>
+    console.log(info?.source, value);
 
   return (
-    <div ref={divref} className={`${cloudregionstyle.cloudregion} w-full h-full`}>
-      <div className="flex justify-end mb-4"> <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} /></div>
+    <div
+      ref={divref}
+      className={`${cloudregionstyle.cloudregion} w-full h-full`}
+    >
+      <div className="flex justify-end mb-4">
+        {' '}
+        <Search
+          className="w-64 mr-[8px]"
+          placeholder="input search text"
+          enterButton
+          onSearch={onSearch}
+        />
+      </div>
       <div className="flex">
         <div>
-          <div className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col justify-center`}
-            style={{ width: `262px`, height: `127px` }} >
-            <div><PlusOutlined className="mr-[8px]"></PlusOutlined>{t('common.add')}</div>
+          <div
+            className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col justify-center`}
+            style={{ width: `262px`, height: `127px` }}
+          >
+            <div>
+              <PlusOutlined className="mr-[8px]"></PlusOutlined>
+              {t('common.add')}
+            </div>
           </div>
         </div>
         <div className="ml-[45px]">
-          <CouldregionCard title={<Cloudregiontitle></Cloudregiontitle>}><p className="mt-4 crp h-[40px] textclip">{cloudregiondata}</p> </CouldregionCard>
+          <CouldregionCard title={<Cloudregiontitle></Cloudregiontitle>}>
+            <p className="crp h-[40px] textclip">{selectedRegion?.introduction}</p>
+          </CouldregionCard>
         </div>
       </div>
       {/* 编辑默认云区域弹窗 */}
@@ -88,23 +165,32 @@ const Cloudregion = () => {
         open={openeditcloudregion}
         okText="Confirm"
         cancelText="Cancel"
-        onCancel={() => { setOpeneditcloudregion(false) }}
-        onOk={() => { handleFormOkClick() }}>
-        <Form
-          layout="vertical"
-          ref={cloudregionformRef}
-          name="nest-messages"
-        >
-          <Form.Item required name={['user', 'website']} label={t('node-manager.cloudregion.editform.Name')}>
-            <Input placeholder="Default Cloud Region" disabled />
+        onCancel={() => {
+          setOpeneditcloudregion(false);
+        }}
+        onOk={() => {
+          handleFormOkClick();
+        }}
+      >
+        <Form layout="vertical" ref={cloudregionformRef} name="nest-messages">
+          <Form.Item
+            required
+            name={['user', 'website']}
+            label={t('node-manager.cloudregion.editform.Name')}
+          >
+            <Input placeholder={selectedRegion?.name} disabled />
           </Form.Item>
-          <Form.Item required name={['user', 'introduction']} label={t('node-manager.cloudregion.editform.Introduction')}>
-            <Input.TextArea value={cloudregiondata} rows={5} />
+          <Form.Item
+            required
+            name={['user', 'introduction']}
+            label={t('node-manager.cloudregion.editform.Introduction')}
+          >
+            <Input.TextArea value={'fdhhfdh'} rows={5} />
           </Form.Item>
         </Form>
       </OperateModal>
     </div>
-  )
-}
+  );
+};
 
 export default Cloudregion;
