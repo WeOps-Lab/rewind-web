@@ -20,6 +20,7 @@ interface ModalConfig {
   type: string;
   form?: TableDataItem;
   key?: string;
+  id?: string;
 }
 //调用弹窗的类型
 interface ModalRef {

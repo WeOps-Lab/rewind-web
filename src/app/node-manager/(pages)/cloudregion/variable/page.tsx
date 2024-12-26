@@ -48,7 +48,6 @@ const Variable = () => {
   //删除的确定的弹窗
   const delconfirm = (key: string) => {
     deletevariable(key).then((res) => {
-      debugger
       message.success(res.message);
     }).catch((error) => {
       message.error(error.message);

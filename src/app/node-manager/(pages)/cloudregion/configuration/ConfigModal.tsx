@@ -128,18 +128,17 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const showConfigForm = (type: string) => {
       if (type === "apply") {
         return (
-          <div className="w-full h-full">
-            <div>
-              <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
-            </div>
-            <div className="mt-4"><CustomTable
+          <div>
+            <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
+            <CustomTable
+              className="mt-4"
               columns={applycolumns}
               dataSource={applydata}
               pagination={{
                 pageSize: 20,
               }}
-              scroll={{ y: "calc(100vh - 400px)", x: "600px" }}
-            /></div>
+              scroll={{ y: "calc(100vh - 480px)", x: "calc(100vw - 700px)" }}
+            />
           </div>
         );
       }
@@ -194,6 +193,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         cancelText={t("common.cancel")}
         onCancel={handleCancel}
         onOk={handleConfirm}
+        width={type === "apply" ? 800 : 600}
       >
         {showConfigForm(type)}
       </OperateModal>

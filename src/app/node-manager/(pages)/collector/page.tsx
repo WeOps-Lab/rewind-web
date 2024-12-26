@@ -14,20 +14,20 @@ const Collector = () => {
   return (
     <div className={`${collectorstyle.collection}`}>
       {/* 顶部的提示信息 */}
-      <div className="flex mb-4 justify-between">
-        <Segmented
-          className="custom-tabs"
-          options={['All(20)', 'Elastic(6)', 'XX(10)']}
-          value={value}
-          onChange={setValue}
-        />
-        <Search className="w-64" placeholder="input search text" onSearch={onSearch} enterButton />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <Segmented
+        className="custom-tabs"
+        options={['All(20)', 'Elastic(6)', 'XX(10)']}
+        value={value}
+        onChange={setValue}
+      />
+      <div className="flex flex-col">
+        <div className="flex justify-end mb-4"> <Search className="w-64 mr-8" placeholder="input search text" onSearch={onSearch} enterButton /></div>
         {/* 卡片 */}
-        {cards.map((_, index) => (
-          <Collectorcard key={5} page={index} />
-        ))}
+        <div className="flex gap-x-16 flex-wrap gap-y-8">
+          {cards.map((_, index) => (
+            <Collectorcard key={5} page={index} />
+          ))}
+        </div>
       </div>
     </div>
   );

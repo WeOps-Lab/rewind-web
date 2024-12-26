@@ -17,6 +17,7 @@ interface WithSideMenuLayoutProps {
   showProgress?: boolean;
   showSideMenu?: boolean;
   layoutType?: 'sideMenu' | 'segmented';
+  taskProgressComponent?: React.ReactNode;
 }
 
 const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
@@ -29,6 +30,7 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   showProgress,
   showSideMenu = true,
   layoutType = 'sideMenu',
+  taskProgressComponent,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -52,6 +54,7 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
               menuItems={menuItems}
               showBackButton={showBackButton}
               showProgress={showProgress}
+              taskProgressComponent={taskProgressComponent}
               onBackButtonClick={onBackButtonClick}
             >
               {intro}

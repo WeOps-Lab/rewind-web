@@ -18,18 +18,39 @@ const useApiCloudRegion = () => {
 
   //节点的模块
   //获取节点列表
-  const getnodelist = async (cloud_region_id: number) => {
-    return await get('/api/node/', { params: { cloud_region_id } });
+  const getnodelist = async (cloud_region_id: number, search?: string) => {
+    return await get('/api/node/', { params: { cloud_region_id, search } });
   };
 
   //获取sidecar的安装步骤
   const getsidecarstep = async (ip: string, operating_system: string) => {
-    return await get('/api/sidecar/install_steps/', {
+    return await get('/api/sidecar/install_guide/', {
       params: {
         ip,
         operating_system,
       },
     });
+  };
+
+  //批量绑定或更新节点的采集器配置
+  const batchbindcollector = async (
+    data: {
+      node_ids: string;
+      collector_configuration_id: string;
+    }[]
+  ) => {
+    return await post('/api/node/batch_binding_configuration/', data);
+  };
+
+  //批量操作节点的采集器（启动、停止、重启）
+  const batchoperationcollector = async (
+    data: {
+      node_ids: string[];
+      collector_id: string;
+      operation: string;
+    }[]
+  ) => {
+    return await post('/api/node/batch_operation/', data);
   };
 
   //配置文件的模块
@@ -83,8 +104,10 @@ const useApiCloudRegion = () => {
 
   //变量的模块
   //获取变量列表
-  const getvariablelist = async (cloud_region_id: number,search?:string) => {
-    return await get('/api/sidecar_env/', { params: { cloud_region_id,search } });
+  const getvariablelist = async (cloud_region_id: number, search?: string) => {
+    return await get('/api/sidecar_env/', {
+      params: { cloud_region_id, search },
+    });
   };
 
   //创建环境变量
@@ -128,6 +151,8 @@ const useApiCloudRegion = () => {
     createvariable,
     updatevariable,
     deletevariable,
+    batchbindcollector,
+    batchoperationcollector,
   };
 };
 export default useApiCloudRegion;

@@ -78,7 +78,7 @@ const Cloudregion = () => {
         <div className="w-[16px] h-[24px]">
           <div
             className="absolute"
-            style={{ top: '-7px', left: '218px' }}
+            style={{ top: '-4px', left: '240px' }}
             onClick={editeiinfo}
           >
             <MoreOutlined />
@@ -89,8 +89,8 @@ const Cloudregion = () => {
   };
 
   const CouldregionCard: React.FC<CouldregionCardProps> = ({
-    height = 127,
-    width = 262,
+    height = 128,
+    width = 288,
     title,
     children,
   }) => {
@@ -105,7 +105,7 @@ const Cloudregion = () => {
 
     return (
       <div
-        className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col`}
+        className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col shadow-md`}
         style={{ width: `${width}px`, height: `${height}px` }}
         onClick={handleCardClick}
       >
@@ -144,8 +144,7 @@ const Cloudregion = () => {
       <div className="flex">
         <div>
           <div
-            className={`p-4 rounded-md flex items-center bg-[var(--color-bg-1)] flex-col justify-center`}
-            style={{ width: `262px`, height: `127px` }}
+            className={`p-4 w-72 ml-12 h-32 shadow-md rounded-md flex items-center bg-[var(--color-bg-1)] flex-col justify-center`}
           >
             <div>
               <PlusOutlined className="mr-[8px]"></PlusOutlined>
@@ -153,9 +152,9 @@ const Cloudregion = () => {
             </div>
           </div>
         </div>
-        <div className="ml-[45px]">
+        <div className="ml-12">
           <CouldregionCard title={<Cloudregiontitle></Cloudregiontitle>}>
-            <p className="crp h-[40px] textclip">{selectedRegion?.introduction}</p>
+            <p className="crp h-9 textclip">{selectedRegion?.introduction}</p>
           </CouldregionCard>
         </div>
       </div>

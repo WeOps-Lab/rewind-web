@@ -23,12 +23,12 @@ interface sidecarinfotype {
 //配置页面的table的列定义
 interface ConfigHookParams {
   configurationClick: (key: string) => void;
-  applyconfigurationClick: (key: string) => void
+  applyconfigurationClick: (key: string) => void;
 }
 interface VariableProps {
   openUerModal: (type: string, form: TableDataItem) => void;
   getFormDataById: (key: string) => TableDataItem;
-  delconfirm: (key:string,text:any) => void;
+  delconfirm: (key: string, text: any) => void;
   delcancel: (e: any) => void;
 }
 interface CouldregionCardProps {
@@ -47,6 +47,14 @@ interface IConfiglistprops {
   config_template?: string;
 }
 
+// 配置文件的展开数据类型
+interface Iexpandeddata {
+  key: string;
+  name: string;
+  filename: string;
+  status: string;
+}
+
 export type {
   ConfigurationData,
   SidecardForm,
@@ -54,5 +62,6 @@ export type {
   ConfigHookParams,
   VariableProps,
   CouldregionCardProps,
-  IConfiglistprops
+  IConfiglistprops,
+  Iexpandeddata,
 };
