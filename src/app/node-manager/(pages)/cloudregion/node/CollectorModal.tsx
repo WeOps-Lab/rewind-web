@@ -12,6 +12,7 @@ import type { FormInstance } from "antd";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/utils/i18n";
 import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index"
+import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
@@ -20,25 +21,50 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const router = useRouter();
     //设置表当的数据
     const { t } = useTranslation();
+    const { getnodelist } = useApiCloudRegion();
     const [type, setType] = useState<string>("");
+    const [nodeid, setNodeid] = useState<string>("");
     //设置弹窗状态
     const [collectorVisible, setCollectorVisible] =
       useState<boolean>(false);
     const configarr = ["bindconfig", "updataconfig"]
     const Popconfirmarr = ["restart", "stop"]
     useImperativeHandle(ref, () => ({
-      showModal: ({ type }) => {
+      showModal: ({ type, id }) => {
         // 开启弹窗的交互
         setCollectorVisible(true);
         setType(type);
+        if (id) {
+          setNodeid(id);
+        }
       },
     }));
 
     //初始化表单的数据
     useEffect(() => {
-      collectorformRef.current?.resetFields();
+      if (collectorVisible) {
+        collectorformRef.current?.resetFields();
+      }
     }, [collectorVisible]);
 
+    //根据id获取配置，并设置表单数据
+    useEffect(() => {
+      if (!collectorVisible) {
+        return;
+      }
+      if (nodeid) {
+        // 调用接口获取数据
+        const cloud_region_id = 1;
+        getnodelist(cloud_region_id, nodeid).then((res) => {
+          console.log('获取的配置是', res)
+        })
+        const data = {
+          Collector: "采集器1",
+          configration: "配置文件1"
+        };
+        collectorformRef.current?.setFieldsValue(data);
+      }
+    }, [collectorVisible])
 
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
@@ -51,8 +77,10 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
       }
       //处理绑定配置，更新配置，启动探针
       if (type === "bindconfig") {
-        message.success("Successfully");
+
       }
+
+      message.success("Successfully");
       setCollectorVisible(false);
       onSuccess();
       setCollectorVisible(false);

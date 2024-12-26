@@ -6,7 +6,7 @@ const CollectorCard: FC<{ key: number; page: number }> = (props) => {
   return (
     <Link href={`collector/detail?id=${props.page}`}>
       <div
-        className={`${collectorstyle.card} min-w-[250px] bg-[var(--color-bg-1)]  p-4 flex flex-col shadow-md`}
+        className={`${collectorstyle.card} min-w-60 max-w-80 bg-[var(--color-bg-1)] h-40  p-4 flex flex-col shadow-md`}
       >
         {/* 卡片的上面的内容 */}
         <div className="flex mb-4">

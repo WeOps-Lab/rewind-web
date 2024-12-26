@@ -16,7 +16,7 @@ import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 const { TextArea } = Input;
 
 const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
-  ({ onSuccess }, ref) => {
+  ({ }, ref) => {
     const sidecarformRef = useRef<FormInstance>(null);
     const { t } = useTranslation();
     const { getsidecarstep } = useApiCloudRegion();
@@ -54,6 +54,7 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
       setSidecarVisible(false);
     };
     const handleConfirm = () => {
+      sidecarformRef.current?.validateFields();
       const ip = sidecarformRef.current?.getFieldValue('ipaddress');
       const operating_system = sidecarformRef.current?.getFieldValue('operatingsystem');
       getsidecarstep(ip, operating_system).then((res) => {
@@ -63,8 +64,8 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
 
       })
       message.success("查询成功");
-      onSuccess();
-      setSidecarVisible(false);
+      // onSuccess();
+      // setSidecarVisible(false);
     };
 
     //选择操作系统
@@ -95,12 +96,19 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
         <Form.Item
           name="ipaddress"
           label={t("node-manager.cloudregion.node.ipaddress")}
+          rules={[
+            {
+              required: true,
+              message: '请输入IP地址',
+            },
+          ]}
         >
           <Input className="" />
         </Form.Item>
         <Form.Item
           name="operatingsystem"
           label={t("node-manager.cloudregion.node.system")}
+          required={true}
         >
           <Select
             options={[

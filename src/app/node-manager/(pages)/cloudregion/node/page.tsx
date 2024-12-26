@@ -18,6 +18,7 @@ import { useColumns } from "./useColumns"
 import Mainlayout from '../mainlayout/layout'
 import useApiClient from '@/utils/request';
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
+import type { Iexpandeddata } from "@/app/node-manager/types/cloudregion"
 type OperationKey = 'startcollector' | 'restartcollector' | 'stopcollector' | 'bindingconfig' | 'updateconfig';
 type TableRowSelection<T extends object = object> =
   TableProps<T>["rowSelection"];
@@ -38,27 +39,32 @@ const Node = () => {
   //设置展开行的状态
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
+  //展开行的数据
+  const [expandeddata, setExpandeddata] = useState<Iexpandeddata[]>([])
+
   // 展开行的触发的事件
   const toggleExpandRow = (key: React.Key) => {
     const newExpandedRowKeys = expandedRowKeys.includes(key)
       ? expandedRowKeys.filter((k) => k !== key)
       : [...expandedRowKeys, key];
+    //获取展开行的信息
+    const cloud_region_id = 1;
+
+    getnodelist(cloud_region_id, key as string).then((res) => {
+      const data = res[0].status.collectors.map((item: any) => {
+        return {
+          key: item.id,
+          name: item.collector_id,
+          filename: item.configuration_id,
+          status: item.message
+          ,
+        }
+      })
+      setExpandeddata(data);
+    })
     setExpandedRowKeys(newExpandedRowKeys);
   };
 
-  const getMokData = (num: number) => {
-    const data = [];
-    for (let i = 0; i < num; i++) {
-      data.push({
-        key: i.toString(),
-        name: `metricbeat${i}`,
-        filename: `文件${i}`
-      });
-    }
-    return data;
-  }
-  //模拟点击ip展开的数据
-  const ipexpandedRowRenderdata = getMokData(4);
   const columns = useColumns({ toggleExpandRow })
   //保存要过滤字段的对应的值
   const [visibleRowKeys, setVisibleRowKeys] = useState<string>();
@@ -100,23 +106,11 @@ const Node = () => {
 
   useEffect(() => {
     if (isLoading) {
-      getnodelist(1).then((res) => {
-        const data = res.map((item: any) => {
-          return {
-            key: item.id,
-            ip: item.ip,
-            operatingsystem: item.operating_system,
-            sidecar: item.status.status === "1" ? "Running" : "Error",
-          }
-        })
-        setNodelist(data)
-      }).catch((error) => {
-        console.error('Error fetching cloud region data:', error);
-      });
+      getNodelist();
     }
   }, [isLoading]);
   useEffect(() => {
-    if (selectedRowKeys.length === 0) {
+    if (!selectedRowKeys.length) {
       setColbtnshow(true);
       return
     }
@@ -141,7 +135,7 @@ const Node = () => {
       restartcollector: "restart",
       stopcollector: "stop"
     }
-    collectorRef.current?.showModal({ type: obj[e.key as OperationKey] })
+    collectorRef.current?.showModal({ type: obj[e.key as OperationKey], id: selectedRowKeys[0].toString() })
   };
 
   const SidecarmenuProps = {
@@ -190,12 +184,11 @@ const Node = () => {
     getCheckboxProps: getCheckboxProps
   };
 
-
   //一个根据id获取详细的展开的行的数据
   const getExpandedRowData = () => {
     return (
       <div className="grid grid-cols-2 gap-4 p-4">
-        {ipexpandedRowRenderdata.map((item) => {
+        {expandeddata.map((item) => {
           const metricbeattype = "weiqiyong"
           return (
             <div key={item.key} className="flex h-[32px]">
@@ -238,7 +231,33 @@ const Node = () => {
       </div>
     );
   };
-  const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
+
+  //模糊搜索(id, name, ip)
+  const onSearch: SearchProps['onSearch'] = (value) => {
+    getNodelist(value)
+  };
+
+  //更新nodelist的图标的点击的事件
+  const updatenodelist = () => {
+    getNodelist();
+  }
+
+  const getNodelist = (search?: string) => {
+    const id = 1;
+    getnodelist(id, search).then((res) => {
+      const data = res.map((item: any) => {
+        return {
+          key: item.id,
+          ip: item.ip,
+          operatingsystem: item.operating_system,
+          sidecar: item.status.status === "1" ? "Running" : "Error",
+        }
+      })
+      setNodelist(data)
+    }).catch((error) => {
+      console.error('Error fetching cloud region data:', error);
+    });
+  }
   return (
     <Mainlayout>
       <div className={`${nodeStyle.node} w-full h-full`}>
@@ -262,7 +281,7 @@ const Node = () => {
                 </Space>
               </Button>
             </Dropdown>
-            <ReloadOutlined />
+            <ReloadOutlined className="rotating" onClick={updatenodelist} />
           </div>
           <div className="tablewidth">{/* 表格的部分 */}
             <CustomTable

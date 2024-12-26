@@ -61,7 +61,7 @@ const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =>
           message.success(res);
         })
       } else {
-        updatevariable(id, tempdata);
+        updatevariable(variableFormData?.key, tempdata);
       }
       setVariableVisible(false);
       onSuccess();

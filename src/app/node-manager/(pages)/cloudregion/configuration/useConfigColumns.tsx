@@ -17,13 +17,13 @@ export const useConfigColumns = ({
       title: t("node-manager.cloudregion.Configuration.name"),
       dataIndex: "name",
       fixed: "left",
-      width: 180,
+      width: 150,
       render: (text: string) => <a>{text}</a>,
     },
     {
       title: t("node-manager.cloudregion.Configuration.Collector"),
       dataIndex: "collector",
-      width: 300,
+      width: 150,
     },
     {
       title: t("node-manager.cloudregion.Configuration.System"),

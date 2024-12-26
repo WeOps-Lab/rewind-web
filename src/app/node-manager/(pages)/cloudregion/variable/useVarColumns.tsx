@@ -13,29 +13,25 @@ export const useVarColumns = ({
     {
       title: t("node-manager.cloudregion.variable.Name"),
       dataIndex: "name",
-      width: 180,
       render: (text: string) => <a>{text}</a>,
     },
     {
       title: t("node-manager.cloudregion.variable.Value"),
       dataIndex: "value",
-      width: 150,
     },
     {
       title: t("node-manager.cloudregion.variable.Desc"),
       dataIndex: "description",
-      width: 200,
     },
     {
       title: t("common.actions"),
       dataIndex: "key",
-      width: 200,
       fixed: "right",
       render: (key: string, text) => (
         <div>
           <Button
             onClick={() => {
-              openUerModal("edit", getFormDataById(key)!);
+              openUerModal("edit", getFormDataById(key));
             }}
             color="primary"
             variant="link"

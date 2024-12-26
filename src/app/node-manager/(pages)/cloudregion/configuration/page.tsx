@@ -43,7 +43,6 @@ const Configration = () => {
   const cloud_region_id = 1;
   //点击编辑配置文件的触发事件
   const configurationClick = (key: string) => {
-    debugger
     const configurationformdata = data.find((item) => item.key === key);
     configurationRef.current?.showModal({
       type: "edit",
@@ -164,11 +163,12 @@ const Configration = () => {
           <Button
             className="mr-[8px]"
             type="primary"
+            icon={<PlusOutlined />}
             onClick={() => {
               addconfigurationClick();
             }}
           >
-            <PlusOutlined />{t("common.add")}
+            {t("common.add")}
           </Button>
           <Popconfirm
             title={t("node-manager.cloudregion.Configuration.modifydeltitle")}
@@ -188,7 +188,7 @@ const Configration = () => {
         </div>
         <div>
           <CustomTable<any>
-            scroll={{ x: "calc(100vw - 300px)", y: "calc(100vh - 440px)" }}
+            scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
             columns={columns}
             dataSource={data}
             rowSelection={rowSelection}
@@ -199,8 +199,6 @@ const Configration = () => {
           ref={configurationRef}
           onSuccess={() => {
             getConfiglist();
-            debugger
-            console.log(data)
           }}
         ></ConfigModal>
       </div>
