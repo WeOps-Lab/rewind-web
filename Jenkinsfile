@@ -58,13 +58,14 @@ pipeline {
        stage('更新环境'){
             steps {
                 script {
-                    sh "
+                    sh """
                     cd ${env.KUBE_DIR}/munchkin-web/overlays/lite/ && \
                         sudo kubectl delete -k . || true &&\
                         sudo kubectl apply -k . 
                     cd ${env.KUBE_DIR}/munchkin-web/overlays/cwoa/ && \
                         sudo kubectl delete -k . || true &&\
                         sudo kubectl apply -k .                         
+                    """
                 }
             }
        }
