@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Popover } from 'antd';
 import { CaretDownFilled } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
+import { useMenus } from '@/context/menus';
 import UserInfo from '../user-info';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
 
 const TopMenu = () => {
   const { t } = useTranslation();
-  const [menuItems, setMenuItems] = useState<Array<{ label: string; icon: string; path: string }>>([]);
+  const menuItems = useMenus();
   const pathname = usePathname();
   const apps: Array<{ name: string; icon: string }> = [
     { name: 'Monitor', icon: 'jiankong1' },
@@ -19,31 +19,6 @@ const TopMenu = () => {
     { name: 'Resource', icon: 'zichanguanli' },
     { name: 'System', icon: 'yingyongxitongguanli' },
   ];
-
-  useEffect(() => {
-    const fetchMenus = async () => {
-      const locale = localStorage.getItem('locale') || 'en';
-      try {
-        const response = await fetch(`/api/menu?locale=${locale}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch menus');
-        }
-        const menus = await response.json();
-        setMenuItems(menus);
-      } catch (error) {
-        console.error('Failed to fetch menus:', error);
-        try {
-          const menuResponse = await fetch(`/menus/${locale}.json`);
-          const menus = await menuResponse.json();
-          setMenuItems(menus);
-        } catch {
-          console.error('Failed to load menus from local:', error);
-        }
-      }
-    };
-
-    fetchMenus();
-  }, []);
 
   const renderContent = (
     <div className='grid grid-cols-3 gap-4 max-h-[350px] overflow-auto'>
@@ -57,19 +32,23 @@ const TopMenu = () => {
   );
 
   return (
-    <div className="z-30 flex flex-col grow-0 shrink-0 w-full basis-auto min-h-[56px]">
-      <div className="flex flex-1 items-center justify-between px-4">
+    <div className="z-30 flex flex-col grow-0 shrink-0 w-full basis-auto h-[56px] relative">
+      <div className="flex items-center justify-between px-4 w-full h-full">
         <div className="flex items-center space-x-2">
           <Image src="/logo-site.png" className="block w-auto h-10" alt="logo" width={100} height={40} />
           <div>WeOps</div>
           <Popover content={renderContent} title={t('common.appList')} trigger="hover">
-            <div className={`flex items-center justify-center space-x-4 cursor-pointer rounded-[10px] px-3 py-2 ${styles.nav}`}>
+            <div className={`flex items-center justify-center cursor-pointer rounded-[10px] px-3 py-2 ${styles.nav}`}>
               <Icon type='caidandaohang' className='mr-1' />
-              {t('common.navigation')}
               <CaretDownFilled className={`text-sm ${styles.icons}`} />
             </div>
           </Popover>
         </div>
+        <div className="flex items-center flex-shrink-0 space-x-4">
+          <UserInfo />
+        </div>
+      </div>
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="flex items-center space-x-4">
           {menuItems.map((item) => {
             const isActive = item.path === '/' ? pathname === '/' : pathname.startsWith(item.path);
@@ -82,9 +61,6 @@ const TopMenu = () => {
               </Link>
             );
           })}
-        </div>
-        <div className="flex items-center flex-shrink-0 space-x-4">
-          <UserInfo />
         </div>
       </div>
     </div>
