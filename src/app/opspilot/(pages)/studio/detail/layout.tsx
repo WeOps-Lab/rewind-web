@@ -3,7 +3,6 @@
 import React from 'react';
 import { Tooltip } from 'antd';
 import WithSideMenuLayout from '@/components/sub-layout';
-import TaskProgress from '@/app/opspilot/components/task-progress'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 
@@ -98,8 +97,6 @@ const KnowledgeDetailLayout = ({ children }: { children: React.ReactNode }) => {
       topSection={<TopSection />}
       intro={intro}
       showBackButton={true}
-      showProgress={true}
-      taskProgressComponent={<TaskProgress />}
       onBackButtonClick={handleBackButtonClick}
     >
       {children}
