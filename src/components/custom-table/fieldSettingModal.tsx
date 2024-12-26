@@ -134,7 +134,6 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
         }
       >
         <div className={`${fieldSettingModalStyle.settingFields} flex`}>
-          {/* 左侧选择列表 */}
           <div className="w-1/2 p-4 border-r">
             <div>
               <Checkbox

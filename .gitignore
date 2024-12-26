@@ -56,3 +56,4 @@ storybook-static/*
 # public locales and menus
 /public/locales/*
 /public/menus/*
+/public/app/*
