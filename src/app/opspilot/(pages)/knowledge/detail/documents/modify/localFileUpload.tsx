@@ -32,8 +32,10 @@ const LocalFileUpload: React.FC<LocalFileUploadProps> = ({ onFileChange, initial
       'text/x-markdown', // .md (non-standard)
       'text/csv' // .csv
     ];
+    const allowedExtensions = ['.docx', '.pdf', '.xlsx', '.txt', '.csv', '.md'];
     const isAllowedType = allowedTypes.includes(file.type);
-    if (!isAllowedType) {
+    const isAllowedExtension = allowedExtensions.some(ext => file.name.endsWith(ext));
+    if (!isAllowedType && !isAllowedExtension) {
       message.error(`${file.name} ${t('common.fileType')}`);
       return Upload.LIST_IGNORE;
     }
