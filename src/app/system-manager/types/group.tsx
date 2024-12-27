@@ -7,12 +7,12 @@ interface DataType {
     fathernode?: string;
     childrenleght?: 0;
   }
-  
-  
+
+
   interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
     'data-row-key': string;
   }
-  
+
   interface Access {
     view: boolean;
     viewMembers: boolean;
@@ -20,7 +20,7 @@ interface DataType {
     manage: boolean;
     manageMembership: boolean;
   }
-  
+
   interface SubGroup {
     id: string;
     name: string;
@@ -29,7 +29,7 @@ interface DataType {
     subGroups: SubGroup[];
     access: Access;
   }
-  
+
   interface Group {
     id: string;
     name: string;
@@ -57,8 +57,7 @@ interface OriginalGroup {
 interface ConvertedGroup {
   key: string;
   name: string;
-  childrenGroups?: ConvertedGroup[];
+  children?: ConvertedGroup[];
 }
 
 export type { DataType, RowProps, Access, SubGroup, Group ,OriginalGroup,ConvertedGroup};
-  

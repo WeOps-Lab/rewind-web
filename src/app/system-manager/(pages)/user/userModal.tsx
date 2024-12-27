@@ -11,9 +11,9 @@ import { Input, Button, Form, Radio, Select } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance, RadioChangeEvent } from 'antd';
 import { useTranslation } from '@/utils/i18n';
-import { UserDataType } from '@/app/system-manager/types/users';
+import { UserDataType } from '@/app/system-manager/types/user';
 import RoleDescription from '@/app/system-manager/components/role-description';
-import { useUsernamegeApi } from "@/app/system-manager/api/users/index";
+import { useUsernamegeApi } from "@/app/system-manager/api/user/index";
 
 interface ModalProps {
   onSuccess: () => void;
@@ -71,8 +71,8 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
     }));
 
     const options = [
-      { label: t('system.users.form.administrator'), value: 'Administrator' },
-      { label: t('system.users.form.normalusers'), value: 'Normal users' },
+      { label: t('system.user.form.administrator'), value: 'Administrator' },
+      { label: t('system.user.form.normalusers'), value: 'Normal users' },
     ];
 
     useEffect(() => {
@@ -165,37 +165,37 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
             <Form ref={formRef} layout="vertical">
               <Form.Item
                 name="username"
-                label={t('system.users.form.username')}
+                label={t('system.user.form.username')}
                 rules={[{ required: true, message: t('common.inputRequired') }]}
                 colon={false}
               >
-                <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.username')}`} disabled={type !== 'add'} />
+                <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.username')}`} disabled={type !== 'add'} />
               </Form.Item>
               <Form.Item
                 name="name"
-                label={t('system.users.form.name')}
+                label={t('system.user.form.name')}
                 colon={false}
               >
-                <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.name')}`} />
+                <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.name')}`} />
               </Form.Item>
               <Form.Item
                 name="email"
-                label={t('system.users.form.email')}
+                label={t('system.user.form.email')}
                 colon={false}
                 rules={[{ required: true, message: t('common.inputRequired') }]}
               >
-                <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.email')}`} />
+                <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.email')}`} />
               </Form.Item>
               <Form.Item
                 name="number"
-                label={t('system.users.form.number')}
+                label={t('system.user.form.number')}
                 colon={false}
               >
-                <Input placeholder={`${t('common.inputMsg')}${t('system.users.form.number')}`} />
+                <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.number')}`} />
               </Form.Item>
               <Form.Item
                 name="team"
-                label={t('system.users.form.team')}
+                label={t('system.user.form.team')}
                 colon={false}
                 rules={[{ required: true, message: t('common.inputRequired') }]}
               >
@@ -210,7 +210,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
               </Form.Item>
               <Form.Item
                 name="role"
-                label={t('system.users.form.role')}
+                label={t('system.user.form.role')}
                 colon={false}
                 rules={[{ required: true, message: t('common.inputRequired') }]}
               >

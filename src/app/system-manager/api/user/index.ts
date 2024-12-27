@@ -6,7 +6,7 @@ export const useUsernamegeApi = () => {
   //获取用户列表的api
   function getuserslistApi(params: any) {
     try {
-      return get('/user-manager/internal/user/list', { params });
+      return get('/system_mgmt/user/search_user_list/', { params });
     } catch (error) {
       throw error;
     }

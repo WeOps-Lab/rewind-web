@@ -6,8 +6,8 @@
       "batchmodifyroles": "Batch Modify Roles",
       "selectedusers": "Selected Users"
     },
-    "users": {
-      "title": "Users",
+    "user": {
+      "title": "User",
       "desc": "Display all information.You can maintain user information and assign roles.",
       "search": "Search",
       "table": {
@@ -40,11 +40,12 @@
         "desc3": "3. In other apps, have only operational permissions for using pages, with management pages having view-only access."
       }
     },
-    "groups": {
-      "title": "Groups",
+    "group": {
+      "title": "Group",
       "desc": "Display all information.You can maintain user information and assign roles.",
       "addsubGroups": "Add Sub-Groups",
-      "rename": "Rename"
+      "rename": "Rename",
+      "renameSuccess": "Rename Success"
     }
   }
 }

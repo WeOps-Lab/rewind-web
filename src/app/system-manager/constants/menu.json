@@ -3,23 +3,23 @@
     {
     "label": "用户",
     "icon": "yonghu",
-    "path": "/system-manager/users"
+    "path": "/system-manager/user"
   },
   {
     "label": "组织",
     "icon": "chatgpt",
-    "path": "/system-manager/groups"
+    "path": "/system-manager/group"
   }],
   "en": [
     {
-    "label": "Users",
+    "label": "User",
     "icon": "yonghu",
-    "path": "/system-manager/users"
+    "path": "/system-manager/user"
   },
   {
-    "label": "Groups",
+    "label": "Group",
     "icon": "chatgpt",
-    "path": "/system-manager/groups"
+    "path": "/system-manager/group"
   }
 ]
 }

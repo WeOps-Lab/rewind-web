@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Input, message, Modal, Tree, Button } from 'antd';
+import { Input, message, Modal, Tree, Button, Spin } from 'antd'; // Import Spin for loading indicator
 import { Flex, Tag, TreeDataNode } from 'antd';
 import type { TableColumnsType } from 'antd';
 import TopSection from '@/components/top-section';
@@ -8,9 +8,9 @@ import UserModal, { ModalRef } from './userModal';
 import { useTranslation } from '@/utils/i18n';
 import { getRandomColor } from '@/app/system-manager/utils';
 import CustomTable from '@/components/custom-table';
-import { useUsernamegeApi } from "@/app/system-manager/api/users/index";
-import { OriginalGroup } from "@/app/system-manager/types/groups";
-import { UserDataType, TableRowSelection } from '@/app/system-manager/types/users';
+import { useUsernamegeApi } from "@/app/system-manager/api/user/index";
+import { OriginalGroup } from "@/app/system-manager/types/group";
+import { UserDataType, TableRowSelection } from '@/app/system-manager/types/user';
 import userInfoStyle from './index.module.scss';
 
 const { Search } = Input;
@@ -22,7 +22,8 @@ const User = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
-  const [treeData, setTreaData] = useState<TreeDataNode[]>();
+  const [treeData, setTreaData] = useState<TreeDataNode[]>([]);
+  const [loading, setLoading] = useState<boolean>(true); // Add loading state
 
   const modifydeleteuseref = useRef<HTMLButtonElement>(null);
   const modifyroleuseref = useRef<HTMLButtonElement>(null);
@@ -32,10 +33,9 @@ const User = () => {
   const { confirm } = Modal;
   const { getuserslistApi, getorgtreeApi, deleteUserApi } = useUsernamegeApi();
 
-  // 用户表格数据
   const columns: TableColumnsType<any> = [
     {
-      title: t('system.users.table.username'),
+      title: t('system.user.table.username'),
       dataIndex: 'username',
       width: 185,
       fixed: 'left',
@@ -54,12 +54,23 @@ const User = () => {
         );
       },
     },
-    { title: t('system.users.table.name'), dataIndex: 'name', width: 100 },
-    { title: t('system.users.table.email'), dataIndex: 'email', width: 185 },
-    { title: t('system.users.table.number'), dataIndex: 'number', width: 110 },
-    { title: t('system.users.table.team'), dataIndex: 'team', width: 80 },
     {
-      title: t('system.users.table.role'),
+      title: t('system.user.table.name'),
+      dataIndex: 'name',
+      width: 100
+    },
+    {
+      title: t('system.user.table.email'),
+      dataIndex: 'email',
+      width: 185
+    },
+    {
+      title: t('system.user.table.number'),
+      dataIndex: 'number',
+      width: 110
+    },
+    {
+      title: t('system.user.table.role'),
       dataIndex: 'role',
       width: 110,
       render: (text) => {
@@ -94,6 +105,7 @@ const User = () => {
   ];
 
   const fetchUsers = async () => {
+    setLoading(true); // Set loading state to true before fetch
     const params = {
       search: searchValue,
       page: currentPage,
@@ -101,7 +113,7 @@ const User = () => {
     }
     try {
       const res = await getuserslistApi(params);
-      const data = res.users.map((item: UserDataType) => ({
+      const data = res.user.map((item: UserDataType) => ({
         key: item.id,
         username: item.username,
         name: item.firstName,
@@ -115,6 +127,8 @@ const User = () => {
     } catch (error) {
       console.error(t('common.fetchFailed'), error);
       message.error(t('common.fetchFailed'));
+    } finally {
+      setLoading(false); // Set loading state to false after fetch
     }
   };
 
@@ -227,7 +241,7 @@ const User = () => {
 
   return (
     <div className={`${userInfoStyle.userInfo} w-full`}>
-      <TopSection title={t('system.users.title')} content={t('system.users.desc')} />
+      <TopSection title={t('system.user.title')} content={t('system.user.desc')} />
       <div className={`flex w-full overflow-hidden mt-4`} style={{ height: 'calc(100vh - 195px)' }}>
         <div className={`${userInfoStyle.bgColor} p-4 w-[230px] flex-shrink-0 flex flex-col justify-items-center items-center rounded-md mr-[17px]`}>
           <Input className="w-[204px]" placeholder={`${t('common.search')}...`} />
@@ -294,21 +308,23 @@ const User = () => {
               </Button>
             </div>
           </div>
-          <Flex gap="middle" vertical>
-            <CustomTable
-              scroll={{ y: 'calc(100vh - 370px)' }}
-              pagination={{
-                pageSize,
-                current: currentPage,
-                total,
-                showSizeChanger: true,
-                onChange: handleTableChange,
-              }}
-              columns={columns}
-              dataSource={tabledata}
-              rowSelection={rowSelection}
-            />
-          </Flex>
+          <Spin spinning={loading}>
+            <Flex gap="middle" vertical>
+              <CustomTable
+                scroll={{ y: 'calc(100vh - 370px)' }}
+                pagination={{
+                  pageSize,
+                  current: currentPage,
+                  total,
+                  showSizeChanger: true,
+                  onChange: handleTableChange,
+                }}
+                columns={columns}
+                dataSource={tabledata}
+                rowSelection={rowSelection}
+              />
+            </Flex>
+          </Spin>
         </div>
       </div>
     </div>
