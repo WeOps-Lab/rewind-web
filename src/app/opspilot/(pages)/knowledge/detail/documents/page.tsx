@@ -213,30 +213,32 @@ const DocumentsPage: React.FC = () => {
     }
   };
 
-  const handleSearch = async (value: string) => {
+  const handleSearch = (value: string) => {
     setSearchText(value);
-    await fetchData(value);
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+    }));
   };
 
-  const handleTableChange = (pagination: PaginationProps) => {
-    setPagination(pagination);
+  const handleTableChange = (page: number, pageSize?: number) => {
+    setPagination((prev) => ({
+      ...prev,
+      current: page,
+      pageSize: pageSize || prev.pageSize,
+    }));
   };
 
-  const { current, pageSize } = pagination;
-
-  const getTableParams = useCallback((searchText: string) => {
-    return {
-      name: searchText,
+  const fetchData = useCallback(async (text = '') => {
+    setLoading(true);
+    const { current, pageSize } = pagination;
+    const params = {
+      name: text,
       page: current,
       page_size: pageSize,
       knowledge_source_type: activeTabKey,
       knowledge_base_id: id
     };
-  }, [current, pageSize, activeTabKey]);
-
-  const fetchData = useCallback(async (text = '') => {
-    setLoading(true);
-    const params = getTableParams(text);
     try {
       const res = await get('/knowledge_mgmt/knowledge_document/', { params });
       const { items: data } = res;
@@ -250,7 +252,7 @@ const DocumentsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [get, getTableParams]);
+  }, [get, pagination.current, pagination.pageSize, searchText, activeTabKey]);
 
   useEffect(() => {
     fetchData(searchText);
@@ -270,6 +272,11 @@ const DocumentsPage: React.FC = () => {
   };
 
   const handleTabChange = (key: string) => {
+    setPagination({
+      current: 1,
+      total: 0,
+      pageSize: 20,
+    });
     setActiveTabKey(key);
   };
 
@@ -288,7 +295,7 @@ const DocumentsPage: React.FC = () => {
 
   return (
     <div style={{marginTop: '-10px'}}>
-      <Tabs defaultActiveKey={activeTabKey} onChange={handleTabChange}> {/* 使用activeTabKey */}
+      <Tabs defaultActiveKey={activeTabKey} onChange={handleTabChange}>
         <TabPane tab={t('knowledge.localFile')} key='file' />
         <TabPane tab={t('knowledge.webLink')} key='web_page' />
         <TabPane tab={t('knowledge.cusText')} key='manual' />
@@ -338,12 +345,14 @@ const DocumentsPage: React.FC = () => {
       <CustomTable
         rowKey="id"
         rowSelection={rowSelection}
-        scroll={{ y: 'calc(100vh - 460px)' }}
+        scroll={{ y: 'calc(100vh - 450px)' }}
         columns={columns}
         dataSource={tableData}
-        pagination={pagination}
+        pagination={{
+          ...pagination,
+          onChange: handleTableChange
+        }}
         loading={loading}
-        onChange={handleTableChange}
       />
       <SelectSourceModal
         defaultSelected={activeTabKey}
