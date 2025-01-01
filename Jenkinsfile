@@ -55,7 +55,12 @@ pipeline {
        }
 
        stage('更新环境'){
-            agent { label 'docker' }
+            agent { 
+                label 'docker' 
+            }
+            options {
+                skipDefaultCheckout true
+            }
             steps {
                 script {
                     sh """
