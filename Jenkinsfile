@@ -64,7 +64,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                    docker pull ${IMAGE_NAME}:${IMAGE_TAG}"
+                    docker pull ${IMAGE_NAME}:${IMAGE_TAG}
                     docker restart system-manager-web
                     """
                 }
