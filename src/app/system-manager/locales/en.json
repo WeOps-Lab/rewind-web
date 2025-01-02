@@ -1,0 +1,50 @@
+{
+  "system": {
+    "common": {
+      "modifyrole": "Modify Role",
+      "modifydelete": "Modify Delete",
+      "batchmodifyroles": "Batch Modify Roles",
+      "selectedusers": "Selected Users"
+    },
+    "user": {
+      "title": "User",
+      "desc": "Display all information.You can maintain user information and assign roles.",
+      "search": "Search",
+      "table": {
+        "username": "USERNAME",
+        "lastName": "LAST NAME",
+        "email": "EMAIL",
+        "number": "NUMBER",
+        "role": "ROLE"
+      },
+      "form": {
+        "username": "Username",
+        "lastName": "Last Name",
+        "name": "Name",
+        "email": "Email",
+        "group": "Group",
+        "role": "Role",
+        "administrator": "Administrator",
+        "normalusers": "Normal Users"
+      },
+      "admin": {
+        "title": "The administrator has the following permissions:",
+        "desc1": "1.Manage organizations and users in system settings.",
+        "desc2": "2.Have the highest privileges in other apps, possessing access to all data and the ability to perform all functionality operations."
+      },
+      "normal": {
+        "title": "Normal users have the following permissions:",
+        "desc1": "1. Cannot manage organizations and users.",
+        "desc2": "2. In other apps, have data access rights only for their own organization.",
+        "desc3": "3. In other apps, have only operational permissions for using pages, with management pages having view-only access."
+      }
+    },
+    "group": {
+      "title": "Group",
+      "desc": "Display all information.You can maintain user information and assign roles.",
+      "addSubGroups": "Add Sub-Groups",
+      "rename": "Rename",
+      "renameSuccess": "Rename Success"
+    }
+  }
+}
