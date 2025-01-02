@@ -1,47 +1,56 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Input, Form, message, Modal, Spin } from 'antd';
+import { Button, Input, Form, message, Spin, Popconfirm } from 'antd';
+import { ColumnsType } from 'antd/es/table';
 import CustomTable from '@/components/custom-table';
 import TopSection from '@/components/top-section';
 import OperateModal from '@/components/operate-modal';
-import { DataType, OriginalGroup, ConvertedGroup } from '@/app/system-manager/types/group';
+import { OriginalGroup, ConvertedGroup } from '@/app/system-manager/types/group';
 import { useTranslation } from '@/utils/i18n';
-import { useApiTeam } from '@/app/system-manager/api/group/index';
+import { useGroupApi } from '@/app/system-manager/api/group/index';
 
 const { Search } = Input;
 
-const Groups = () => {
-  const [form] = Form.useForm();
+const Groups: React.FC = () => {
+  const [addForm] = Form.useForm();
+  const [renameForm] = Form.useForm();
   const [addSubTeamKey, setAddSubTeamKey] = useState('');
   const [renameKey, setRenameKey] = useState('');
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
   const [addTeamModalOpen, setAddTeamModalOpen] = useState(false);
   const [addSubTeamModalOpen, setAddSubTeamModalOpen] = useState(false);
   const [renameTeamModalOpen, setRenameTeamModalOpen] = useState(false);
-  const [dataSource, setDataSource] = useState<DataType[]>();
+  const [dataSource, setDataSource] = useState<ConvertedGroup[]>([]);
+  const [originalData, setOriginalData] = useState<OriginalGroup[]>([]);
   const [loading, setLoading] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
 
   const { t } = useTranslation();
-  const { getTeamData, addTeamData, renameTeam, deleteTeam } = useApiTeam();
+  const { getTeamData, addTeamData, updateGroup, deleteTeam } = useGroupApi();
 
-  const columns: any = [
+  const columns: ColumnsType<ConvertedGroup> = [
     { title: t('system.user.form.name'), dataIndex: 'name', width: 450 },
     {
       title: t('common.actions'),
       dataIndex: 'actions',
       width: 300,
-      render: (_: string, data: DataType) => (
+      render: (_: string, data: ConvertedGroup) => (
         <>
           <Button type="link" className="mr-[8px]" onClick={() => addSubGroup(data.key)}>
-            {t('system.group.addsubGroups')}
+            {t('system.group.addSubGroups')}
           </Button>
           <Button type="link" className="mr-[8px]" onClick={() => renameGroup(data.key)}>
             {t('system.group.rename')}
           </Button>
           {!data.children || data.children.length === 0 ? (
-            <Button type="link" onClick={() => deleteGroup(data.key)}>
-              {t('common.delete')}
-            </Button>
+            <Popconfirm
+              title={t('common.delConfirm')}
+              okText={t('common.confirm')}
+              cancelText={t('common.cancel')}
+              onConfirm={() => handleDeleteGroup(data.key)}
+            >
+              <Button type="link">{t('common.delete')}</Button>
+            </Popconfirm>
           ) : null}
         </>
       ),
@@ -56,6 +65,7 @@ const Groups = () => {
     setLoading(true);
     try {
       const teamData = await getTeamData();
+      setOriginalData(teamData);
       const convertedData = convertGroups(teamData);
       setDataSource(convertedData);
     } finally {
@@ -69,9 +79,11 @@ const Groups = () => {
         key: group.id,
         name: group.name,
       };
+
       if (group.subGroups && group.subGroups.length > 0) {
         groupData.children = convertGroups(group.subGroups);
       }
+
       return groupData;
     });
   };
@@ -79,8 +91,7 @@ const Groups = () => {
   const handleInputSearchChange = async (value: string) => {
     setLoading(true);
     try {
-      const teamData = await getTeamData();
-      const filteredData = teamData.filter((group: any) => group.name.includes(value));
+      const filteredData = originalData.filter((group: any) => group.name.includes(value));
       const newData = convertGroups(filteredData);
       setDataSource(newData);
     } finally {
@@ -90,36 +101,40 @@ const Groups = () => {
 
   const addGroup = () => {
     setAddTeamModalOpen(true);
-    form.resetFields();
+    addForm.resetFields();
   };
 
   const onAddTeam = async () => {
+    setModalLoading(true);
     try {
-      await form.validateFields();
-      setAddTeamModalOpen(false);
+      await addForm.validateFields();
       await addTeamData({
-        group_name: form.getFieldValue('teamName')
+        group_name: addForm.getFieldValue('teamName'),
       });
       await fetchData();
       message.success(t('common.addSuccess'));
+      setAddTeamModalOpen(false);
     } catch (error) {
       console.error('Failed:', error);
+    } finally {
+      setModalLoading(false);
     }
   };
 
   const addSubGroup = (key: string) => {
     setAddSubTeamModalOpen(true);
     setAddSubTeamKey(key);
-    form.resetFields();
+    addForm.resetFields();
   };
 
   const onAddSubTeam = async () => {
+    setModalLoading(true);
     try {
-      await form.validateFields();
-      const teamName = form.getFieldValue('teamName');
+      await addForm.validateFields();
+      const teamName = addForm.getFieldValue('teamName');
       await addTeamData({
         group_name: teamName,
-        parent_group_id: addSubTeamKey
+        parent_group_id: addSubTeamKey,
       });
       await fetchData();
       message.success(t('common.addSuccess'));
@@ -127,62 +142,71 @@ const Groups = () => {
       setAddSubTeamModalOpen(false);
     } catch (error) {
       console.error('Failed:', error);
+    } finally {
+      setModalLoading(false);
     }
   };
 
   const renameGroup = (key: string) => {
     setRenameTeamModalOpen(true);
     setRenameKey(key);
-    form.resetFields();
-    findNode(dataSource as DataType[], key);
+    renameForm.resetFields();
+    const node = findNode(originalData, key);
+    if (node) {
+      renameForm.setFieldsValue({ renameTeam: node.name });
+    }
   };
 
-  const findNode = (treeData: DataType[], targetKey: string): DataType | undefined => {
+  const findNode = (treeData: OriginalGroup[], targetKey: string): OriginalGroup | undefined => {
     for (const node of treeData) {
-      if (node.key === targetKey) {
-        form.setFieldsValue({ renameTeam: node.name });
+      if (node.id === targetKey) {
         return node;
-      } else if (node.children) {
-        const childNode = findNode(node.children, targetKey);
+      } else if (node.subGroups) {
+        const childNode = findNode(node.subGroups, targetKey);
         if (childNode) return childNode;
       }
     }
   };
 
   const onRenameTeam = async () => {
+    setModalLoading(true);
     try {
-      await form.validateFields();
-      const newName = form.getFieldValue('renameTeam');
-      await renameTeam(newName, renameKey);
-      await fetchData();
+      await renameForm.validateFields();
+      const newName = renameForm.getFieldValue('renameTeam');
+      await updateGroup({
+        group_id: renameKey,
+        group_name: newName,
+      });
       message.success(t('system.group.renameSuccess'));
+      await fetchData();
       setRenameTeamModalOpen(false);
     } catch (error) {
       console.error('Failed:', error);
+    } finally {
+      setModalLoading(false);
     }
   };
 
-  const deleteGroup = (key: string) => {
-    showDeleteConfirm(key);
+  const handleDeleteGroup = (key: string) => {
+    const group = findNode(originalData, key);
+    if (group) {
+      deleteGroup(group);
+    }
   };
 
-  const onExpand = (expanded: boolean, record: DataType) => {
-    setExpandedRowKeys(prev => expanded ? [...prev, record.key] : prev.filter(key => key !== record.key));
+  const deleteGroup = async (data: OriginalGroup) => {
+    setLoading(true);
+    try {
+      await deleteTeam(data);
+      message.success(t('common.delSuccess'));
+      await fetchData();
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const showDeleteConfirm = (key: string) => {
-    Modal.confirm({
-      title: t('common.delConfirm'),
-      content: t('common.delConfirmCxt'),
-      centered: true,
-      okText: t('common.confirm'),
-      cancelText: t('common.cancel'),
-      onOk: async () => {
-        await deleteTeam(key);
-        await fetchData();
-        message.success(t('common.delSuccess'));
-      },
-    });
+  const onExpand = (expanded: boolean, record: ConvertedGroup) => {
+    setExpandedRowKeys((prev) => (expanded ? [...prev, record.key] : prev.filter((key) => key !== record.key)));
   };
 
   return (
@@ -196,7 +220,9 @@ const Groups = () => {
           onSearch={handleInputSearchChange}
           placeholder={`${t('common.search')}...`}
         />
-        <Button type="primary" onClick={addGroup}>+{t('common.add')}</Button>
+        <Button type="primary" onClick={addGroup}>
+          +{t('common.add')}
+        </Button>
       </div>
 
       <Spin spinning={loading}>
@@ -216,11 +242,13 @@ const Groups = () => {
         closable={false}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
+        okButtonProps={{ loading: modalLoading }}
+        cancelButtonProps={{ disabled: modalLoading }}
         open={addTeamModalOpen}
         onOk={onAddTeam}
         onCancel={() => setAddTeamModalOpen(false)}
       >
-        <Form form={form}>
+        <Form form={addForm}>
           <Form.Item
             name="teamName"
             label={t('system.user.form.name')}
@@ -236,11 +264,13 @@ const Groups = () => {
         closable={false}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
+        okButtonProps={{ loading: modalLoading }}
+        cancelButtonProps={{ disabled: modalLoading }}
         open={addSubTeamModalOpen}
         onOk={onAddSubTeam}
         onCancel={() => setAddSubTeamModalOpen(false)}
       >
-        <Form form={form}>
+        <Form form={addForm}>
           <Form.Item
             name="teamName"
             label={t('system.user.form.name')}
@@ -251,17 +281,18 @@ const Groups = () => {
         </Form>
       </OperateModal>
 
-      {/* Rename Team Modal */}
       <OperateModal
         title={t('system.group.rename')}
         closable={false}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
+        okButtonProps={{ loading: modalLoading }}
+        cancelButtonProps={{ disabled: modalLoading }}
         open={renameTeamModalOpen}
         onOk={onRenameTeam}
         onCancel={() => setRenameTeamModalOpen(false)}
       >
-        <Form form={form}>
+        <Form form={renameForm}>
           <Form.Item
             name="renameTeam"
             label={t('system.user.form.name')}

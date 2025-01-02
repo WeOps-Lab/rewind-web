@@ -1,26 +1,37 @@
 {
   "zh": [
     {
-    "label": "用户",
-    "icon": "yonghu",
-    "path": "/system-manager/user"
-  },
-  {
-    "label": "组织",
-    "icon": "chatgpt",
-    "path": "/system-manager/group"
-  }],
-  "en": [
+      "label": "用户",
+      "icon": "yonghu",
+      "path": "/system-manager/user"
+    },
     {
-    "label": "User",
-    "icon": "yonghu",
-    "path": "/system-manager/user"
-  },
-  {
-    "label": "Group",
-    "icon": "chatgpt",
-    "path": "/system-manager/group"
-  }
-]
+      "label": "组织",
+      "icon": "chatgpt",
+      "path": "/system-manager/group"
+    },
+     {
+      "label": "角色",
+      "icon": "chatgpt",
+      "path": "/system-manager/role"
+    }
+  ],
+  "en": [
+      {
+      "label": "User",
+      "icon": "yonghu",
+      "path": "/system-manager/user"
+    },
+    {
+      "label": "Group",
+      "icon": "chatgpt",
+      "path": "/system-manager/group"
+    },
+    {
+      "label": "Role",
+      "icon": "chatgpt",
+      "path": "/system-manager/role"
+    }
+  ]
 }
 

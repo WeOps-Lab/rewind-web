@@ -12,18 +12,17 @@
       "search": "Search",
       "table": {
         "username": "USERNAME",
-        "name": "NAME",
+        "lastName": "LAST NAME",
         "email": "EMAIL",
         "number": "NUMBER",
-        "team": "TEAM",
         "role": "ROLE"
       },
       "form": {
         "username": "Username",
+        "lastName": "Last Name",
         "name": "Name",
         "email": "Email",
-        "number": "Phone",
-        "team": "Team",
+        "group": "Group",
         "role": "Role",
         "administrator": "Administrator",
         "normalusers": "Normal Users"
@@ -43,7 +42,7 @@
     "group": {
       "title": "Group",
       "desc": "Display all information.You can maintain user information and assign roles.",
-      "addsubGroups": "Add Sub-Groups",
+      "addSubGroups": "Add Sub-Groups",
       "rename": "Rename",
       "renameSuccess": "Rename Success"
     }
