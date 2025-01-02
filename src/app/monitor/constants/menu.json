@@ -2,44 +2,44 @@
   "zh": [
     {
       "label": "搜索",
-      "icon": "jiqiren2",
+      "icon": "search-f",
       "path": "/monitor/search"
     },
     {
       "label": "视图",
-      "icon": "jiqiren2",
+      "icon": "zichan-quanbushebei",
       "path": "/monitor/view"
     },
     {
       "label": "事件",
-      "icon": "jiqiren2",
+      "icon": "mulu",
       "path": "/monitor/event"
     },
     {
       "label": "集成",
-      "icon": "jiqiren2",
+      "icon": "moxing2",
       "path": "/monitor/intergration"
     }
   ],
   "en": [
     {
       "label": "Search",
-      "icon": "jiqiren2",
+      "icon": "search-f",
       "path": "/monitor/search"
     },
     {
       "label": "View",
-      "icon": "jiqiren2",
+      "icon": "zichan-quanbushebei",
       "path": "/monitor/view"
     },
     {
       "label": "Event",
-      "icon": "jiqiren2",
+      "icon": "mulu",
       "path": "/monitor/event"
     },
     {
       "label": "Intergration",
-      "icon": "jiqiren2",
+      "icon": "moxing2",
       "path": "/monitor/intergration"
     }
   ]
