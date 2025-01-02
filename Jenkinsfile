@@ -39,8 +39,8 @@ pipeline {
             steps {
                 script {
                     sh """
-                    rm -Rf ./src/app/example    
-                    cp -Rf ./.env.example .env                
+                    rm -Rf ./src/app/example
+                    cp -Rf ./.env.example .env
                     sudo docker build -f ./Dockerfile -t ${IMAGE_NAME}:${IMAGE_TAG} .
                     """
                 }
@@ -61,10 +61,10 @@ pipeline {
                     sh """
                     cd ${env.KUBE_DIR}/munchkin-web/overlays/lite/ && \
                         sudo kubectl delete -k . || true &&\
-                        sudo kubectl apply -k . 
+                        sudo kubectl apply -k .
                     cd ${env.KUBE_DIR}/munchkin-web/overlays/cwoa/ && \
                         sudo kubectl delete -k . || true &&\
-                        sudo kubectl apply -k .                         
+                        sudo kubectl apply -k .
                     """
                 }
             }
