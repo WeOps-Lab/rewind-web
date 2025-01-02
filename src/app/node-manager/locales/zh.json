@@ -40,7 +40,9 @@
         "bindconfig": "绑定配置",
         "updataconfig": "更新配置",
         "restarinfo": "您确定要重新启动收集器吗？",
-        "stopinfo": "您确定要停止收集器吗？"
+        "stopinfo": "您确定要停止收集器吗？",
+        "ruleinputinfo":"请输入你的IP地址!",
+        "group":"组织"
       },
       "Configuration": {
         "name": "姓名",

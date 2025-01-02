@@ -40,13 +40,13 @@ export const useConfigColumns = ({
       dataIndex: "key",
       fixed: "right",
       width: 180,
-      render: (key) => (
+      render: (key, item) => (
         <div className="flex">
           <Button
             color="primary"
             variant="link"
             onClick={() => {
-              applyconfigurationClick(key);
+              applyconfigurationClick(key, item.operatingsystem);
             }}
           >
             {t("common.apply")}
@@ -69,6 +69,7 @@ export const useConfigColumns = ({
             onCancel={delcancel}
           >
             <Button
+              disabled={item.nodecount}
               color="primary"
               variant="link"
             >

@@ -1,10 +1,38 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SubLayout from "@/components/sub-layout";
 import Icon from '@/components/icon';
 import { useTranslation } from "@/utils/i18n";
+import useApiCollector from "@/app/node-manager/api/collector";
+import type { Collectorcardprops } from "@/app/node-manager/types/index";
+
 const Collectordetail = () => {
+
+  const { getCollectorlist } = useApiCollector();
   const { t } = useTranslation();
+  const [detaildata, setDetaildata] = useState<Collectorcardprops>({
+    id: "无",
+    name: "无",
+    system: ['Linux'],
+    introduction: '网络请求失败'
+  });
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const id = searchParams.get("id");
+    if (typeof id === 'string') {
+      getCollectorlist(id).then((res) => {
+        const tempdata = {
+          id: res[0].id,
+          name: res[0].name,
+          system: [res[0].node_operating_system],
+          introduction: res[0].introduction
+        }
+        setDetaildata(tempdata)
+      })
+    }
+  }, []);
+
   //顶部的组件
   const Topsection = () => {
     return (
@@ -16,6 +44,7 @@ const Collectordetail = () => {
       </div>
     );
   }
+
   return (
     <div className="w-full h-full">
       <SubLayout
@@ -27,12 +56,12 @@ const Collectordetail = () => {
         <div className="w-full h-full">
           <div>文档介绍的位置</div>
           <div>
-            <div>Linux</div>
+            <div>{detaildata.system && detaildata.system[0] ? detaildata.system[0] : '未知系统'}</div>
             <div>Linux的介绍</div>
           </div>
           <div className="mt-[20px]">
             <div>conntrack</div>
-            <div>conntrack的介绍</div>
+            <div>{detaildata.introduction}</div>
           </div>
           <div className="mt-[20px]">
             <div>Summary</div>

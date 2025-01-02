@@ -4,7 +4,7 @@ import type { TableColumnsType } from "antd";
 
 export const useApplyColumns = ({
   handleApply,
-}: { handleApply: () => void }): TableColumnsType => {
+}: { handleApply: (key: string) => void }): TableColumnsType => {
   const { t } = useTranslation();
   //数据
   const applycolumns: TableColumnsType = [
@@ -40,7 +40,7 @@ export const useApplyColumns = ({
       dataIndex: "key",
       fixed: "right",
       render: (key: string, sidecarinfo) => {
-        return (<Button disabled={sidecarinfo.sidecar != 'Running'} type="link" onClick={handleApply}>{t('common.apply')}</Button>)
+        return (<Button disabled={sidecarinfo.sidecar != 'Running'} type="link" onClick={() => { handleApply(key) }}>{t('common.apply')}</Button>)
       },
     },
   ];

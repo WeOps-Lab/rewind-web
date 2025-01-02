@@ -13,6 +13,9 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "@/utils/i18n";
 import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index"
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
+import type { OptionItem } from "@/app/node-manager/types/index";
+import type { CollectorItem } from "@/app/node-manager/types/cloudregion";
+import useCloudId from "@/app/node-manager/hooks/useCloudid";
 
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
@@ -21,67 +24,110 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const router = useRouter();
     //设置表当的数据
     const { t } = useTranslation();
-    const { getnodelist } = useApiCloudRegion();
+    const cloudid = useCloudId();
+    const { getnodelist, batchbindcollector, batchoperationcollector } = useApiCloudRegion();
     const [type, setType] = useState<string>("");
-    const [nodeid, setNodeid] = useState<string>("");
+    const [nodeids, setNodeids] = useState<string[]>([""]);
     //设置弹窗状态
     const [collectorVisible, setCollectorVisible] =
       useState<boolean>(false);
+    //用于控制配置文件的显示
     const configarr = ["bindconfig", "updataconfig"]
+    //需要二次弹窗确定的类型
     const Popconfirmarr = ["restart", "stop"]
+    //用于存储配置文件列表
+    const [configlist, setConfiglist] = useState<OptionItem[]>([])
+    //用于存储采集器的列表
+    const [collectorlist, setCollectorlist] = useState<OptionItem[]>([])
+
+
     useImperativeHandle(ref, () => ({
-      showModal: ({ type, id }) => {
+      showModal: ({ type, ids }) => {
         // 开启弹窗的交互
         setCollectorVisible(true);
         setType(type);
-        if (id) {
-          setNodeid(id);
+        if (ids) {
+          setNodeids(ids);
         }
       },
     }));
-
-    //初始化表单的数据
-    useEffect(() => {
-      if (collectorVisible) {
-        collectorformRef.current?.resetFields();
-      }
-    }, [collectorVisible]);
 
     //根据id获取配置，并设置表单数据
     useEffect(() => {
       if (!collectorVisible) {
         return;
       }
-      if (nodeid) {
-        // 调用接口获取数据
-        const cloud_region_id = 1;
-        getnodelist(cloud_region_id, nodeid).then((res) => {
-          console.log('获取的配置是', res)
-        })
-        const data = {
-          Collector: "采集器1",
-          configration: "配置文件1"
-        };
-        collectorformRef.current?.setFieldsValue(data);
+      if (nodeids) {
+        //获取配置文件列表和采集器的列表
+        const collectorPromises = nodeids.map((item) => getnodelist(Number(cloudid), item));
+        Promise.all(collectorPromises)
+          .then((results) => {
+            const collectorlisttemp: OptionItem[] = [];
+            const configlisttemp: OptionItem[] = [];
+            results.forEach((res) => {
+              res[0]?.status?.collectors?.forEach((elem: CollectorItem) => {
+                collectorlisttemp.push({
+                  value: String(elem.collector_id),
+                  label: String(elem.collector_name)
+                });
+                configlisttemp.push({
+                  value: String(elem.configuration_id),
+                  label: String(elem.configuration_name)
+                });
+              });
+            });
+            collectorformRef.current?.resetFields();
+            setConfiglist(configlisttemp);
+            setCollectorlist(collectorlisttemp);
+            collectorformRef.current?.setFieldsValue({
+              Collector: collectorlisttemp[0]?.label,
+              configration: configlisttemp[0]?.label
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching data: ", error);
+          });
       }
-    }, [collectorVisible])
+    }, [collectorVisible, collectorformRef])
 
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
       setCollectorVisible(false);
     };
+
     //点击确定按钮的相关逻辑处理
     const handleConfirm = () => {
       if (Popconfirmarr.includes(type)) {
         return
       }
-      //处理绑定配置，更新配置，启动探针
+      //处理绑定配置
       if (type === "bindconfig") {
-
+        const values = collectorformRef.current?.getFieldsValue();
+        const collector_configuration_id = configlist?.find((item) => item.label === values?.configration)?.value;
+        const node_ids = nodeids;
+        if (typeof (collector_configuration_id) === "string") {
+          batchbindcollector({ node_ids, collector_configuration_id })
+        }
       }
-
+      //处理更新配置
+      if (type === "updataconfig") {
+        const values = collectorformRef.current?.getFieldsValue();
+        const collector_configuration_id = configlist?.find((item) => item.label === values?.configration)?.value;
+        const node_ids = nodeids;
+        if (typeof (collector_configuration_id) === "string") {
+          batchbindcollector({ node_ids, collector_configuration_id })
+        }
+      }
+      //处理启动
+      if (type === "start") {
+        const values = collectorformRef.current?.getFieldsValue();
+        const collector_id = collectorlist?.find((item) => item.value === values?.Collector)?.value;
+        const node_ids = nodeids;
+        if (typeof (collector_id) === "string") {
+          batchoperationcollector({ node_ids, collector_id, operation: "start" })
+        }
+      }
       message.success("Successfully");
-      setCollectorVisible(false);
       onSuccess();
       setCollectorVisible(false);
     };
@@ -90,11 +136,20 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const handleChangestartcollector = (value: string) => {
       console.log('选择的操作系统是', value)
     }
+
     //二次确认的弹窗
     const secondconfirm = () => {
-      setCollectorVisible(false);
+      const values = collectorformRef.current?.getFieldsValue();
+      const collector_id = collectorlist?.find((item) => item.value === values?.Collector)?.value;
+      const node_ids = nodeids;
+      if (typeof (collector_id) === "string") {
+        batchoperationcollector({ node_ids, collector_id, operation: type })
+      }
       message.success("Successfully");
+      onSuccess();
+      setCollectorVisible(false);
     }
+
     return (
       <OperateModal
         title={t(`node-manager.cloudregion.node.${type}`)}
@@ -129,11 +184,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
             label={t("node-manager.cloudregion.node.collector")}
           >
             <Select
-              defaultValue="采集器列表"
-              options={[
-                { value: 'collector1', label: '采集器1' },
-                { value: 'collector2', label: '采集器2' }
-              ]}
+              options={collectorlist}
               onChange={handleChangestartcollector}
             >
             </Select>
@@ -143,21 +194,17 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
             label={t("node-manager.cloudregion.node.config")}
           >
             <Select
-              defaultValue="配置文件列表"
-              options={[
-                { value: 'configuration1', label: '配置文件1' },
-                { value: 'configuration2', label: '配置文件2' }
-              ]}
+              options={configlist}
               onChange={handleChangestartcollector}
             >
             </Select>
-            <p>{t('node-manager.cloudregion.node.btntext1')}<Button className="p-0 mx-1" type="link" onClick={() => { router.push("/node-manager/cloudregion/configuration") }}>{t('node-manager.cloudregion.node.btntext2')}</Button>{t('node-manager.cloudregion.node.btntext3')}</p>
           </Form.Item>
           }
+          <p>{t('node-manager.cloudregion.node.btntext1')}<Button className="p-0 mx-1" type="link" onClick={() => { router.push("/node-manager/cloudregion/configuration") }}>{t('node-manager.cloudregion.node.btntext2')}</Button>{t('node-manager.cloudregion.node.btntext3')}</p>
         </Form>
       </OperateModal>
     );
   }
 );
-CollectorModal.displayName = "RuleModal";
+CollectorModal.displayName = "CollectorModal";
 export default CollectorModal;

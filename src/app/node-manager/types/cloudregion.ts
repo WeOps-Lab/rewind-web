@@ -9,13 +9,6 @@ interface ConfigurationData {
   nodecount?: number | string;
 }
 
-interface SidecardForm {
-  key: React.Key;
-  ip: string;
-  operatingsystem: string;
-  sidecar: string;
-}
-
 interface sidecarinfotype {
   sidecar: string;
   [key: string]: string;
@@ -23,7 +16,7 @@ interface sidecarinfotype {
 //配置页面的table的列定义
 interface ConfigHookParams {
   configurationClick: (key: string) => void;
-  applyconfigurationClick: (key: string) => void;
+  applyconfigurationClick: (key: string, selectedsystem: string) => void;
 }
 interface VariableProps {
   openUerModal: (type: string, form: TableDataItem) => void;
@@ -47,21 +40,59 @@ interface IConfiglistprops {
   config_template?: string;
 }
 
-// 配置文件的展开数据类型
-interface Iexpandeddata {
+//后端返回的采集器列表
+interface CollectorItem {
+  id?: string;
+  collector_id?: string;
+  collector_name?: string;
+  configuration_id?: string;
+  configuration_name?: string;
+  message?: string;
+}
+
+//node展开的数据类型
+interface NodeExpanddata {
   key: string;
   name: string;
   filename: string;
   status: string;
+  nodeid: string;
 }
 
+//更新配置文件的请求
+interface updateConfigReq {
+  node_ids: string[];
+  collector_configuration_id: string;
+}
+
+//节点模块返回的数据
+interface nodeItemtRes {
+  id: string;
+  ip: string;
+  operating_system: string;
+  status: {
+    status: string;
+  };
+  [key: string]: any;
+}
+
+//节点处理后的数据格式
+interface mappedNodeItem {
+  key: string;
+  ip: string;
+  operatingsystem: string;
+  sidecar: string;
+}
 export type {
   ConfigurationData,
-  SidecardForm,
   sidecarinfotype,
   ConfigHookParams,
   VariableProps,
   CouldregionCardProps,
   IConfiglistprops,
-  Iexpandeddata,
+  CollectorItem,
+  NodeExpanddata,
+  updateConfigReq,
+  nodeItemtRes,
+  mappedNodeItem,
 };

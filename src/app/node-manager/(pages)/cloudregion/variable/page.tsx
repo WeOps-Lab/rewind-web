@@ -13,6 +13,7 @@ import Mainlayout from '../mainlayout/layout'
 import { PlusOutlined } from "@ant-design/icons";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 import useApiClient from "@/utils/request";
+import useCloudId from "@/app/node-manager/hooks/useCloudid";
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
@@ -21,7 +22,9 @@ const Variable = () => {
   const { isLoading } = useApiClient();
   const variableRef = useRef<ModalRef>(null);
   const { t } = useTranslation();
+  const cloudid = useCloudId();
   const [data, setData] = useState<TableDataItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     if (!isLoading) {
@@ -85,8 +88,7 @@ const Variable = () => {
 
   //搜索框的事件
   const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
-    const id = 1;
-    getvariablelist(id, value).then((res) => {
+    getvariablelist(Number(cloudid), value).then((res) => {
       const tempdata = res.map((item: any) => {
         return {
           key: item.id,
@@ -102,8 +104,8 @@ const Variable = () => {
 
   //获取表格数据
   const getVariablelist = () => {
-    const id = 1;
-    getvariablelist(id).then((res) => {
+    getvariablelist(Number(cloudid)).then((res) => {
+      setLoading(true)
       const tempdata = res.map((item: any) => {
         return {
           key: item.id,
@@ -113,6 +115,8 @@ const Variable = () => {
         }
       })
       setData(tempdata);
+    }).finally(() => {
+      setLoading(false)
     });
   }
 
@@ -139,6 +143,7 @@ const Variable = () => {
         <div className="overflow-x-auto">
           <CustomTable
             scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
+            loading={loading}
             columns={columns}
             dataSource={data}
             rowSelection={rowSelection}
