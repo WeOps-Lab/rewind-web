@@ -7,7 +7,7 @@ import { useTranslation } from '@/utils/i18n';
 
 const apiClient = axios.create({
   baseURL: '/reqApi',
-  timeout: 300000, // 请求超时时间
+  timeout: 300000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -40,7 +40,6 @@ const useApiClient = () => {
   }, [token]);
 
   useEffect(() => {
-    // 请求拦截器
     const requestInterceptor = apiClient.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         if (!tokenRef.current) {
@@ -55,7 +54,6 @@ const useApiClient = () => {
       }
     );
 
-    // 响应拦截器
     const responseInterceptor = apiClient.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error) => {
@@ -63,13 +61,12 @@ const useApiClient = () => {
           const { status } = error.response;
           const messageText = error.response?.data?.message;
           if (status === 401) {
-            // 处理 401 错误，重定向到 Keycloak 登录页面
             signIn('keycloak');
           } else if (status === 403) {
-            // 处理 403 错误，显示无权限消息
+            message.error(messageText);
             return Promise.reject(new Error(messageText));
           } else if (status === 500) {
-            // 处理 500 错误，例如显示错误消息
+            message.error(messageText);
             return Promise.reject(new Error(t('common.serverError')));
           }
         }
@@ -77,37 +74,55 @@ const useApiClient = () => {
       }
     );
 
-    // 清理拦截器
     return () => {
       apiClient.interceptors.request.eject(requestInterceptor);
       apiClient.interceptors.response.eject(responseInterceptor);
     };
   }, []);
 
-  // 封装请求方法，并使用 useCallback 确保函数是稳定的
   const get = useCallback(async <T = any>(url: string, config?: AxiosRequestConfig, onError?: () => void): Promise<T> => {
-    const response = await apiClient.get<T>(url, config);
-    return handleResponse(response, onError);
+    try {
+      const response = await apiClient.get<T>(url, config);
+      return handleResponse(response, onError);
+    } catch (error) {
+      throw error;
+    }
   }, []);
 
   const post = useCallback(async <T = any>(url: string, data?: unknown, config?: AxiosRequestConfig, onError?: () => void): Promise<T> => {
-    const response = await apiClient.post<T>(url, data, config);
-    return handleResponse(response, onError);
+    try {
+      const response = await apiClient.post<T>(url, data, config);
+      return handleResponse(response, onError);
+    } catch (error) {
+      throw error;
+    }
   }, []);
 
   const put = useCallback(async <T = any>(url: string, data?: unknown, config?: AxiosRequestConfig, onError?: () => void): Promise<T> => {
-    const response = await apiClient.put<T>(url, data, config);
-    return handleResponse(response, onError);
+    try {
+      const response = await apiClient.put<T>(url, data, config);
+      return handleResponse(response, onError);
+    } catch (error) {
+      throw error;
+    }
   }, []);
 
   const del = useCallback(async <T = any>(url: string, config?: AxiosRequestConfig, onError?: () => void): Promise<T> => {
-    const response = await apiClient.delete<T>(url, config);
-    return handleResponse(response, onError);
+    try {
+      const response = await apiClient.delete<T>(url, config);
+      return handleResponse(response, onError);
+    } catch (error) {
+      throw error;
+    }
   }, []);
 
   const patch = useCallback(async <T = any>(url: string, data?: unknown, config?: AxiosRequestConfig, onError?: () => void): Promise<T> => {
-    const response = await apiClient.patch<T>(url, data, config);
-    return handleResponse(response, onError);
+    try {
+      const response = await apiClient.patch<T>(url, data, config);
+      return handleResponse(response, onError);
+    } catch (error) {
+      throw error;
+    }
   }, []);
 
   return { get, post, put, del, patch, isLoading };

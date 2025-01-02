@@ -48,6 +48,7 @@
     "training": "Training",
     "trainFailed": "Failed to train",
     "noResult": "No Results",
+    "noData": "No Data",
     "inputRequired": "Please Input, it is required",
     "invalidURL": "Please enter a valid URL",
     "errorFetch": "Error fetch",
