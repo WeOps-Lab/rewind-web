@@ -1,92 +1,106 @@
-'use client';
-
-import React, {
-  useState,
-  useRef,
-  forwardRef,
-  useImperativeHandle,
-  useEffect,
-} from 'react';
-import { Input, Button, Form, Radio, Select } from 'antd';
+import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
+import { Input, Button, Form, Select, message } from 'antd';
 import OperateModal from '@/components/operate-modal';
-import type { FormInstance, RadioChangeEvent } from 'antd';
+import type { FormInstance } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import { UserDataType } from '@/app/system-manager/types/user';
-import RoleDescription from '@/app/system-manager/components/role-description';
-import { useUsernamegeApi } from "@/app/system-manager/api/user/index";
+import { useUserApi } from "@/app/system-manager/api/user/index";
+import { useRoleApi } from "@/app/system-manager/api/role/index";
+import type { DataNode as TreeDataNode } from 'antd/lib/tree';
 
 interface ModalProps {
   onSuccess: () => void;
+  treeData: TreeDataNode[];
 }
+
 interface ModalConfig {
-  type: string;
+  type: 'add' | 'edit';
   form: UserDataType;
 }
+
 interface ModalRef {
   showModal: (config: ModalConfig) => void;
 }
 
 const UserModal = forwardRef<ModalRef, ModalProps>(
-  ({ onSuccess }, ref) => {
+  ({ onSuccess, treeData }, ref) => {
     const { t } = useTranslation();
     const formRef = useRef<FormInstance>(null);
+
     const [userVisible, setUserVisible] = useState<boolean>(false);
-    const [type, setType] = useState<string>('');
+    const [type, setType] = useState<'add' | 'edit'>('add');
+    const [infoLoading, setInfoLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const [userForm, setUserForm] = useState<UserDataType>({
       key: '',
       username: '',
-      name: '',
       email: '',
-      number: '',
-      team: '',
-      role: ''
+      lastName: '',
+      roles: [],
+      groups: []
     });
-    const [eidtroleselect, setEidtroleselect] = useState<boolean>(true);
-    const { addUserApi, editUserApi } = useUsernamegeApi();
+
+    const { addUser, editUser, getRoleList } = useUserApi();
+    const { getClientData } = useRoleApi();
+    const [roleOptions, setRoleOptions] = useState<{ label: string, value: string }[]>([]);
+
+    const [groupOptions, setGroupOptions] = useState<{ label: string, value: string }[]>([]);
 
     useImperativeHandle(ref, () => ({
       showModal: ({ type, form }) => {
         setUserVisible(true);
         setType(type);
-        switch (type) {
-          case 'add':
-            setUserForm({
-              key: '',
-              username: '',
-              name: '',
-              email: '',
-              number: '',
-              team: 'team1',
-              role: 'Normal users'
-            });
-            break;
-          case 'edit':
-            setUserForm(form);
-            break;
-          case 'modifyrole':
-            setUserForm(form);
-            break;
-        }
+        setUserForm(
+          type === 'add'
+            ? { key: '', username: '', email: '', lastName: '', roles: [], groups: [] }
+            : form
+        );
       },
     }));
 
-    const options = [
-      { label: t('system.user.form.administrator'), value: 'Administrator' },
-      { label: t('system.user.form.normalusers'), value: 'Normal users' },
-    ];
+    const fetchRoleInfo = async () => {
+      setInfoLoading(true);
+      try {
+        const clientData = await getClientData();
+        const roleData = await getRoleList({ params: { client_id: clientData?.[0]?.id } });
+        const roleOpts = roleData.map((role: { role_name: string; role_id: string }) => ({
+          label: role.role_name,
+          value: role.role_id,
+        }));
+        setRoleOptions(roleOpts);
+      } catch (error) {
+        message.error('Error fetching role info');
+        console.error('Error fetching role info', error);
+      } finally {
+        setInfoLoading(false);
+      }
+    };
+
+    useEffect(() => {
+      // Convert treeData to groupOptions for Select component
+      const convertTreeDataToGroupOptions = (data: TreeDataNode[]): { label: string, value: string }[] => {
+        const options: { label: string, value: string }[] = [];
+        data.forEach(item => {
+          options.push({ label: item.title as string, value: item.key as string });
+          if (item.children && item.children.length > 0) {
+            options.push(...convertTreeDataToGroupOptions(item.children));
+          }
+        });
+        return options;
+      };
+
+      const options = convertTreeDataToGroupOptions(treeData);
+      setGroupOptions(options);
+    }, [treeData]);
 
     useEffect(() => {
       if (userVisible) {
         formRef.current?.resetFields();
-        if (type === 'add') {
-          formRef.current?.setFieldsValue({
-            team: 'team1',
-            role: "Normal users"
-          });
-        }
         formRef.current?.setFieldsValue(userForm);
+        fetchRoleInfo();
       }
-    }, [userVisible, userForm]);
+    }, [userVisible]);
 
     const handleCancel = () => {
       setUserVisible(false);
@@ -94,133 +108,106 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
 
     const handleConfirm = async () => {
       try {
+        setIsLoading(true);
         const validData = await formRef.current?.validateFields();
 
+        const formattedData = {
+          ...validData,
+          roles: validData.roles.map((roleId: string) => ({
+            id: roleId,
+            name: roleOptions.find(role => role.value === roleId)?.label,
+          }))
+        };
+
         if (type === 'add') {
-          await addUserApi(validData.username, validData.email, validData.name, validData.number);
+          await addUser(formattedData);
+          message.success(t('common.addSuccess'));
         } else {
-          await editUserApi(userForm.key, validData);
+          await editUser(userForm.key, formattedData);
+          message.success(t('common.editSuccess'));
         }
 
         onSuccess();
         setUserVisible(false);
       } catch (error) {
-        console.log('Validation failed:', error);
+        message.error(t('common.operationFailed'));
+        console.error('Validation failed:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    const radiochang = (e: RadioChangeEvent) => {
-      setEidtroleselect(e.target.value === "Administrator");
-    };
-
     return (
-      <div>
-        {type === 'modifyrole' ? (
-          <OperateModal
-            width={650}
-            title={t('system.common.batchmodifyroles')}
-            closable={false}
-            open={userVisible}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-            footer={[
-              <Button key="submit" type="primary" onClick={handleConfirm}>
-                {t('common.confirm')}
-              </Button>,
-              <Button key="cancel" onClick={handleCancel}>
-                {t('common.cancel')}
-              </Button>,
-            ]}
+      <OperateModal
+        title={type === 'add' ? t('common.add') : `${t('common.edit')}-${userForm.username}`}
+        open={userVisible}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        onCancel={handleCancel}
+        width={650}
+        footer={[
+          <Button key="cancel" onClick={handleCancel}>
+            {t('common.cancel')}
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleConfirm} loading={isLoading}>
+            {t('common.confirm')}
+          </Button>
+        ]}
+      >
+        <Form ref={formRef} layout="vertical">
+          <Form.Item
+            name="username"
+            label={t('system.user.form.username')}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
+            colon={false}
           >
-            <Form ref={formRef}>
-              <Form.Item colon={false}>
-                <span>{t('system.common.selectedusers')}:</span>
-                <span className="text-[var(--color-primary)]">{userForm.username}</span>
-              </Form.Item>
-              <Form.Item name="role" colon={false}>
-                <Radio.Group options={options} onChange={radiochang} />
-              </Form.Item>
-              <Form.Item name="comment" colon={false}>
-                <RoleDescription modifyRoleSelect={eidtroleselect} />
-              </Form.Item>
-            </Form>
-          </OperateModal>
-        ) : (
-          <OperateModal
-            title={type === 'add' ? t('common.add') : t('common.edit') + '-' + userForm.username}
-            closable={false}
-            open={userVisible}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-            width={650}
-            footer={[
-              <Button key="submit" type="primary" onClick={handleConfirm}>
-                {t('common.confirm')}
-              </Button>,
-              <Button key="cancel" onClick={handleCancel}>
-                {t('common.cancel')}
-              </Button>,
-            ]}
+            <Input
+              placeholder={`${t('common.inputMsg')}${t('system.user.form.username')}`}
+              disabled={type !== 'add'}
+            />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label={t('system.user.form.email')}
+            colon={false}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Form ref={formRef} layout="vertical">
-              <Form.Item
-                name="username"
-                label={t('system.user.form.username')}
-                rules={[{ required: true, message: t('common.inputRequired') }]}
-                colon={false}
-              >
-                <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.username')}`} disabled={type !== 'add'} />
-              </Form.Item>
-              <Form.Item
-                name="name"
-                label={t('system.user.form.name')}
-                colon={false}
-              >
-                <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.name')}`} />
-              </Form.Item>
-              <Form.Item
-                name="email"
-                label={t('system.user.form.email')}
-                colon={false}
-                rules={[{ required: true, message: t('common.inputRequired') }]}
-              >
-                <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.email')}`} />
-              </Form.Item>
-              <Form.Item
-                name="number"
-                label={t('system.user.form.number')}
-                colon={false}
-              >
-                <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.number')}`} />
-              </Form.Item>
-              <Form.Item
-                name="team"
-                label={t('system.user.form.team')}
-                colon={false}
-                rules={[{ required: true, message: t('common.inputRequired') }]}
-              >
-                <Select
-                  style={{ width: '100%' }}
-                  options={[
-                    { value: 'team1', label: 'team1' },
-                    { value: 'team2', label: 'team2' },
-                  ]}
-                  placeholder="select it"
-                />
-              </Form.Item>
-              <Form.Item
-                name="role"
-                label={t('system.user.form.role')}
-                colon={false}
-                rules={[{ required: true, message: t('common.inputRequired') }]}
-              >
-                <Radio.Group options={options} onChange={radiochang} />
-                <RoleDescription modifyRoleSelect={eidtroleselect} />
-              </Form.Item>
-            </Form>
-          </OperateModal>
-        )}
-      </div>
+            <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.email')}`} />
+          </Form.Item>
+          <Form.Item
+            name="lastName"
+            label={t('system.user.form.lastName')}
+            colon={false}
+          >
+            <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.lastName')}`} />
+          </Form.Item>
+          <Form.Item
+            name="groups"
+            label={t('system.user.form.group')}
+            colon={false}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
+          >
+            <Select
+              placeholder={`${t('common.select')} ${t('system.user.form.group')}`}
+              mode="multiple"
+              options={groupOptions}
+            />
+          </Form.Item>
+          <Form.Item
+            name="roles"
+            label={t('system.user.form.role')}
+            colon={false}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
+          >
+            <Select
+              placeholder={`${t('common.select')} ${t('system.user.form.role')}`}
+              mode="multiple"
+              loading={infoLoading}
+              options={roleOptions}
+            />
+          </Form.Item>
+        </Form>
+      </OperateModal>
     );
   }
 );

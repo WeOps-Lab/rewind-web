@@ -1,15 +1,18 @@
 import type { TableProps } from 'antd';
 // 定义接口
 interface UserDataType {
+  id?: string;
   key: string;
   username: string;
-  name: string;
   email: string;
-  number: string;
-  team: string;
-  role: string;
-  [key: string]: unknown;
+  lastName: string;
+  name?: string;
+  team?: string;
+  role?: string;
+  roles: Array<{ id: string; name: string }>;
+  groups: Array<any>;
 }
+
 interface Access {
   manageGroupMembership: boolean;
   view: boolean;

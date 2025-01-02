@@ -11,18 +11,18 @@
       "desc": "显示所有信息，您可以维护用户信息并分配角色。",
       "table": {
         "username":"用户名",
-        "name":"名称",
+        "lastName":"名称",
         "email":"邮箱",
         "number":"号码",
-        "team":"团队",
+        "group":"团队",
         "role":"角色"
       },
       "form": {
         "username": "用户名",
-        "name": "姓名",
+        "lastName": "姓名",
+        "name": "名称",
         "email": "邮箱",
-        "number": "电话",
-        "team": "团队",
+        "group": "团队",
         "role": "角色",
         "actions": "操作",
         "administrator": "管理员",

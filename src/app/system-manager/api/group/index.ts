@@ -1,39 +1,25 @@
 import useApiClient from '@/utils/request';
-export const useApiTeam = () => {
-  const { get, post, del, put } = useApiClient();
+export const useGroupApi = () => {
+  const { get, post } = useApiClient();
   //获取组织列表api
   async function getTeamData() {
     return await get('/system_mgmt/group/search_group_list/');
   }
   async function addTeamData(params: any) {
-    try {
-      const data = await post('/system_mgmt/group/create_group/', params);
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const data = await post('/system_mgmt/group/create_group/', params);
+    return data;
   }
-  async function renameTeam(group_name: string, groupId: string) {
-    try {
-      return await put(`/user-manager/internal/group/${groupId}`,
-        {
-          name: group_name,
-        }
-      );
-    } catch (error) {
-      console.error('Failed to rename team:', error);
-    }
+  async function updateGroup(params: any) {
+    return await post('/system_mgmt/group/update_group/', params);
   }
 
-  async function deleteTeam(groupId: string) {
-    return await del(
-      `user-manager/internal/group/${groupId}`
-    );
+  async function deleteTeam(params: any) {
+    return await post('/system_mgmt/group/delete_groups/', params);
   }
   return {
     getTeamData,
     addTeamData,
-    renameTeam,
+    updateGroup,
     deleteTeam,
   };
 };
