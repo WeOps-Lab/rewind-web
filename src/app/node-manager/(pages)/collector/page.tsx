@@ -2,28 +2,42 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "antd";
 import collectorstyle from "./index.module.scss";
-import Collectorcard from "../../components/collectorcard";
 import { Segmented } from "antd";
 import useApiCollector from "@/app/node-manager/api/collector/index";
+import EntityList from "@/components/entity-list/index";
+import { useRouter } from "next/navigation";
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
-const { Search } = Input;
-
 
 const Collector = () => {
 
   const { getCollectorlist } = useApiCollector();
+  const router = useRouter();
   const [value, setValue] = useState<string | number>('All(20)');
-  const [cards, setCards] = useState([])
+  const [cards, setCards] = useState<[]>([])
   useEffect(() => {
     getCollectorlist().then((res) => {
-      setCards(res)
+      const tempdata = res.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        description: item.introduction,
+        icon: 'caijiqizongshu',
+        tag: [item.node_operating_system]
+      }))
+      setCards(tempdata)
     })
   }, [])
 
   const onSearch: SearchProps['onSearch'] = (value) => {
     getCollectorlist(value).then((res) => {
-      setCards(res)
+      const tempdata = res.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        description: item.introduction,
+        icon: 'caijiqizongshu',
+        tag: [item.node_operating_system]
+      }))
+      setCards(tempdata)
     })
   };
 
@@ -37,13 +51,8 @@ const Collector = () => {
         onChange={setValue}
       />
       <div className="flex flex-col">
-        <div className="flex justify-end mb-4"> <Search className="w-64 mr-8" placeholder="input search text" onSearch={onSearch} enterButton /></div>
-        {/* 卡片 */}
-        <div className="flex gap-x-16 flex-wrap gap-y-8">
-          {cards.map((item: any) => (
-            <Collectorcard key={5} id={item.id} name={item.name} system={[item.node_operating_system]} introduction={item.introduction} />
-          ))}
-        </div>
+        {/* 卡片的渲染 */}
+        <EntityList data={cards} loading={false} onSearch={onSearch} onCardClick={(item: any) => router.push(`collector/detail?id=${item?.id}`)}></EntityList>
       </div>
     </div>
   );

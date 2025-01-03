@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import type { TableDataItem } from '@/app/node-manager/types/index';
 //配置文件的类型
 interface ConfigurationData {
@@ -24,12 +23,7 @@ interface VariableProps {
   delconfirm: (key: string, text: any) => void;
   delcancel: (e: any) => void;
 }
-interface CouldregionCardProps {
-  height?: number;
-  width?: number;
-  title: ReactNode;
-  children?: ReactNode;
-}
+
 //api返回的配置文件列表的类型
 interface IConfiglistprops {
   id: string;
@@ -88,7 +82,6 @@ export type {
   sidecarinfotype,
   ConfigHookParams,
   VariableProps,
-  CouldregionCardProps,
   IConfiglistprops,
   CollectorItem,
   NodeExpanddata,

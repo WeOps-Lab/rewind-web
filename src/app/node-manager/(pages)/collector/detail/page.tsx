@@ -11,10 +11,10 @@ const Collectordetail = () => {
   const { getCollectorlist } = useApiCollector();
   const { t } = useTranslation();
   const [detaildata, setDetaildata] = useState<Collectorcardprops>({
-    id: "无",
-    name: "无",
-    system: ['Linux'],
-    introduction: '网络请求失败'
+    id: "",
+    name: "",
+    system: [],
+    introduction: ''
   });
 
   useEffect(() => {
