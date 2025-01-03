@@ -419,7 +419,7 @@ const Overview = () => {
   };
 
   return (
-    <div className="bg-[var(--color-bg-1)] p-[20px]">
+    <div className="bg-[var(--color-bg-1)]">
       <div className="flex justify-end mb-[15px]">
         <TimeSelector
           defaultValue={timeDefaultValue}
@@ -428,7 +428,7 @@ const Overview = () => {
           onRefresh={onRefresh}
         />
       </div>
-      <div className="h-[calc(100vh-180px)] overflow-y-auto">
+      <div className="h-[calc(100vh-170px)] overflow-y-auto">
         <Spin spinning={loading}>
           <div className="flex flex-wrap justify-evenly">
             {metricData

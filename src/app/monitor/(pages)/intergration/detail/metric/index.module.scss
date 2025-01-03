@@ -1,11 +1,10 @@
 .metric {
     background: var(--color-bg-1);
     width: 100%;
-    padding: 20px;
 
     .metricTable {
         width: 100%;
-        height: calc(100vh - 320px);
+        height: calc(100vh - 316px);
         overflow-y: auto;
     }
 }
