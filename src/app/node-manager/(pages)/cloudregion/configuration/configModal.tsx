@@ -77,7 +77,6 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         getApplydata();
         return
       }
-      debugger
       //add发起请求，设置表单的数据
       if (configVisible && (['add', 'edit'].includes(type))) {
         configformRef.current?.setFieldsValue(configForm);
