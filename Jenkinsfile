@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        BRANCH_NAME = 'system-manager'
+        BRANCH_NAME = 'monitor-manager'
         IMAGE_NAME = "etherfurnace/${BRANCH_NAME}-web"
         IMAGE_TAG='latest'
     }
@@ -55,12 +55,16 @@ pipeline {
        }
 
        stage('更新环境'){
+            agent { 
+                label 'docker' 
+            }
+            options {
+                skipDefaultCheckout true
+            }
             steps {
                 script {
                     sh """
-                    cd ${env.KUBE_DIR}/system-manager-web/overlays/lite/ && \
-                        sudo kubectl delete -k . || true &&\
-                        sudo kubectl apply -k . 
+                       echo "pass"
                     """
                 }
             }
