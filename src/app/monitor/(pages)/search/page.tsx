@@ -233,7 +233,7 @@ const Search: React.FC = () => {
       instanceId: instanceId.join(','),
       type: 'add',
     });
-    const targetUrl = `/event/strategy?${params.toString()}`;
+    const targetUrl = `/monitor/event/strategy?${params.toString()}`;
     window.open(targetUrl, '_blank', 'noopener,noreferrer');
   };
 

@@ -332,7 +332,7 @@ const Intergration = () => {
     row.name = apps.find((item) => item.key === objectId)?.name;
     row.monitorObjId = apps.find((item) => item.key === objectId)?.key || '';
     const params = new URLSearchParams(row);
-    const targetUrl = `/view/detail/overview?${params.toString()}`;
+    const targetUrl = `/monitor/view/detail/overview?${params.toString()}`;
     router.push(targetUrl);
   };
 

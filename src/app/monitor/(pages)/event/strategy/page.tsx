@@ -356,7 +356,7 @@ const StrategyOperation = () => {
   };
 
   const goBack = () => {
-    router.push(`/event?active=strategy&objId=${monitorObjId}`);
+    router.push(`/monitor/event?active=strategy&objId=${monitorObjId}`);
   };
 
   const createStrategy = () => {

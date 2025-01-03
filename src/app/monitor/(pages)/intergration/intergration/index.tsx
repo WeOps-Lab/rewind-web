@@ -189,7 +189,7 @@ const Intergration = () => {
   const linkToDetial = (app: ObectItem) => {
     const row = deepClone(app);
     const params = new URLSearchParams(row);
-    const targetUrl = `/intergration/detail?${params.toString()}`;
+    const targetUrl = `/monitor/intergration/detail?${params.toString()}`;
     router.push(targetUrl);
   };
 

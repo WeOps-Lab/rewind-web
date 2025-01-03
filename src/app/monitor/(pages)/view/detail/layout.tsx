@@ -19,13 +19,13 @@ const IntergrationDetailLayout = ({
   const icon = OBJECT_ICON_MAP[searchParams.get('name') || ''];
 
   const handleBackButtonClick = () => {
-    router.push(`/view`);
+    router.push(`/monitor/view`);
   };
 
   const menuItems = [
     {
       label: t('monitor.views.overview'),
-      path: '/view/detail/overview',
+      path: '/monitor/view/detail/overview',
       icon: 'shujumoxingguanli',
     },
   ];

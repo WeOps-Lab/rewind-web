@@ -330,7 +330,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         metric_id: row.name,
       };
       const queryString = new URLSearchParams(_row).toString();
-      const url = `/search?${queryString}`;
+      const url = `/monitor/search?${queryString}`;
       window.open(url, '_blank', 'noopener,noreferrer');
     };
 
@@ -343,7 +343,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         type: 'add',
       };
       const queryString = new URLSearchParams(_row).toString();
-      const url = `/event/strategy?${queryString}`;
+      const url = `/monitor/event/strategy?${queryString}`;
       window.open(url, '_blank', 'noopener,noreferrer');
     };
 

@@ -132,7 +132,7 @@ const Asset = () => {
     _row.monitorObjId = _objId;
     _row.name = objects.find((item) => item.id === _objId)?.name || '';
     const queryString = new URLSearchParams(_row).toString();
-    const url = `/view/detail/overview?${queryString}`;
+    const url = `/monitor/view/detail/overview?${queryString}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

@@ -22,18 +22,18 @@ const IntergrationDetailLayout = ({
   const menuItems = [
     {
       label: t('monitor.intergrations.configure'),
-      path: '/intergration/detail/configure',
+      path: '/monitor/intergration/detail/configure',
       icon: 'shujumoxingguanli',
     },
     {
       label: t('monitor.metric'),
-      path: '/intergration/detail/metric',
+      path: '/monitor/intergration/detail/metric',
       icon: 'zichan-quanbushebei',
     },
   ];
 
   const handleBackButtonClick = () => {
-    router.push(`/intergration`);
+    router.push(`/monitor/intergration`);
   };
 
   const TopSection = () => (

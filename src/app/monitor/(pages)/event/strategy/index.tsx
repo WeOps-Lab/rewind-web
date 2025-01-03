@@ -306,7 +306,7 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
       id: row.id,
       name: row.name,
     });
-    const targetUrl = `/event/strategy?${params.toString()}`;
+    const targetUrl = `/monitor/event/strategy?${params.toString()}`;
     router.push(targetUrl);
   };
 

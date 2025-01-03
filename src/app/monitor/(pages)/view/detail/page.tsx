@@ -9,7 +9,7 @@ export default function IndexDetialPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    const targetUrl = `/view/detail/overview?${params.toString()}`;
+    const targetUrl = `/monitor/view/detail/overview?${params.toString()}`;
     router.push(targetUrl);
   }, [router, searchParams]);
 
