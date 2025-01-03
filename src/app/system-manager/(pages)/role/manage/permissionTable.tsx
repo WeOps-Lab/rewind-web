@@ -148,7 +148,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
       key: 'operations',
       render: (operations: string[], record: Permission) => (
         <div className="flex space-x-2">
-          {operations.map((operation: string) => (
+          {(operations||[]).map((operation: string) => (
             <Checkbox
               key={operation}
               onChange={(e: CheckboxChangeEvent) => handleOperationCheckboxChange(record.key, operation, e.target.checked)}
