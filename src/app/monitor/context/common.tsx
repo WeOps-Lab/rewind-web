@@ -3,33 +3,31 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import useApiClient from '@/utils/request';
 import { UserItem, Organization } from '@/app/monitor/types';
-import {
-  convertArray,
-  filterNodesWithAllParents,
-} from '@/app/monitor/utils/common';
+import { ListItem } from '@/types';
 
 interface CommonContextType {
-  permissionGroupsInfo: PermissionGroupsInfo;
+  loginInfo: LoginInfo;
   userList: UserItem[];
   authOrganizations: Organization[];
-  organizations: Organization[];
 }
 
-interface PermissionGroupsInfo {
-  is_all: boolean;
-  group_ids: string[];
+interface LoginInfo {
+  is_superuser: boolean;
+  roles: string[];
+  username: string;
+  group_list: ListItem[];
 }
 
 const CommonContext = createContext<CommonContextType | null>(null);
 
 const CommonContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [permissionGroupsInfo, setPermissionGroupsInfo] =
-    useState<PermissionGroupsInfo>({
-      is_all: true,
-      group_ids: [],
-    });
+  const [loginInfo, setLoginInfo] = useState<LoginInfo>({
+    is_superuser: true,
+    roles: [],
+    username: '',
+    group_list: [],
+  });
   const [userList, setUserList] = useState<UserItem[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [authOrganizations, setAuthOrganizations] = useState<Organization[]>(
     []
   );
@@ -43,27 +41,22 @@ const CommonContextProvider = ({ children }: { children: React.ReactNode }) => {
   const getPermissionGroups = async () => {
     setPageLoading(true);
     try {
-      const getUserList = get('/monitor/api/user_group/user_list/');
-      const getOrganizationList = get('/monitor/api/user_group/group_list/');
-      const getAuthOrganization = get('/monitor/api/user_group/user_groups/');
-      Promise.all([getUserList, getOrganizationList, getAuthOrganization])
+      const getUserList = get('/base/user_api_secret/');
+      //   const getUserList = get('/monitor/api/system_mgmt/user_all/');
+      const getAuthOrganization = get('/core/api/login_info/');
+      Promise.all([getUserList, getAuthOrganization])
         .then((res) => {
-          const userData: UserItem[] = res[0].users;
-          const allOrganizations = res[1];
-          const authOrganizationData: PermissionGroupsInfo = res[2];
-          const groupIds = authOrganizationData.group_ids || [];
-          const isAdmin = !!authOrganizationData.is_all || false;
-          const authOrganizations = filterNodesWithAllParents(
-            allOrganizations,
-            groupIds
+          const userData: UserItem[] = res[0]?.users || [];
+          const authGroupList = (res[1]?.group_list || []).map(
+            (item: Organization) => ({
+              label: item.name,
+              value: item.id,
+              children: [],
+            })
           );
-          const authList: Organization[] = convertArray(
-            isAdmin ? allOrganizations : authOrganizations
-          );
-          setPermissionGroupsInfo(authOrganizationData);
+          setLoginInfo(res[1]);
           setUserList(userData);
-          setAuthOrganizations(authList);
-          setOrganizations(convertArray(allOrganizations));
+          setAuthOrganizations(authGroupList);
         })
         .finally(() => {
           setPageLoading(false);
@@ -75,10 +68,9 @@ const CommonContextProvider = ({ children }: { children: React.ReactNode }) => {
   return pageLoading ? null : (
     <CommonContext.Provider
       value={{
-        permissionGroupsInfo,
+        loginInfo,
         userList,
         authOrganizations,
-        organizations,
       }}
     >
       {children}
