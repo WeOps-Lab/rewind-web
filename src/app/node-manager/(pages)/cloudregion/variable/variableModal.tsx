@@ -47,12 +47,12 @@ const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =>
   //添加变量
   const handleConfirm = async () => {
     const id = 1;
-    try {
-      const data = await formRef.current?.validateFields();
+    formRef.current?.validateFields().then((values) => {
+      const { name, value, description } = values;
       const tempdata = {
-        key: data.name,
-        value: data.value,
-        description: data.description,
+        key: name,
+        value,
+        description,
         cloud_region_id: id
       }
       //发起请求的类型（添加和编辑）
@@ -65,9 +65,7 @@ const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =>
       }
       setVariableVisible(false);
       onSuccess();
-    } catch (error) {
-      console.log(error);
-    }
+    });
   };
 
   return (
@@ -90,7 +88,7 @@ const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =>
             },
             {
               required: true,
-              message: "please input variable name",
+              message: t("common.inputMsg"),
             },
           ]}
         >
@@ -102,8 +100,9 @@ const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =>
           rules={[
             {
               required: true,
-              message: "please input variable value",
-            },]}
+              message: t("common.inputMsg"),
+            },
+          ]}
         >
           <Input />
         </Form.Item>

@@ -100,36 +100,30 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
       if (Popconfirmarr.includes(type)) {
         return
       }
-      //处理绑定配置
-      if (type === "bindconfig") {
-        const values = collectorformRef.current?.getFieldsValue();
-        const collector_configuration_id = configlist?.find((item) => item.label === values?.configration)?.value;
-        const node_ids = nodeids;
-        if (typeof (collector_configuration_id) === "string") {
-          batchbindcollector({ node_ids, collector_configuration_id })
+
+      //表单验证
+      collectorformRef.current?.validateFields().then((values) => {
+        //处理更新和绑定配置
+        if (["bindconfig", "updataconfig"].includes(type)) {
+          const collector_configuration_id = configlist?.find((item) => item.label === values?.configration)?.value;
+          const node_ids = nodeids;
+          if (typeof (collector_configuration_id) === "string") {
+            batchbindcollector({ node_ids, collector_configuration_id })
+          }
         }
-      }
-      //处理更新配置
-      if (type === "updataconfig") {
-        const values = collectorformRef.current?.getFieldsValue();
-        const collector_configuration_id = configlist?.find((item) => item.label === values?.configration)?.value;
-        const node_ids = nodeids;
-        if (typeof (collector_configuration_id) === "string") {
-          batchbindcollector({ node_ids, collector_configuration_id })
+
+        //处理启动
+        if (type === "start") {
+          const collector_id = collectorlist?.find((item) => item.value === values?.Collector)?.value;
+          const node_ids = nodeids;
+          if (typeof (collector_id) === "string") {
+            batchoperationcollector({ node_ids, collector_id, operation: "start" })
+          }
         }
-      }
-      //处理启动
-      if (type === "start") {
-        const values = collectorformRef.current?.getFieldsValue();
-        const collector_id = collectorlist?.find((item) => item.value === values?.Collector)?.value;
-        const node_ids = nodeids;
-        if (typeof (collector_id) === "string") {
-          batchoperationcollector({ node_ids, collector_id, operation: "start" })
-        }
-      }
-      message.success("Successfully");
-      onSuccess();
-      setCollectorVisible(false);
+        message.success("Successfully");
+        onSuccess();
+        setCollectorVisible(false);
+      })
     };
 
     //选择操作系统
@@ -139,15 +133,16 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
 
     //二次确认的弹窗
     const secondconfirm = () => {
-      const values = collectorformRef.current?.getFieldsValue();
-      const collector_id = collectorlist?.find((item) => item.value === values?.Collector)?.value;
-      const node_ids = nodeids;
-      if (typeof (collector_id) === "string") {
-        batchoperationcollector({ node_ids, collector_id, operation: type })
-      }
-      message.success("Successfully");
-      onSuccess();
-      setCollectorVisible(false);
+      collectorformRef.current?.validateFields().then((values) => {
+        const collector_id = collectorlist?.find((item) => item.value === values?.Collector)?.value;
+        const node_ids = nodeids;
+        if (typeof (collector_id) === "string") {
+          batchoperationcollector({ node_ids, collector_id, operation: type })
+        }
+        message.success("Successfully");
+        onSuccess();
+        setCollectorVisible(false);
+      })
     }
 
     return (
@@ -181,7 +176,13 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
         <Form ref={collectorformRef} layout="vertical" colon={false}>
           <Form.Item
             name="Collector"
-            label={t("node-manager.cloudregion.node.collector")}
+            label={t("common.selectMsg")}
+            rules={[
+              {
+                required: true,
+                message: t("common.selectMsg"),
+              },
+            ]}
           >
             <Select
               options={collectorlist}
@@ -191,7 +192,13 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
           </Form.Item>
           {configarr.includes(type) && <Form.Item
             name="configration"
-            label={t("node-manager.cloudregion.node.config")}
+            label={t("common.selectMsg")}
+            rules={[
+              {
+                required: true,
+                message: t("common.selectMsg"),
+              },
+            ]}
           >
             <Select
               options={configlist}

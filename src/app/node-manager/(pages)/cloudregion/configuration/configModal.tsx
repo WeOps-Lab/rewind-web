@@ -77,7 +77,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         return
       }
       //add发起请求，设置表单的数据
-      if (configVisible && (type === 'add' || type === 'edit')) {
+      if (configVisible && (['add', 'edit'].includes(type))) {
         configformRef.current?.setFieldsValue(configForm);
       }
     }, [configVisible, configForm, type]);
@@ -88,30 +88,33 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     };
 
     //处理添加和编辑的确定事件
-    const handleConfirm = async () => {
+    const handleConfirm = () => {
       // 校验表单
-      const tabledata = configformRef.current?.getFieldsValue();
-      if (type === 'add') {
-        createconfig({
-          name: tabledata.name,
-          collector_id: tabledata.collector,
-          cloud_region_id: Number(cloudid),
-          config_template: tabledata.configinfo,
-        })
+      configformRef.current?.validateFields().then((values) => {
+        const { name, collector, cloudid, configinfo } = values
+        if (type === 'add') {
+          createconfig({
+            name,
+            collector_id: collector,
+            cloud_region_id: Number(cloudid),
+            config_template: configinfo,
+          })
+          onSuccess();
+          setConfigVisible(false);
+          return;
+        }
+        updatecollector(
+          editeConfigId,
+          {
+            name,
+            config_template: configinfo,
+            collector_id: collector,
+          }
+        )
         onSuccess();
         setConfigVisible(false);
-        return;
-      }
-      updatecollector(
-        editeConfigId,
-        {
-          name: tabledata.name,
-          config_template: tabledata.configinfo,
-          collector_id: tabledata.collector,
-        }
-      )
-      onSuccess();
-      setConfigVisible(false);
+
+      })
     };
 
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
@@ -201,12 +204,24 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         <Form.Item
           name="name"
           label={t('node-manager.cloudregion.Configuration.Name')}
+          rules={[
+            {
+              required: true,
+              message: t("common.inputMsg"),
+            },
+          ]}
         >
           <Input />
         </Form.Item>
         <Form.Item
           name="operatingsystem"
           label={t('node-manager.cloudregion.Configuration.system')}
+          rules={[
+            {
+              required: true,
+              message: t("common.selectMsg"),
+            },
+          ]}
         >
           <Select
             defaultValue="linux"
@@ -221,6 +236,12 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         <Form.Item
           name="collector"
           label={t('node-manager.cloudregion.Configuration.collector')}
+          rules={[
+            {
+              required: true,
+              message: t("common.selectMsg"),
+            },
+          ]}
         >
           <Select
             options={colselectitems}
@@ -256,5 +277,6 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     );
   }
 );
+
 ConfigModal.displayName = "RuleModal";
 export default ConfigModal;

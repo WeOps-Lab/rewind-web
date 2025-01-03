@@ -56,23 +56,17 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
     };
 
     const handleConfirm = () => {
-      sidecarformRef.current?.validateFields();
-      const ip = sidecarformRef.current?.getFieldValue('ipaddress');
-      const operating_system = sidecarformRef.current?.getFieldValue('operatingsystem');
-      const group = sidecarformRef.current?.getFieldValue('group');
-      getsidecarstep(ip, operating_system, group).then((res) => {
-        sidecarformRef.current?.setFieldsValue({
-          installationguide: res
+      sidecarformRef.current?.validateFields().then((values) => {
+        const { ipaddress, operatingsystem, group } = values;
+        getsidecarstep(ipaddress, operatingsystem, group).then((res) => {
+          sidecarformRef.current?.setFieldsValue({
+            installationguide: res
+          })
+
         })
-
-      })
-      message.success("Query successful!");
+        message.success("Query successful!");
+      });
     };
-
-    //选择操作系统
-    const handleChangeOperatingsystem = (value: string) => {
-      console.log('选择的操作系统是', value)
-    }
 
     const showSidecarForm = (type: string) => {
       if (type === 'uninstall') {
@@ -109,21 +103,30 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
         <Form.Item
           name="operatingsystem"
           label={t("node-manager.cloudregion.node.system")}
-          required={true}
+          rules={[
+            {
+              required: true,
+              message: t("common.selectMsg"),
+            },
+          ]}
         >
           <Select
             options={[
               { value: 'linux', label: 'Linux' },
               { value: 'windows', label: 'Windows' }
             ]}
-            onChange={handleChangeOperatingsystem}
           >
           </Select>
         </Form.Item>
         <Form.Item
           name="group"
           label={t("node-manager.cloudregion.node.group")}
-          required={true}
+          rules={[
+            {
+              required: true,
+              message: t("common.selectMsg"),
+            },
+          ]}
         >
           <Select
             options={[
