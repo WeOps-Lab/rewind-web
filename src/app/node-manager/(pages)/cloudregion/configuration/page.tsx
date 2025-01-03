@@ -27,6 +27,7 @@ const Configration = () => {
   const { getconfiglist, batchdeletecollector } = useApiCloudRegion();
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
+  const [loading, setLoading] = useState<boolean>(true)
   const [data, setData] = useState([{
     key: '1',
     name: '文件1',
@@ -142,6 +143,7 @@ const Configration = () => {
   //获取配置文件列表
   const getConfiglist = (search?: string) => {
     getconfiglist(Number(cloudid), search).then((res) => {
+      setLoading(true)
       const data = res.map((item: IConfiglistprops) => {
         return {
           key: item.id,
@@ -153,6 +155,8 @@ const Configration = () => {
         }
       })
       setData(data)
+    }).finally(() => {
+      setLoading(false)
     })
   }
 
@@ -205,6 +209,7 @@ const Configration = () => {
         </div>
         <div>
           <CustomTable<any>
+            loading={loading}
             scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
             columns={columns}
             dataSource={data}
