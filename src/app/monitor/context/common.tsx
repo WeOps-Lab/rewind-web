@@ -32,21 +32,21 @@ const CommonContextProvider = ({ children }: { children: React.ReactNode }) => {
     []
   );
   const [pageLoading, setPageLoading] = useState(false);
-  const { get } = useApiClient();
+  const { get, isLoading } = useApiClient();
 
   useEffect(() => {
+    if (isLoading) return;
     getPermissionGroups();
-  }, []);
+  }, [isLoading]);
 
   const getPermissionGroups = async () => {
     setPageLoading(true);
     try {
-      const getUserList = get('/base/user_api_secret/');
-      //   const getUserList = get('/monitor/api/system_mgmt/user_all/');
+      const getUserList = get('/monitor/api/system_mgmt/user_all/');
       const getAuthOrganization = get('/core/api/login_info/');
       Promise.all([getUserList, getAuthOrganization])
         .then((res) => {
-          const userData: UserItem[] = res[0]?.users || [];
+          const userData: UserItem[] = res[0]?.data || [];
           const authGroupList = (res[1]?.group_list || []).map(
             (item: Organization) => ({
               label: item.name,
