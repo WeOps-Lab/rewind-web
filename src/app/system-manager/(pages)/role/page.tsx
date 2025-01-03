@@ -23,7 +23,6 @@ const RolePage = () => {
       setDataList(filteredData.map((item: { name: string }) => ({
         ...item,
         icon: 'rizhiguanli',
-        tag: ['linux', 'windows']
       })));
       console.log('data', filteredData);
     } catch {
@@ -43,7 +42,7 @@ const RolePage = () => {
 
   const handleCardClick = (item: any) => {
     const itemId = item.id;
-    router.push(`/roles/${itemId}`);
+    router.push(`/system-manager/role/manage?id=${itemId}`);
   };
 
   return (

@@ -1,26 +1,38 @@
 import useApiClient from '@/utils/request';
 export const useRoleApi = () => {
-  const { get, post, put, del } = useApiClient();
+  const { get, post } = useApiClient();
   async function getClientData() {
     return await get('/system_mgmt/api/get_client/');
   }
-  const getRoles = async () => {
-    return await get('/system_mgmt/api/roles/');
+  const getRoles = async (params: any) => {
+    return await get('/system_mgmt/role/search_role_list/', params);
   }
-  const addRole = async (role: { name: string }) => {
-    return await post('/system_mgmt/api/roles/', role);
+  const addRole = async (params: any) => {
+    return await post('/system_mgmt/role/create_role/', params);
   }
-  const updateRole = async (role: { id: string, name: string }) => {
-    return await put(`/system_mgmt/api/roles/${role.id}/`, { name: role.name });
+  const updateRole = async (params: any) => {
+    return await post('/system_mgmt/role/update_role/', params);
   }
-  const deleteRole = async (roleId: string) => {
-    return await del(`/system_mgmt/api/roles/${roleId}/`);
+  const deleteRole = async (params: any) => {
+    return await post('/system_mgmt/role/delete_role/', params);
   }
-  const getUsersByRole = async (roleId: string) => {
-    return await get(`/system_mgmt/api/roles/${roleId}/users/`);
+  const getUsersByRole = async (params: any) => {
+    return await get('/system_mgmt/role/search_role_users/', params);
   }
-  const updatePermissions = async (roleId: string, permissions: any) => {
-    return await put(`/system_mgmt/api/roles/${roleId}/permissions/`, { permissions });
+  const getAllUser = async () => {
+    return await get('/system_mgmt/user/user_all/');
+  }
+  const getRolePermissions = async (params: any) => {
+    return await get('/system_mgmt/role/get_role_menus/', params);
+  }
+  const updateRolePermissions = async (params: any) => {
+    return await post('/system_mgmt/role/update_role_menus/', params);
+  }
+  const addUser = async (params: any) => {
+    return await post('/system_mgmt/role/update_role_menus/', params);
+  }
+  const deleteUser = async (params: any) => {
+    return await post('/system_mgmt/role/delete_role/', params);
   }
   return {
     getClientData,
@@ -29,6 +41,10 @@ export const useRoleApi = () => {
     updateRole,
     deleteRole,
     getUsersByRole,
-    updatePermissions
+    getAllUser,
+    getRolePermissions,
+    updateRolePermissions,
+    addUser,
+    deleteUser
   };
 };
