@@ -45,6 +45,19 @@
       "addSubGroups": "Add Sub-Groups",
       "rename": "Rename",
       "renameSuccess": "Rename Success"
+    },
+    "role": {
+      "title": "Role",
+      "users": "Users",
+      "permissions": "Permissions",
+      "name": "Name",
+      "addRole": "Add Role",
+      "addUser": "Add User",
+      "updateRole": "Update Role",
+      "permission": {
+        "menu": "MENU",
+        "operation": "OPERATION"
+      }
     }
   }
 }

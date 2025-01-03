@@ -1,114 +1,139 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Form, message, Spin, Popconfirm, Table, Tabs, Checkbox, TableColumnType } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Input, Form, message, Spin, Popconfirm, Tabs, Select } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
+import { useSearchParams } from 'next/navigation';
+import CustomTable from '@/components/custom-table';
 import OperateModal from '@/components/operate-modal';
 import { useRoleApi } from '@/app/system-manager/api/role';
 import { Role, User } from '@/app/system-manager/types/role';
 import TopSection from '@/components/top-section';
+import PermissionTable from './permissionTable';
+import RoleList from './roleList';
 
 const { Search } = Input;
 const { TabPane } = Tabs;
+const { Option } = Select;
 
 const RoleManagement: React.FC = () => {
-  const [addRoleForm] = Form.useForm();
-  const [renameRoleForm] = Form.useForm();
+  const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
+
+  const [roleForm] = Form.useForm();
+  const [addUserForm] = Form.useForm();
 
   const [roleList, setRoleList] = useState<Role[]>([]);
   const [userList, setUserList] = useState<User[]>([]);
+  const [allUserList, setAllUserList] = useState<User[]>([]);
+  const [tableData, setTableData] = useState<User[]>([]);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(false);
+  const [allUserLoading, setAllUserLoading] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
-  const [addRoleModalOpen, setAddRoleModalOpen] = useState(false);
-  const [renameRoleModalOpen, setRenameRoleModalOpen] = useState(false);
-  const [selectedUserKeys, setSelectedUserKeys] = useState<string[]>([]);
+  const [roleModalOpen, setRoleModalOpen] = useState(false);
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [selectedUserKeys, setSelectedUserKeys] = useState<React.Key[]>([]);
   const [permissionsCheckedKeys, setPermissionsCheckedKeys] = useState<{ [key: string]: string[] }>({});
+  const [isEditingRole, setIsEditingRole] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [total, setTotal] = useState(0);
+  const [loadingRoles, setLoadingRoles] = useState(true);
+  const [activeTab, setActiveTab] = useState('1');
 
-  const { t } = useTranslation();
-  const { getRoles, addRole, updateRole, deleteRole, getUsersByRole, updatePermissions } = useRoleApi();
+  const roleApi = useRoleApi();
 
   useEffect(() => {
-    const initialRoles: Role[] = [
-      { id: '1', name: 'Admin' },
-      { id: '2', name: 'Editor' },
-      { id: '3', name: 'Viewer' }
-    ];
-    const initialUsers: User[] = [
-      { id: '1', name: 'User A', group: 'Group A', roles: ['Admin'] },
-      { id: '2', name: 'User B', group: 'Group B', roles: ['Editor'] },
-      { id: '3', name: 'User C', group: 'Group C', roles: ['Viewer'] }
-    ];
-    setRoleList(initialRoles);
-    setUserList(initialUsers);
-    setSelectedRole(initialRoles[0]);
+    fetchRoles();
+    handleTableChange(1, pageSize);
   }, []);
 
   useEffect(() => {
-    if (selectedRole) {
-      fetchUsersByRole(selectedRole);
-    }
+    if (selectedRole) fetchUsersByRole(selectedRole);
   }, [selectedRole]);
 
+  const handleTableChange = (page: number, size?: number) => {
+    const newPageSize = size || pageSize;
+    const offset = (page - 1) * newPageSize;
+    const paginatedData = userList.slice(offset, offset + newPageSize);
+
+    setTableData(paginatedData);
+    setCurrentPage(page);
+    setPageSize(newPageSize);
+    setTotal(userList.length);
+  };
+
   const fetchRoles = async () => {
-    setLoading(true);
+    setLoadingRoles(true);
     try {
-      const roles = await getRoles();
+      const roles = await roleApi.getRoles({ params: { client_id: id } });
       setRoleList(roles);
       if (roles.length > 0) setSelectedRole(roles[0]);
     } finally {
-      setLoading(false);
+      setLoadingRoles(false);
     }
   };
 
   const fetchUsersByRole = async (role: Role) => {
     setLoading(true);
     try {
-      const users = await getUsersByRole(role.id);
+      const users = await roleApi.getUsersByRole({ params: { role_id: role.id, client_id: id } });
       setUserList(users);
+      handleTableChange(currentPage, pageSize);
     } finally {
       setLoading(false);
     }
   };
 
-  const addRoleHandler = () => {
-    setAddRoleModalOpen(true);
-    addRoleForm.resetFields();
-  };
-
-  const onAddRole = async () => {
-    setModalLoading(true);
+  const fetchAllUsers = async () => {
+    setAllUserLoading(true);
     try {
-      await addRoleForm.validateFields();
-      const roleName = addRoleForm.getFieldValue('roleName');
-      await addRole({ name: roleName });
-      await fetchRoles();
-      message.success(t('common.addSuccess'));
-      setAddRoleModalOpen(false);
+      const users = await roleApi.getAllUser();
+      setAllUserList(users);
     } catch (error) {
-      console.error('Failed:', error);
+      console.error(`${t('common.fetchFailed')}:`, error);
     } finally {
-      setModalLoading(false);
+      setAllUserLoading(false);
     }
   };
 
-  const renameRoleHandler = (role: Role) => {
-    setRenameRoleModalOpen(true);
-    renameRoleForm.setFieldsValue({ roleName: role.name });
+  const fetchRolePermissions = async (role: Role) => {
+    setLoading(true);
+    try {
+      const permissions = await roleApi.getRolePermissions({ params: { role_id: role.id, client_id: id } });
+      console.log('permissions', permissions);
+    } catch (error) {
+      console.error(`${t('common.fetchFailed')}:`, error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const onRenameRole = async () => {
+  const showRoleModal = (role: Role | null = null) => {
+    setIsEditingRole(!!role);
+    if (role) {
+      roleForm.setFieldsValue({ roleName: role.name });
+    } else {
+      roleForm.resetFields();
+    }
+    setRoleModalOpen(true);
+  };
+
+  const handleRoleModalSubmit = async () => {
     setModalLoading(true);
     try {
-      await renameRoleForm.validateFields();
-      const newName = renameRoleForm.getFieldValue('roleName');
-      if (selectedRole) {
-        await updateRole({ id: selectedRole.id, name: newName });
+      await roleForm.validateFields();
+      const roleName = roleForm.getFieldValue('roleName');
+      if (isEditingRole && selectedRole) {
+        await roleApi.updateRole({ client_id: id, role_id: selectedRole.id, name: roleName });
+      } else {
+        await roleApi.addRole({ client_id: id, name: roleName });
       }
       await fetchRoles();
-      if (selectedRole) await fetchUsersByRole(selectedRole);
-      message.success(t('common.updateSuccess'));
-      setRenameRoleModalOpen(false);
+      message.success(isEditingRole ? t('common.updateSuccess') : t('common.addSuccess'));
+      setRoleModalOpen(false);
     } catch (error) {
       console.error('Failed:', error);
     } finally {
@@ -116,17 +141,16 @@ const RoleManagement: React.FC = () => {
     }
   };
 
-  const onDeleteRole = (role: Role) => {
-    deleteRole(role.id)
-      .then(async () => {
-        message.success(t('common.delSuccess'));
-        await fetchRoles();
-        if (selectedRole) await fetchUsersByRole(selectedRole);
-      })
-      .catch((error) => {
-        console.error('Failed:', error);
-        message.error(t('common.delFail'));
-      });
+  const onDeleteRole = async (role: Role) => {
+    try {
+      await roleApi.deleteRole(role.id);
+      message.success(t('common.delSuccess'));
+      await fetchRoles();
+      if (selectedRole) await fetchUsersByRole(selectedRole);
+    } catch (error) {
+      console.error('Failed:', error);
+      message.error(t('common.delFail'));
+    }
   };
 
   const columns = [
@@ -149,7 +173,7 @@ const RoleManagement: React.FC = () => {
     {
       title: t('common.actions'),
       key: 'actions',
-      render: (_: string, record: User) => (
+      render: (_: any, record: User) => (
         <Popconfirm
           title={t('common.delConfirm')}
           okText={t('common.confirm')}
@@ -163,145 +187,19 @@ const RoleManagement: React.FC = () => {
   ];
 
   const handleDeleteUser = async (userId: string) => {
-    // Implement user delete logic here
-    console.log('Delete user:', userId);
-    message.success(t('common.delSuccess'));
+    try {
+      await roleApi.deleteUser(userId);
+      message.success(t('common.delSuccess'));
+      fetchUsersByRole(selectedRole!);
+    } catch (error) {
+      console.error('Failed:', error);
+      message.error(t('common.delFail'));
+    }
   };
-
-  const renderRoleItem = (role: Role) => (
-    <div key={role.id} className="flex items-center justify-between p-2 bg-gray-100 mb-1">
-      <div className="cursor-pointer" onClick={() => onSelectRole(role)}>{role.name}</div>
-      <div>
-        <Button type="link" onClick={() => renameRoleHandler(role)}><EditOutlined /></Button>
-        <Popconfirm
-          title={t('common.delConfirm')}
-          okText={t('common.confirm')}
-          cancelText={t('common.cancel')}
-          onConfirm={() => onDeleteRole(role)}
-        >
-          <Button type="link"><DeleteOutlined /></Button>
-        </Popconfirm>
-      </div>
-    </div>
-  );
 
   const onSelectRole = (role: Role) => {
     setSelectedRole(role);
     fetchUsersByRole(role);
-  };
-
-  const permissionsData = [
-    {
-      key: '1',
-      menu: 'Studio',
-      operations: ['View', 'Add', 'Edit', 'Delete'],
-      children: [
-        { key: '1-1', menu: 'Bot-list', operations: ['View', 'Add', 'Edit', 'Delete'] },
-        { key: '1-2', menu: 'Bot-Setting', operations: ['View', 'Edit', 'Save & Publish'] },
-        { key: '1-3', menu: 'Bot-Channel', operations: ['View', 'Setting'] }
-      ]
-    },
-    {
-      key: '2',
-      menu: 'Knowledge',
-      operations: [],
-      children: [
-        { key: '2-1', menu: 'Knowledge-list', operations: ['View', 'Add', 'Edit', 'Delete'] },
-        { key: '2-2', menu: 'Knowledge-Document', operations: ['View', 'Add', 'Set', 'Train', 'Delete'] }
-      ]
-    }
-  ];
-
-  const getAllOperationKeys = (record: any): string[] => {
-    let keys = [...record.operations];
-    if (record.children) {
-      record.children.forEach((child: any) => {
-        keys = keys.concat(getAllOperationKeys(child));
-      });
-    }
-    return keys;
-  };
-
-  const updateCheckedKeys = (record: any, checked: boolean, prevState: { [key: string]: string[] }) => {
-    const newCheckedKeys = { ...prevState };
-
-    const handleOperations = (key: string, operations: string[], isChecked: boolean) => {
-      if (isChecked) {
-        newCheckedKeys[key] = [...new Set([...(newCheckedKeys[key] || []), ...operations])];
-      } else {
-        newCheckedKeys[key] = [];
-      }
-    };
-
-    const handleChildren = (nodes: any[], isChecked: boolean) => {
-      nodes.forEach((node) => {
-        handleOperations(node.key, node.operations, isChecked);
-        if (node.children) {
-          handleChildren(node.children, isChecked);
-        }
-      });
-    };
-
-    handleOperations(record.key, record.operations, checked);
-    if (record.children) {
-      handleChildren(record.children, checked);
-    }
-
-    return newCheckedKeys;
-  };
-
-  const handleMenuCheckboxChange = (record: any, checked: boolean) => {
-    setPermissionsCheckedKeys((prevState) => {
-      const newCheckedKeys = updateCheckedKeys(record, checked, prevState);
-      return { ...newCheckedKeys, [record.key]: checked ? getAllOperationKeys(record) : [] };
-    });
-  };
-
-  const handleOperationCheckboxChange = (menuKey: string, operation: string, checked: boolean) => {
-    setPermissionsCheckedKeys((prevState) => ({
-      ...prevState,
-      [menuKey]: checked
-        ? [...(prevState[menuKey] || []), operation]
-        : (prevState[menuKey] || []).filter((op) => op !== operation)
-    }));
-  };
-
-  const renderPermissionTable = (data: any[]) => {
-    const columns: TableColumnType<any>[] = [
-      {
-        title: t('system.permissions.menu'),
-        dataIndex: 'menu',
-        key: 'menu',
-        render: (text: string, record: any) => (
-          <Checkbox
-            onChange={(e) => handleMenuCheckboxChange(record, e.target.checked)}
-            checked={permissionsCheckedKeys[record.key]?.length > 0}
-          >
-            {text}
-          </Checkbox>
-        )
-      },
-      {
-        title: t('system.permissions.operation'),
-        dataIndex: 'operations',
-        key: 'operations',
-        render: (operations: string[], record: any) => (
-          <div className="flex space-x-2">
-            {operations.map((operation) => (
-              <Checkbox
-                key={operation}
-                onChange={(e) => handleOperationCheckboxChange(record.key, operation, e.target.checked)}
-                checked={permissionsCheckedKeys[record.key]?.includes(operation) || false}
-              >
-                {operation}
-              </Checkbox>
-            ))}
-          </div>
-        )
-      }
-    ];
-
-    return <Table columns={columns} dataSource={data} expandable={{ childrenColumnName: 'children' }} pagination={false} />;
   };
 
   const handleConfirmPermissions = async () => {
@@ -309,7 +207,10 @@ const RoleManagement: React.FC = () => {
 
     setLoading(true);
     try {
-      await updatePermissions(selectedRole.id, permissionsCheckedKeys);
+      await roleApi.updateRolePermissions({
+        id: selectedRole.id,
+        keys: permissionsCheckedKeys
+      });
       message.success(t('common.updateSuccess'));
     } catch (error) {
       console.error('Failed:', error);
@@ -319,92 +220,192 @@ const RoleManagement: React.FC = () => {
     }
   };
 
+  const handleUserSearch = (value: string) => {
+    const filteredUsers = userList.filter((user) =>
+      user.name.toLowerCase().includes(value.toLowerCase()) ||
+      user.group.toLowerCase().includes(value.toLowerCase()) ||
+      user.roles.some(role => role.toLowerCase().includes(value.toLowerCase()))
+    );
+    setUserList(filteredUsers);
+    handleTableChange(1, pageSize);
+  };
+
+  const openUserModal = () => {
+    if (!allUserList.length) fetchAllUsers();
+    addUserForm.resetFields();
+    setAddUserModalOpen(true);
+  };
+
+  const handleAddUser = async () => {
+    setModalLoading(true);
+    try {
+      const values = await addUserForm.validateFields();
+      await roleApi.addUser(values);
+      message.success(t('common.addSuccess'));
+      fetchUsersByRole(selectedRole!);
+      handleTableChange(currentPage, pageSize);
+      setAddUserModalOpen(false);
+    } catch (error) {
+      console.error('Failed:', error);
+      message.error(t('common.addFail'));
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleTabChange = (key: string) => {
+    setActiveTab(key);
+    if (!selectedRole) return;
+    if (key === '1') {
+      fetchUsersByRole(selectedRole);
+    } else {
+      fetchRolePermissions(selectedRole);
+    }
+  };
+
+  const permissionsData = [
+    {
+      key: '1',
+      menu: 'Studio',
+      children: [
+        { key: '1-1', menu: 'Bot-list', operations: ['View', 'Add', 'Edit', 'Delete'] },
+        { key: '1-2', menu: 'Bot-Setting', operations: ['View', 'Edit', 'Save & Publish'] },
+        { key: '1-3', menu: 'Bot-Channel', operations: ['View', 'Setting'] }
+      ]
+    },
+    {
+      key: '2',
+      menu: 'Knowledge',
+      children: [
+        { key: '2-1', menu: 'Knowledge-list', operations: ['View', 'Add', 'Edit', 'Delete'] },
+        { key: '2-2', menu: 'Knowledge-Document', operations: ['View', 'Add', 'Set', 'Train', 'Delete'] }
+      ]
+    }
+  ];
+
   return (
     <div className="w-full">
       <TopSection title={t('system.group.title')} content={t('system.group.desc')} />
-
-      <div className="flex mt-4">
-        <div className="w-1/4 p-4 bg-gray-50">
-          <div className="flex justify-between items-center mb-4">
-            <h2>{t('system.role.title')}</h2>
-            <Button type="primary" onClick={addRoleHandler}><PlusOutlined /> {t('common.add')}</Button>
-          </div>
-          <div>{roleList.map(renderRoleItem)}</div>
-        </div>
-
-        <div className="w-3/4 p-4 bg-white">
-          <Tabs defaultActiveKey="1">
+      <div className="flex mt-4 w-full" style={{ height: 'calc(100vh - 195px)' }}>
+        <RoleList
+          loadingRoles={loadingRoles}
+          roleList={roleList}
+          selectedRole={selectedRole}
+          onSelectRole={onSelectRole}
+          showRoleModal={showRoleModal}
+          onDeleteRole={onDeleteRole}
+          t={t}
+        />
+        <div className="flex-1 p-4 overflow-hidden bg-[var(--color-bg-1)] rounded-md">
+          <Tabs defaultActiveKey="1" activeKey={activeTab} onChange={handleTabChange}>
             <TabPane tab={t('system.role.users')} key="1">
-              <div className="flex justify-between items-center mb-4">
-                <h2>{t('system.user.title')}</h2>
-                <Search placeholder={t('common.search')} onSearch={(value) => console.log(value)} className="max-w-xs" />
+              <div className="flex justify-end mb-4">
+                <Search
+                  allowClear
+                  enterButton
+                  className='w-60 mr-[8px]'
+                  onSearch={handleUserSearch}
+                  placeholder={`${t('common.search')}`}
+                />
+                <Button
+                  className="mr-[8px]"
+                  type="primary"
+                  onClick={openUserModal}
+                >
+                  +{t('common.add')}
+                </Button>
+                <Button
+                  onClick={() => console.log('Delete selected users')}
+                  disabled={selectedUserKeys.length === 0}
+                >
+                  {t('system.common.modifydelete')}
+                </Button>
               </div>
               <Spin spinning={loading}>
-                <Table
+                <CustomTable
+                  scroll={{ y: 'calc(100vh - 370px)' }}
                   rowSelection={{
                     selectedRowKeys: selectedUserKeys,
-                    onChange: (selectedRowKeys) => setSelectedUserKeys(selectedRowKeys as string[]),
+                    onChange: (selectedRowKeys) => setSelectedUserKeys(selectedRowKeys as React.Key[]),
                   }}
                   columns={columns}
-                  dataSource={userList}
+                  dataSource={tableData}
                   rowKey={(record) => record.id}
-                  pagination={{ pageSize: 5 }}
+                  pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    total: total,
+                    showSizeChanger: true,
+                    onChange: handleTableChange,
+                  }}
                 />
               </Spin>
             </TabPane>
             <TabPane tab={t('system.role.permissions')} key="2">
-              <div className="flex justify-between items-center mb-4">
-                <h2>{t('system.role.permissions')}</h2>
+              <div className="flex justify-end items-center mb-4">
                 <Button type="primary" onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
               </div>
-              <div className="p-4 bg-white">
-                {renderPermissionTable(permissionsData)}
-              </div>
+              <PermissionTable
+                t={t}
+                loading={loading}
+                permissionsData={permissionsData}
+                permissionsCheckedKeys={permissionsCheckedKeys}
+                setPermissionsCheckedKeys={(keyMap) => setPermissionsCheckedKeys(keyMap)}
+              />
             </TabPane>
           </Tabs>
         </div>
       </div>
 
       <OperateModal
-        title={t('system.role.add')}
+        title={isEditingRole ? t('system.role.updateRole') : t('system.role.addRole')}
         closable={false}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
         okButtonProps={{ loading: modalLoading }}
         cancelButtonProps={{ disabled: modalLoading }}
-        open={addRoleModalOpen}
-        onOk={onAddRole}
-        onCancel={() => setAddRoleModalOpen(false)}
+        open={roleModalOpen}
+        onOk={handleRoleModalSubmit}
+        onCancel={() => setRoleModalOpen(false)}
       >
-        <Form form={addRoleForm}>
+        <Form form={roleForm}>
           <Form.Item
             name="roleName"
-            label={t('system.role.form.name')}
+            label={t('system.role.name')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={t('system.role.form.inputName')} />
+            <Input placeholder={t('system.role.name')} />
           </Form.Item>
         </Form>
       </OperateModal>
 
       <OperateModal
-        title={t('system.role.rename')}
+        title={t('system.role.addUser')}
         closable={false}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
         okButtonProps={{ loading: modalLoading }}
         cancelButtonProps={{ disabled: modalLoading }}
-        open={renameRoleModalOpen}
-        onOk={onRenameRole}
-        onCancel={() => setRenameRoleModalOpen(false)}
+        open={addUserModalOpen}
+        onOk={handleAddUser}
+        onCancel={() => setAddUserModalOpen(false)}
       >
-        <Form form={renameRoleForm}>
+        <Form form={addUserForm}>
           <Form.Item
-            name="roleName"
-            label={t('system.role.form.name')}
+            name="users"
+            label={t('system.role.users')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={t('system.role.form.inputName')} />
+            <Select
+              mode="multiple"
+              disabled={allUserLoading}
+              loading={allUserLoading}
+              placeholder={`${t('common.select')} ${t('system.role.users')}`}
+            >
+              {allUserList.map(user => (
+                <Option key={user.id} value={user.id}>{user.username}</Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </OperateModal>
