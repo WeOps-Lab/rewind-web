@@ -71,6 +71,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
 
     //初始化表单的数据
     useEffect(() => {
+
       configformRef.current?.resetFields();
       if (type === 'apply') {
         getApplydata();
@@ -80,7 +81,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       if (configVisible && (['add', 'edit'].includes(type))) {
         configformRef.current?.setFieldsValue(configForm);
       }
-    }, [configVisible, configForm, type]);
+    }, [configVisible, configForm]);
 
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {

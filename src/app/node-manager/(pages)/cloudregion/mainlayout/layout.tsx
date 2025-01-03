@@ -3,7 +3,15 @@ import React from "react";
 import SubLayout from "@/components/sub-layout";
 import { useTranslation } from "@/utils/i18n";
 import { usePathname } from "next/navigation";
-import Collectorintro from "@/app/node-manager/components/collectorintro";
+import Icon from "@/components/icon/index";
+
+const Collectorintro = () => {
+  const { t } = useTranslation();
+  return (<div className="flex h-[58px] flex-col items-center justify-center">
+    <Icon type="yunquyu" className="h-16 w-16" style={{ height: '36px', width: '36px' }}></Icon>
+    <h1 className="text-center">{t('node-manager.cloudregion.title')}</h1>
+  </div>)
+}
 
 const CollectorLayout = ({ children }: Readonly<{
   children: React.ReactNode;
@@ -46,7 +54,8 @@ const CollectorLayout = ({ children }: Readonly<{
         ]}
         topSection={<Topsection></Topsection>}
         showBackButton={false}
-        intro={<Collectorintro></Collectorintro>}     >
+        intro={<Collectorintro></Collectorintro>}
+      >
         {children}
       </SubLayout>
     </div>
