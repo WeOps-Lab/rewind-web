@@ -111,8 +111,7 @@ const Overview = () => {
         setOriginMetricData(_metricData);
         fetchViewData(_metricData, id);
       });
-    } catch (error) {
-      console.log(error);
+    } catch {
       setLoading(false);
     }
   };

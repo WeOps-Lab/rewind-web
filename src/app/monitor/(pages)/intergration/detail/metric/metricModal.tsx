@@ -86,8 +86,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
             }
           }
           setGroupForm(formData);
-        } catch (error) {
-          console.log(error);
+        } catch {
           setGroupForm(formData);
           setEnumList([{ name: null, id: null }]);
         }

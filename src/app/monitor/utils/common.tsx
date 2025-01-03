@@ -278,8 +278,7 @@ export const isStringArray = (input: string): boolean => {
       return false;
     }
     return true;
-  } catch (error) {
-    console.log(error)
+  } catch {
     return false;
   }
 };

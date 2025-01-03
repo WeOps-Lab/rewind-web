@@ -231,8 +231,7 @@ const Configure = () => {
         .finally(() => {
           setLoading(false);
         });
-    } catch (error) {
-      console.log(error);
+    } catch {
       setLoading(false);
     }
   };
@@ -327,8 +326,7 @@ const Configure = () => {
           await post('/monitor/api/metrics_group/set_order/', updatedOrder);
           message.success(t('common.updateSuccess'));
           getInitData();
-        } catch (error) {
-          console.log(error);
+        } catch {
           setLoading(false);
         }
       }

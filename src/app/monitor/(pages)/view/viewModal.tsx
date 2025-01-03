@@ -129,8 +129,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
           .finally(() => {
             setLoading(false);
           });
-      } catch (error) {
-        console.log(error);
+      } catch {
         setLoading(false);
       }
     };

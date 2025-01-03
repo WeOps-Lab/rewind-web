@@ -46,8 +46,7 @@ const ImportModal = forwardRef<ModalRef, ModalConfig>(({ onSuccess }, ref) => {
         const json = JSON.parse(reader.result as string);
         setParsedData(json); // 存储解析后的数据
         onHandleSuccess('Ok');
-      } catch (error) {
-        console.log(error);
+      } catch {
         setParsedData(null);
         message.error('Failed to parse JSON file');
       }
