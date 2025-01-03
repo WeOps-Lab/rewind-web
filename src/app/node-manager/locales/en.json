@@ -40,7 +40,9 @@
         "bindconfig": "Bind Configuration",
         "updataconfig": "Update Configuration",
         "restarinfo": "Are you sure to restart the collector?",
-        "stopinfo": "Are you sure to stop the collector?"
+        "stopinfo": "Are you sure to stop the collector?",
+        "ruleinputinfo":"Please input your IP address!",
+         "group":"Group"
       },
       "Configuration": {
         "name": "NAME",

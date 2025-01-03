@@ -6,7 +6,7 @@ import React, {
   useImperativeHandle,
   useEffect,
 } from "react";
-import { Input, Form, Select, message } from "antd";
+import { Input, Form, Select, message, Button } from "antd";
 import OperateModal from "@/components/operate-modal";
 import { useTranslation } from "@/utils/i18n";
 import type { FormInstance } from "antd";
@@ -36,6 +36,7 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
         setSidecarFormData({
           ipaddress: '',
           operatingsystem: 'linux',
+          group: 'group1',
           installationguide: ''
         });
       },
@@ -53,25 +54,19 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
     const handleCancel = () => {
       setSidecarVisible(false);
     };
+
     const handleConfirm = () => {
-      sidecarformRef.current?.validateFields();
-      const ip = sidecarformRef.current?.getFieldValue('ipaddress');
-      const operating_system = sidecarformRef.current?.getFieldValue('operatingsystem');
-      getsidecarstep(ip, operating_system).then((res) => {
-        sidecarformRef.current?.setFieldsValue({
-          installationguide: res
+      sidecarformRef.current?.validateFields().then((values) => {
+        const { ipaddress, operatingsystem, group } = values;
+        getsidecarstep(ipaddress, operatingsystem, group).then((res) => {
+          sidecarformRef.current?.setFieldsValue({
+            installationguide: res
+          })
+
         })
-
-      })
-      message.success("查询成功");
-      // onSuccess();
-      // setSidecarVisible(false);
+        message.success("Query successful!");
+      });
     };
-
-    //选择操作系统
-    const handleChangeOperatingsystem = (value: string) => {
-      console.log('选择的操作系统是', value)
-    }
 
     const showSidecarForm = (type: string) => {
       if (type === 'uninstall') {
@@ -99,7 +94,7 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
           rules={[
             {
               required: true,
-              message: '请输入IP地址',
+              message: t("node-manager.node.ruleinputinfo"),
             },
           ]}
         >
@@ -108,14 +103,36 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
         <Form.Item
           name="operatingsystem"
           label={t("node-manager.cloudregion.node.system")}
-          required={true}
+          rules={[
+            {
+              required: true,
+              message: t("common.selectMsg"),
+            },
+          ]}
         >
           <Select
             options={[
               { value: 'linux', label: 'Linux' },
               { value: 'windows', label: 'Windows' }
             ]}
-            onChange={handleChangeOperatingsystem}
+          >
+          </Select>
+        </Form.Item>
+        <Form.Item
+          name="group"
+          label={t("node-manager.cloudregion.node.group")}
+          rules={[
+            {
+              required: true,
+              message: t("common.selectMsg"),
+            },
+          ]}
+        >
+          <Select
+            options={[
+              { value: 'group1', label: 'group1' },
+              { value: 'group2', label: 'group2' }
+            ]}
           >
           </Select>
         </Form.Item>
@@ -139,7 +156,12 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
         okText={t("common.confirm")}
         cancelText={t("common.cancel")}
         onCancel={handleCancel}
-        onOk={handleConfirm}
+        footer={
+          <>
+            <Button onClick={handleCancel}>{t(`common.${type === 'install' ? 'cancel' : 'close'}`)}</Button>
+            {type === 'install' && <Button type="primary" onClick={handleConfirm}>{t('common.confirm')}</Button>}
+          </>
+        }
       >
         {showSidecarForm(type)}
       </OperateModal>

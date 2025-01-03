@@ -13,15 +13,18 @@ interface ConfigItem<T> {
 
 //传入modal的参数类型成功的回调
 interface ModalSuccess {
-  onSuccess: () => void
+  onSuccess: () => void;
 }
+
 //调用弹窗接口传入的类型
 interface ModalConfig {
   type: string;
   form?: TableDataItem;
   key?: string;
-  id?: string;
+  ids?: string[];
+  selectedsystem?: string;
 }
+
 //调用弹窗的类型
 interface ModalRef {
   showModal: (config: ModalConfig) => void;
@@ -34,5 +37,28 @@ interface TopSectionProps {
   children: React.ReactNode;
 }
 
+//下拉配置
+interface OptionItem {
+  label: string;
+  value: string | number;
+  template?: string;
+}
 
-export type { ConfigItem, TableDataItem, ModalSuccess, ModalRef, ModalConfig ,TopSectionProps};
+//云区域的卡片
+interface Collectorcardprops {
+  id: string;
+  name: string;
+  system: string[];
+  introduction: string;
+}
+
+export type {
+  ConfigItem,
+  TableDataItem,
+  ModalSuccess,
+  ModalRef,
+  ModalConfig,
+  TopSectionProps,
+  OptionItem,
+  Collectorcardprops,
+};

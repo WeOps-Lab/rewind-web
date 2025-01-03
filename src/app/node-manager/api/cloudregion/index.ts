@@ -1,4 +1,5 @@
 import useApiClient from '@/utils/request';
+import type { updateConfigReq } from '@/app/node-manager/types/cloudregion';
 
 const useApiCloudRegion = () => {
   const { get, post, del, patch } = useApiClient();
@@ -23,40 +24,45 @@ const useApiCloudRegion = () => {
   };
 
   //获取sidecar的安装步骤
-  const getsidecarstep = async (ip: string, operating_system: string) => {
+  const getsidecarstep = async (
+    ip: string,
+    operating_system: string,
+    group: string
+  ) => {
     return await get('/api/sidecar/install_guide/', {
       params: {
         ip,
         operating_system,
+        group,
       },
     });
   };
 
   //批量绑定或更新节点的采集器配置
-  const batchbindcollector = async (
-    data: {
-      node_ids: string;
-      collector_configuration_id: string;
-    }[]
-  ) => {
+  const batchbindcollector = async (data: updateConfigReq) => {
     return await post('/api/node/batch_binding_configuration/', data);
   };
 
   //批量操作节点的采集器（启动、停止、重启）
-  const batchoperationcollector = async (
-    data: {
-      node_ids: string[];
-      collector_id: string;
-      operation: string;
-    }[]
-  ) => {
-    return await post('/api/node/batch_operation/', data);
+  const batchoperationcollector = async (data: {
+    node_ids: string[];
+    collector_id: string;
+    operation: string;
+  }) => {
+    return await post('/api/node/batch_operate_collector/', data);
+  };
+
+  //获取节点管理的状态枚举值
+  const getnodstateenum = async () => {
+    return await get('/api/node/enum/');
   };
 
   //配置文件的模块
   //获取配置文件列表
-  const getconfiglist = async (cloud_region_id: number) => {
-    return await get('/api/configuration/', { params: { cloud_region_id } });
+  const getconfiglist = async (cloud_region_id: number, search?: string) => {
+    return await get('/api/configuration/', {
+      params: { cloud_region_id, search },
+    });
   };
 
   //创建一个配置文件
@@ -74,7 +80,7 @@ const useApiCloudRegion = () => {
     id: string,
     data: {
       name: string;
-      config_template: string;
+      config_template?: string;
       collector_id: string;
     }
   ) => {
@@ -153,6 +159,7 @@ const useApiCloudRegion = () => {
     deletevariable,
     batchbindcollector,
     batchoperationcollector,
+    getnodstateenum,
   };
 };
 export default useApiCloudRegion;

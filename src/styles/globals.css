@@ -75,6 +75,9 @@
 
   --color-primary-bg: var(--color-bg);
   --color-modal-header-color: #f5f8ff;
+
+  --ant-dropdown-padding-block: 5px;
+  --ant-popover-inner-padding: 12px;
 }
 
 .dark {

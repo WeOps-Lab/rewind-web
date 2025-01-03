@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Input, message, Popconfirm } from "antd";
+import { Button, Input, Popconfirm } from "antd";
 import type { TableProps } from "antd";
 import CustomTable from "@/components/custom-table"
-import ConfigModal from "./ConfigModal";
+import ConfigModal from "./configModal";
 import { ModalRef } from "@/app/node-manager/types/index";
 import { IConfiglistprops } from '@/app/node-manager/types/cloudregion'
 import { useTranslation } from "@/utils/i18n";
@@ -13,17 +13,21 @@ import Mainlayout from '../mainlayout/layout';
 import { PlusOutlined } from "@ant-design/icons";
 import useApiClient from "@/utils/request";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
+import useCloudId from "@/app/node-manager/hooks/useCloudid";
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
 const Configration = () => {
+
   const configurationRef = useRef<ModalRef>(null);
   const modifydeleteconfigurationref = useRef<HTMLButtonElement>(null);
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
+  const cloudid = useCloudId();
   const { getconfiglist, batchdeletecollector } = useApiCloudRegion();
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
+  const [loading, setLoading] = useState<boolean>(true)
   const [data, setData] = useState([{
     key: '1',
     name: '文件1',
@@ -32,15 +36,7 @@ const Configration = () => {
     nodecount: 3,
     configinfo: '文件1的配置信息',
   }])
-  const [configfrom] = useState({
-    name: "",
-    key: data[0].key,
-    collector: data[0].collector,
-    operatingsystem: data[0].operatingsystem,
-    configinfo: data[0].configinfo,
-  });
-  //云区域的默认的id
-  const cloud_region_id = 1;
+
   //点击编辑配置文件的触发事件
   const configurationClick = (key: string) => {
     const configurationformdata = data.find((item) => item.key === key);
@@ -51,11 +47,11 @@ const Configration = () => {
   }
 
   //点击应用的配置文件的触发事件
-  const applyconfigurationClick = (key: string) => {
+  const applyconfigurationClick = (key: string, selectedsystem: string) => {
     configurationRef.current?.showModal({
       type: "apply",
-      form: emptytabledata,
-      key: key,
+      key,
+      selectedsystem
     });
   }
 
@@ -76,9 +72,9 @@ const Configration = () => {
   const emptytabledata = {
     name: "",
     key: "",
-    collector: "",
-    operatingsystem: "",
-    nodecount: "",
+    collector: data[0]?.collector,
+    operatingsystem: data[0]?.operatingsystem,
+    configinfo: data[0]?.configinfo
   };
 
   //组件初始化渲染
@@ -86,7 +82,11 @@ const Configration = () => {
     if (!isLoading) {
       return
     }
-    getConfiglist();
+    const searchParams = new URLSearchParams(window.location.search);
+    const id = searchParams.get("id");
+    if (!id) {
+      getConfiglist();
+    }
   }, []);
 
   //删除配置文件刷新页面
@@ -97,6 +97,15 @@ const Configration = () => {
     getConfiglist();
     handleDeleteCollector(false);
   }, [deletestate])
+
+  //判断是否是点击配置文件来查询的
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const id = searchParams.get("id");
+    if (typeof id === 'string') {
+      getConfiglist(id);
+    }
+  }, []);
 
   //组价初始渲染
   useEffect(() => {
@@ -122,11 +131,19 @@ const Configration = () => {
         selectedRows
       );
     },
+    //禁止选中
+    getCheckboxProps: (record: any) => {
+      return {
+        disabled: record.nodecount,
+        name: record.name,
+      };
+    }
   };
 
   //获取配置文件列表
-  const getConfiglist = () => {
-    getconfiglist(Number(cloud_region_id)).then((res) => {
+  const getConfiglist = (search?: string) => {
+    getconfiglist(Number(cloudid), search).then((res) => {
+      setLoading(true)
       const data = res.map((item: IConfiglistprops) => {
         return {
           key: item.id,
@@ -138,6 +155,8 @@ const Configration = () => {
         }
       })
       setData(data)
+    }).finally(() => {
+      setLoading(false)
     })
   }
 
@@ -145,15 +164,17 @@ const Configration = () => {
   const addconfigurationClick = () => {
     configurationRef.current?.showModal({
       type: "add",
-      form: configfrom,
+      form: emptytabledata,
     });
   }
 
-  const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
+  //搜索框的触发事件
+  const onSearch: SearchProps['onSearch'] = (value) => {
+    getConfiglist(value);
+  };
 
   const delcancel = (e: any) => {
     console.log(e);
-    message.error('Click on No');
   }
   return (
     <Mainlayout>
@@ -188,6 +209,7 @@ const Configration = () => {
         </div>
         <div>
           <CustomTable<any>
+            loading={loading}
             scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
             columns={columns}
             dataSource={data}
