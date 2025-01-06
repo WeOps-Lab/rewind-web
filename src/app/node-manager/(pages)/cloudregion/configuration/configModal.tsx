@@ -269,7 +269,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         onOk={handleConfirm}
         width={type === "apply" ? 800 : 600}
       >
-        {showConfigForm(type)!}
+        {showConfigForm(type) || " "}
       </OperateModal>
     );
   }
