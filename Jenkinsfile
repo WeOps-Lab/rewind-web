@@ -65,7 +65,12 @@ pipeline {
                 script {
                     sh """
                        docker pull ${IMAGE_NAME}:${IMAGE_TAG}
-                       docker restart monitor-web || true
+                       docker stop monitor-web || true
+                       docker rm monitor-web || true
+                       docker run -itd --name monitor-web --restart always \
+                            -v /root/codes/conf/monitor-web/.env:/app/.env.local \
+                            --network lite \
+                            etherfurnace/monitor-manager-web
                     """
                 }
             }
