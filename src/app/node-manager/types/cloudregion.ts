@@ -77,6 +77,15 @@ interface mappedNodeItem {
   operatingsystem: string;
   sidecar: string;
 }
+
+interface ConfigDate{
+  key: string,
+  name: string,
+  collector: string,
+  operatingsystem: string,
+  nodecount: number,
+  configinfo: string,
+}
 export type {
   ConfigurationData,
   sidecarinfotype,
@@ -88,4 +97,5 @@ export type {
   updateConfigReq,
   nodeItemtRes,
   mappedNodeItem,
+  ConfigDate
 };

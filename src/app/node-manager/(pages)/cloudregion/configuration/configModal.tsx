@@ -10,7 +10,6 @@ import { Input, Form, Select, message } from "antd";
 import CustomTable from '@/components/custom-table'
 import OperateModal from "@/components/operate-modal";
 import type { FormInstance } from "antd";
-import { data } from "@/app/node-manager/mockdata/cloudregion/node";
 import { ModalSuccess, TableDataItem, ModalRef } from "@/app/node-manager/types/index";
 import { useTranslation } from '@/utils/i18n';
 import type { GetProps } from 'antd';
@@ -34,7 +33,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const cloudid = useCloudId();
     const { createconfig, getconfiglist, getnodelist, applyconfig, updatecollector } = useApiCloudRegion();
     const [configForm, setConfigForm] = useState<TableDataItem>();
-    const [applydata, setApplydata] = useState<mappedNodeItem[]>(data);
+    const [applydata, setApplydata] = useState<mappedNodeItem[]>();
     const [colselectitems, setColselectitems] = useState<OptionItem[]>([])
     const [configid, setConfigid] = useState<string>('')
     const [editeConfigId, setEditeConfigId] = useState<string>('')
@@ -64,21 +63,21 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           setSelectedsystem(selectedsystem)
         } else {
           setEditeConfigId(form?.key)
-          setConfigForm(form)
         }
+        setConfigForm(form)
       },
     }));
 
     //初始化表单的数据
     useEffect(() => {
 
-      configformRef.current?.resetFields();
       if (type === 'apply') {
         getApplydata();
         return
       }
       //add发起请求，设置表单的数据
       if (configVisible && (['add', 'edit'].includes(type))) {
+        configformRef.current?.resetFields();
         configformRef.current?.setFieldsValue(configForm);
       }
     }, [configVisible, configForm]);
@@ -185,9 +184,10 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     }
 
     const showConfigForm = (type: string) => {
-      if (type === "apply") {
-        return (
-          <div>
+
+      return (
+        <Form ref={configformRef} layout="vertical" colon={false}>
+          {type === "apply" ? <div>
             <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
             <CustomTable
               className="mt-4"
@@ -199,68 +199,64 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               scroll={{ y: "calc(100vh - 480px)", x: "calc(100vw - 700px)" }}
             />
           </div>
-        );
-      }
-      return (<Form ref={configformRef} layout="vertical" colon={false}>
-        <Form.Item
-          name="name"
-          label={t('node-manager.cloudregion.Configuration.Name')}
-          rules={[
-            {
-              required: true,
-              message: t("common.inputMsg"),
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          name="operatingsystem"
-          label={t('node-manager.cloudregion.Configuration.system')}
-          rules={[
-            {
-              required: true,
-              message: t("common.selectMsg"),
-            },
-          ]}
-        >
-          <Select
-            defaultValue="linux"
-            options={[
-              { value: 'linux', label: 'Linux' },
-              { value: 'windows', label: 'Windows' }
-            ]}
-            onChange={handleChangeOperatingsystem}
-          >
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="collector"
-          label={t('node-manager.cloudregion.Configuration.collector')}
-          rules={[
-            {
-              required: true,
-              message: t("common.selectMsg"),
-            },
-          ]}
-        >
-          <Select
-            options={colselectitems}
-            onChange={handleChangeCollector}
-          >
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="configinfo"
-          label=" "
-        >
-          <TextArea
-            rows={8}
-            style={{ resize: 'none' }}
-            disabled={true}
-          />
-        </Form.Item>
-      </Form>);
+            :
+            <><Form.Item
+              name="name"
+              label={t('node-manager.cloudregion.Configuration.Name')}
+              rules={[
+                {
+                  required: true,
+                  message: t("common.inputMsg"),
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item><Form.Item
+              name="operatingsystem"
+              label={t('node-manager.cloudregion.Configuration.system')}
+              rules={[
+                {
+                  required: true,
+                  message: t("common.selectMsg"),
+                },
+              ]}
+            >
+              <Select
+                defaultValue="linux"
+                options={[
+                  { value: 'linux', label: 'Linux' },
+                  { value: 'windows', label: 'Windows' }
+                ]}
+                onChange={handleChangeOperatingsystem}
+              >
+              </Select>
+            </Form.Item><Form.Item
+              name="collector"
+              label={t('node-manager.cloudregion.Configuration.collector')}
+              rules={[
+                {
+                  required: true,
+                  message: t("common.selectMsg"),
+                },
+              ]}
+            >
+              <Select
+                options={colselectitems}
+                onChange={handleChangeCollector}
+              >
+              </Select>
+            </Form.Item><Form.Item
+              name="configinfo"
+              label=" "
+            >
+              <TextArea
+                rows={8}
+                style={{ resize: 'none' }}
+                disabled={true} />
+            </Form.Item></>
+          }
+        </Form>
+      )
     }
 
     return (
@@ -273,7 +269,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         onOk={handleConfirm}
         width={type === "apply" ? 800 : 600}
       >
-        {showConfigForm(type)}
+        {showConfigForm(type) || " "}
       </OperateModal>
     );
   }

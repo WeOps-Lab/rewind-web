@@ -19,6 +19,7 @@ interface CloudregioncardProps {
   [key: string]: any;
 }
 
+
 const Cloudregion = () => {
   const cloudregionformRef = useRef<FormInstance>(null);
   const divref = useRef(null);
@@ -28,6 +29,7 @@ const Cloudregion = () => {
   const { getcloudlist, updatecloudintro } = useApiCloudRegion();
   const [selectedRegion, setSelectedRegion] = useState<CloudregioncardProps | null>(null);
   const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
+  const [clouditem, setClouditem] = useState<{ id: string; name: string; description: string; icon: string; }[]>([]);
 
   // 获取相关的接口
   const fetchCloudRegions = async () => {
@@ -35,6 +37,12 @@ const Cloudregion = () => {
       const res = await getcloudlist();
       if (res && res.length > 0) {
         setSelectedRegion(res[0]);
+        setClouditem([{
+          id: '1',
+          name: t("node-manager.cloudregion.title"),
+          description: selectedRegion?.introduction as string,
+          icon: 'yunquyu'
+        }])
       } else {
         console.error('No data received');
       }
@@ -52,7 +60,8 @@ const Cloudregion = () => {
   useEffect(() => {
     cloudregionformRef.current?.resetFields();
     cloudregionformRef.current?.setFieldsValue({
-      user: {
+      cloudregion: {
+        title: t("node-manager.cloudregion.title"),
         introduction: selectedRegion?.introduction,
       },
     });
@@ -78,12 +87,7 @@ const Cloudregion = () => {
       className={`${cloudregionstyle.cloudregion} w-full h-full`}
     >
       <EntityList
-        data={[{
-          id: '1',
-          name: '默认云区域',
-          description: '这个是云区域的描述',
-          icon: 'yunquyu'
-        }]}
+        data={clouditem}
         menuActions={() => {
           return (<Menu>
             <Menu.Item key="edit" onClick={() => handleEdit()}>{t('common.edit')}</Menu.Item>
@@ -108,15 +112,13 @@ const Cloudregion = () => {
       >
         <Form layout="vertical" ref={cloudregionformRef} name="nest-messages">
           <Form.Item
-            required
-            name={['user', 'website']}
+            name={['cloudregion', 'title']}
             label={t('node-manager.cloudregion.editform.Name')}
           >
             <Input placeholder={selectedRegion?.name} disabled />
           </Form.Item>
           <Form.Item
-            required
-            name={['user', 'introduction']}
+            name={['cloudregion', 'introduction']}
             label={t('node-manager.cloudregion.editform.Introduction')}
           >
             <Input.TextArea value={'fdhhfdh'} rows={5} />

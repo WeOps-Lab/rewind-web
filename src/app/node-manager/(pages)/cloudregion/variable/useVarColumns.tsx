@@ -24,7 +24,7 @@ export const useVarColumns = ({
       dataIndex: "description",
     },
     {
-      title: t("common.actions"),
+      title: t("node-manager.cloudregion.variable.actions"),
       dataIndex: "key",
       fixed: "right",
       render: (key: string, text) => (

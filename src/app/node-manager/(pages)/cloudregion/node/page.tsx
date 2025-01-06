@@ -17,7 +17,6 @@ import { useColumns } from "./useColumns";
 import Mainlayout from "../mainlayout/layout";
 import useApiClient from "@/utils/request";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
-import { data } from "@/app/node-manager/mockdata/cloudregion/node";
 import type { CollectorItem, NodeExpanddata } from "@/app/node-manager/types/cloudregion";
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
 
@@ -35,7 +34,7 @@ const Node = () => {
   const cloudid = useCloudId();
   const { isLoading } = useApiClient();
   const { getnodelist, batchbindcollector } = useApiCloudRegion();
-  const [nodelist, setNodelist] = useState<TableDataItem[]>(data);
+  const [nodelist, setNodelist] = useState<TableDataItem[]>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
   const [expandedDataMapping, setExpandedDataMapping] = useState<Record<string, NodeExpanddata[]>>({});

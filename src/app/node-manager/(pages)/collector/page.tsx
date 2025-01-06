@@ -13,7 +13,7 @@ const Collector = () => {
 
   const { getCollectorlist } = useApiCollector();
   const router = useRouter();
-  const [value, setValue] = useState<string | number>('All(20)');
+  const [value, setValue] = useState<string | number>();
   const [cards, setCards] = useState<[]>([])
   useEffect(() => {
     getCollectorlist().then((res) => {
@@ -46,7 +46,7 @@ const Collector = () => {
       {/* 顶部的提示信息 */}
       <Segmented
         className="custom-tabs"
-        options={['All(20)', 'Elastic(6)', 'XX(10)']}
+        options={[`All(${cards.length})`]}
         value={value}
         onChange={setValue}
       />

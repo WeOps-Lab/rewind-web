@@ -67,7 +67,8 @@
         "value": "Value",
         "desc": "Description",
         "deletevariable": "Delete Variable",
-        "deleteinfo": "Are you sure to delete this variable?"
+        "deleteinfo": "Are you sure to delete this variable?",
+        "actions":"ACTIONS"
       }
     },
     "collector": {

@@ -6,7 +6,7 @@ const useApiCloudRegion = () => {
 
   //获取云区域列表
   const getcloudlist = async () => {
-    return await get('/api/cloud_region/');
+    return await get('/node_mgmt/api/cloud_region/');
   };
 
   //更新云区域的介绍
@@ -14,13 +14,13 @@ const useApiCloudRegion = () => {
     id: string,
     data: { introduction: string }
   ) => {
-    return await patch(`/api/cloud_region/${id}/`, data);
+    return await patch(`/node_mgmt/api/cloud_region/${id}/`, data);
   };
 
   //节点的模块
   //获取节点列表
   const getnodelist = async (cloud_region_id: number, search?: string) => {
-    return await get('/api/node/', { params: { cloud_region_id, search } });
+    return await get('/node_mgmt/api/node/', { params: { cloud_region_id, search } });
   };
 
   //获取sidecar的安装步骤
@@ -29,7 +29,7 @@ const useApiCloudRegion = () => {
     operating_system: string,
     group: string
   ) => {
-    return await get('/api/sidecar/install_guide/', {
+    return await get('/node_mgmt/api/sidecar/install_guide/', {
       params: {
         ip,
         operating_system,
@@ -40,7 +40,7 @@ const useApiCloudRegion = () => {
 
   //批量绑定或更新节点的采集器配置
   const batchbindcollector = async (data: updateConfigReq) => {
-    return await post('/api/node/batch_binding_configuration/', data);
+    return await post('/node_mgmt/api/node/batch_binding_configuration/', data);
   };
 
   //批量操作节点的采集器（启动、停止、重启）
@@ -49,18 +49,18 @@ const useApiCloudRegion = () => {
     collector_id: string;
     operation: string;
   }) => {
-    return await post('/api/node/batch_operate_collector/', data);
+    return await post('/node_mgmt/api/node/batch_operate_collector/', data);
   };
 
   //获取节点管理的状态枚举值
   const getnodstateenum = async () => {
-    return await get('/api/node/enum/');
+    return await get('/node_mgmt/api/node/enum/');
   };
 
   //配置文件的模块
   //获取配置文件列表
   const getconfiglist = async (cloud_region_id: number, search?: string) => {
-    return await get('/api/configuration/', {
+    return await get('/node_mgmt/api/configuration/', {
       params: { cloud_region_id, search },
     });
   };
@@ -72,7 +72,7 @@ const useApiCloudRegion = () => {
     cloud_region_id: number;
     config_template: string;
   }) => {
-    return await post('/api/configuration/', data);
+    return await post('/node_mgmt/api/configuration/', data);
   };
 
   //部分更新采集器
@@ -84,12 +84,12 @@ const useApiCloudRegion = () => {
       collector_id: string;
     }
   ) => {
-    return await patch(`/api/configuration/${id}/`, data);
+    return await patch(`/node_mgmt/api/configuration/${id}/`, data);
   };
 
   //删除采集器配置
   const deletecollector = async (id: string) => {
-    return await del(`/api/configuration/${id}/`);
+    return await del(`/node_mgmt/api/configuration/${id}/`);
   };
 
   //应用指定采集器配置文件到指定节点
@@ -100,18 +100,18 @@ const useApiCloudRegion = () => {
       collector_configuration_id: string;
     }
   ) => {
-    return await post('/api/configuration/apply_to_node/', data);
+    return await post('/node_mgmt/api/configuration/apply_to_node/', data);
   };
 
   //批量删除采集器配置
   const batchdeletecollector = async (data: { ids: string[] }) => {
-    return await post('/api/configuration/bulk_delete/', data);
+    return await post('/node_mgmt/api/configuration/bulk_delete/', data);
   };
 
   //变量的模块
   //获取变量列表
   const getvariablelist = async (cloud_region_id: number, search?: string) => {
-    return await get('/api/sidecar_env/', {
+    return await get('/node_mgmt/api/sidecar_env/', {
       params: { cloud_region_id, search },
     });
   };
@@ -123,7 +123,7 @@ const useApiCloudRegion = () => {
     description?: string;
     cloud_region_id: number;
   }) => {
-    return await post('/api/sidecar_env/', data);
+    return await post('/node_mgmt/api/sidecar_env/', data);
   };
 
   //部分更新环境变量
@@ -135,12 +135,12 @@ const useApiCloudRegion = () => {
       description?: string;
     }
   ) => {
-    return await patch(`/api/sidecar_env/${id}/`, data);
+    return await patch(`/node_mgmt/api/sidecar_env/${id}/`, data);
   };
 
   //删除环境变量
   const deletevariable = async (id: string) => {
-    return await del(`/api/sidecar_env/${id}/`);
+    return await del(`/node_mgmt/api/sidecar_env/${id}/`);
   };
   return {
     getcloudlist,
