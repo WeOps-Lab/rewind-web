@@ -5,6 +5,7 @@ import {
   SubGroupItem,
   ListItem,
 } from '@/app/monitor/types';
+import { Group } from '@/types';
 import { MetricItem } from '@/app/monitor/types/monitor';
 import dayjs from 'dayjs';
 import { UNIT_LIST, APPOINT_METRIC_IDS } from '@/app/monitor/constants/monitor';
@@ -310,4 +311,18 @@ export const getEnumValueUnit = (metric: MetricItem, id: number | string) => {
   return isNaN(+id) || APPOINT_METRIC_IDS.includes(name)
     ? `${id} ${unit}`
     : `${(+id).toFixed(2)} ${unit}`;
+};
+
+export const transformTreeData = (nodes: Group[]): CascaderItem[] => {
+  return nodes.map((node) => {
+    const transformedNode: CascaderItem = {
+      value: node.id,
+      label: node.name,
+      children: [],
+    };
+    if (node.children?.length) {
+      transformedNode.children = transformTreeData(node.children);
+    }
+    return transformedNode;
+  });
 };
