@@ -68,9 +68,9 @@ pipeline {
                        docker stop node-manager-web || true
                        docker rm node-manager-web || true
                        docker run -itd --name node-manager-web --restart always \
-                            -v /root/codes/conf/node-manager/.env:/app/.env.local \
+                            -v /root/codes/conf/node-manager-web/.env:/app/.env.local \
                             --network lite \
-                            etherfurnace/node-manager-web                       
+                            etherfurnace/node-manager-web                    
                     """
                 }
             }
