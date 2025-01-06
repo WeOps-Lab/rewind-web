@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dropdown, Space, Avatar, Menu, MenuProps } from 'antd';
+import { usePathname, useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { DownOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
@@ -10,6 +11,8 @@ import { useUserInfoContext } from '@/context/userInfo';
 const UserInfo = () => {
   const { data: session } = useSession();
   const { t } = useTranslation();
+  const pathname = usePathname();
+  const router = useRouter();
   const { flatGroups, selectedGroup, setSelectedGroup } = useUserInfoContext();
 
   const username = session?.username || 'Test';
@@ -29,6 +32,13 @@ const UserInfo = () => {
     if (nextGroup) {
       setSelectedGroup(nextGroup);
       setDropdownVisible(false);
+      const pathSegments = pathname.split('/').filter(Boolean);
+      if (pathSegments.length > 2) {
+        const newPath = `/${pathSegments.slice(0, 2).join('/')}`;
+        router.push(newPath);
+      } else {
+        router.refresh();
+      }
     }
   };
 
