@@ -1,6 +1,5 @@
 {
-  "/provider": {
+  "/opspilot/provider": {
     "admin": ["read", "write"]
   }
 }
-  

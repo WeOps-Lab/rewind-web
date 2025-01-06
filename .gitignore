@@ -57,3 +57,8 @@ storybook-static/*
 /public/locales/*
 /public/menus/*
 /public/app/*
+
+server.cert
+server.csr
+server.js
+server.key
