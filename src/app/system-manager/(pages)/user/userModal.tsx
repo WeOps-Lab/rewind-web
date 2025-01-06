@@ -130,7 +130,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(
         onSuccess();
         setUserVisible(false);
       } catch (error) {
-        message.error(t('common.operationFailed'));
         console.error('Validation failed:', error);
       } finally {
         setIsLoading(false);

@@ -38,7 +38,7 @@ const User: React.FC = () => {
     {
       title: t('system.user.table.username'),
       dataIndex: 'username',
-      width: 185,
+      width: 230,
       fixed: 'left',
       render: (text: string) => {
         const color = getRandomColor();
@@ -82,7 +82,7 @@ const User: React.FC = () => {
     {
       title: t('common.actions'),
       dataIndex: 'key',
-      width: 150,
+      width: 160,
       fixed: 'right',
       render: (key: string) => (
         <>

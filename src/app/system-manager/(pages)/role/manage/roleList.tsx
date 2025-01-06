@@ -34,8 +34,8 @@ const RoleList: React.FC<RoleListProps> = ({
         {role.display_name || role.name}
       </div>
       <div className="flex text-base items-center text-[var(--color-text-3)]">
-        <span className="hidden group-hover:inline cursor-pointer" onClick={() => showRoleModal(role)}>
-          <Icon type="xinzeng" />
+        <span className="hidden group-hover:inline cursor-pointer hover:text-[var(--color-text-hover)]" onClick={() => showRoleModal(role)}>
+          <Icon type="bianji" />
         </span>
         <Popconfirm
           title={t('common.delConfirm')}
@@ -43,7 +43,7 @@ const RoleList: React.FC<RoleListProps> = ({
           cancelText={t('common.cancel')}
           onConfirm={() => onDeleteRole(role)}
         >
-          <span className="ml-[5px] hidden group-hover:inline cursor-pointer">
+          <span className="ml-[5px] hidden group-hover:inline cursor-pointer hover:text-[var(--color-text-active)]">
             <Icon type="shanchu" />
           </span>
         </Popconfirm>
