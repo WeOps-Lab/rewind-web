@@ -29,7 +29,7 @@ const Cloudregion = () => {
   const { getcloudlist, updatecloudintro } = useApiCloudRegion();
   const [selectedRegion, setSelectedRegion] = useState<CloudregioncardProps | null>(null);
   const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
-  const [clouditem,setClouditem]=useState<{ id: string; name: string; description: string; icon: string; } []>([]);
+  const [clouditem, setClouditem] = useState<{ id: string; name: string; description: string; icon: string; }[]>([]);
 
   // 获取相关的接口
   const fetchCloudRegions = async () => {
@@ -61,7 +61,7 @@ const Cloudregion = () => {
     cloudregionformRef.current?.resetFields();
     cloudregionformRef.current?.setFieldsValue({
       cloudregion: {
-        title:t("node-manager.cloudregion.title"),
+        title: t("node-manager.cloudregion.title"),
         introduction: selectedRegion?.introduction,
       },
     });
