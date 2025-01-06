@@ -14,6 +14,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import useApiClient from "@/utils/request";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
+import type { ConfigDate } from '@/app/node-manager/types/cloudregion'
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
@@ -28,14 +29,7 @@ const Configration = () => {
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
   const [loading, setLoading] = useState<boolean>(true)
-  const [data, setData] = useState([{
-    key: '1',
-    name: '文件1',
-    collector: 'Metricbeat1',
-    operatingsystem: 'Windows',
-    nodecount: 3,
-    configinfo: '文件1的配置信息',
-  }])
+  const [data, setData] = useState<ConfigDate[]>([])
 
   //点击编辑配置文件的触发事件
   const configurationClick = (key: string) => {

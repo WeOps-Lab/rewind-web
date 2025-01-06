@@ -5,7 +5,7 @@ const useApiCollector = () => {
 
   //获取采集器列表
   const getCollectorlist = async (search?: string) => {
-    return await get('/api/collector/', { params: { search } });
+    return await get('/node_mgmt/api/collector/', { params: { search } });
   };
   return {
     getCollectorlist,

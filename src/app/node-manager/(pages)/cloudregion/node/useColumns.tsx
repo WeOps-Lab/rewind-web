@@ -20,7 +20,7 @@ export const useColumns = ({
       ),
     },
     {
-      title: t("node-manager.cloudregion.node.system"),
+      title: t("node-manager.cloudregion.node.System"),
       dataIndex: "operatingsystem",
       filters: [
         {
@@ -36,7 +36,7 @@ export const useColumns = ({
         record.operatingsystem.indexOf(value as string) === 0,
     },
     {
-      title: t("node-manager.cloudregion.node.sidecar"),
+      title: t("node-manager.cloudregion.node.Sidecar"),
       dataIndex: "sidecar",
       filters: [
         {

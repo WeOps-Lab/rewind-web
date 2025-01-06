@@ -176,7 +176,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
         <Form ref={collectorformRef} layout="vertical" colon={false}>
           <Form.Item
             name="Collector"
-            label={t("common.selectMsg")}
+            label={t("node-manager.cloudregion.node.collector")}
             rules={[
               {
                 required: true,
@@ -192,7 +192,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
           </Form.Item>
           {configarr.includes(type) && <Form.Item
             name="configration"
-            label={t("common.selectMsg")}
+            label={t("node-manager.cloudregion.node.config")}
             rules={[
               {
                 required: true,
