@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import useApiClient from '@/utils/request';
 import { UserItem, Organization } from '@/app/monitor/types';
 import { ListItem } from '@/types';
+import Spin from '@/components/spin';
 
 interface CommonContextType {
   loginInfo: LoginInfo;
@@ -65,7 +66,9 @@ const CommonContextProvider = ({ children }: { children: React.ReactNode }) => {
       setPageLoading(false);
     }
   };
-  return pageLoading ? null : (
+  return pageLoading ? (
+    <Spin />
+  ) : (
     <CommonContext.Provider
       value={{
         loginInfo,
