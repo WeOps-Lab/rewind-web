@@ -25,3 +25,17 @@ export interface groupProps {
   name: string,
   path: string
 }
+
+export interface Group {
+  id: string;
+  name: string;
+  children?: Group[];
+}
+
+export interface UserInfoContextType {
+  roles: string[];
+  groups: Group[];
+  selectedGroup: Group | null;
+  flatGroups: Group[];
+  setSelectedGroup: (group: Group) => void;
+}
