@@ -66,11 +66,6 @@ const User: React.FC = () => {
       width: 185
     },
     {
-      title: t('system.user.table.number'),
-      dataIndex: 'number',
-      width: 110
-    },
-    {
       title: t('system.user.table.role'),
       dataIndex: 'role',
       width: 110,

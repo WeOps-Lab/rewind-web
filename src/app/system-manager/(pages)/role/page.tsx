@@ -41,8 +41,7 @@ const RolePage = () => {
   };
 
   const handleCardClick = (item: any) => {
-    const itemId = item.id;
-    router.push(`/system-manager/role/manage?id=${itemId}`);
+    router.push(`/system-manager/role/manage?id=${item.id}&clientId=${item.client_id}`);
   };
 
   return (

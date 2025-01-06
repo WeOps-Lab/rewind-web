@@ -12,6 +12,9 @@ export const useUserApi = () => {
   async function getClient() {
     return await get('/system_mgmt/api/get_client/');
   }
+  async function getClientDetail(params: any) {
+    return await get('/system_mgmt/api/get_client_detail/', params);
+  }
   async function getRoleList(params: any) {
     return await get('/system_mgmt/role/search_role_list/', params);
   }
@@ -73,6 +76,7 @@ export const useUserApi = () => {
     getUsersList,
     getOrgTree,
     getClient,
+    getClientDetail,
     getRoleList,
     editUser,
     modifyRole,

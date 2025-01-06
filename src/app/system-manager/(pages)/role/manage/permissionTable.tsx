@@ -1,20 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Checkbox, TableProps } from 'antd';
 import CustomTable from '@/components/custom-table';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 
-// Translate Function
 type TranslateFunction = (key: string) => string;
 
 interface Permission {
-  key: string;
-  menu: string;
-  operations?: string[];
+  name: string;
+  display_name: string;
+  operation?: string[];
   children?: Permission[];
 }
 
 interface PermissionTableProps {
-  permissionsData: Permission[];
+  menuData: Permission[];
   loading: boolean;
   permissionsCheckedKeys: Record<string, string[]>;
   setPermissionsCheckedKeys: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
@@ -22,17 +21,18 @@ interface PermissionTableProps {
 }
 
 const PermissionTable: React.FC<PermissionTableProps> = ({
-  permissionsData,
+  menuData,
   loading,
   permissionsCheckedKeys,
   setPermissionsCheckedKeys,
   t
 }) => {
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   const getAllOperationKeys = (record: Permission): string[] => {
     let keys: string[] = [];
-    if (record.operations) {
-      keys = keys.concat(record.operations);
+    if (record.operation) {
+      keys = keys.concat(record.operation);
     }
     if (record.children) {
       record.children.forEach((child) => {
@@ -56,7 +56,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
 
     const handleChildren = (nodes: Permission[], isChecked: boolean) => {
       nodes.forEach((node) => {
-        handleOperations(node.key, node.operations, isChecked);
+        handleOperations(node.name, node.operation, isChecked);
         if (node.children) {
           handleChildren(node.children, isChecked);
         }
@@ -102,12 +102,12 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
   const isIndeterminate = (record: Permission): boolean => {
     const allKeys = getAllOperationKeys(record);
     const selectedKeys: string[] = [];
-    if (permissionsCheckedKeys[record.key]) {
-      selectedKeys.push(...permissionsCheckedKeys[record.key]);
+    if (permissionsCheckedKeys[record.name]) {
+      selectedKeys.push(...permissionsCheckedKeys[record.name]);
     }
     record.children?.forEach(child => {
-      if (permissionsCheckedKeys[child.key]) {
-        selectedKeys.push(...permissionsCheckedKeys[child.key]);
+      if (permissionsCheckedKeys[child.name]) {
+        selectedKeys.push(...permissionsCheckedKeys[child.name]);
       }
     });
     return selectedKeys.length > 0 && selectedKeys.length < allKeys.length;
@@ -116,12 +116,12 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
   const isChecked = (record: Permission): boolean => {
     const allKeys = getAllOperationKeys(record);
     const selectedKeys: string[] = [];
-    if (permissionsCheckedKeys[record.key]) {
-      selectedKeys.push(...permissionsCheckedKeys[record.key]);
+    if (permissionsCheckedKeys[record.name]) {
+      selectedKeys.push(...permissionsCheckedKeys[record.name]);
     }
     record.children?.forEach((child) => {
-      if (permissionsCheckedKeys[child.key]) {
-        selectedKeys.push(...permissionsCheckedKeys[child.key]);
+      if (permissionsCheckedKeys[child.name]) {
+        selectedKeys.push(...permissionsCheckedKeys[child.name]);
       }
     });
     return selectedKeys.length === allKeys.length;
@@ -130,29 +130,30 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
   const columns: TableProps<Permission>['columns'] = [
     {
       title: t('system.role.permission.menu'),
-      dataIndex: 'menu',
-      key: 'menu',
+      dataIndex: 'display_name',
+      key: 'display_name',
       render: (text: string, record: Permission) => (
         <Checkbox
+          key={record.name}
           indeterminate={isIndeterminate(record)}
           onChange={(e: CheckboxChangeEvent) => handleMenuCheckboxChange(record, e.target.checked)}
           checked={isChecked(record)}
         >
-          {text}
+          {text || record.name}
         </Checkbox>
       ),
     },
     {
       title: t('system.role.permission.operation'),
-      dataIndex: 'operations',
-      key: 'operations',
+      dataIndex: 'operation',
+      key: 'operation',
       render: (operations: string[], record: Permission) => (
-        <div className="flex space-x-2">
-          {(operations||[]).map((operation: string) => (
+        <div className="flex space-x-2" key={record.name}>
+          {(operations || []).map((operation: string) => (
             <Checkbox
               key={operation}
-              onChange={(e: CheckboxChangeEvent) => handleOperationCheckboxChange(record.key, operation, e.target.checked)}
-              checked={permissionsCheckedKeys[record.key]?.includes(operation) || false}
+              onChange={(e: CheckboxChangeEvent) => handleOperationCheckboxChange(record.name, operation, e.target.checked)}
+              checked={permissionsCheckedKeys[record.name]?.includes(operation) || false}
             >
               {operation}
             </Checkbox>
@@ -165,10 +166,19 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
   return (
     <div>
       <CustomTable
+        scroll={{ y: 'calc(100vh - 370px)' }}
         loading={loading}
         columns={columns}
-        dataSource={permissionsData}
-        expandable={{ childrenColumnName: 'children' }}
+        dataSource={menuData.map(item => ({ ...item, key: item.name }))} // Ensure unique key for each item
+        expandable={{
+          childrenColumnName: 'children',
+          expandedRowKeys: expandedKeys,
+          onExpand: (expanded, record) => {
+            setExpandedKeys((prev) =>
+              expanded ? [...prev, record.name] : prev.filter((key) => key !== record.name)
+            );
+          },
+        }}
         pagination={false}
       />
     </div>

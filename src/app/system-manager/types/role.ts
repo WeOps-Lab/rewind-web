@@ -1,7 +1,8 @@
 export interface Role {
-  id: string;
-  name: string;
-  display_name?: string;
+  policy_id: string;
+  role_name: string;
+  display_name: string;
+  role_id: string
 }
 
 export interface User {

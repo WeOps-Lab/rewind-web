@@ -6,8 +6,9 @@ import { useTranslation } from '@/utils/i18n';
 import { useSearchParams } from 'next/navigation';
 import CustomTable from '@/components/custom-table';
 import OperateModal from '@/components/operate-modal';
+import { useUserApi } from '@/app/system-manager/api/user'
 import { useRoleApi } from '@/app/system-manager/api/role';
-import { Role, User } from '@/app/system-manager/types/role';
+import { Role, User, Menu } from '@/app/system-manager/types/role';
 import TopSection from '@/components/top-section';
 import PermissionTable from './permissionTable';
 import RoleList from './roleList';
@@ -20,6 +21,7 @@ const RoleManagement: React.FC = () => {
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
+  const clientId = searchParams.get('clientId');
 
   const [roleForm] = Form.useForm();
   const [addUserForm] = Form.useForm();
@@ -42,10 +44,26 @@ const RoleManagement: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [loadingRoles, setLoadingRoles] = useState(true);
   const [activeTab, setActiveTab] = useState('1');
+  const [menuData, setMenuData] = useState<Menu[]>([]);
 
-  const roleApi = useRoleApi();
+  const {
+    getRoles,
+    getUsersByRole,
+    getAllUser,
+    getRolePermissions,
+    updateRole,
+    addRole,
+    addUser,
+    deleteRole,
+    deleteUser,
+    updateRolePermissions,
+    getAllMenus
+  } = useRoleApi()
+  const { getClientDetail } = useUserApi();
 
   useEffect(() => {
+    fetchClientDetail();
+    fetchAllMenus();
     fetchRoles();
     handleTableChange(1, pageSize);
   }, []);
@@ -57,6 +75,8 @@ const RoleManagement: React.FC = () => {
   const handleTableChange = (page: number, size?: number) => {
     const newPageSize = size || pageSize;
     const offset = (page - 1) * newPageSize;
+    console.log('pagination', offset, offset + newPageSize);
+    console.log('userList', userList);
     const paginatedData = userList.slice(offset, offset + newPageSize);
 
     setTableData(paginatedData);
@@ -68,7 +88,7 @@ const RoleManagement: React.FC = () => {
   const fetchRoles = async () => {
     setLoadingRoles(true);
     try {
-      const roles = await roleApi.getRoles({ params: { client_id: id } });
+      const roles = await getRoles({ params: { client_id: id } });
       setRoleList(roles);
       if (roles.length > 0) setSelectedRole(roles[0]);
     } finally {
@@ -76,10 +96,21 @@ const RoleManagement: React.FC = () => {
     }
   };
 
+  const fetchClientDetail = async () => {
+    const client = await getClientDetail({ params: { client_id: id } });
+    console.log('client', client);
+    // setClientData(menus);
+  };
+
+  const fetchAllMenus = async () => {
+    const menus = await getAllMenus({ params: { client_id: id } });
+    setMenuData(menus);
+  };
+
   const fetchUsersByRole = async (role: Role) => {
     setLoading(true);
     try {
-      const users = await roleApi.getUsersByRole({ params: { role_id: role.id, client_id: id } });
+      const users = await getUsersByRole({ params: { role_name: role.role_name, client_id: id } });
       setUserList(users);
       handleTableChange(currentPage, pageSize);
     } finally {
@@ -90,7 +121,7 @@ const RoleManagement: React.FC = () => {
   const fetchAllUsers = async () => {
     setAllUserLoading(true);
     try {
-      const users = await roleApi.getAllUser();
+      const users = await getAllUser();
       setAllUserList(users);
     } catch (error) {
       console.error(`${t('common.fetchFailed')}:`, error);
@@ -100,9 +131,10 @@ const RoleManagement: React.FC = () => {
   };
 
   const fetchRolePermissions = async (role: Role) => {
+    console.log('role', role);
     setLoading(true);
     try {
-      const permissions = await roleApi.getRolePermissions({ params: { role_id: role.id, client_id: id } });
+      const permissions = await getRolePermissions({ params: { client_id: id } });
       console.log('permissions', permissions);
     } catch (error) {
       console.error(`${t('common.fetchFailed')}:`, error);
@@ -114,7 +146,7 @@ const RoleManagement: React.FC = () => {
   const showRoleModal = (role: Role | null = null) => {
     setIsEditingRole(!!role);
     if (role) {
-      roleForm.setFieldsValue({ roleName: role.name });
+      roleForm.setFieldsValue({ roleName: role.display_name });
     } else {
       roleForm.resetFields();
     }
@@ -127,9 +159,17 @@ const RoleManagement: React.FC = () => {
       await roleForm.validateFields();
       const roleName = roleForm.getFieldValue('roleName');
       if (isEditingRole && selectedRole) {
-        await roleApi.updateRole({ client_id: id, role_id: selectedRole.id, name: roleName });
+        await updateRole({
+          client_id: clientId,
+          role_id: selectedRole.policy_id,
+          name: roleName,
+          id: id
+        });
       } else {
-        await roleApi.addRole({ client_id: id, name: roleName });
+        await addRole({
+          client_id: id,
+          name: roleName
+        });
       }
       await fetchRoles();
       message.success(isEditingRole ? t('common.updateSuccess') : t('common.addSuccess'));
@@ -143,7 +183,11 @@ const RoleManagement: React.FC = () => {
 
   const onDeleteRole = async (role: Role) => {
     try {
-      await roleApi.deleteRole(role.id);
+      await deleteRole({
+        policy_id: role.policy_id,
+        role_name: role.role_name,
+        id: id
+      });
       message.success(t('common.delSuccess'));
       await fetchRoles();
       if (selectedRole) await fetchUsersByRole(selectedRole);
@@ -155,20 +199,19 @@ const RoleManagement: React.FC = () => {
 
   const columns = [
     {
-      title: t('system.user.form.name'),
-      dataIndex: 'name',
-      key: 'name',
+      title: t('system.user.form.username'),
+      dataIndex: 'username',
+      key: 'username',
+    },
+    {
+      title: t('system.user.form.lastName'),
+      dataIndex: 'lastName',
+      key: 'lastName',
     },
     {
       title: t('system.user.form.group'),
       dataIndex: 'group',
       key: 'group',
-    },
-    {
-      title: t('system.user.form.role'),
-      dataIndex: 'roles',
-      key: 'roles',
-      render: (roles: string[]) => roles.join(', '),
     },
     {
       title: t('common.actions'),
@@ -188,7 +231,7 @@ const RoleManagement: React.FC = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      await roleApi.deleteUser(userId);
+      await deleteUser(userId);
       message.success(t('common.delSuccess'));
       fetchUsersByRole(selectedRole!);
     } catch (error) {
@@ -207,8 +250,8 @@ const RoleManagement: React.FC = () => {
 
     setLoading(true);
     try {
-      await roleApi.updateRolePermissions({
-        id: selectedRole.id,
+      await updateRolePermissions({
+        id: selectedRole.policy_id,
         keys: permissionsCheckedKeys
       });
       message.success(t('common.updateSuccess'));
@@ -240,14 +283,17 @@ const RoleManagement: React.FC = () => {
     setModalLoading(true);
     try {
       const values = await addUserForm.validateFields();
-      await roleApi.addUser(values);
+      await addUser({
+        role_id: selectedRole?.role_id,
+        user_ids: values?.users
+      });
       message.success(t('common.addSuccess'));
       fetchUsersByRole(selectedRole!);
       handleTableChange(currentPage, pageSize);
       setAddUserModalOpen(false);
     } catch (error) {
       console.error('Failed:', error);
-      message.error(t('common.addFail'));
+      message.error(t('common.saveFailed'));
     } finally {
       setModalLoading(false);
     }
@@ -262,26 +308,6 @@ const RoleManagement: React.FC = () => {
       fetchRolePermissions(selectedRole);
     }
   };
-
-  const permissionsData = [
-    {
-      key: '1',
-      menu: 'Studio',
-      children: [
-        { key: '1-1', menu: 'Bot-list', operations: ['View', 'Add', 'Edit', 'Delete'] },
-        { key: '1-2', menu: 'Bot-Setting', operations: ['View', 'Edit', 'Save & Publish'] },
-        { key: '1-3', menu: 'Bot-Channel', operations: ['View', 'Setting'] }
-      ]
-    },
-    {
-      key: '2',
-      menu: 'Knowledge',
-      children: [
-        { key: '2-1', menu: 'Knowledge-list', operations: ['View', 'Add', 'Edit', 'Delete'] },
-        { key: '2-2', menu: 'Knowledge-Document', operations: ['View', 'Add', 'Set', 'Train', 'Delete'] }
-      ]
-    }
-  ];
 
   return (
     <div className="w-full">
@@ -348,7 +374,7 @@ const RoleManagement: React.FC = () => {
               <PermissionTable
                 t={t}
                 loading={loading}
-                permissionsData={permissionsData}
+                menuData={menuData}
                 permissionsCheckedKeys={permissionsCheckedKeys}
                 setPermissionsCheckedKeys={(keyMap) => setPermissionsCheckedKeys(keyMap)}
               />
