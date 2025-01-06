@@ -67,10 +67,10 @@ pipeline {
                     docker pull ${IMAGE_NAME}:${IMAGE_TAG}
                     docker stop system-manager-web || true
                     docker rm system-manager-web || true
-                    docker run -itd --name system-manager --restart always \
-                        -v /root/codes/conf/system-manager/.env:/apps/.env \
+                    docker run -itd --name system-manager-web --restart always \
+                        -v /root/codes/conf/system-manager-web/.env:/app/.env.local \
                         --network lite \
-                        etherfurnace/system-manager
+                        etherfurnace/system-manager-web
                     """
                 }
             }
