@@ -46,7 +46,7 @@ const Collector = () => {
       {/* 顶部的提示信息 */}
       <Segmented
         className="custom-tabs"
-        options={[`All(${cards.length})`]}
+        options={[`All(${cards.length})`,`Elastic(${cards.length})`]}
         value={value}
         onChange={setValue}
       />

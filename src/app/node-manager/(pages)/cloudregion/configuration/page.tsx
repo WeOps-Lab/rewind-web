@@ -14,7 +14,8 @@ import { PlusOutlined } from "@ant-design/icons";
 import useApiClient from "@/utils/request";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
-import type { ConfigDate } from '@/app/node-manager/types/cloudregion'
+import type { ConfigDate } from '@/app/node-manager/types/cloudregion';
+import configstyle from './index.module.scss'
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
@@ -172,7 +173,7 @@ const Configration = () => {
   }
   return (
     <Mainlayout>
-      <div className="w-full h-full">
+      <div className={`${configstyle.config} w-full h-full`}>
         <div className="flex justify-end mb-4">
           <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
           <Button
@@ -201,10 +202,11 @@ const Configration = () => {
             </Button>
           </Popconfirm>
         </div>
-        <div>
+        <div className="tablewidth">
           <CustomTable<any>
             loading={loading}
-            scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
+            className="h-3/4"
+            scroll={{ y: "calc(100vh - 400px)", x: "calc(100vw - 288px)" }}
             columns={columns}
             dataSource={data}
             rowSelection={rowSelection}

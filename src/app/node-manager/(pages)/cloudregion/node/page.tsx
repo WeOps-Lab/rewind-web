@@ -333,8 +333,7 @@ const Node = () => {
               columns={columns}
               loading={loading}
               dataSource={nodelist}
-              className="min-h-[274px]"
-              scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
+              scroll={{ y: "calc(100vh - 400px)", x: "calc(100vw - 300px)" }}
               rowSelection={rowSelection}
               expandable={{
                 expandIconColumnIndex: -1,

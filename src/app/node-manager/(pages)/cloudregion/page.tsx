@@ -38,9 +38,9 @@ const Cloudregion = () => {
       if (res && res.length > 0) {
         setSelectedRegion(res[0]);
         setClouditem([{
-          id: '1',
-          name: t("node-manager.cloudregion.title"),
-          description: selectedRegion?.introduction as string,
+          id: res[0].id,
+          name: res[0].name,
+          description: res[0]?.introduction as string,
           icon: 'yunquyu'
         }])
       } else {
@@ -61,15 +61,16 @@ const Cloudregion = () => {
     cloudregionformRef.current?.resetFields();
     cloudregionformRef.current?.setFieldsValue({
       cloudregion: {
-        title: t("node-manager.cloudregion.title"),
+        id: selectedRegion?.id,
+        title: selectedRegion?.name,
         introduction: selectedRegion?.introduction,
       },
     });
   }, [openeditcloudregion]);
 
   const handleFormOkClick = () => {
-    const values = cloudregionformRef.current?.getFieldsValue();
-    updatecloudintro('1', { introduction: values?.user?.introduction });
+    const { cloudregion } = cloudregionformRef.current?.getFieldsValue();
+    updatecloudintro(cloudregion.id, { introduction: cloudregion.introduction });
     setOpeneditcloudregion(false);
     fetchCloudRegions();
   };
@@ -88,12 +89,12 @@ const Cloudregion = () => {
     >
       <EntityList
         data={clouditem}
+        loading={false}
         menuActions={() => {
           return (<Menu>
             <Menu.Item key="edit" onClick={() => handleEdit()}>{t('common.edit')}</Menu.Item>
           </Menu>)
         }}
-        loading={false}
         openModal={() => { }}
         onSearch={onSearch} onCardClick={() => { router.push('/node-manager/cloudregion/node?cloud_region_id=1'); }} ></EntityList>
 
@@ -111,6 +112,9 @@ const Cloudregion = () => {
         }}
       >
         <Form layout="vertical" ref={cloudregionformRef} name="nest-messages">
+          <Form.Item name={['cloudregion', 'id']} hidden>
+            <Input />
+          </Form.Item>
           <Form.Item
             name={['cloudregion', 'title']}
             label={t('node-manager.cloudregion.editform.Name')}
@@ -121,7 +125,7 @@ const Cloudregion = () => {
             name={['cloudregion', 'introduction']}
             label={t('node-manager.cloudregion.editform.Introduction')}
           >
-            <Input.TextArea value={'fdhhfdh'} rows={5} />
+            <Input.TextArea rows={5} />
           </Form.Item>
         </Form>
       </OperateModal>

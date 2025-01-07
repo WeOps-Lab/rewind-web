@@ -14,6 +14,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 import useApiClient from "@/utils/request";
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
+import variableStyle from "./index.module.scss"
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
@@ -122,7 +123,7 @@ const Variable = () => {
 
   return (
     <Mainlayout>
-      <div className="w-full h-full">
+      <div className={`${variableStyle.variable} w-full h-full`}>
         <div className="flex justify-end mb-4">
           <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
           <Button
@@ -140,9 +141,9 @@ const Variable = () => {
           </Button>
 
         </div>
-        <div className="overflow-x-auto">
+        <div className="tablewidth">
           <CustomTable
-            scroll={{ y: "calc(100vh - 400px)", x: "max-content" }}
+            scroll={{ y: "calc(100vh - 400px)", x: data && data.length > 0 ? "max-content" : undefined, }}
             loading={loading}
             columns={columns}
             dataSource={data}
