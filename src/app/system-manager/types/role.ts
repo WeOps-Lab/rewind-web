@@ -12,3 +12,11 @@ export interface User {
   roles: string[];
   username?: string;
 }
+
+export interface Menu {
+  name: string;
+  display_name?: string;
+  operation?: string[];
+  children?: Menu[];
+}
+

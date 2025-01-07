@@ -2,18 +2,12 @@ import React, { useState } from 'react';
 import { Checkbox, TableProps } from 'antd';
 import CustomTable from '@/components/custom-table';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import { Menu } from '@/app/system-manager/types/role';
 
 type TranslateFunction = (key: string) => string;
 
-interface Permission {
-  name: string;
-  display_name: string;
-  operation?: string[];
-  children?: Permission[];
-}
-
 interface PermissionTableProps {
-  menuData: Permission[];
+  menuData: Menu[];
   loading: boolean;
   permissionsCheckedKeys: Record<string, string[]>;
   setPermissionsCheckedKeys: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
@@ -29,7 +23,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
 }) => {
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
-  const getAllOperationKeys = (record: Permission): string[] => {
+  const getAllOperationKeys = (record: Menu): string[] => {
     let keys: string[] = [];
     if (record.operation) {
       keys = keys.concat(record.operation);
@@ -42,7 +36,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
     return keys;
   };
 
-  const updateCheckedKeys = (record: Permission, checked: boolean, prevState: Record<string, string[]>): Record<string, string[]> => {
+  const updateCheckedKeys = (record: Menu, checked: boolean, prevState: Record<string, string[]>): Record<string, string[]> => {
     const newCheckedKeys = { ...prevState };
 
     const handleOperations = (key: string, operations?: string[], isChecked?: boolean) => {
@@ -54,7 +48,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
       }
     };
 
-    const handleChildren = (nodes: Permission[], isChecked: boolean) => {
+    const handleChildren = (nodes: Menu[], isChecked: boolean) => {
       nodes.forEach((node) => {
         handleOperations(node.name, node.operation, isChecked);
         if (node.children) {
@@ -67,7 +61,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
     return newCheckedKeys;
   };
 
-  const handleMenuCheckboxChange = (record: Permission, checked: boolean) => {
+  const handleMenuCheckboxChange = (record: Menu, checked: boolean) => {
     setPermissionsCheckedKeys((prevState) => {
       const newCheckedKeys = updateCheckedKeys(record, checked, prevState);
       return newCheckedKeys;
@@ -99,7 +93,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
     });
   };
 
-  const isIndeterminate = (record: Permission): boolean => {
+  const isIndeterminate = (record: Menu): boolean => {
     const allKeys = getAllOperationKeys(record);
     const selectedKeys: string[] = [];
     if (permissionsCheckedKeys[record.name]) {
@@ -113,7 +107,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
     return selectedKeys.length > 0 && selectedKeys.length < allKeys.length;
   };
 
-  const isChecked = (record: Permission): boolean => {
+  const isChecked = (record: Menu): boolean => {
     const allKeys = getAllOperationKeys(record);
     const selectedKeys: string[] = [];
     if (permissionsCheckedKeys[record.name]) {
@@ -127,12 +121,12 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
     return selectedKeys.length === allKeys.length;
   };
 
-  const columns: TableProps<Permission>['columns'] = [
+  const columns: TableProps<Menu>['columns'] = [
     {
       title: t('system.role.permission.menu'),
       dataIndex: 'display_name',
       key: 'display_name',
-      render: (text: string, record: Permission) => (
+      render: (text: string, record: Menu) => (
         <Checkbox
           key={record.name}
           indeterminate={isIndeterminate(record)}
@@ -147,7 +141,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
       title: t('system.role.permission.operation'),
       dataIndex: 'operation',
       key: 'operation',
-      render: (operations: string[], record: Permission) => (
+      render: (operations: string[], record: Menu) => (
         <div className="flex space-x-2" key={record.name}>
           {(operations || []).map((operation: string) => (
             <Checkbox
