@@ -245,39 +245,39 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
                 },
               ]}
             >
-                <Select
-                  defaultValue="linux"
-                  options={[
-                    { value: 'linux', label: 'Linux' },
-                    { value: 'windows', label: 'Windows' }
-                  ]}
-                  onChange={handleChangeOperatingsystem}
-                >
-                </Select>
-              </Form.Item><Form.Item
-                name="collector"
-                label={t('node-manager.cloudregion.Configuration.collector')}
-                rules={[
-                  {
-                    required: true,
-                    message: t("common.selectMsg"),
-                  },
+              <Select
+                defaultValue="linux"
+                options={[
+                  { value: 'linux', label: 'Linux' },
+                  { value: 'windows', label: 'Windows' }
                 ]}
+                onChange={handleChangeOperatingsystem}
               >
-                <Select
-                  options={colselectitems}
-                  onChange={handleChangeCollector}
-                >
-                </Select>
-              </Form.Item><Form.Item
-                name="configinfo"
-                label=" "
+              </Select>
+            </Form.Item><Form.Item
+              name="collector"
+              label={t('node-manager.cloudregion.Configuration.collector')}
+              rules={[
+                {
+                  required: true,
+                  message: t("common.selectMsg"),
+                },
+              ]}
+            >
+              <Select
+                options={colselectitems}
+                onChange={handleChangeCollector}
               >
-                <TextArea
-                  rows={8}
-                  style={{ resize: 'none' }}
-                  disabled={true} />
-              </Form.Item></>
+              </Select>
+            </Form.Item><Form.Item
+              name="configinfo"
+              label=" "
+            >
+              <TextArea
+                rows={8}
+                style={{ resize: 'none' }}
+                disabled={true} />
+            </Form.Item></>
           }
         </Form>
       )
