@@ -35,7 +35,7 @@ export const useRoleApi = () => {
     return await post('/system_mgmt/role/add_user/', params);
   }
   const deleteUser = async (params: any) => {
-    return await post('/system_mgmt/role/delete_role/', params);
+    return await post('/system_mgmt/role/delete_user/', params);
   }
   return {
     getClientData,
