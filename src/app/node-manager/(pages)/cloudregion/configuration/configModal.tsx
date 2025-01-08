@@ -87,39 +87,43 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       setConfigVisible(false);
     };
 
+    const handleCreate = (name: string, configinfo: string, collector: string) => {
+      createconfig({
+        name,
+        collector_id: collector,
+        cloud_region_id: Number(cloudid),
+        config_template: configinfo,
+      }).then(() => {
+        onSuccess()
+        message.success(t('common.addSuccess'))
+      })
+    }
+
+    const handleUpdate = (name: string, configinfo: string, collector: string) => {
+      updatecollector(
+        editeConfigId,
+        {
+          name,
+          config_template: configinfo,
+          collector_id: collector,
+        }
+      ).then(() => {
+        onSuccess();
+        message.success(t('common.updateSuccess'))
+      })
+    }
+
     //处理添加和编辑的确定事件
     const handleConfirm = () => {
       // 校验表单
       configformRef.current?.validateFields().then((values) => {
         const { name, collector, configinfo } = values
         if (type === 'add') {
-          createconfig({
-            name,
-            collector_id: collector,
-            cloud_region_id: Number(cloudid),
-            config_template: configinfo,
-          }).then(() => {
-            onSuccess()
-            message.success(t('common.addSuccess'))
-          }).catch(() => {
-            message.error(t('common.error'))
-          })
+          handleCreate(name, collector, configinfo);
           setConfigVisible(false);
           return;
         }
-        updatecollector(
-          editeConfigId,
-          {
-            name,
-            config_template: configinfo,
-            collector_id: collector,
-          }
-        ).then(() => {
-          onSuccess();
-          message.success(t('common.updateSuccess'))
-        }).catch(() => {
-          message.success(t('common.updateFailed'))
-        })
+        handleUpdate(name, collector, configinfo)
         setConfigVisible(false);
 
       })
@@ -138,8 +142,6 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
           setApplydata(tempdata);
-        }).catch(() => {
-          message.success(t('common.fetchFailed'))
         })
     };
 
@@ -202,8 +204,6 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
           setApplydata(tempdata);
-        }).catch(() => {
-          message.success(t('common.fetchFailed'))
         })
     }
 
@@ -245,39 +245,39 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
                 },
               ]}
             >
-              <Select
-                defaultValue="linux"
-                options={[
-                  { value: 'linux', label: 'Linux' },
-                  { value: 'windows', label: 'Windows' }
+                <Select
+                  defaultValue="linux"
+                  options={[
+                    { value: 'linux', label: 'Linux' },
+                    { value: 'windows', label: 'Windows' }
+                  ]}
+                  onChange={handleChangeOperatingsystem}
+                >
+                </Select>
+              </Form.Item><Form.Item
+                name="collector"
+                label={t('node-manager.cloudregion.Configuration.collector')}
+                rules={[
+                  {
+                    required: true,
+                    message: t("common.selectMsg"),
+                  },
                 ]}
-                onChange={handleChangeOperatingsystem}
               >
-              </Select>
-            </Form.Item><Form.Item
-              name="collector"
-              label={t('node-manager.cloudregion.Configuration.collector')}
-              rules={[
-                {
-                  required: true,
-                  message: t("common.selectMsg"),
-                },
-              ]}
-            >
-              <Select
-                options={colselectitems}
-                onChange={handleChangeCollector}
+                <Select
+                  options={colselectitems}
+                  onChange={handleChangeCollector}
+                >
+                </Select>
+              </Form.Item><Form.Item
+                name="configinfo"
+                label=" "
               >
-              </Select>
-            </Form.Item><Form.Item
-              name="configinfo"
-              label=" "
-            >
-              <TextArea
-                rows={8}
-                style={{ resize: 'none' }}
-                disabled={true} />
-            </Form.Item></>
+                <TextArea
+                  rows={8}
+                  style={{ resize: 'none' }}
+                  disabled={true} />
+              </Form.Item></>
           }
         </Form>
       )

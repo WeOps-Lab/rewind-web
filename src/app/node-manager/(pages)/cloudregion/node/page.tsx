@@ -205,8 +205,6 @@ const Node = () => {
   }) => {
     batchbindcollector(data).then(() => {
       message.success(t('common.batchbindSuccess'))
-    }).catch(() => {
-      message.error(t('common.batchbindFailed'))
     })
     getNodelist();
 
