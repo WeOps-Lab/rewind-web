@@ -32,6 +32,7 @@ import { FiltersConfig } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
 import TimeSelector from '@/components/time-selector';
 import AlertDetail from './alertDetail';
+import Collapse from '@/components/collapse';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import dayjs from 'dayjs';
 import { useCommon } from '@/app/monitor/context/common';
@@ -46,15 +47,21 @@ const INIT_HISTORY_FILTERS = {
   level: [],
   state: [],
   notify: [],
+  monitor_object_name: [],
 };
 
 const INIT_ACTIVE_FILTERS = {
   level: [],
   state: ['new'],
   notify: [],
+  monitor_object_name: [],
 };
 
-const Alert: React.FC<AlertProps> = ({ objects, metrics }) => {
+const Alert: React.FC<AlertProps> = ({
+  objects,
+  metrics,
+  groupObjects = [],
+}) => {
   const { get, patch, isLoading } = useApiClient();
   const { t } = useTranslation();
   const STATE_MAP = useStateMap();
@@ -235,6 +242,7 @@ const Alert: React.FC<AlertProps> = ({ objects, metrics }) => {
     timeRange,
     filters.level,
     filters.state,
+    filters.monitor_object_name,
     pagination.current,
     pagination.pageSize,
   ]);
@@ -247,6 +255,7 @@ const Alert: React.FC<AlertProps> = ({ objects, metrics }) => {
     timeRange,
     filters.level,
     filters.state,
+    filters.monitor_object_name,
     pagination.current,
     pagination.pageSize,
   ]);
@@ -291,6 +300,7 @@ const Alert: React.FC<AlertProps> = ({ objects, metrics }) => {
     const params = {
       status_in: filters.state.join(',') || 'recovered,closed',
       level_in: filters.level.join(','),
+      monitor_object_name: filters.monitor_object_name.join(','),
       content: searchText,
       page: pagination.current,
       page_size: pagination.pageSize,
@@ -383,63 +393,90 @@ const Alert: React.FC<AlertProps> = ({ objects, metrics }) => {
             {t('monitor.events.filterItems')}
           </h3>
           <div className="mb-[15px]">
-            <h4 className="font-[600] text-[14px] text-[var(--color-text-3)] mb-[10px]">
-              {t('monitor.events.level')}
-            </h4>
-            <Checkbox.Group
-              className="ml-[20px]"
-              value={filters.level}
-              onChange={(checkeds) => onFilterChange(checkeds, 'level')}
-            >
-              <Space direction="vertical">
-                <Checkbox value="critical">
-                  <div className={alertStyle.level}>
-                    {t('monitor.events.critical')}
-                  </div>
-                </Checkbox>
-                <Checkbox value="error">
-                  <div
-                    className={alertStyle.level}
-                    style={{
-                      borderLeft: `4px solid ${LEVEL_MAP.error}`,
-                    }}
-                  >
-                    {t('monitor.events.error')}
-                  </div>
-                </Checkbox>
-                <Checkbox value="warning">
-                  <div
-                    className={alertStyle.level}
-                    style={{
-                      borderLeft: `4px solid ${LEVEL_MAP.warning}`,
-                    }}
-                  >
-                    {t('monitor.events.warning')}
-                  </div>
-                </Checkbox>
-              </Space>
-            </Checkbox.Group>
-          </div>
-          {activeTab === 'historicalAlarms' && (
-            <div className="mb-[15px]">
-              <h4 className="font-[600] text-[var(--color-text-3)] text-[14px] mb-[10px]">
-                {t('monitor.events.state')}
-              </h4>
+            <Collapse title={t('monitor.events.level')} isOpen={false}>
               <Checkbox.Group
-                value={filters.state}
                 className="ml-[20px]"
-                onChange={(checkeds) => onFilterChange(checkeds, 'state')}
+                value={filters.level}
+                onChange={(checkeds) => onFilterChange(checkeds, 'level')}
               >
                 <Space direction="vertical">
-                  {/* <Checkbox value="new">{t('monitor.events.new')}</Checkbox> */}
-                  <Checkbox value="recovered">
-                    {t('monitor.events.recovery')}
+                  <Checkbox value="critical">
+                    <div className={alertStyle.level}>
+                      {t('monitor.events.critical')}
+                    </div>
                   </Checkbox>
-                  <Checkbox value="closed">
-                    {t('monitor.events.closed')}
+                  <Checkbox value="error">
+                    <div
+                      className={alertStyle.level}
+                      style={{
+                        borderLeft: `4px solid ${LEVEL_MAP.error}`,
+                      }}
+                    >
+                      {t('monitor.events.error')}
+                    </div>
+                  </Checkbox>
+                  <Checkbox value="warning">
+                    <div
+                      className={alertStyle.level}
+                      style={{
+                        borderLeft: `4px solid ${LEVEL_MAP.warning}`,
+                      }}
+                    >
+                      {t('monitor.events.warning')}
+                    </div>
                   </Checkbox>
                 </Space>
               </Checkbox.Group>
+            </Collapse>
+          </div>
+          <div className="mb-[15px]">
+            <Collapse title={t('monitor.events.assetType')} isOpen={false}>
+              <Checkbox.Group
+                className="ml-[20px]"
+                value={filters.monitor_object_name}
+                onChange={(checkeds) =>
+                  onFilterChange(checkeds, 'monitor_object_name')
+                }
+              >
+                <Space direction="vertical">
+                  {groupObjects.map((item, index) => {
+                    return (
+                      <Collapse
+                        key={index}
+                        title={item.label || '--'}
+                        className={alertStyle.assetType}
+                      >
+                        {(item.options || []).map((optionItem, optionIndex) => (
+                          <Checkbox key={optionIndex} value={optionItem.value}>
+                            {optionItem.label}
+                          </Checkbox>
+                        ))}
+                      </Collapse>
+                    );
+                  })}
+                </Space>
+              </Checkbox.Group>
+            </Collapse>
+          </div>
+          {activeTab === 'historicalAlarms' && (
+            <div className="mb-[15px]">
+              <Collapse title={t('monitor.events.state')} isOpen={false}>
+                <Checkbox.Group
+                  value={filters.state}
+                  className="ml-[20px]"
+                  onChange={(checkeds) => onFilterChange(checkeds, 'state')}
+                >
+                  <Space direction="vertical">
+                    {/* <Checkbox value="new">{t('monitor.events.new')}</Checkbox> */}
+                    <Checkbox value="recovered">
+                      {t('monitor.events.recovery')}
+                    </Checkbox>
+                    <Checkbox value="closed">
+                      {t('monitor.events.closed')}
+                    </Checkbox>
+                  </Space>
+                </Checkbox.Group>
+              </Collapse>
             </div>
           )}
         </div>

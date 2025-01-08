@@ -11,10 +11,20 @@
         padding: 20px;
         margin-right: 20px;
         height: calc(100vh - 146px);
+        overflow-y: auto;
 
         .level {
             border-left: 4px solid #F43B2C;
             padding-left: 8px;
+        }
+
+        .assetType {
+            :global {
+                .collapse-title {
+                    padding: 0 !important;
+                    background-color: var(--color-bg-1);
+                }
+            }
         }
     }
 

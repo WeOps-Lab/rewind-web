@@ -18,6 +18,7 @@ const Event = () => {
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [objects, setObjects] = useState<ObectItem[]>([]);
+  const [groupObjects, setGroupObjects] = useState<ObectItem[]>([]);
   const [metrics, setMetrics] = useState<MetricItem[]>([]);
 
   const items: SegmentedItem[] = [
@@ -58,6 +59,24 @@ const Event = () => {
         add_policy_count: true,
       },
     });
+    const groupedData = data.reduce(
+      (acc, item) => {
+        if (!acc[item.type]) {
+          acc[item.type] = {
+            label: item.display_type,
+            title: item.type,
+            options: [],
+          };
+        }
+        acc[item.type].options.push({
+          label: item.display_name,
+          value: item.name,
+        });
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+    setGroupObjects(Object.values(groupedData));
     setObjects(data);
   };
 
@@ -71,7 +90,11 @@ const Event = () => {
           onChange={onTabChange}
         />
         {activeTab === 'alert' ? (
-          <Alert objects={objects} metrics={metrics} />
+          <Alert
+            objects={objects}
+            metrics={metrics}
+            groupObjects={groupObjects}
+          />
         ) : (
           <Strategy objects={objects} metrics={metrics} />
         )}

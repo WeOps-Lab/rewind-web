@@ -57,6 +57,9 @@ export interface ObectItem {
   description: string;
   display_name?: string;
   display_type?: string;
+  options?: ObectItem[];
+  label?: string;
+  value?: string;
   [key: string]: unknown;
 }
 
@@ -160,6 +163,7 @@ export interface FiltersConfig {
   level: string[];
   state: string[];
   notify: string[];
+  monitor_object_name: string[];
 }
 export interface ThresholdField {
   level: string;
@@ -170,6 +174,7 @@ export interface ThresholdField {
 export interface AlertProps {
   objects: ObectItem[];
   metrics: MetricItem[];
+  groupObjects?: ObectItem[];
 }
 
 export interface SourceFeild {

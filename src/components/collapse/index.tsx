@@ -10,6 +10,8 @@ interface AccordionProps {
   title: string;
   children: ReactNode;
   className?: string;
+  titleClassName?: string;
+  contentClassName?: string;
   isOpen?: boolean;
   icon?: JSX.Element;
   sortable?: boolean;
@@ -25,6 +27,8 @@ const Collapse: React.FC<AccordionProps> = ({
   isOpen = true,
   icon,
   className = '',
+  titleClassName = '',
+  contentClassName = '',
   sortable = false,
   onToggle,
   onDragStart,
@@ -55,7 +59,7 @@ const Collapse: React.FC<AccordionProps> = ({
       onDrop={sortable ? onDrop : undefined}
     >
       <div
-        className="flex justify-between items-center p-[10px] bg-[var(--color-fill-1)] cursor-pointer"
+        className={`flex justify-between items-center p-[10px] bg-[var(--color-fill-1)] cursor-pointer collapse-title ${titleClassName}`}
         onClick={toggleAccordion}
       >
         <div className="flex items-center">
@@ -76,7 +80,11 @@ const Collapse: React.FC<AccordionProps> = ({
           </div>
         )}
       </div>
-      {open && <div className="py-[10px] collapse-content">{children}</div>}
+      {open && (
+        <div className={`py-[10px] collapse-content ${contentClassName}`}>
+          {children}
+        </div>
+      )}
     </div>
   );
 };
