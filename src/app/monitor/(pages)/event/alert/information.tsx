@@ -182,6 +182,15 @@ const Information: React.FC<TableDataItem> = ({
             metric={formData.metric}
           />
         </div>
+        <div className='hidden'>
+          <h3  className="font-[600] text-[16px] mb-[15px]">报文</h3>
+          <div className='bg-[var(--color-fill-2)] p-[10px] text-[12px] leading-[24px]'>
+            【功能项】SNMP Trap的告警展示 1、列表：
+            级别+时间+策略名称：和之前的取值一样 资产：取trap中的“IP Address”
+            资产类型：根据trap中的type确定 指标和值：根据trap报文的OID映射展示
+            2、详情： 最下面的视图改为“报文”，展示报文的原始值
+          </div>
+        </div>
       </div>
     </div>
   );

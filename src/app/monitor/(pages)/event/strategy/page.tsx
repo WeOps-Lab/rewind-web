@@ -11,6 +11,7 @@ import {
   Switch,
   Radio,
   InputNumber,
+  Tooltip,
 } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
@@ -19,6 +20,7 @@ import {
   Organization,
   ListItem,
   UserItem,
+  SegmentedItem,
 } from '@/app/monitor/types';
 import CustomCascader from '@/components/custom-cascader';
 import {
@@ -27,6 +29,7 @@ import {
   MetricItem,
   FilterItem,
   ThresholdField,
+  PluginItem,
 } from '@/app/monitor/types/monitor';
 import { useCommon } from '@/app/monitor/context/common';
 import { deepClone } from '@/app/monitor/utils/common';
@@ -42,7 +45,7 @@ import { useConditionList } from '@/app/monitor/constants/monitor';
 import {
   useScheduleList,
   COMPARISON_METHOD,
-  METHOD_LIST,
+  useMethodList,
   LEVEL_MAP,
   useLevelList,
   SCHEDULE_UNIT_MAP,
@@ -52,11 +55,13 @@ import {
 const { Option } = Select;
 import Icon from '@/components/icon';
 const defaultGroup = ['instance_id'];
+const { TextArea } = Input;
 
 const StrategyOperation = () => {
   const { t } = useTranslation();
   const { get, post, put, isLoading } = useApiClient();
   const CONDITION_LIST = useConditionList();
+  const METHOD_LIST = useMethodList();
   const LEVEL_LIST = useLevelList();
   const SCHEDULE_LIST = useScheduleList();
   const commonContext = useCommon();
@@ -113,13 +118,17 @@ const StrategyOperation = () => {
       value: null,
     },
   ]);
+  const [pluginList, setPluginList] = useState<SegmentedItem[]>([]);
 
   useEffect(() => {
     if (!isLoading) {
       getMetrics({
         monitor_object_id: monitorObjId,
       });
-      detailId && getStragyDetail();
+      setPageLoading(true);
+      Promise.all([getPlugins(), detailId && getStragyDetail()]).finally(() => {
+        setPageLoading(false);
+      });
     }
   }, [isLoading]);
 
@@ -132,6 +141,7 @@ const StrategyOperation = () => {
         period: 5,
         schedule: 5,
         recovery_condition: 5,
+        plugin_id: pluginList[0]?.value,
       });
       setMetric(searchParams.get('metricId') || null);
       setSource({
@@ -143,7 +153,20 @@ const StrategyOperation = () => {
     } else {
       dealDetail(formData);
     }
-  }, [type, formData, metrics]);
+  }, [type, formData, metrics, pluginList]);
+
+  const getPlugins = async () => {
+    const data = await get('/monitor/api/monitor_plugin/', {
+      params: {
+        monitor_object_id: monitorObjId,
+      },
+    });
+    const plugins = data.map((item: PluginItem) => ({
+      label: item.display_name,
+      value: item.id,
+    }));
+    setPluginList(plugins);
+  };
 
   const dealDetail = (data: StrategyFields) => {
     const {
@@ -269,13 +292,8 @@ const StrategyOperation = () => {
   };
 
   const getStragyDetail = async () => {
-    try {
-      setPageLoading(true);
-      const data = await get(`/monitor/api/monitor_policy/${detailId}/`);
-      setFormData(data);
-    } finally {
-      setPageLoading(false);
-    }
+    const data = await get(`/monitor/api/monitor_policy/${detailId}/`);
+    setFormData(data);
   };
 
   const handleLabelChange = (val: string, index: number) => {
@@ -487,277 +505,380 @@ const StrategyOperation = () => {
                   title: t('monitor.events.defineTheMetric'),
                   description: (
                     <>
-                      <Form.Item<StrategyFields>
-                        label={
-                          <span className="w-[100px]">
-                            {t('monitor.source')}
-                          </span>
-                        }
-                        name="source"
-                        rules={[{ required: true, validator: validateAssets }]}
-                      >
-                        <div>
-                          <div className="flex">
-                            {t('common.select')}
-                            <span className="text-[var(--color-primary)] px-[4px]">
-                              {source.values.length}
-                            </span>
-                            {t('monitor.assets')}
-                            <Button
-                              className="ml-[10px]"
-                              icon={<PlusOutlined />}
-                              size="small"
-                              onClick={openInstModal}
-                            ></Button>
-                          </div>
-                          <div className="text-[var(--color-text-3)] mt-[10px]">
-                            {t('monitor.events.setAssets')}
-                          </div>
-                        </div>
+                      <Form.Item<StrategyFields> className="ml-[120px]">
+                        <Form.Item
+                          name="plugin_id"
+                          noStyle
+                          rules={[
+                            { required: true, message: t('common.required') },
+                          ]}
+                        >
+                          <Radio.Group
+                            className="ml-[-60px]"
+                            options={pluginList}
+                            optionType="button"
+                            buttonStyle="solid"
+                          />
+                        </Form.Item>
                       </Form.Item>
-                      <Form.Item<StrategyFields>
-                        name="metric"
-                        label={
-                          <span className="w-[100px]">
-                            {t('monitor.metric')}
-                          </span>
+                      <Form.Item
+                        noStyle
+                        shouldUpdate={(prevValues, currentValues) =>
+                          prevValues.plugin_id !== currentValues.plugin_id
                         }
-                        rules={[{ validator: validateMetric, required: true }]}
                       >
-                        <div className={strategyStyle.condition}>
-                          <Select
-                            allowClear
-                            style={{
-                              width: '300px',
-                              margin: '0 20px 10px 0',
-                            }}
-                            placeholder={t('monitor.metric')}
-                            showSearch
-                            value={metric}
-                            loading={metricsLoading}
-                            onChange={handleMetricChange}
-                          >
-                            {metrics.map((item) => (
-                              <Option value={item.name} key={item.name}>
-                                {item.display_name}
-                              </Option>
-                            ))}
-                          </Select>
-                          <div className={strategyStyle.conditionItem}>
-                            {conditions.length ? (
-                              <ul className={strategyStyle.conditions}>
-                                <li className={strategyStyle.conditionTitle}>
-                                  <span>{t('monitor.filter')}</span>
-                                </li>
-                                {conditions.map((conditionItem, index) => (
-                                  <li
-                                    className={`${strategyStyle.itemOption} ${strategyStyle.filter}`}
-                                    key={index}
+                        {({ getFieldValue }) =>
+                          getFieldValue('plugin_id') === 1000 ? (
+                            <Form.Item<StrategyFields>
+                              label={<span className="w-[100px]">PromQL</span>}
+                              name="prom_ql"
+                              rules={[
+                                {
+                                  required: true,
+                                  message: t('common.required'),
+                                },
+                              ]}
+                            >
+                              <TextArea
+                                className="w-[800px]"
+                                allowClear
+                                rows={4}
+                              />
+                            </Form.Item>
+                          ) : (
+                            <>
+                              <Form.Item<StrategyFields>
+                                label={
+                                  <span className="w-[100px]">
+                                    {t('monitor.source')}
+                                  </span>
+                                }
+                                name="source"
+                                rules={[
+                                  { required: true, validator: validateAssets },
+                                ]}
+                              >
+                                <div>
+                                  <div className="flex">
+                                    {t('common.select')}
+                                    <span className="text-[var(--color-primary)] px-[4px]">
+                                      {source.values.length}
+                                    </span>
+                                    {t('monitor.assets')}
+                                    <Button
+                                      className="ml-[10px]"
+                                      icon={<PlusOutlined />}
+                                      size="small"
+                                      onClick={openInstModal}
+                                    ></Button>
+                                  </div>
+                                  <div className="text-[var(--color-text-3)] mt-[10px]">
+                                    {t('monitor.events.setAssets')}
+                                  </div>
+                                </div>
+                              </Form.Item>
+                              <Form.Item<StrategyFields>
+                                name="metric"
+                                label={
+                                  <span className="w-[100px]">
+                                    {t('monitor.metric')}
+                                  </span>
+                                }
+                                rules={[
+                                  { validator: validateMetric, required: true },
+                                ]}
+                              >
+                                <div className={strategyStyle.condition}>
+                                  <Select
+                                    allowClear
+                                    style={{
+                                      width: '300px',
+                                      margin: '0 20px 10px 0',
+                                    }}
+                                    placeholder={t('monitor.metric')}
+                                    showSearch
+                                    value={metric}
+                                    loading={metricsLoading}
+                                    onChange={handleMetricChange}
                                   >
+                                    {metrics.map((item) => (
+                                      <Option value={item.name} key={item.name}>
+                                        {item.display_name}
+                                      </Option>
+                                    ))}
+                                  </Select>
+                                  <div className={strategyStyle.conditionItem}>
+                                    {conditions.length ? (
+                                      <ul className={strategyStyle.conditions}>
+                                        <li
+                                          className={
+                                            strategyStyle.conditionTitle
+                                          }
+                                        >
+                                          <span>{t('monitor.filter')}</span>
+                                        </li>
+                                        {conditions.map(
+                                          (conditionItem, index) => (
+                                            <li
+                                              className={`${strategyStyle.itemOption} ${strategyStyle.filter}`}
+                                              key={index}
+                                            >
+                                              <Select
+                                                className={
+                                                  strategyStyle.filterLabel
+                                                }
+                                                placeholder={t('monitor.label')}
+                                                showSearch
+                                                value={conditionItem.name}
+                                                onChange={(val) =>
+                                                  handleLabelChange(val, index)
+                                                }
+                                              >
+                                                {labels.map((item) => (
+                                                  <Option
+                                                    value={item}
+                                                    key={item}
+                                                  >
+                                                    {item}
+                                                  </Option>
+                                                ))}
+                                              </Select>
+                                              <Select
+                                                style={{
+                                                  width: '100px',
+                                                }}
+                                                placeholder={t('monitor.term')}
+                                                value={conditionItem.method}
+                                                onChange={(val) =>
+                                                  handleConditionChange(
+                                                    val,
+                                                    index
+                                                  )
+                                                }
+                                              >
+                                                {CONDITION_LIST.map(
+                                                  (item: ListItem) => (
+                                                    <Option
+                                                      value={item.id}
+                                                      key={item.id}
+                                                    >
+                                                      {item.name}
+                                                    </Option>
+                                                  )
+                                                )}
+                                              </Select>
+                                              <Input
+                                                style={{
+                                                  width: '150px',
+                                                }}
+                                                placeholder={t('monitor.value')}
+                                                value={conditionItem.value}
+                                                onChange={(e) =>
+                                                  handleValueChange(e, index)
+                                                }
+                                              ></Input>
+                                              <Button
+                                                icon={<CloseOutlined />}
+                                                onClick={() =>
+                                                  deleteConditionItem(index)
+                                                }
+                                              />
+                                              <Button
+                                                icon={<PlusOutlined />}
+                                                onClick={addConditionItem}
+                                              />
+                                            </li>
+                                          )
+                                        )}
+                                      </ul>
+                                    ) : (
+                                      <div className="flex items-center mr-[20px]">
+                                        <span className="mr-[10px]">
+                                          {t('monitor.filter')}
+                                        </span>
+                                        <Button
+                                          disabled={!metric}
+                                          icon={<PlusOutlined />}
+                                          onClick={addConditionItem}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <span className="mr-[10px]">
+                                      {t('common.group')}
+                                    </span>
                                     <Select
-                                      className={strategyStyle.filterLabel}
-                                      placeholder={t('monitor.label')}
-                                      showSearch
-                                      value={conditionItem.name}
-                                      onChange={(val) =>
-                                        handleLabelChange(val, index)
-                                      }
+                                      allowClear
+                                      style={{
+                                        width: '300px',
+                                        margin: '0 10px 10px 0',
+                                      }}
+                                      mode="tags"
+                                      maxTagCount="responsive"
+                                      placeholder={t('common.group')}
+                                      value={groupBy}
+                                      onChange={handleGroupByChange}
                                     >
-                                      {labels.map((item) => (
+                                      {(
+                                        MONITOR_GROUPS_MAP[
+                                          monitorName as string
+                                        ]?.list || defaultGroup
+                                      ).map((item) => (
                                         <Option value={item} key={item}>
                                           {item}
                                         </Option>
                                       ))}
                                     </Select>
-                                    <Select
-                                      style={{
-                                        width: '100px',
-                                      }}
-                                      placeholder={t('monitor.term')}
-                                      value={conditionItem.method}
-                                      onChange={(val) =>
-                                        handleConditionChange(val, index)
-                                      }
-                                    >
-                                      {CONDITION_LIST.map((item: ListItem) => (
-                                        <Option value={item.id} key={item.id}>
-                                          {item.name}
-                                        </Option>
-                                      ))}
-                                    </Select>
-                                    <Input
-                                      style={{
-                                        width: '150px',
-                                      }}
-                                      placeholder={t('monitor.value')}
-                                      value={conditionItem.value}
-                                      onChange={(e) =>
-                                        handleValueChange(e, index)
-                                      }
-                                    ></Input>
-                                    <Button
-                                      icon={<CloseOutlined />}
-                                      onClick={() => deleteConditionItem(index)}
-                                    />
-                                    <Button
-                                      icon={<PlusOutlined />}
-                                      onClick={addConditionItem}
-                                    />
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <div className="flex items-center mr-[20px]">
-                                <span className="mr-[10px]">
-                                  {t('monitor.filter')}
-                                </span>
-                                <Button
-                                  disabled={!metric}
-                                  icon={<PlusOutlined />}
-                                  onClick={addConditionItem}
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <span className="mr-[10px]">
-                              {t('common.group')}
-                            </span>
-                            <Select
-                              allowClear
-                              style={{
-                                width: '300px',
-                                margin: '0 10px 10px 0',
-                              }}
-                              mode="tags"
-                              maxTagCount="responsive"
-                              placeholder={t('common.group')}
-                              value={groupBy}
-                              onChange={handleGroupByChange}
-                            >
-                              {(
-                                MONITOR_GROUPS_MAP[monitorName as string]
-                                  ?.list || defaultGroup
-                              ).map((item) => (
-                                <Option value={item} key={item}>
-                                  {item}
-                                </Option>
-                              ))}
-                            </Select>
-                          </div>
-                        </div>
-                        <div className="text-[var(--color-text-3)]">
-                          {t('monitor.events.setDimensions')}
-                        </div>
-                      </Form.Item>
-                      <Form.Item<StrategyFields>
-                        required
-                        label={
-                          <span className="w-[100px]">
-                            {t('monitor.events.frequency')}
-                          </span>
-                        }
-                      >
-                        <Form.Item
-                          name="schedule"
-                          noStyle
-                          rules={[
-                            { required: true, message: t('common.required') },
-                          ]}
-                        >
-                          <InputNumber
-                            min={SCHEDULE_UNIT_MAP[`${unit}Min`]}
-                            max={SCHEDULE_UNIT_MAP[`${unit}Max`]}
-                            precision={0}
-                            addonAfter={
-                              <Select
-                                value={unit}
-                                style={{ width: 120 }}
-                                onChange={handleUnitChange}
+                                  </div>
+                                </div>
+                                <div className="text-[var(--color-text-3)]">
+                                  {t('monitor.events.setDimensions')}
+                                </div>
+                              </Form.Item>
+                              <Form.Item<StrategyFields>
+                                required
+                                label={
+                                  <span className="w-[100px]">
+                                    {t('monitor.events.frequency')}
+                                  </span>
+                                }
                               >
-                                {SCHEDULE_LIST.map((item) => (
-                                  <Option key={item.value} value={item.value}>
-                                    {item.label}
-                                  </Option>
-                                ))}
-                              </Select>
-                            }
-                          />
-                        </Form.Item>
-                        <div className="text-[var(--color-text-3)] mt-[10px]">
-                          {t('monitor.events.setFrequency')}
-                        </div>
-                      </Form.Item>
-                      <Form.Item<StrategyFields>
-                        required
-                        label={
-                          <span className="w-[100px]">
-                            {t('monitor.events.period')}
-                          </span>
-                        }
-                      >
-                        <Form.Item
-                          name="period"
-                          noStyle
-                          rules={[
-                            { required: true, message: t('common.required') },
-                          ]}
-                        >
-                          <InputNumber
-                            min={SCHEDULE_UNIT_MAP[`${periodUnit}Min`]}
-                            max={SCHEDULE_UNIT_MAP[`${periodUnit}Max`]}
-                            precision={0}
-                            addonAfter={
-                              <Select
-                                value={periodUnit}
-                                style={{ width: 120 }}
-                                onChange={handlePeriodUnitChange}
+                                <Form.Item
+                                  name="schedule"
+                                  noStyle
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: t('common.required'),
+                                    },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    min={SCHEDULE_UNIT_MAP[`${unit}Min`]}
+                                    max={SCHEDULE_UNIT_MAP[`${unit}Max`]}
+                                    precision={0}
+                                    addonAfter={
+                                      <Select
+                                        value={unit}
+                                        style={{ width: 120 }}
+                                        onChange={handleUnitChange}
+                                      >
+                                        {SCHEDULE_LIST.map((item) => (
+                                          <Option
+                                            key={item.value}
+                                            value={item.value}
+                                          >
+                                            {item.label}
+                                          </Option>
+                                        ))}
+                                      </Select>
+                                    }
+                                  />
+                                </Form.Item>
+                                <div className="text-[var(--color-text-3)] mt-[10px]">
+                                  {t('monitor.events.setFrequency')}
+                                </div>
+                              </Form.Item>
+                              <Form.Item<StrategyFields>
+                                required
+                                label={
+                                  <span className="w-[100px]">
+                                    {t('monitor.events.period')}
+                                  </span>
+                                }
                               >
-                                {SCHEDULE_LIST.map((item) => (
-                                  <Option key={item.value} value={item.value}>
-                                    {item.label}
-                                  </Option>
-                                ))}
-                              </Select>
-                            }
-                          />
-                        </Form.Item>
-                        <div className="text-[var(--color-text-3)] mt-[10px]">
-                          {t('monitor.events.setPeriod')}
-                        </div>
-                      </Form.Item>
-                      <Form.Item<StrategyFields>
-                        required
-                        label={
-                          <span className="w-[100px]">
-                            {t('monitor.events.method')}
-                          </span>
+                                <Form.Item
+                                  name="period"
+                                  noStyle
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: t('common.required'),
+                                    },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    min={SCHEDULE_UNIT_MAP[`${periodUnit}Min`]}
+                                    max={SCHEDULE_UNIT_MAP[`${periodUnit}Max`]}
+                                    precision={0}
+                                    addonAfter={
+                                      <Select
+                                        value={periodUnit}
+                                        style={{ width: 120 }}
+                                        onChange={handlePeriodUnitChange}
+                                      >
+                                        {SCHEDULE_LIST.map((item) => (
+                                          <Option
+                                            key={item.value}
+                                            value={item.value}
+                                          >
+                                            {item.label}
+                                          </Option>
+                                        ))}
+                                      </Select>
+                                    }
+                                  />
+                                </Form.Item>
+                                <div className="text-[var(--color-text-3)] mt-[10px]">
+                                  {t('monitor.events.setPeriod')}
+                                </div>
+                              </Form.Item>
+                              <Form.Item<StrategyFields>
+                                required
+                                label={
+                                  <span className="w-[100px]">
+                                    {t('monitor.events.method')}
+                                  </span>
+                                }
+                              >
+                                <Form.Item
+                                  name="algorithm"
+                                  noStyle
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: t('common.required'),
+                                    },
+                                  ]}
+                                >
+                                  <Select
+                                    allowClear
+                                    style={{
+                                      width: '300px',
+                                    }}
+                                    placeholder={t('monitor.events.method')}
+                                  >
+                                    {METHOD_LIST.map((item: ListItem) => (
+                                      <Option
+                                        value={item.value}
+                                        key={item.value}
+                                      >
+                                        <Tooltip
+                                          overlayInnerStyle={{
+                                            whiteSpace: 'pre-line',
+                                            color: 'var(--color-text-1)',
+                                          }}
+                                          placement="rightTop"
+                                          arrow={false}
+                                          color="var(--color-bg-1)"
+                                          title={item.title}
+                                        >
+                                          <span className="w-full flex">
+                                            {item.label}
+                                          </span>
+                                        </Tooltip>
+                                      </Option>
+                                    ))}
+                                  </Select>
+                                </Form.Item>
+                                <div className="text-[var(--color-text-3)] mt-[10px]">
+                                  {t('monitor.events.setMethod')}
+                                </div>
+                              </Form.Item>
+                            </>
+                          )
                         }
-                      >
-                        <Form.Item
-                          name="algorithm"
-                          noStyle
-                          rules={[
-                            { required: true, message: t('common.required') },
-                          ]}
-                        >
-                          <Select
-                            allowClear
-                            style={{
-                              width: '300px',
-                            }}
-                            placeholder={t('monitor.events.method')}
-                          >
-                            {METHOD_LIST.map((item: ListItem) => (
-                              <Option value={item.value} key={item.value}>
-                                {item.label}
-                              </Option>
-                            ))}
-                          </Select>
-                        </Form.Item>
-                        <div className="text-[var(--color-text-3)] mt-[10px]">
-                          {t('monitor.events.setMethod')}
-                        </div>
                       </Form.Item>
                     </>
                   ),

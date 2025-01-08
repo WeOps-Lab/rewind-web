@@ -202,6 +202,8 @@ export interface StrategyFields {
   filter?: FilterItem[];
   id?: number;
   group_by?: string[];
+  plugin_id?: number;
+  prom_ql?: string;
   [key: string]: unknown;
 }
 

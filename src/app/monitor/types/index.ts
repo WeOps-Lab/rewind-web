@@ -111,3 +111,8 @@ export interface TimeSelectorDefaultValue {
   selectValue: number | null;
   rangePickerVaule: [Dayjs, Dayjs] | null;
 }
+
+export interface TimeLineItem {
+  color: string;
+  children: JSX.Element;
+}

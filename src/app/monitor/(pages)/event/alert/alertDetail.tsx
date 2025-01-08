@@ -5,8 +5,9 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useEffect,
+  useRef,
 } from 'react';
-import { Button, Tag, Tabs, Spin } from 'antd';
+import { Button, Tag, Tabs, Spin, Timeline } from 'antd';
 import OperateModal from '@/app/monitor/components/operate-drawer';
 import { useTranslation } from '@/utils/i18n';
 import {
@@ -15,8 +16,8 @@ import {
   TableDataItem,
   TabItem,
   ChartData,
-  ColumnItem,
   Pagination,
+  TimeLineItem,
 } from '@/app/monitor/types';
 import {
   ChartDataItem,
@@ -28,7 +29,6 @@ import { AlertOutlined } from '@ant-design/icons';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import useApiClient from '@/utils/request';
 import Information from './information';
-import CustomTable from '@/components/custom-table';
 import { getEnumValueUnit } from '@/app/monitor/utils/common';
 import {
   LEVEL_MAP,
@@ -49,11 +49,10 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
     const [chartData, setChartData] = useState<ChartDataItem[]>([]);
     const [activeTab, setActiveTab] = useState<string>('information');
     const [loading, setLoading] = useState<boolean>(false);
-    const [tableData, setTableData] = useState<TableDataItem[]>([]);
     const [pagination, setPagination] = useState<Pagination>({
       current: 1,
       total: 0,
-      pageSize: 20,
+      pageSize: 100,
     });
     const [tableLoading, setTableLoading] = useState<boolean>(false);
     const isInformation = activeTab === 'information';
@@ -67,47 +66,9 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
         key: 'event',
       },
     ];
-    const columns: ColumnItem[] = [
-      {
-        title: t('monitor.events.level'),
-        dataIndex: 'level',
-        key: 'level',
-        render: (_, { level }) => (
-          <Tag icon={<AlertOutlined />} color={LEVEL_MAP[level] as string}>
-            {LEVEL_LIST.find((item) => item.value === level)?.label || '--'}
-          </Tag>
-        ),
-      },
-      {
-        title: t('common.time'),
-        dataIndex: 'created_at',
-        key: 'created_at',
-        sorter: (a: any, b: any) => a.id - b.id,
-        render: (_, { created_at }) => (
-          <>{created_at ? convertToLocalizedTime(created_at) : '--'}</>
-        ),
-      },
-      {
-        title: t('monitor.events.eventName'),
-        dataIndex: 'content',
-        key: 'content',
-        render: () => <>{formData.policy?.name || '--'}</>,
-      },
-      {
-        title: t('monitor.events.index'),
-        dataIndex: 'index',
-        key: 'index',
-        render: () => <>{formData.metric?.display_name || '--'}</>,
-      },
-      {
-        title: t('monitor.value'),
-        dataIndex: 'value',
-        key: 'value',
-        render: (_, record) => (
-          <>{getEnumValueUnit(formData.metric, record.value)}</>
-        ),
-      },
-    ];
+    const [timeLineData, setTimeLineData] = useState<TimeLineItem[]>([]);
+    const timelineRef = useRef<HTMLDivElement>(null); // 用于引用 Timeline 容器
+    const isFetchingRef = useRef<boolean>(false); // 用于标记是否正在加载数据
 
     useImperativeHandle(ref, () => ({
       showModal: ({ title, form }) => {
@@ -133,6 +94,13 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
         getTableData();
       }
     }, [pagination.current, pagination.pageSize]);
+
+    useEffect(() => {
+      // 当分页加载完成后，重置 isFetchingRef 标志位
+      if (!tableLoading) {
+        isFetchingRef.current = false;
+      }
+    }, [tableLoading]);
 
     const getParams = () => {
       const target =
@@ -187,7 +155,23 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
             params,
           }
         );
-        setTableData(data.results);
+        const _timelineData = data.results.map((item: TableDataItem) => ({
+          color: LEVEL_MAP[item.level] || 'gray',
+          children: (
+            <>
+              <span className="font-[600] mr-[10px]">
+                {item.created_at
+                  ? convertToLocalizedTime(item.created_at)
+                  : '--'}
+              </span>
+              {`${formData.metric?.display_name} `}
+              <span className="text-[var(--color-text-3)]">
+                {getEnumValueUnit(formData.metric, item.value)}
+              </span>
+            </>
+          ),
+        }));
+        setTimeLineData((prev) => [...prev, ..._timelineData]); // 追加新数据
         setPagination((prev: Pagination) => ({
           ...prev,
           total: data.count,
@@ -261,23 +245,51 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
       return result;
     };
 
+    const loadMore = () => {
+      if (pagination.current * pagination.pageSize < pagination.total) {
+        isFetchingRef.current = true; // 设置标志位，表示正在加载
+        setPagination((prev) => ({
+          ...prev,
+          current: prev.current + 1,
+        }));
+      }
+    };
+
+    const handleScroll = () => {
+      if (!timelineRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = timelineRef.current;
+      // 判断是否接近底部
+      if (
+        scrollTop + clientHeight >= scrollHeight - 10 &&
+        !tableLoading &&
+        !isFetchingRef.current
+      ) {
+        loadMore();
+      }
+    };
+
     const handleCancel = () => {
       setGroupVisible(false);
       setActiveTab('information');
       setChartData([]);
-      setTableData([]);
+      setTimeLineData([]);
     };
+
     const changeTab = (val: string) => {
       setActiveTab(val);
+      setTimeLineData([]);
+      setPagination({
+        current: 1,
+        total: 0,
+        pageSize: 100,
+      });
+      setLoading(false);
+      setTableLoading(false);
     };
 
     const closeModal = () => {
       handleCancel();
       onSuccess();
-    };
-
-    const handleTableChange = (pagination: any) => {
-      setPagination(pagination);
     };
 
     return (
@@ -327,7 +339,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
               </ul>
             </div>
             <Tabs activeKey={activeTab} items={tabs} onChange={changeTab} />
-            <Spin className="w-full" spinning={loading}>
+            <Spin className="w-full" spinning={loading || tableLoading}>
               {isInformation ? (
                 <Information
                   formData={formData}
@@ -338,15 +350,17 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
                   chartData={processData(chartData || [])}
                 />
               ) : (
-                <CustomTable
-                  scroll={{ y: 'calc(100vh - 390px)' }}
-                  columns={columns}
-                  dataSource={tableData}
-                  pagination={pagination}
-                  loading={tableLoading}
-                  rowKey="id"
-                  onChange={handleTableChange}
-                />
+                <div
+                  className="pt-[10px]"
+                  style={{
+                    height: 'calc(100vh - 276px)',
+                    overflowY: 'auto',
+                  }}
+                  ref={timelineRef}
+                  onScroll={handleScroll}
+                >
+                  <Timeline items={timeLineData} />
+                </div>
               )}
             </Spin>
           </div>

@@ -106,11 +106,31 @@ const useMethodList = (): ListItem[] => {
   const { t } = useTranslation();
   return useMemo(
     () => [
-      { label: t('monitor.events.sum'), value: 'sum' },
-      { label: t('monitor.events.avg'), value: 'avg' },
-      { label: t('monitor.events.max'), value: 'max' },
-      { label: t('monitor.events.min'), value: 'min' },
-      { label: t('monitor.events.newValue'), value: 'new' },
+      { label: 'SUM', value: 'sum', title: t('monitor.events.sumTitle') },
+      {
+        label: 'SUM_OVER_TIME',
+        value: 'sum_over_time',
+        title: t('monitor.events.sumOverTimeTitle'),
+      },
+      { label: 'MAX', value: 'max', title: t('monitor.events.maxTitle') },
+      {
+        label: 'MAX_OVER_TIME',
+        value: 'max_over_time',
+        title: t('monitor.events.maxOverTimeTitle'),
+      },
+      { label: 'MIN', value: 'min', title: t('monitor.events.minTitle') },
+      {
+        label: 'MIN_OVER_TIME',
+        value: 'min_over_time',
+        title: t('monitor.events.minOverTimeTitle'),
+      },
+      { label: 'AVG', value: 'avg', title: t('monitor.events.avgTitle') },
+      {
+        label: 'AVG_OVER_TIME',
+        value: 'avg_over_time',
+        title: t('monitor.events.avgOverTimeTitle'),
+      },
+      { label: 'COUNT', value: 'count', title: t('monitor.events.countTitle') },
     ],
     [t]
   );
@@ -1223,14 +1243,6 @@ const APPOINT_METRIC_IDS: string[] = [
   'cluster_node_count',
 ];
 
-const METHOD_LIST: ListItem[] = [
-  { label: 'SUM', value: 'sum' },
-  { label: 'AVG', value: 'avg' },
-  { label: 'MAX', value: 'max' },
-  { label: 'MIN', value: 'min' },
-  { label: 'NEW', value: 'new' },
-];
-
 export {
   UNIT_LIST,
   INDEX_CONFIG,
@@ -1241,7 +1253,6 @@ export {
   MONITOR_GROUPS_MAP,
   OBJECT_ICON_MAP,
   APPOINT_METRIC_IDS,
-  METHOD_LIST,
   useInterfaceLabelMap,
   useScheduleList,
   useMethodList,
