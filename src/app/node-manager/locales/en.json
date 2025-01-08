@@ -7,7 +7,12 @@
     "variable": "Variable",
     "configuration": "Configuration",
     "node": "Node",
-    "topdes": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars."
+    "topdes": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars.",
+    "batchbindSuccess":"Batchbinded successfully",
+    "batchbindFailed":"Failed to batchbind",
+    "refSuccess": "Refresh successful",
+    "success":"Successfully",
+    "quesuccess":"Query successful!"
   },
   "node-manager": {
     "cloudregion": {

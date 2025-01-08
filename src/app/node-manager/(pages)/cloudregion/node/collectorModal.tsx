@@ -79,16 +79,23 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
             collectorformRef.current?.resetFields();
             setConfiglist(configlisttemp);
             setCollectorlist(collectorlisttemp);
-            collectorformRef.current?.setFieldsValue({
-              Collector: collectorlisttemp[0]?.label,
-              configration: configlisttemp[0]?.label
-            });
           })
           .catch((error) => {
             console.error("Error fetching data: ", error);
           });
       }
     }, [collectorVisible, collectorformRef])
+
+    useEffect(() => {
+      if (collectorlist.length > 0 || configlist.length > 0) {
+        // 数据加载完毕后手动设置表单的字段值
+        collectorformRef.current?.setFieldsValue({
+          Collector: collectorlist[0]?.value || undefined,
+          configration: configlist[0]?.value || undefined,
+        });
+      }
+    }, [collectorlist, configlist]);
+
 
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
@@ -108,7 +115,9 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
           const collector_configuration_id = configlist?.find((item) => item.label === values?.configration)?.value;
           const node_ids = nodeids;
           if (typeof (collector_configuration_id) === "string") {
-            batchbindcollector({ node_ids, collector_configuration_id })
+            batchbindcollector({ node_ids, collector_configuration_id }).then(() => {
+              message.success(t(type === "bindconfig" ? 'common.batchbindSuccess' : 'common.updateSuccess'))
+            })
           }
         }
 
@@ -117,11 +126,11 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
           const collector_id = collectorlist?.find((item) => item.value === values?.Collector)?.value;
           const node_ids = nodeids;
           if (typeof (collector_id) === "string") {
-            batchoperationcollector({ node_ids, collector_id, operation: "start" })
+            batchoperationcollector({ node_ids, collector_id, operation: "start" }).then(() => {
+              onSuccess();
+            })
           }
         }
-        message.success("Successfully");
-        onSuccess();
         setCollectorVisible(false);
       })
     };
@@ -139,7 +148,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
         if (typeof (collector_id) === "string") {
           batchoperationcollector({ node_ids, collector_id, operation: type })
         }
-        message.success("Successfully");
+        message.success("common.success");
         onSuccess();
         setCollectorVisible(false);
       })

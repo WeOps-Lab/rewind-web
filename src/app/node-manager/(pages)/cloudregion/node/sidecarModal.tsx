@@ -62,9 +62,8 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
           sidecarformRef.current?.setFieldsValue({
             installationguide: res
           })
-
+          message.success(t("common.quesuccess"));
         })
-        message.success("Query successful!");
       });
     };
 
@@ -94,7 +93,7 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
           rules={[
             {
               required: true,
-              message: t("node-manager.node.ruleinputinfo"),
+              message: t("common.inputRequired"),
             },
           ]}
         >

@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { FormInstance, Input } from 'antd';
+import { FormInstance, Input, message } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import useApiClient from '@/utils/request';
 import { Form, Menu } from 'antd';
@@ -33,26 +33,20 @@ const Cloudregion = () => {
 
   // 获取相关的接口
   const fetchCloudRegions = async () => {
-    try {
-      const res = await getcloudlist();
-      if (res && res.length > 0) {
-        setSelectedRegion(res[0]);
-        setClouditem([{
-          id: res[0].id,
-          name: res[0].name,
-          description: res[0]?.introduction as string,
-          icon: 'yunquyu'
-        }])
-      } else {
-        console.error('No data received');
-      }
-    } catch (error) {
-      console.error('Error fetching cloud region data:', error);
-    }
+
+    getcloudlist().then((res) => {
+      setSelectedRegion(res[0]);
+      setClouditem([{
+        id: res[0].id,
+        name: res[0].name,
+        description: res[0]?.introduction as string,
+        icon: 'yunquyu'
+      }])
+    })
   };
 
   useEffect(() => {
-    if (isLoading) {
+    if (!isLoading) {
       fetchCloudRegions();
     }
   }, [isLoading]);
@@ -70,9 +64,11 @@ const Cloudregion = () => {
 
   const handleFormOkClick = () => {
     const { cloudregion } = cloudregionformRef.current?.getFieldsValue();
-    updatecloudintro(cloudregion.id, { introduction: cloudregion.introduction });
+    updatecloudintro(cloudregion.id, { introduction: cloudregion.introduction }).then(() => {
+      fetchCloudRegions();
+      message.success(t('common.updateSuccess'));
+    })
     setOpeneditcloudregion(false);
-    fetchCloudRegions();
   };
 
   const onSearch: SearchProps['onSearch'] = (value, _e, info) =>

@@ -75,14 +75,13 @@ const Configration = () => {
   //组件初始化渲染
   useEffect(() => {
     if (!isLoading) {
-      return
+      const searchParams = new URLSearchParams(window.location.search);
+      const id = searchParams.get("id");
+      if (!id) {
+        getConfiglist();
+      }
     }
-    const searchParams = new URLSearchParams(window.location.search);
-    const id = searchParams.get("id");
-    if (!id) {
-      getConfiglist();
-    }
-  }, []);
+  }, [isLoading]);
 
   //删除配置文件刷新页面
   useEffect(() => {

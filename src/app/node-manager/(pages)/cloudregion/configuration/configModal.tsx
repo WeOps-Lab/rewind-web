@@ -91,15 +91,19 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const handleConfirm = () => {
       // 校验表单
       configformRef.current?.validateFields().then((values) => {
-        const { name, collector, cloudid, configinfo } = values
+        const { name, collector, configinfo } = values
         if (type === 'add') {
           createconfig({
             name,
             collector_id: collector,
             cloud_region_id: Number(cloudid),
             config_template: configinfo,
+          }).then(() => {
+            onSuccess()
+            message.success(t('common.addSuccess'))
+          }).catch(() => {
+            message.error(t('common.error'))
           })
-          onSuccess();
           setConfigVisible(false);
           return;
         }
@@ -110,19 +114,38 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
             config_template: configinfo,
             collector_id: collector,
           }
-        )
-        onSuccess();
+        ).then(() => {
+          onSuccess();
+          message.success(t('common.updateSuccess'))
+        }).catch(() => {
+          message.success(t('common.updateFailed'))
+        })
         setConfigVisible(false);
 
       })
     };
 
-    const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value);
+    const onSearch: SearchProps['onSearch'] = (value) => {
+      getnodelist(Number(cloudid), value)
+        .then((res) => {
+          const data = res.map((item: nodeItemtRes) => {
+            return {
+              key: item.id,
+              ip: item.ip,
+              operatingsystem: item.operating_system,
+              sidecar: item.status.status === "0" ? "Error" : "Running",
+            };
+          });
+          const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
+          setApplydata(tempdata);
+        }).catch(() => {
+          message.success(t('common.fetchFailed'))
+        })
+    };
 
     //选择操作系统
     const handleChangeOperatingsystem = (value: string) => {
-      const cloud_region_id = 1;
-      getconfiglist(cloud_region_id).then((res) => {
+      getconfiglist(Number(cloudid)).then((res) => {
         const temporaryformdata = res.filter((item: IConfiglistprops) => {
           if (item.operating_system === value) {
             return {
@@ -167,8 +190,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
 
     //获取应用列表的数据表格
     const getApplydata = () => {
-      const id = 1;
-      getnodelist(id)
+      getnodelist(Number(cloudid))
         .then((res) => {
           const data = res.map((item: nodeItemtRes) => {
             return {
@@ -180,13 +202,15 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
           setApplydata(tempdata);
+        }).catch(() => {
+          message.success(t('common.fetchFailed'))
         })
     }
 
     const showConfigForm = (type: string) => {
 
       return (
-        <Form ref={configformRef} layout="vertical" colon={false}>
+        <Form ref={configformRef} layout="vertical" initialValues={{ operatingsystem: 'linux' }} colon={false}>
           {type === "apply" ? <div>
             <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
             <CustomTable

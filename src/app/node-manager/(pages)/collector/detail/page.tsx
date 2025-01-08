@@ -39,7 +39,7 @@ const Collectordetail = () => {
       <div className="flex flex-col h-[90px] p-4 overflow-hidden">
         <h1 className="text-lg">{t('node-manager.collector.title')}</h1>
         <p className="text-sm overflow-hidden w-full min-w-[1000px] mt-[8px]">
-          {t('node-manager.collector.desc')}
+          {detaildata.introduction}
         </p>
       </div>
     );
