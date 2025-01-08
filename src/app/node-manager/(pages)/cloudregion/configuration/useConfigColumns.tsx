@@ -90,7 +90,7 @@ export const useConfigColumns = ({
       content: 'success delete',
       duration: 1,
     });
-    deletecollector(key);
+    deletecollector(key)
     setDeletestate(true);
   }
 

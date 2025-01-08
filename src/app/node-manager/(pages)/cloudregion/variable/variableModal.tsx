@@ -13,8 +13,10 @@ import { useTranslation } from "@/utils/i18n";
 import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index";
 import type { TableDataItem } from "@/app/node-manager/types/index";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
+import useCloudId from "@/app/node-manager/hooks/useCloudid"
 const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const { createvariable, updatevariable } = useApiCloudRegion();
+  const cloudid = useCloudId();
   const { t } = useTranslation();
   const formRef = useRef<FormInstance>(null);
   //设置弹窗状态
@@ -46,25 +48,27 @@ const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =>
 
   //添加变量
   const handleConfirm = async () => {
-    const id = 1;
     formRef.current?.validateFields().then((values) => {
       const { name, value, description } = values;
       const tempdata = {
         key: name,
         value,
         description,
-        cloud_region_id: id
+        cloud_region_id: Number(cloudid)
       }
       //发起请求的类型（添加和编辑）
       if (type === 'add') {
-        createvariable(tempdata).then((res) => {
-          message.success(res);
+        createvariable(tempdata).then(() => {
+          message.success(t('common.addSuccess'));
+          onSuccess();
         })
       } else {
-        updatevariable(variableFormData?.key, tempdata);
+        updatevariable(variableFormData?.key, tempdata).then(() => {
+          message.success(t('common.updateSuccess'));
+          onSuccess();
+        })
       }
       setVariableVisible(false);
-      onSuccess();
     });
   };
 

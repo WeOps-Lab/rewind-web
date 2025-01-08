@@ -29,10 +29,9 @@ const Variable = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      return;
+      getVariablelist();
     }
-    getVariablelist();
-  }, [])
+  }, [isLoading])
 
   //根据传入的值打开对应的用户弹窗（添加用户弹窗和编辑用户的弹窗）
   const openUerModal = (type: string, form: TableDataItem) => {
@@ -51,18 +50,15 @@ const Variable = () => {
   };
   //删除的确定的弹窗
   const delconfirm = (key: string) => {
-    deletevariable(key).then((res) => {
-      message.success(res.message);
-    }).catch((error) => {
-      message.error(error.message);
+    deletevariable(key).then(() => {
+      message.success(t('common.delSuccess'));
     }).finally(() => {
       getVariablelist();
     });
   };
 
-  const delcancel = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    console.log(e);
-    message.error('Click on No');
+  const delcancel = () => {
+
   };
   const columns = useVarColumns({
     openUerModal,
@@ -88,7 +84,7 @@ const Variable = () => {
   };
 
   //搜索框的事件
-  const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
+  const onSearch: SearchProps['onSearch'] = (value) => {
     getvariablelist(Number(cloudid), value).then((res) => {
       const tempdata = res.map((item: any) => {
         return {
@@ -100,7 +96,6 @@ const Variable = () => {
       })
       setData(tempdata);
     })
-    console.log(value, _e, info);
   };
 
   //获取表格数据
@@ -143,7 +138,7 @@ const Variable = () => {
         </div>
         <div className="tablewidth">
           <CustomTable
-            scroll={{ y: "calc(100vh - 400px)", x: data && data.length > 0 ? "max-content" : undefined, }}
+            scroll={{ y: "calc(100vh - 400px)", x: "calc(100vw - 300px)" }}
             loading={loading}
             columns={columns}
             dataSource={data}

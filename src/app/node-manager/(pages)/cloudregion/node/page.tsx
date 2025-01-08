@@ -123,7 +123,7 @@ const Node = () => {
   ];
 
   useEffect(() => {
-    if (isLoading) {
+    if (!isLoading) {
       getNodelist();
     }
   }, [isLoading]);
@@ -203,9 +203,10 @@ const Node = () => {
     node_ids: string[];
     collector_configuration_id: string
   }) => {
-    batchbindcollector(data);
+    batchbindcollector(data).then(() => {
+      message.success(t('common.batchbindSuccess'))
+    })
     getNodelist();
-    message.success("success update");
 
   }
 
@@ -277,7 +278,9 @@ const Node = () => {
   };
 
   const updatenodelist = () => {
+    setExpandedRowKeys([]);
     getNodelist();
+    message.success(t('common.refSuccess'))
   };
 
   const getNodelist = (search?: string) => {
@@ -293,10 +296,44 @@ const Node = () => {
           };
         });
         setNodelist(data);
-      })
-      .finally(() => {
+      }).finally(() => {
         setLoading(false)
       });
+  };
+
+  const handleCollectorSuccess = async () => {
+    // 更新 table 的普通数据（主列表数据）
+    await getNodelist();
+    // 收集已经展开行的 key，再次更新这些展开行的数据
+    await Promise.all(
+      expandedRowKeys.map(async (key) => {
+        await loadExpandedRowData(key); // 加载每个展开行的最新数据
+      })
+    );
+
+    message.success(t("common.updateSuccess")); // 提示更新成功
+  };
+
+
+  const loadExpandedRowData = async (key: React.Key) => {
+    try {
+      const res = await getnodelist(Number(cloudid), String(key));
+      const data = res[0]?.status.collectors.map((item: CollectorItem) => ({
+        nodeid: key,
+        key: item.configuration_id,
+        name: item.collector_name,
+        filename: item.configuration_name,
+        status: item.message,
+      })) || [];
+
+      // 更新所有展开行的缓存数据
+      setExpandedDataMapping((prev) => ({
+        ...prev,
+        [String(key)]: data,
+      }));
+    } catch (e) {
+      console.error(`Failed to load data for key "${key}":`, e);
+    }
   };
 
   return (
@@ -351,7 +388,7 @@ const Node = () => {
           ></SidecarModal>
           <CollectorModal
             ref={collectorRef}
-            onSuccess={() => { getNodelist() }}
+            onSuccess={() => { handleCollectorSuccess() }}
           ></CollectorModal>
         </div>
       </div>
