@@ -46,6 +46,8 @@ const RoleManagement: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('1');
   const [menuData, setMenuData] = useState<Menu[]>([]);
+  const [clientName, setClientName] = useState('');
+  const [clientDescription, setClientDescription] = useState('');
 
   const {
     getRoles,
@@ -84,7 +86,8 @@ const RoleManagement: React.FC = () => {
 
   const fetchClientDetail = async () => {
     const client = await getClientDetail({ params: { client_id: id } });
-    console.log('client', client);
+    setClientName(client.name);
+    setClientDescription(client.description);
   };
 
   const fetchAllMenus = async () => {
@@ -351,7 +354,7 @@ const RoleManagement: React.FC = () => {
 
   return (
     <div className="w-full">
-      <TopSection title={t('system.group.title')} content={t('system.group.desc')} />
+      <TopSection title={clientName} content={clientDescription} />
       <div className="flex mt-4 w-full" style={{ height: 'calc(100vh - 195px)' }}>
         <RoleList
           loadingRoles={loadingRoles}
