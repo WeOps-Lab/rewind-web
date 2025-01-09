@@ -468,7 +468,9 @@ const Alert: React.FC<AlertProps> = ({
       {}
     );
     // 5. 将分组后的对象转为数组
-    return Object.values(groupedData);
+    return Object.values(groupedData).sort(
+      (a: any, b: any) => dayjs(b.time).valueOf() - dayjs(a.time).valueOf()
+    );
   };
 
   const onFilterChange = (
