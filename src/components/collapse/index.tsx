@@ -69,7 +69,7 @@ const Collapse: React.FC<AccordionProps> = ({
           <span className="text-[var(--color-text-3)] mr-[6px]">
             {open ? <CaretDownOutlined /> : <CaretRightOutlined />}
           </span>
-          <span className="font-semibold text-[14px]">{title}</span>
+          <span className="font-semibold text-[14px] title">{title}</span>
         </div>
         {icon && (
           <div

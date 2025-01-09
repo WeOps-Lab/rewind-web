@@ -164,8 +164,8 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
                   ? convertToLocalizedTime(item.created_at)
                   : '--'}
               </span>
-              {`${formData.metric?.display_name} `}
-              <span className="text-[var(--color-text-3)]">
+              {`${formData.metric?.display_name}`}
+              <span className="text-[var(--color-text-3)] ml-[10px]">
                 {getEnumValueUnit(formData.metric, item.value)}
               </span>
             </>

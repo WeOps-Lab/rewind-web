@@ -9,6 +9,7 @@ import {
   Modal,
   message,
   Tabs,
+  Spin,
 } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
@@ -31,10 +32,11 @@ import { AlertOutlined } from '@ant-design/icons';
 import { FiltersConfig } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
 import TimeSelector from '@/components/time-selector';
+import StackedBarChart from '@/app/monitor/components/charts/stackedBarChart';
 import AlertDetail from './alertDetail';
 import Collapse from '@/components/collapse';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useCommon } from '@/app/monitor/context/common';
 import alertStyle from './index.module.scss';
 import {
@@ -75,6 +77,7 @@ const Alert: React.FC<AlertProps> = ({
   const userList: UserItem[] = users.current;
   const [searchText, setSearchText] = useState<string>('');
   const [tableLoading, setTableLoading] = useState<boolean>(false);
+  const [chartLoading, setChartLoading] = useState<boolean>(false);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     current: 1,
@@ -92,6 +95,7 @@ const Alert: React.FC<AlertProps> = ({
     })?.current || {};
   const [filters, setFilters] = useState<FiltersConfig>(INIT_ACTIVE_FILTERS);
   const [activeTab, setActiveTab] = useState<string>('activeAlarms');
+  const [chartData, setChartData] = useState<Record<string, any>[]>([]);
 
   const tabs: TabItem[] = [
     {
@@ -108,6 +112,7 @@ const Alert: React.FC<AlertProps> = ({
       title: t('monitor.events.level'),
       dataIndex: 'level',
       key: 'level',
+      width: 100,
       render: (_, { level }) => (
         <Tag icon={<AlertOutlined />} color={LEVEL_MAP[level] as string}>
           {LEVEL_LIST.find((item) => item.value === level)?.label || '--'}
@@ -118,6 +123,7 @@ const Alert: React.FC<AlertProps> = ({
       title: t('common.time'),
       dataIndex: 'updated_at',
       key: 'updated_at',
+      width: 160,
       sorter: (a: any, b: any) => a.id - b.id,
       render: (_, { updated_at }) => (
         <>{updated_at ? convertToLocalizedTime(updated_at) : '--'}</>
@@ -127,30 +133,35 @@ const Alert: React.FC<AlertProps> = ({
       title: t('monitor.events.strategyName'),
       dataIndex: 'title',
       key: 'title',
+      width: 120,
       render: (_, record) => <>{record.policy?.name || '--'}</>,
     },
     {
       title: t('monitor.asset'),
       dataIndex: 'asset',
       key: 'asset',
+      width: 100,
       render: (_, record) => <>{record.monitor_instance?.name || '--'}</>,
     },
     {
       title: t('monitor.events.assetType'),
       dataIndex: 'assetType',
       key: 'assetType',
+      width: 120,
       render: (_, record) => <>{showObjName(record)}</>,
     },
     {
       title: t('monitor.metric'),
       dataIndex: 'index',
       key: 'index',
+      width: 120,
       render: (_, record) => <>{record.metric?.display_name || '--'}</>,
     },
     {
       title: t('monitor.value'),
       dataIndex: 'value',
       key: 'value',
+      width: 100,
       render: (_, record) => (
         <>{getEnumValueUnit(record.metric, record.value)}</>
       ),
@@ -159,6 +170,7 @@ const Alert: React.FC<AlertProps> = ({
       title: t('monitor.events.state'),
       dataIndex: 'status',
       key: 'status',
+      width: 80,
       render: (_, { status }) => (
         <Tag color={status === 'new' ? 'blue' : 'var(--color-text-4)'}>
           {STATE_MAP[status]}
@@ -169,6 +181,7 @@ const Alert: React.FC<AlertProps> = ({
       title: t('monitor.events.notify'),
       dataIndex: 'notify',
       key: 'notify',
+      width: 100,
       render: (_, record) => (
         <>
           {t(
@@ -183,6 +196,7 @@ const Alert: React.FC<AlertProps> = ({
       title: t('common.operator'),
       dataIndex: 'operator',
       key: 'operator',
+      width: 100,
       render: (_, { operator }) => {
         return operator ? (
           <div className="column-user" title={operator}>
@@ -233,6 +247,7 @@ const Alert: React.FC<AlertProps> = ({
     }
     timerRef.current = setInterval(() => {
       getAssetInsts('timer');
+      getChartData('timer');
     }, frequence);
     return () => {
       clearTimer();
@@ -260,8 +275,20 @@ const Alert: React.FC<AlertProps> = ({
     pagination.pageSize,
   ]);
 
+  useEffect(() => {
+    if (isLoading) return;
+    getChartData('refresh');
+  }, [
+    isLoading,
+    timeRange,
+    filters.level,
+    filters.state,
+    filters.monitor_object_name,
+  ]);
+
   const changeTab = (val: string) => {
     setActiveTab(val);
+    setChartData([]);
     if (val === 'activeAlarms') {
       setFilters(INIT_ACTIVE_FILTERS);
       return;
@@ -343,12 +370,29 @@ const Alert: React.FC<AlertProps> = ({
     }
   };
 
+  const getChartData = async (type: string) => {
+    const params = getParams();
+    const { page, page_size, ...chartParams } = params;
+    console.log(page, page_size);
+    chartParams.content = '';
+    try {
+      setChartLoading(type !== 'timer');
+      const data = await get('/monitor/api/monitor_alert/', {
+        params: chartParams,
+      });
+      setChartData(processDataForStackedBarChart(data.results) as any);
+    } finally {
+      setChartLoading(false);
+    }
+  };
+
   const onFrequenceChange = (val: number) => {
     setFrequence(val);
   };
 
   const onRefresh = () => {
     getAssetInsts('refresh');
+    getChartData('refresh');
   };
 
   const openAlertDetail = (row: TableDataItem) => {
@@ -365,6 +409,66 @@ const Alert: React.FC<AlertProps> = ({
 
   const onTimeChange = (val: number[]) => {
     setTimeRange(val);
+  };
+
+  const processDataForStackedBarChart = (
+    data: TableDataItem,
+    desiredSegments = 12
+  ) => {
+    if (!data?.length) return [];
+    // 1. 找到最早时间和最晚时间
+    const timestamps = data.map((item: TableDataItem) =>
+      dayjs(item.created_at)
+    );
+    const minTime = timestamps.reduce(
+      (min: Dayjs, curr: Dayjs) => (curr.isBefore(min) ? curr : min),
+      timestamps[0]
+    ); // 最早时间
+    const maxTime = timestamps.reduce(
+      (max: Dayjs, curr: Dayjs) => (curr.isAfter(max) ? curr : max),
+      timestamps[0]
+    ); // 最晚时间
+    // 2. 计算时间跨度（以分钟为单位）
+    const totalMinutes = maxTime.diff(minTime, 'minute');
+    // 3. 动态计算时间区间（每段的分钟数）
+    const intervalMinutes = Math.max(
+      Math.ceil(totalMinutes / desiredSegments),
+      1
+    ); // 确保 intervalMinutes 至少为 1
+    // 4. 按动态时间区间划分数据
+    const groupedData = data.reduce(
+      (acc: TableDataItem, curr: TableDataItem) => {
+        // 根据 created_at 时间戳，计算所属时间区间
+        const timestamp = dayjs(curr.created_at).startOf('minute'); // 转为分钟级别时间戳
+        const roundedTime = convertToLocalizedTime(
+          minTime.add(
+            Math.floor(timestamp.diff(minTime, 'minute') / intervalMinutes) *
+              intervalMinutes,
+            'minute'
+          )
+        );
+        if (!acc[roundedTime]) {
+          acc[roundedTime] = {
+            time: roundedTime,
+            critical: 0,
+            error: 0,
+            warning: 0,
+          };
+        }
+        // 根据 level 统计数量
+        if (curr.level === 'critical') {
+          acc[roundedTime].critical += 1;
+        } else if (curr.level === 'error') {
+          acc[roundedTime].error += 1;
+        } else if (curr.level === 'warning') {
+          acc[roundedTime].warning += 1;
+        }
+        return acc;
+      },
+      {}
+    );
+    // 5. 将分组后的对象转为数组
+    return Object.values(groupedData);
   };
 
   const onFilterChange = (
@@ -393,7 +497,7 @@ const Alert: React.FC<AlertProps> = ({
             {t('monitor.events.filterItems')}
           </h3>
           <div className="mb-[15px]">
-            <Collapse title={t('monitor.events.level')} isOpen={false}>
+            <Collapse title={t('monitor.events.level')}>
               <Checkbox.Group
                 className="ml-[20px]"
                 value={filters.level}
@@ -430,7 +534,7 @@ const Alert: React.FC<AlertProps> = ({
             </Collapse>
           </div>
           <div className="mb-[15px]">
-            <Collapse title={t('monitor.events.assetType')} isOpen={false}>
+            <Collapse title={t('monitor.events.assetType')}>
               <Checkbox.Group
                 className="ml-[20px]"
                 value={filters.monitor_object_name}
@@ -448,7 +552,12 @@ const Alert: React.FC<AlertProps> = ({
                       >
                         {(item.options || []).map((optionItem, optionIndex) => (
                           <Checkbox key={optionIndex} value={optionItem.value}>
-                            {optionItem.label}
+                            <span
+                              className="inline-block w-[100px] hide-text align-middle"
+                              title={optionItem.label}
+                            >
+                              {optionItem.label}
+                            </span>
                           </Checkbox>
                         ))}
                       </Collapse>
@@ -460,7 +569,7 @@ const Alert: React.FC<AlertProps> = ({
           </div>
           {activeTab === 'historicalAlarms' && (
             <div className="mb-[15px]">
-              <Collapse title={t('monitor.events.state')} isOpen={false}>
+              <Collapse title={t('monitor.events.state')}>
                 <Checkbox.Group
                   value={filters.state}
                   className="ml-[20px]"
@@ -480,34 +589,48 @@ const Alert: React.FC<AlertProps> = ({
             </div>
           )}
         </div>
-        <div className={alertStyle.table}>
-          <Tabs activeKey={activeTab} items={tabs} onChange={changeTab} />
-          <div className="flex justify-between mb-[10px]">
-            <Input
-              allowClear
-              className="w-[350px]"
-              placeholder={t('common.searchPlaceHolder')}
-              onChange={(e) => setSearchText(e.target.value)}
-              onPressEnter={enterText}
-              onClear={clearText}
-            />
-            <TimeSelector
-              defaultValue={timeDefaultValue}
-              onlyRefresh={activeTab === 'activeAlarms'}
-              onChange={(value) => onTimeChange(value)}
-              onFrequenceChange={onFrequenceChange}
-              onRefresh={onRefresh}
+        <div>
+          <Spin spinning={chartLoading}>
+            <div className={alertStyle.chartWrapper}>
+              <div className="flex items-center justify-between mb-[2px]">
+                <span className="text-[14px] ml-[10px]">
+                  {t('monitor.events.distributionMap')}
+                </span>
+                <TimeSelector
+                  defaultValue={timeDefaultValue}
+                  onlyRefresh={activeTab === 'activeAlarms'}
+                  onChange={(value) => onTimeChange(value)}
+                  onFrequenceChange={onFrequenceChange}
+                  onRefresh={onRefresh}
+                />
+              </div>
+              <div className={alertStyle.chart}>
+                <StackedBarChart data={chartData} colors={LEVEL_MAP as any} />
+              </div>
+            </div>
+          </Spin>
+          <div className={alertStyle.table}>
+            <Tabs activeKey={activeTab} items={tabs} onChange={changeTab} />
+            <div className="flex justify-between mb-[10px]">
+              <Input
+                allowClear
+                className="w-[350px]"
+                placeholder={t('common.searchPlaceHolder')}
+                onChange={(e) => setSearchText(e.target.value)}
+                onPressEnter={enterText}
+                onClear={clearText}
+              />
+            </div>
+            <CustomTable
+              scroll={{ y: 'calc(100vh - 540px)', x: 'calc(100vw - 320px)' }}
+              columns={columns}
+              dataSource={tableData}
+              pagination={pagination}
+              loading={tableLoading}
+              rowKey="id"
+              onChange={handleTableChange}
             />
           </div>
-          <CustomTable
-            scroll={{ y: 'calc(100vh - 380px)', x: 'calc(100vw - 300px)' }}
-            columns={columns}
-            dataSource={tableData}
-            pagination={pagination}
-            loading={tableLoading}
-            rowKey="id"
-            onChange={handleTableChange}
-          />
         </div>
       </div>
       <AlertDetail

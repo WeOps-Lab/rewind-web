@@ -5,11 +5,11 @@
     width: 100%;
 
     .filters {
-        width: 180px;
-        width: 180px;
+        width: 200px;
+        min-width: 200px;
         background-color: var(--color-bg-1);
         padding: 20px;
-        margin-right: 20px;
+        margin-right: 10px;
         height: calc(100vh - 146px);
         overflow-y: auto;
 
@@ -26,12 +26,40 @@
                 }
             }
         }
+
+        :global {
+            .collapse-title {
+                padding: 3px 10px;
+                border-radius: 2px;
+
+                .title {
+                    font-weight: 500 !important;
+                }
+            }
+        }
+    }
+
+    .chartWrapper {
+        background-color: var(--color-bg-1);
+        padding: 20px 20px 0 10px;
+        margin-bottom: 10px;
+
+        .chart {
+            height: 100px;
+
+            :global {
+                .ant-empty-normal {
+                    margin: 0;
+                    transform: translateY(20px);
+                }
+            }
+        }
     }
 
     .table {
-        width: calc(100vw - 230px);
+        width: calc(100vw - 240px);
         background-color: var(--color-bg-1);
-        height: calc(100vh - 146px);
+        height: calc(100vh - 310px);
         padding: 10px 20px 20px 20px;
     }
 }
