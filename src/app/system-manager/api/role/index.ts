@@ -22,14 +22,14 @@ export const useRoleApi = () => {
   const getAllUser = async () => {
     return await get('/system_mgmt/user/user_all/');
   }
-  const getRolePermissions = async (params: any) => {
+  const getRoleMenus = async (params: any) => {
     return await get('/system_mgmt/role/get_role_menus/', params);
   }
   const getAllMenus = async (params: any) => {
     return await get('/system_mgmt/role/get_all_menus/', params);
   }
-  const updateRolePermissions = async (params: any) => {
-    return await post('/system_mgmt/role/update_role_menus/', params);
+  const setRoleMenus = async (params: any) => {
+    return await post('/system_mgmt/role/set_role_menus/', params);
   }
   const addUser = async (params: any) => {
     return await post('/system_mgmt/role/add_user/', params);
@@ -45,9 +45,9 @@ export const useRoleApi = () => {
     deleteRole,
     getUsersByRole,
     getAllUser,
-    getRolePermissions,
+    getRoleMenus,
     getAllMenus,
-    updateRolePermissions,
+    setRoleMenus,
     addUser,
     deleteUser
   };

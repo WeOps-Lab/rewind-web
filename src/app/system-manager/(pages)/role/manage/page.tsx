@@ -51,13 +51,13 @@ const RoleManagement: React.FC = () => {
     getRoles,
     getUsersByRole,
     getAllUser,
-    getRolePermissions,
+    getRoleMenus,
     updateRole,
     addRole,
     addUser,
     deleteRole,
     deleteUser,
-    updateRolePermissions,
+    setRoleMenus,
     getAllMenus
   } = useRoleApi()
   const { getClientDetail } = useUserApi();
@@ -68,18 +68,15 @@ const RoleManagement: React.FC = () => {
     fetchRoles();
   }, []);
 
-  useEffect(() => {
-    if (selectedRole) {
-      fetchUsersByRole(selectedRole, 1, pageSize);
-    }
-  }, [selectedRole]);
-
   const fetchRoles = async () => {
     setLoadingRoles(true);
     try {
       const roles = await getRoles({ params: { client_id: id } });
       setRoleList(roles);
-      if (roles.length > 0) setSelectedRole(roles[0]);
+      if (roles.length > 0) {
+        setSelectedRole(roles[0]);
+        fetchUsersByRole(roles[0], 1, pageSize);
+      }
     } finally {
       setLoadingRoles(false);
     }
@@ -139,8 +136,14 @@ const RoleManagement: React.FC = () => {
   const fetchRolePermissions = async (role: Role) => {
     setLoading(true);
     try {
-      const permissions = await getRolePermissions({ params: { client_id: id, role_id: role.role_id } });
-      setPermissionsCheckedKeys(permissions);
+      const permissions = await getRoleMenus({ params: { id, policy_id: role.policy_id } });
+      const permissionsMap: Record<string, string[]> = permissions.reduce((acc: any, item: string) => {
+        const [name, ...operations] = item.split('-');
+        if (!acc[name]) acc[name] = [];
+        acc[name].push(...operations);
+        return acc;
+      }, {});
+      setPermissionsCheckedKeys(permissionsMap);
     } catch (error) {
       console.error(`${t('common.fetchFailed')}:`, error);
     } finally {
@@ -275,7 +278,11 @@ const RoleManagement: React.FC = () => {
 
   const onSelectRole = (role: Role) => {
     setSelectedRole(role);
-    fetchUsersByRole(role, 1, pageSize);
+    if (activeTab === '1') {
+      fetchUsersByRole(role, 1, pageSize);
+    } else if (activeTab === '2') {
+      fetchRolePermissions(role);
+    }
   };
 
   const handleConfirmPermissions = async () => {
@@ -283,9 +290,14 @@ const RoleManagement: React.FC = () => {
 
     setLoading(true);
     try {
-      await updateRolePermissions({
-        id: selectedRole.policy_id,
-        keys: permissionsCheckedKeys
+      const menus = Object.entries(permissionsCheckedKeys).flatMap(([menuName, operations]) =>
+        operations.map(operation => `${menuName}-${operation}`)
+      );
+      await setRoleMenus({
+        policy_id: selectedRole.policy_id,
+        policy_name: selectedRole.display_name,
+        id,
+        menus
       });
       message.success(t('common.updateSuccess'));
     } catch (error) {
@@ -326,9 +338,14 @@ const RoleManagement: React.FC = () => {
   };
 
   const handleTabChange = (key: string) => {
+    console.log('key', key);
     setActiveTab(key);
-    if (key === '2' && selectedRole) {
-      fetchRolePermissions(selectedRole);
+    if (selectedRole) {
+      if (key === '1') {
+        fetchUsersByRole(selectedRole, 1, pageSize);
+      } else if (key === '2') {
+        fetchRolePermissions(selectedRole);
+      }
     }
   };
 
@@ -392,7 +409,7 @@ const RoleManagement: React.FC = () => {
             </TabPane>
             <TabPane tab={t('system.role.permissions')} key="2">
               <div className="flex justify-end items-center mb-4">
-                <Button type="primary" onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
+                <Button type="primary" loading={loading} onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
               </div>
               <PermissionTable
                 t={t}

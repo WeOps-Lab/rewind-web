@@ -30,7 +30,7 @@ const RoleList: React.FC<RoleListProps> = ({
       key={role.role_id}
       className={`flex items-center justify-between p-2 mb-2 hover:bg-[var(--color-fill-1)] group ${selectedRole?.role_id === role.role_id ? 'bg-[var(--color-fill-2)]' : ''}`}
     >
-      <div className="cursor-pointer" onClick={() => onSelectRole(role)}>
+      <div className="cursor-pointer text-sm" onClick={() => onSelectRole(role)}>
         {role.display_name || role.role_name}
       </div>
       <div className="flex text-base items-center text-[var(--color-text-3)]">
