@@ -146,10 +146,11 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
         const collector_id = collectorlist?.find((item) => item.value === values?.Collector)?.value;
         const node_ids = nodeids;
         if (typeof (collector_id) === "string") {
-          batchoperationcollector({ node_ids, collector_id, operation: type })
+          batchoperationcollector({ node_ids, collector_id, operation: type }).then(() => {
+            message.success(t('node-manager.cloudregion.node.stopsuccess'))
+            onSuccess();
+          })
         }
-        message.success("common.success");
-        onSuccess();
         setCollectorVisible(false);
       })
     }

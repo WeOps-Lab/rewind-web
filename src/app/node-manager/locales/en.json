@@ -12,7 +12,8 @@
     "batchbindFailed":"Failed to batchbind",
     "refSuccess": "Refresh successful",
     "success":"Successfully",
-    "quesuccess":"Query successful!"
+    "quesuccess":"Query successful!",
+    "applysuccess":"Apply success!"
   },
   "node-manager": {
     "cloudregion": {
@@ -47,7 +48,8 @@
         "restarinfo": "Are you sure to restart the collector?",
         "stopinfo": "Are you sure to stop the collector?",
         "ruleinputinfo":"Please input your IP address!",
-         "group":"Group"
+        "group":"Group",
+        "stopsuccess":"The collector was stopped successfully"
       },
       "Configuration": {
         "name": "NAME",

@@ -16,7 +16,7 @@ const Collector = () => {
   const [cards, setCards] = useState<[]>([])
   useEffect(() => {
     if (!isLoading) {
-      getCollectorlist().then((res) => {
+      getCollectorlist({}).then((res) => {
         const tempdata = res.map((item: any) => ({
           id: item.id,
           name: item.name,

@@ -12,7 +12,8 @@
     "batchbindFailed":"绑定失败",
     "refSuccess": "刷新成功",
     "success":"成功",
-    "quesuccess":"查询成功"
+    "quesuccess":"查询成功",
+     "applysuccess":"应用成功!"
   },
   "node-manager": {
     "cloudregion": {
@@ -47,7 +48,8 @@
         "restarinfo": "您确定要重新启动收集器吗？",
         "stopinfo": "您确定要停止收集器吗？",
         "ruleinputinfo":"请输入你的IP地址!",
-        "group":"组织"
+        "group":"组织",
+        "stopsuccess":"停止采集器成功"
       },
       "Configuration": {
         "name": "姓名",

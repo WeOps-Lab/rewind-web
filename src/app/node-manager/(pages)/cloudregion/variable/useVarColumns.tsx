@@ -13,7 +13,7 @@ export const useVarColumns = ({
     {
       title: t("node-manager.cloudregion.variable.Name"),
       dataIndex: "name",
-      render: (text: string) => <a>{text}</a>,
+      render: (text: string) => <p>{text}</p>,
     },
     {
       title: t("node-manager.cloudregion.variable.Value"),

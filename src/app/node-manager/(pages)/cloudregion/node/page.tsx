@@ -219,7 +219,7 @@ const Node = () => {
       items = updateDropdownMapping[String(key)] || [];
     }
     return (
-      <div className="grid grid-cols-2 gap-4 p-4">
+      <div className="grid grid-cols-2 gap-4">
         {data.map((item) => {
           const statusMapping: { [key: string]: string } = {
             Running: "yunhangzhongx",
@@ -228,24 +228,24 @@ const Node = () => {
           };
           const metricbeattype = statusMapping[item.status] || statusMapping.Default;
           return (
-            <div key={item.key} className="flex h-[32px]">
-              <p className="leading-[32px] w-32 text-center">{item.name}</p>
-              <div className="flex justify-center items-center ml-4 w-[30px] h-[30px">
+            <div key={item.key} className="flex h-[18px]">
+              <p className="w-32 h-full flex items-center justify-center text-center">{item.name}</p>
+              <div className="flex justify-center items-center ml-4 w-[30px] h-[18px}">
                 <Icon
                   type={metricbeattype}
-                  style={{ height: "19px", width: "19px" }}
+                  style={{ height: "18px", width: "18px" }}
                 ></Icon>
               </div>
-              <Button
-                className="w-32"
-                color="primary"
-                variant="link"
-                onClick={() => {
-                  router.push(`/node-manager/cloudregion/configuration?id=${item.key}`);
-                }}
-              >
-                {item.filename || '--'}
-              </Button>
+              <div className="flex items-center justify-center w-32 h-full">
+                <Button
+                  type="link"
+                  onClick={() => {
+                    router.push(`/node-manager/cloudregion/configuration?id=${item.key}`);
+                  }}
+                >
+                  {item.filename || '--'}
+                </Button>
+              </div>
               <Dropdown
                 className="w-32"
                 menu={{
@@ -277,11 +277,46 @@ const Node = () => {
     getNodelist(value);
   };
 
-  const updatenodelist = () => {
-    setExpandedRowKeys([]);
-    getNodelist();
-    message.success(t('common.refSuccess'))
+  const updatenodelist = async () => {
+    setLoading(true);
+
+    // 获取节点数据
+    const newNodeList = await getnodelist(Number(cloudid)).then((res) => {
+      return res.map((item: any) => {
+        return {
+          key: item.id,
+          ip: item.ip,
+          operatingsystem: item.operating_system.charAt(0).toUpperCase() + item.operating_system.slice(1),
+          sidecar: item.status.status === "1" ? "Running" : "Error",
+        };
+      });
+    });
+
+    setNodelist(newNodeList);
+
+    // 尝试保留之前展开行的数据，根据已有的 `expandedRowKeys`
+    const newExpandedDataMapping = { ...expandedDataMapping };
+
+    for (const key of expandedRowKeys) {
+      const resItem = await getnodelist(Number(cloudid), key as string).then((res) => res[0]);
+
+      if (resItem) {
+        const expandedData = resItem.status.collectors.map((item: CollectorItem) => ({
+          nodeid: key,
+          key: item.configuration_id,
+          name: item.collector_name,
+          filename: item.configuration_name,
+          status: item.message,
+        })) || [];
+
+        newExpandedDataMapping[String(key)] = expandedData;
+      }
+    }
+
+    setExpandedDataMapping(newExpandedDataMapping);
+    setLoading(false);
   };
+
 
   const getNodelist = (search?: string) => {
     getnodelist(Number(cloudid), search)
@@ -305,35 +340,26 @@ const Node = () => {
     // 更新 table 的普通数据（主列表数据）
     await getNodelist();
     // 收集已经展开行的 key，再次更新这些展开行的数据
-    await Promise.all(
-      expandedRowKeys.map(async (key) => {
-        await loadExpandedRowData(key); // 加载每个展开行的最新数据
-      })
-    );
 
-    message.success(t("common.updateSuccess")); // 提示更新成功
-  };
+    const res = await getnodelist(Number(cloudid));
 
+    const newExpandedDataMapping = { ...expandedDataMapping };
 
-  const loadExpandedRowData = async (key: React.Key) => {
-    try {
-      const res = await getnodelist(Number(cloudid), String(key));
-      const data = res[0]?.status.collectors.map((item: CollectorItem) => ({
-        nodeid: key,
-        key: item.configuration_id,
-        name: item.collector_name,
-        filename: item.configuration_name,
-        status: item.message,
-      })) || [];
+    res.forEach((resitem: any) => {
+      if (expandedRowKeys.includes(resitem.id)) {
+        const data = resitem?.status.collectors.map((item: CollectorItem) => ({
+          nodeid: resitem.id,
+          key: item.configuration_id,
+          name: item.collector_name,
+          filename: item.configuration_name,
+          status: item.message,
+        })) || [];
+        newExpandedDataMapping[resitem.id] = data;
+      }
+    });
 
-      // 更新所有展开行的缓存数据
-      setExpandedDataMapping((prev) => ({
-        ...prev,
-        [String(key)]: data,
-      }));
-    } catch (e) {
-      console.error(`Failed to load data for key "${key}":`, e);
-    }
+    // 一次性更新状态
+    setExpandedDataMapping(newExpandedDataMapping);
   };
 
   return (

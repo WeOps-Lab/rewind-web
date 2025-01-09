@@ -21,7 +21,7 @@ const Collectordetail = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const id = searchParams.get("id");
     if (typeof id === 'string') {
-      getCollectorlist(id).then((res) => {
+      getCollectorlist({ search: id }).then((res) => {
         const tempdata = {
           id: res[0].id,
           name: res[0].name,

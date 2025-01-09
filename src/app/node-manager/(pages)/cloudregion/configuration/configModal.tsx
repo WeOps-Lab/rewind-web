@@ -15,9 +15,10 @@ import { useTranslation } from '@/utils/i18n';
 import type { GetProps } from 'antd';
 import { useApplyColumns } from "./useApplyColumns";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
-import { IConfiglistprops, nodeItemtRes, mappedNodeItem } from '@/app/node-manager/types/cloudregion';
+import { nodeItemtRes, mappedNodeItem } from '@/app/node-manager/types/cloudregion';
 import type { OptionItem } from '@/app/node-manager/types/index';
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
+import useApiCollector from "@/app/node-manager/api/collector/index"
 
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search, TextArea } = Input;
@@ -30,8 +31,9 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       useState<boolean>(false);
     //设置表当的数据
     const { t } = useTranslation();
+    const { getCollectorlist } = useApiCollector();
     const cloudid = useCloudId();
-    const { createconfig, getconfiglist, getnodelist, applyconfig, updatecollector } = useApiCloudRegion();
+    const { createconfig, getnodelist, applyconfig, updatecollector } = useApiCloudRegion();
     const [configForm, setConfigForm] = useState<TableDataItem>();
     const [applydata, setApplydata] = useState<mappedNodeItem[]>();
     const [colselectitems, setColselectitems] = useState<OptionItem[]>([])
@@ -47,8 +49,9 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         {
           node_id: key,
           collector_configuration_id: configid,
-        })
-      message.success('apply success!')
+        }).then(() => {
+        message.success(t('common.applysuccess'))
+      })
       setConfigVisible(true);
     }
     const applycolumns = useApplyColumns({ handleApply })
@@ -80,6 +83,15 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         configformRef.current?.resetFields();
         configformRef.current?.setFieldsValue(configForm);
       }
+
+      //获取系统的类型，并根据系统的类型设置采集器的列表
+      getCollectorlist({ node_operating_system: configForm?.operatingsystem || 'linux' }).then((res) => {
+        const tempdate = res.map((item: any) => {
+          return { value: item.name, label: item.name, template: item.default_template }
+        })
+        setColselectitems(tempdate);
+      })
+
     }, [configVisible, configForm]);
 
     //关闭用户的弹窗(取消和确定事件)
@@ -119,7 +131,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       configformRef.current?.validateFields().then((values) => {
         const { name, collector, configinfo } = values
         if (type === 'add') {
-          handleCreate(name, collector, configinfo);
+          handleCreate(name, configinfo, collector);
           setConfigVisible(false);
           return;
         }
@@ -147,48 +159,24 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
 
     //选择操作系统
     const handleChangeOperatingsystem = (value: string) => {
-      getconfiglist(Number(cloudid)).then((res) => {
-        const temporaryformdata = res.filter((item: IConfiglistprops) => {
-          if (item.operating_system === value) {
-            return {
-              Collector: item.collector,
-              configinfo: item.config_template
-            }
-          }
-        });
-        const uniquedata = uniqueByCollector(temporaryformdata);
-        const temdata = uniquedata.map((item: IConfiglistprops) => {
-          return { value: item.collector, label: item.collector, template: item.config_template }
+      getCollectorlist({ node_operating_system: value }).then((res) => {
+        const tempdate = res.map((item: any) => {
+          return { value: item.name, label: item.name, template: item.default_template }
         })
-        configformRef.current?.setFieldValue("collector", temdata[0].value);
-        configformRef.current?.setFieldValue("configinfo", temdata[0].template);
-
+        configformRef.current?.setFieldValue("collector", tempdate[0].value);
+        configformRef.current?.setFieldValue("configinfo", tempdate[0].template);
         //设置采集器
-        setColselectitems(temdata);
+        setColselectitems(tempdate);
       })
-
     }
+
     //选择采集器
     const handleChangeCollector = (value: string) => {
       const tempdata = colselectitems.filter((item) => item.value === value);
       if (tempdata) {
         configformRef.current?.setFieldValue("configinfo", tempdata[0].template);
       }
-      console.log('选择的采集器是', value, colselectitems)
     }
-
-    // 去除重复的collector
-    const uniqueByCollector = (items: Array<{ collector: string, config_template: string }>) => {
-      const itemsMap = new Map();
-      items.forEach((item) => {
-        // 判断collector是否重复，如果不重复则存入Map
-        if (!itemsMap.has(item.collector)) {
-          itemsMap.set(item.collector, item);
-        }
-      });
-      // 将Map中的values转化为数组
-      return Array.from(itemsMap.values());
-    };
 
     //获取应用列表的数据表格
     const getApplydata = () => {
