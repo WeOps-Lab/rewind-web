@@ -5,7 +5,8 @@ import type { TableProps } from "antd";
 import CustomTable from "@/components/custom-table"
 import ConfigModal from "./configModal";
 import { ModalRef } from "@/app/node-manager/types/index";
-import { IConfiglistprops } from '@/app/node-manager/types/cloudregion'
+import type { IConfiglistprops } from '@/app/node-manager/types/cloudregion';
+import type { CollectorItem, CollectorListResponse } from "@/app/node-manager/types/collector"
 import { useTranslation } from "@/utils/i18n";
 import type { GetProps } from 'antd';
 import { useConfigColumns } from "./useConfigColumns"
@@ -13,6 +14,7 @@ import Mainlayout from '../mainlayout/layout';
 import { PlusOutlined } from "@ant-design/icons";
 import useApiClient from "@/utils/request";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
+import useApiCollector from "@/app/node-manager/api/collector/index"
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
 import type { ConfigDate } from '@/app/node-manager/types/cloudregion';
 import configstyle from './index.module.scss'
@@ -26,11 +28,13 @@ const Configration = () => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
   const cloudid = useCloudId();
+  const { getCollectorlist } = useApiCollector();
   const { getconfiglist, batchdeletecollector } = useApiCloudRegion();
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
   const [loading, setLoading] = useState<boolean>(true)
   const [data, setData] = useState<ConfigDate[]>([])
+  const [addform, setAddform] = useState<CollectorListResponse[]>([])
 
   //点击编辑配置文件的触发事件
   const configurationClick = (key: string) => {
@@ -54,8 +58,9 @@ const Configration = () => {
   const modifydeleteconfirm = () => {
     batchdeletecollector({
       ids: selectedconfigurationRowKeys as string[]
+    }).then(() => {
+      getConfiglist();
     })
-    getConfiglist();
   }
 
   // 表格的列
@@ -67,9 +72,9 @@ const Configration = () => {
   const emptytabledata = {
     name: "",
     key: "",
-    collector: data[0]?.collector,
-    operatingsystem: data[0]?.operatingsystem,
-    configinfo: data[0]?.configinfo
+    collector: addform[0]?.label,
+    operatingsystem: 'linux',
+    configinfo: addform[0]?.template
   };
 
   //组件初始化渲染
@@ -82,6 +87,16 @@ const Configration = () => {
       }
     }
   }, [isLoading]);
+
+  //为了给添加时，初始化一个form数据
+  useEffect(() => {
+    getCollectorlist({ node_operating_system: 'linux' }).then((res: CollectorItem[]) => {
+      const tempdate: CollectorListResponse[] = res.map((item: CollectorItem) => {
+        return { value: item.name, label: item.name, template: item.default_template }
+      })
+      setAddform(tempdate)
+    })
+  }, [])
 
   //删除配置文件刷新页面
   useEffect(() => {

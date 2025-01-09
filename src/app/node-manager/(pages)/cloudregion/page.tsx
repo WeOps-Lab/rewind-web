@@ -98,8 +98,8 @@ const Cloudregion = () => {
       <OperateModal
         title={t('node-manager.cloudregion.editform.title')}
         open={openeditcloudregion}
-        okText="Confirm"
-        cancelText="Cancel"
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         onCancel={() => {
           setOpeneditcloudregion(false);
         }}

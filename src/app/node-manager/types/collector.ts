@@ -1,11 +1,4 @@
-export interface CollectorDataItem {
-    id: string;
-    name: string;
-    node_operating_system: string;
-    default_template: string;
-    introduction: string;
-  }
-  
+
 export interface MergedItem {
     id: string[];
     name: string;
@@ -13,4 +6,19 @@ export interface MergedItem {
     default_template: string;
     introduction: string;
   }
+
+export interface CollectorItem {
+    name: string;
+    default_template: string;
+    id:string;
+    introduction:string;
+    node_operating_system:string
+  }
+  
+export interface CollectorListResponse {
+    value: string;
+    label: string;
+    template: string;
+  }
+  
 

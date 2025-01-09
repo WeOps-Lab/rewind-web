@@ -18,7 +18,7 @@ export const useConfigColumns = ({
       dataIndex: "name",
       fixed: "left",
       width: 150,
-      render: (text: string) => <a>{text}</a>,
+      render: (text: string) => <p>{text}</p>,
     },
     {
       title: t("node-manager.cloudregion.Configuration.Collector"),
@@ -83,7 +83,7 @@ export const useConfigColumns = ({
 
   useEffect(() => {
     setDeletestate(false);
-  }, [])
+  }, [deletestate])
   //删除的确定的弹窗(删除单个配置接口实现)
   const deleteconfirm = (key: any) => {
     message.success({
