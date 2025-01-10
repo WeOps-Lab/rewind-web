@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { Spin, Select, Button, Segmented, Input } from 'antd';
+import { Spin, Select, Button, Segmented, Input, Tree } from 'antd';
 import { BellOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import { useConditionList } from '@/app/monitor/constants/monitor';
 import useApiClient from '@/utils/request';
@@ -16,6 +16,7 @@ import {
   ColumnItem,
   ChartData,
   TimeSelectorDefaultValue,
+  TreeItem,
 } from '@/app/monitor/types';
 import { Dayjs } from 'dayjs';
 import {
@@ -30,8 +31,9 @@ import { deepClone, findUnitNameById } from '@/app/monitor/utils/common';
 import { useSearchParams } from 'next/navigation';
 import dayjs from 'dayjs';
 const { Option } = Select;
+const { Search } = Input;
 
-const Search: React.FC = () => {
+const SearchView: React.FC = () => {
   const { get, isLoading } = useApiClient();
   const { t } = useTranslation();
   const CONDITION_LIST = useConditionList();
@@ -54,7 +56,6 @@ const Search: React.FC = () => {
   const [labels, setLabels] = useState<string[]>([]);
   const [object, setObject] = useState<string | undefined>(url_obj_name as any);
   const [objects, setObjects] = useState<ObectItem[]>([]);
-  const [objectsOptions, setObjectsOptions] = useState<ObectItem[]>([]);
   const [activeTab, setActiveTab] = useState<string>('area');
   const [conditions, setConditions] = useState<ConditionItem[]>([]);
   const beginTime: number = dayjs().subtract(15, 'minute').valueOf();
@@ -72,6 +73,11 @@ const Search: React.FC = () => {
   const [unit, setUnit] = useState<string>('');
   const isArea: boolean = activeTab === 'area';
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+  const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
+  const [treeData, setTreeData] = useState<TreeItem[]>([]);
+  const [originalTreeData, setOriginalTreeData] = useState<TreeItem[]>([]); // 保存原始树数据
+  const [treeSearchValue, setTreeSearchValue] = useState<string>(''); // 搜索值
 
   useEffect(() => {
     if (isLoading) return;
@@ -101,24 +107,10 @@ const Search: React.FC = () => {
     try {
       setObjLoading(true);
       const data: ObectItem[] = await get('/monitor/api/monitor_object/');
-      const groupedData = data.reduce(
-        (acc, item) => {
-          if (!acc[item.type]) {
-            acc[item.type] = {
-              label: item.display_type,
-              title: item.type,
-              options: [],
-            };
-          }
-          acc[item.type].options.push({
-            label: item.display_name,
-            value: item.name,
-          });
-          return acc;
-        },
-        {} as Record<string, any>
-      );
-      setObjectsOptions(Object.values(groupedData));
+      const _treeData = getTreeData(deepClone(data));
+      setTreeData(_treeData);
+      setOriginalTreeData(_treeData); // 保存原始数据
+      setExpandedKeys(_treeData.map((item) => item.key));
       setObjects(data);
     } finally {
       setObjLoading(false);
@@ -252,6 +244,7 @@ const Search: React.FC = () => {
   const handleObjectChange = (val: string) => {
     if (val !== 'otherWay') {
       setObject(val);
+      setSelectedKeys([val]);
       setMetrics([]);
       setLabels([]);
       setMetric(null);
@@ -440,8 +433,66 @@ const Search: React.FC = () => {
     handleSearch('refresh', activeTab, _times);
   };
 
+  const onSelect = (selectedKeys: React.Key[], info: any) => {
+    const isFirstLevel = !!info.node?.children?.length;
+    if (!isFirstLevel && selectedKeys?.length) {
+      setSelectedKeys(selectedKeys);
+      handleObjectChange(selectedKeys[0] as string);
+    }
+  };
+
+  const getTreeData = (data: ObectItem[]): TreeItem[] => {
+    const groupedData = data.reduce(
+      (acc, item) => {
+        if (!acc[item.type]) {
+          acc[item.type] = {
+            title: item.display_type || '--',
+            key: item.type,
+            children: [],
+          };
+        }
+        acc[item.type].children.push({
+          title: item.display_name || '--',
+          label: item.name || '--',
+          key: item.name,
+          children: [],
+        });
+        return acc;
+      },
+      {} as Record<string, TreeItem>
+    );
+    return Object.values(groupedData);
+  };
+
+  const filterTree = (data: TreeItem[], searchValue: string): TreeItem[] => {
+    return data
+      .map((item: any) => {
+        const children = filterTree(item.children || [], searchValue);
+        if (
+          item.title.toLowerCase().includes(searchValue.toLowerCase()) ||
+          children.length
+        ) {
+          return {
+            ...item,
+            children,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as TreeItem[];
+  };
+
+  const onSearchTree = (value: string) => {
+    if (!value) {
+      setTreeData(originalTreeData);
+    } else {
+      const filteredData = filterTree(originalTreeData, value);
+      setTreeData(filteredData);
+    }
+  };
+
   return (
-    <div className={searchStyle.search}>
+    <div className={searchStyle.searchWrapper}>
       <div className={searchStyle.time}>
         <TimeSelector
           defaultValue={timeDefaultValue}
@@ -458,209 +509,229 @@ const Search: React.FC = () => {
           {t('common.search')}
         </Button>
       </div>
-      <div className={searchStyle.criteria}>
-        <Collapse
-          title={t('monitor.search.searchCriteria')}
-          icon={
-            <Button
-              disabled={!object}
-              onClick={createPolicy}
-              type="link"
-              size="small"
-              icon={<BellOutlined />}
+      <div className={searchStyle.searchMain}>
+        <div className={searchStyle.tree}>
+          <Spin spinning={objLoading}>
+            <Search
+              className="mb-[10px]"
+              placeholder={t('common.searchPlaceHolder')}
+              value={treeSearchValue}
+              enterButton
+              onChange={(e) => setTreeSearchValue(e.target.value)}
+              onSearch={onSearchTree}
             />
-          }
-        >
-          <div className={searchStyle.condition}>
-            <div className={searchStyle.conditionItem}>
-              <div className={searchStyle.itemLabel}>{t('monitor.source')}</div>
-              <div
-                className={`${searchStyle.itemOption} ${searchStyle.source}`}
-              >
-                <Select
-                  className={`w-[150px] ${searchStyle.sourceObjectType}`}
-                  placeholder={t('monitor.search.object')}
-                  showSearch
-                  loading={objLoading}
-                  value={object}
-                  options={objectsOptions}
-                  onChange={handleObjectChange}
+            <Tree
+              showLine
+              selectedKeys={selectedKeys}
+              expandedKeys={expandedKeys}
+              onExpand={(keys) => setExpandedKeys(keys)}
+              onSelect={onSelect}
+              treeData={treeData}
+            />
+          </Spin>
+        </div>
+        <div className={searchStyle.search}>
+          <div className={searchStyle.criteria}>
+            <Collapse
+              title={t('monitor.search.searchCriteria')}
+              icon={
+                <Button
+                  disabled={!object}
+                  onClick={createPolicy}
+                  type="link"
+                  size="small"
+                  icon={<BellOutlined />}
                 />
-                <Select
-                  mode="multiple"
-                  placeholder={t('monitor.instance')}
-                  className={`w-[250px] ${searchStyle.sourceObject}`}
-                  maxTagCount="responsive"
-                  loading={instanceLoading}
-                  value={instanceId}
-                  onChange={handleInstanceChange}
-                >
-                  {instances.map((item) => (
-                    <Option value={item.instance_id} key={item.instance_id}>
-                      {item.instance_name}
-                    </Option>
-                  ))}
-                </Select>
+              }
+            >
+              <div className={searchStyle.condition}>
+                <div className={searchStyle.conditionItem}>
+                  <div className={searchStyle.itemLabel}>
+                    {t('monitor.source')}
+                  </div>
+                  <div className={`${searchStyle.itemOption}`}>
+                    <Select
+                      mode="multiple"
+                      placeholder={t('monitor.instance')}
+                      className={`w-[250px] ${searchStyle.sourceObject}`}
+                      maxTagCount="responsive"
+                      loading={instanceLoading}
+                      value={instanceId}
+                      onChange={handleInstanceChange}
+                    >
+                      {instances.map((item) => (
+                        <Option value={item.instance_id} key={item.instance_id}>
+                          {item.instance_name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+                </div>
+                <div className={searchStyle.conditionItem}>
+                  <div className={searchStyle.itemLabel}>
+                    {t('monitor.metric')}
+                  </div>
+                  <div className={searchStyle.itemOption}>
+                    <Select
+                      className="w-[250px]"
+                      placeholder={t('monitor.metric')}
+                      showSearch
+                      value={metric}
+                      loading={metricsLoading}
+                      onChange={handleMetricChange}
+                    >
+                      {metrics.map((item) => (
+                        <Option value={item.name} key={item.name}>
+                          {item.display_name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+                </div>
+                <div className={searchStyle.conditionItem}>
+                  <div
+                    className={`${searchStyle.itemLabel} ${searchStyle.conditionLabel}`}
+                  >
+                    {t('monitor.filter')}
+                  </div>
+                  <div className="flex">
+                    {conditions.length ? (
+                      <ul className={searchStyle.conditions}>
+                        {conditions.map((conditionItem, index) => (
+                          <li
+                            className={`${searchStyle.itemOption} ${searchStyle.filter}`}
+                            key={index}
+                          >
+                            <Select
+                              className={`w-[150px] ${searchStyle.filterLabel}`}
+                              placeholder={t('monitor.label')}
+                              showSearch
+                              value={conditionItem.label}
+                              onChange={(val) => handleLabelChange(val, index)}
+                            >
+                              {labels.map((item) => (
+                                <Option value={item} key={item}>
+                                  {item}
+                                </Option>
+                              ))}
+                            </Select>
+                            <Select
+                              className="w-[90px]"
+                              placeholder={t('monitor.term')}
+                              value={conditionItem.condition}
+                              onChange={(val) =>
+                                handleConditionChange(val, index)
+                              }
+                            >
+                              {CONDITION_LIST.map((item: ListItem) => (
+                                <Option value={item.id} key={item.id}>
+                                  {item.name}
+                                </Option>
+                              ))}
+                            </Select>
+                            <Input
+                              className="w-[150px]"
+                              placeholder={t('monitor.value')}
+                              value={conditionItem.value}
+                              onChange={(e) => handleValueChange(e, index)}
+                            ></Input>
+                            <Button
+                              icon={<CloseOutlined />}
+                              onClick={() => deleteConditionItem(index)}
+                            />
+                            <Button
+                              icon={<PlusOutlined />}
+                              onClick={addConditionItem}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <Button
+                        className="mt-[10px]"
+                        disabled={!metric}
+                        icon={<PlusOutlined />}
+                        onClick={addConditionItem}
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className={searchStyle.conditionItem}>
-              <div className={searchStyle.itemLabel}>{t('monitor.metric')}</div>
-              <div className={searchStyle.itemOption}>
-                <Select
-                  className="w-[250px]"
-                  placeholder={t('monitor.metric')}
-                  showSearch
-                  value={metric}
-                  loading={metricsLoading}
-                  onChange={handleMetricChange}
-                >
-                  {metrics.map((item) => (
-                    <Option value={item.name} key={item.name}>
-                      {item.display_name}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
-            </div>
-            <div className={searchStyle.conditionItem}>
-              <div
-                className={`${searchStyle.itemLabel} ${searchStyle.conditionLabel}`}
-              >
-                {t('monitor.filter')}
-              </div>
-              <div className="flex">
-                {conditions.length ? (
-                  <ul className={searchStyle.conditions}>
-                    {conditions.map((conditionItem, index) => (
-                      <li
-                        className={`${searchStyle.itemOption} ${searchStyle.filter}`}
-                        key={index}
-                      >
-                        <Select
-                          className={`w-[150px] ${searchStyle.filterLabel}`}
-                          placeholder={t('monitor.label')}
-                          showSearch
-                          value={conditionItem.label}
-                          onChange={(val) => handleLabelChange(val, index)}
-                        >
-                          {labels.map((item) => (
-                            <Option value={item} key={item}>
-                              {item}
-                            </Option>
-                          ))}
-                        </Select>
-                        <Select
-                          className="w-[90px]"
-                          placeholder={t('monitor.term')}
-                          value={conditionItem.condition}
-                          onChange={(val) => handleConditionChange(val, index)}
-                        >
-                          {CONDITION_LIST.map((item: ListItem) => (
-                            <Option value={item.id} key={item.id}>
-                              {item.name}
-                            </Option>
-                          ))}
-                        </Select>
-                        <Input
-                          className="w-[150px]"
-                          placeholder={t('monitor.value')}
-                          value={conditionItem.value}
-                          onChange={(e) => handleValueChange(e, index)}
-                        ></Input>
-                        <Button
-                          icon={<CloseOutlined />}
-                          onClick={() => deleteConditionItem(index)}
-                        />
-                        <Button
-                          icon={<PlusOutlined />}
-                          onClick={addConditionItem}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <Button
-                    className="mt-[10px]"
-                    disabled={!metric}
-                    icon={<PlusOutlined />}
-                    onClick={addConditionItem}
-                  />
-                )}
-              </div>
-            </div>
+            </Collapse>
           </div>
-        </Collapse>
-      </div>
-      <Spin spinning={pageLoading}>
-        <div className={searchStyle.chart}>
-          <Segmented
-            className="mb-[10px]"
-            value={activeTab}
-            options={[
-              {
-                label: (
-                  <div className="flex items-center">
-                    <Icon type="duijimianjitu" className="mr-[8px]" />
-                    {t('monitor.search.area')}
-                  </div>
-                ),
-                value: 'area',
-              },
-              {
-                label: (
-                  <div className="flex items-center">
-                    <Icon type="tabulation" className="mr-[8px]" />
-                    {t('monitor.search.table')}
-                  </div>
-                ),
-                value: 'table',
-              },
-            ]}
-            onChange={onTabChange}
-          />
-          {isArea ? (
-            <div className={searchStyle.chartArea}>
-              {!!metric && (
-                <div className="text-[14px] mb-[10px]">
-                  <span className="font-[600]">
-                    {metrics.find((item) => item.name === metric)
-                      ?.display_name || '--'}
-                  </span>
-                  <span className="text-[var(--color-text-3)] text-[12px]">
-                    {`${
-                      findUnitNameById(
-                        metrics.find((item) => item.name === metric)?.unit
-                      )
-                        ? '（' +
+          <Spin spinning={pageLoading}>
+            <div className={searchStyle.chart}>
+              <Segmented
+                className="mb-[10px]"
+                value={activeTab}
+                options={[
+                  {
+                    label: (
+                      <div className="flex items-center">
+                        <Icon type="duijimianjitu" className="mr-[8px]" />
+                        {t('monitor.search.area')}
+                      </div>
+                    ),
+                    value: 'area',
+                  },
+                  {
+                    label: (
+                      <div className="flex items-center">
+                        <Icon type="tabulation" className="mr-[8px]" />
+                        {t('monitor.search.table')}
+                      </div>
+                    ),
+                    value: 'table',
+                  },
+                ]}
+                onChange={onTabChange}
+              />
+              {isArea ? (
+                <div className={searchStyle.chartArea}>
+                  {!!metric && (
+                    <div className="text-[14px] mb-[10px]">
+                      <span className="font-[600]">
+                        {metrics.find((item) => item.name === metric)
+                          ?.display_name || '--'}
+                      </span>
+                      <span className="text-[var(--color-text-3)] text-[12px]">
+                        {`${
                           findUnitNameById(
                             metrics.find((item) => item.name === metric)?.unit
-                          ) +
-                          '）'
-                        : ''
-                    }`}
-                  </span>
+                          )
+                            ? '（' +
+                              findUnitNameById(
+                                metrics.find((item) => item.name === metric)
+                                  ?.unit
+                              ) +
+                              '）'
+                            : ''
+                        }`}
+                      </span>
+                    </div>
+                  )}
+                  <LineChart
+                    metric={metrics.find((item) => item.name === metric)}
+                    data={processData(chartData)}
+                    unit={unit}
+                    onXRangeChange={onXRangeChange}
+                  />
                 </div>
+              ) : (
+                <CustomTable
+                  scroll={{ y: 'calc(100vh - 440px)' }}
+                  columns={columns}
+                  dataSource={tableData}
+                  pagination={false}
+                  rowKey="index"
+                />
               )}
-              <LineChart
-                metric={metrics.find((item) => item.name === metric)}
-                data={processData(chartData)}
-                unit={unit}
-                onXRangeChange={onXRangeChange}
-              />
             </div>
-          ) : (
-            <CustomTable
-              scroll={{ y: 'calc(100vh - 440px)' }}
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="index"
-            />
-          )}
+          </Spin>
         </div>
-      </Spin>
+      </div>
     </div>
   );
 };
 
-export default Search;
+export default SearchView;
