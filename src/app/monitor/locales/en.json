@@ -272,7 +272,9 @@
       "ruleTips": "The rules used to set the asset ownership organization for access are unique to each asset model",
       "generateConfiguration": "Generate Configuration",
       "originalValue": "Original Value",
-      "mappedValue": "Mapped Value"
+      "mappedValue": "Mapped Value",
+      "manual": "Manual",
+      "automatic": "Automatic"
     }
   }
 }

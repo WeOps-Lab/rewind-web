@@ -70,7 +70,7 @@ const Event = () => {
         }
         acc[item.type].options.push({
           label: item.display_name,
-          value: item.name,
+          value: item.id,
         });
         return acc;
       },

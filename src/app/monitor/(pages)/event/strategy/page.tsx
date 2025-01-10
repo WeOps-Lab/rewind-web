@@ -505,21 +505,19 @@ const StrategyOperation = () => {
                   title: t('monitor.events.defineTheMetric'),
                   description: (
                     <>
-                      <Form.Item<StrategyFields> className="ml-[120px]">
-                        <Form.Item
-                          name="plugin_id"
-                          noStyle
-                          rules={[
-                            { required: true, message: t('common.required') },
-                          ]}
-                        >
-                          <Radio.Group
-                            className="ml-[-60px]"
-                            options={pluginList}
-                            optionType="button"
-                            buttonStyle="solid"
-                          />
-                        </Form.Item>
+                      <Form.Item
+                        className={strategyStyle.clusterLabel}
+                        name="plugin_id"
+                        label={<span className={strategyStyle.label}></span>}
+                        rules={[
+                          { required: true, message: t('common.required') },
+                        ]}
+                      >
+                        <Radio.Group
+                          options={pluginList}
+                          optionType="button"
+                          buttonStyle="solid"
+                        />
                       </Form.Item>
                       <Form.Item
                         noStyle
@@ -740,94 +738,6 @@ const StrategyOperation = () => {
                                 required
                                 label={
                                   <span className="w-[100px]">
-                                    {t('monitor.events.frequency')}
-                                  </span>
-                                }
-                              >
-                                <Form.Item
-                                  name="schedule"
-                                  noStyle
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: t('common.required'),
-                                    },
-                                  ]}
-                                >
-                                  <InputNumber
-                                    min={SCHEDULE_UNIT_MAP[`${unit}Min`]}
-                                    max={SCHEDULE_UNIT_MAP[`${unit}Max`]}
-                                    precision={0}
-                                    addonAfter={
-                                      <Select
-                                        value={unit}
-                                        style={{ width: 120 }}
-                                        onChange={handleUnitChange}
-                                      >
-                                        {SCHEDULE_LIST.map((item) => (
-                                          <Option
-                                            key={item.value}
-                                            value={item.value}
-                                          >
-                                            {item.label}
-                                          </Option>
-                                        ))}
-                                      </Select>
-                                    }
-                                  />
-                                </Form.Item>
-                                <div className="text-[var(--color-text-3)] mt-[10px]">
-                                  {t('monitor.events.setFrequency')}
-                                </div>
-                              </Form.Item>
-                              <Form.Item<StrategyFields>
-                                required
-                                label={
-                                  <span className="w-[100px]">
-                                    {t('monitor.events.period')}
-                                  </span>
-                                }
-                              >
-                                <Form.Item
-                                  name="period"
-                                  noStyle
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: t('common.required'),
-                                    },
-                                  ]}
-                                >
-                                  <InputNumber
-                                    min={SCHEDULE_UNIT_MAP[`${periodUnit}Min`]}
-                                    max={SCHEDULE_UNIT_MAP[`${periodUnit}Max`]}
-                                    precision={0}
-                                    addonAfter={
-                                      <Select
-                                        value={periodUnit}
-                                        style={{ width: 120 }}
-                                        onChange={handlePeriodUnitChange}
-                                      >
-                                        {SCHEDULE_LIST.map((item) => (
-                                          <Option
-                                            key={item.value}
-                                            value={item.value}
-                                          >
-                                            {item.label}
-                                          </Option>
-                                        ))}
-                                      </Select>
-                                    }
-                                  />
-                                </Form.Item>
-                                <div className="text-[var(--color-text-3)] mt-[10px]">
-                                  {t('monitor.events.setPeriod')}
-                                </div>
-                              </Form.Item>
-                              <Form.Item<StrategyFields>
-                                required
-                                label={
-                                  <span className="w-[100px]">
                                     {t('monitor.events.method')}
                                   </span>
                                 }
@@ -879,6 +789,88 @@ const StrategyOperation = () => {
                             </>
                           )
                         }
+                      </Form.Item>
+                      <Form.Item<StrategyFields>
+                        required
+                        label={
+                          <span className="w-[100px]">
+                            {t('monitor.events.frequency')}
+                          </span>
+                        }
+                      >
+                        <Form.Item
+                          name="schedule"
+                          noStyle
+                          rules={[
+                            {
+                              required: true,
+                              message: t('common.required'),
+                            },
+                          ]}
+                        >
+                          <InputNumber
+                            min={SCHEDULE_UNIT_MAP[`${unit}Min`]}
+                            max={SCHEDULE_UNIT_MAP[`${unit}Max`]}
+                            precision={0}
+                            addonAfter={
+                              <Select
+                                value={unit}
+                                style={{ width: 120 }}
+                                onChange={handleUnitChange}
+                              >
+                                {SCHEDULE_LIST.map((item) => (
+                                  <Option key={item.value} value={item.value}>
+                                    {item.label}
+                                  </Option>
+                                ))}
+                              </Select>
+                            }
+                          />
+                        </Form.Item>
+                        <div className="text-[var(--color-text-3)] mt-[10px]">
+                          {t('monitor.events.setFrequency')}
+                        </div>
+                      </Form.Item>
+                      <Form.Item<StrategyFields>
+                        required
+                        label={
+                          <span className="w-[100px]">
+                            {t('monitor.events.period')}
+                          </span>
+                        }
+                      >
+                        <Form.Item
+                          name="period"
+                          noStyle
+                          rules={[
+                            {
+                              required: true,
+                              message: t('common.required'),
+                            },
+                          ]}
+                        >
+                          <InputNumber
+                            min={SCHEDULE_UNIT_MAP[`${periodUnit}Min`]}
+                            max={SCHEDULE_UNIT_MAP[`${periodUnit}Max`]}
+                            precision={0}
+                            addonAfter={
+                              <Select
+                                value={periodUnit}
+                                style={{ width: 120 }}
+                                onChange={handlePeriodUnitChange}
+                              >
+                                {SCHEDULE_LIST.map((item) => (
+                                  <Option key={item.value} value={item.value}>
+                                    {item.label}
+                                  </Option>
+                                ))}
+                              </Select>
+                            }
+                          />
+                        </Form.Item>
+                        <div className="text-[var(--color-text-3)] mt-[10px]">
+                          {t('monitor.events.setPeriod')}
+                        </div>
                       </Form.Item>
                     </>
                   ),

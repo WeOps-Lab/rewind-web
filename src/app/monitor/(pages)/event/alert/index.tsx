@@ -49,14 +49,14 @@ const INIT_HISTORY_FILTERS = {
   level: [],
   state: [],
   notify: [],
-  monitor_object_name: [],
+  monitor_objects: [],
 };
 
 const INIT_ACTIVE_FILTERS = {
   level: [],
   state: ['new'],
   notify: [],
-  monitor_object_name: [],
+  monitor_objects: [],
 };
 
 const Alert: React.FC<AlertProps> = ({
@@ -257,7 +257,7 @@ const Alert: React.FC<AlertProps> = ({
     timeRange,
     filters.level,
     filters.state,
-    filters.monitor_object_name,
+    filters.monitor_objects,
     pagination.current,
     pagination.pageSize,
   ]);
@@ -270,7 +270,7 @@ const Alert: React.FC<AlertProps> = ({
     timeRange,
     filters.level,
     filters.state,
-    filters.monitor_object_name,
+    filters.monitor_objects,
     pagination.current,
     pagination.pageSize,
   ]);
@@ -283,7 +283,7 @@ const Alert: React.FC<AlertProps> = ({
     timeRange,
     filters.level,
     filters.state,
-    filters.monitor_object_name,
+    filters.monitor_objects,
   ]);
 
   const changeTab = (val: string) => {
@@ -327,7 +327,7 @@ const Alert: React.FC<AlertProps> = ({
     const params = {
       status_in: filters.state.join(',') || 'recovered,closed',
       level_in: filters.level.join(','),
-      monitor_object_name: filters.monitor_object_name.join(','),
+      monitor_objects: filters.monitor_objects.join(','),
       content: searchText,
       page: pagination.current,
       page_size: pagination.pageSize,
@@ -372,9 +372,11 @@ const Alert: React.FC<AlertProps> = ({
 
   const getChartData = async (type: string) => {
     const params = getParams();
-    const { page, page_size, ...chartParams } = params;
-    console.log(page, page_size);
+    const chartParams = deepClone(params);
+    delete chartParams.page;
+    delete chartParams.page_size;
     chartParams.content = '';
+    chartParams.type = 'count';
     try {
       setChartLoading(type !== 'timer');
       const data = await get('/monitor/api/monitor_alert/', {
@@ -539,9 +541,9 @@ const Alert: React.FC<AlertProps> = ({
             <Collapse title={t('monitor.events.assetType')}>
               <Checkbox.Group
                 className="ml-[20px]"
-                value={filters.monitor_object_name}
+                value={filters.monitor_objects}
                 onChange={(checkeds) =>
-                  onFilterChange(checkeds, 'monitor_object_name')
+                  onFilterChange(checkeds, 'monitor_objects')
                 }
               >
                 <Space direction="vertical">
