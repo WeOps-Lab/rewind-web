@@ -8,6 +8,7 @@ import { LocaleProvider } from '@/context/locale';
 import { ThemeProvider } from '@/context/theme';
 import { MenusProvider } from '@/context/menus';
 import { UserInfoProvider } from '@/context/userInfo';
+import { ClientProvider } from '@/context/client'
 import AuthProvider from '@/context/auth';
 import TopMenu from '@/components/top-menu';
 import { PermissionsProvider } from '@/context/permission';
@@ -34,14 +35,16 @@ export default function RootLayout({
                   <PermissionsProvider>
                     <MenusProvider>
                       <UserInfoProvider>
-                        <div className="flex flex-col min-h-screen">
-                          <header className="sticky top-0 left-0 right-0 flex justify-between items-center header-bg">
-                            <TopMenu />
-                          </header>
-                          <main className="flex-1 p-4 h-full flex">
-                            <AntdRegistry>{children}</AntdRegistry>
-                          </main>
-                        </div>
+                        <ClientProvider>
+                          <div className="flex flex-col min-h-screen">
+                            <header className="sticky top-0 left-0 right-0 flex justify-between items-center header-bg">
+                              <TopMenu />
+                            </header>
+                            <main className="flex-1 p-4 h-full flex">
+                              <AntdRegistry>{children}</AntdRegistry>
+                            </main>
+                          </div>
+                        </ClientProvider>
                       </UserInfoProvider>
                     </MenusProvider>
                   </PermissionsProvider>
