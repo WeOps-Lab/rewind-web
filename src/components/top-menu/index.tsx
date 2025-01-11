@@ -2,33 +2,27 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Popover } from 'antd';
+import { Popover, Spin } from 'antd';
 import { CaretDownFilled } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
 import { useMenus } from '@/context/menus';
-import useApiClient from '@/utils/request';
+import { useClientData } from '@/context/client';
 import UserInfo from '../user-info';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
-
-interface AppItem {
-  name: string;
-  url: string;
-  icon?: string;
-}
+import { ClientData } from '@/types/index'
 
 const TopMenu = () => {
   const { t } = useTranslation();
-  const { get } = useApiClient();
   const menuItems = useMenus();
   const pathname = usePathname();
-
-  const [apps, setApps] = useState<AppItem[]>([]);
+  const { getAll, loading } = useClientData();
+  const [apps, setApps] = useState<ClientData[]>([]);
 
   useEffect(() => {
     const fetchApps = async () => {
       try {
-        const data: AppItem[] = await get('/system_mgmt/api/get_client');
+        const data: ClientData[] = await getAll();
         setApps(data);
       } catch (error) {
         console.error('Failed to fetch apps:', error);
@@ -36,10 +30,14 @@ const TopMenu = () => {
     };
 
     fetchApps();
-  }, [get]);
+  }, [getAll]);
 
-  const renderContent = (
-    <div className='grid grid-cols-3 gap-4 max-h-[350px] overflow-auto'>
+  const renderContent = loading ? (
+    <div className="flex justify-center items-center h-32">
+      <Spin tip="Loading..." />
+    </div>
+  ) : (
+    <div className="grid grid-cols-3 gap-4 max-h-[350px] overflow-auto">
       {apps.map((app) => (
         <div
           key={app.name}
