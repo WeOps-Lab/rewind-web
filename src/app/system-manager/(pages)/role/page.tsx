@@ -5,36 +5,31 @@ import { useRouter } from 'next/navigation';
 import { message } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import EntityList from '@/components/entity-list';
-import { useRoleApi } from '@/app/system-manager/api/role/index';
+import { useClientData } from '@/context/client';
+import { ClientData } from '@/types/index'
 
 const RolePage = () => {
   const { t } = useTranslation();
-  const [dataList, setDataList] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const { getClientData } = useRoleApi();
+  const { getAll, loading } = useClientData();
+  const [dataList, setDataList] = useState<ClientData[]>([]);
   const router = useRouter();
 
   const loadItems = async (searchTerm = '') => {
-    setLoading(true);
     try {
-      console.log('loadItems');
-      const data = await getClientData();
-      const filteredData = data.filter((item: { name: string }) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
-      setDataList(filteredData.map((item: { name: string }) => ({
+      const data: ClientData[] = await getAll();
+      const filteredData:ClientData[] = data.filter((item: ClientData) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      setDataList(filteredData.map((item: ClientData) => ({
         ...item,
         icon: 'rizhiguanli',
       })));
-      console.log('data', filteredData);
     } catch {
       message.error(t('common.fetchFailed'));
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     loadItems();
-  }, []);
+  }, [getAll]);
 
   const handleSearch = async (value: string) => {
     await loadItems(value);

@@ -1,12 +1,11 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { Input, Button, Form, Select, message } from 'antd';
+import { Input, Button, Form, Select, message, Spin } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
 import { useTranslation } from '@/utils/i18n';
-import { UserDataType } from '@/app/system-manager/types/user';
-import { useUserApi } from "@/app/system-manager/api/user/index";
-import { useRoleApi } from "@/app/system-manager/api/role/index";
+import { useUserApi } from '@/app/system-manager/api/user/index';
 import type { DataNode as TreeDataNode } from 'antd/lib/tree';
+import { useClientData } from '@/context/client';
 
 interface ModalProps {
   onSuccess: () => void;
@@ -15,202 +14,168 @@ interface ModalProps {
 
 interface ModalConfig {
   type: 'add' | 'edit';
-  form: UserDataType;
+  userId?: string;
 }
 
-interface ModalRef {
+export interface ModalRef {
   showModal: (config: ModalConfig) => void;
 }
 
-const UserModal = forwardRef<ModalRef, ModalProps>(
-  ({ onSuccess, treeData }, ref) => {
-    const { t } = useTranslation();
-    const formRef = useRef<FormInstance>(null);
+const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref) => {
+  const { t } = useTranslation();
+  const formRef = useRef<FormInstance>(null);
+  const { getByName } = useClientData();
+  const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [infoLoading, setInfoLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [type, setType] = useState<'add' | 'edit'>('add');
+  const [roleOptions, setRoleOptions] = useState<{ label: string; value: string }[]>([]);
+  const [groupOptions, setGroupOptions] = useState<{ label: string; value: string }[]>([]);
 
-    const [userVisible, setUserVisible] = useState<boolean>(false);
-    const [type, setType] = useState<'add' | 'edit'>('add');
-    const [infoLoading, setInfoLoading] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { addUser, editUser, getUserDetail, getRoleList } = useUserApi();
 
-    const [userForm, setUserForm] = useState<UserDataType>({
-      key: '',
-      username: '',
-      email: '',
-      lastName: '',
-      roles: [],
-      groups: []
-    });
-
-    const { addUser, editUser, getRoleList } = useUserApi();
-    const { getClientData } = useRoleApi();
-    const [roleOptions, setRoleOptions] = useState<{ label: string, value: string }[]>([]);
-
-    const [groupOptions, setGroupOptions] = useState<{ label: string, value: string }[]>([]);
-
-    useImperativeHandle(ref, () => ({
-      showModal: ({ type, form }) => {
-        setUserVisible(true);
-        setType(type);
-        setUserForm(
-          type === 'add'
-            ? { key: '', username: '', email: '', lastName: '', roles: [], groups: [] }
-            : form
-        );
-      },
-    }));
-
-    const fetchRoleInfo = async () => {
-      setInfoLoading(true);
-      try {
-        const clientData = await getClientData();
-        const roleData = await getRoleList({ params: { client_id: clientData?.[0]?.id } });
-        const roleOpts = roleData.map((role: { role_name: string; role_id: string }) => ({
+  const fetchRoleInfo = async () => {
+    setInfoLoading(true);
+    try {
+      const curClient = await getByName('OpsPilot');
+      const roleData = await getRoleList({ params: { client_id: curClient?.id } });
+      setRoleOptions(
+        roleData.map((role: { role_name: string; role_id: string }) => ({
           label: role.role_name,
           value: role.role_id,
-        }));
-        setRoleOptions(roleOpts);
-      } catch (error) {
-        message.error('Error fetching role info');
-        console.error('Error fetching role info', error);
-      } finally {
-        setInfoLoading(false);
-      }
-    };
+        })),
+      );
+    } catch {
+      message.error(t('common.fetchFailed'));
+    } finally {
+      setInfoLoading(false);
+    }
+  };
 
-    useEffect(() => {
-      // Convert treeData to groupOptions for Select component
-      const convertTreeDataToGroupOptions = (data: TreeDataNode[]): { label: string, value: string }[] => {
-        const options: { label: string, value: string }[] = [];
-        data.forEach(item => {
-          options.push({ label: item.title as string, value: item.key as string });
-          if (item.children && item.children.length > 0) {
-            options.push(...convertTreeDataToGroupOptions(item.children));
-          }
+  const fetchUserDetail = async (userId: string) => {
+    setLoading(true);
+    try {
+      const curClient = await getByName('OpsPilot');
+      const userDetail = await getUserDetail({ params: { user_id: userId, client_id: curClient?.id } });
+      if (userDetail) {
+        formRef.current?.setFieldsValue({
+          ...userDetail,
+          roles: userDetail.roles?.map((role: { id: string }) => role.id) || [],
+          groups: userDetail.groups?.map((group: { id: string }) => group.id) || [],
         });
-        return options;
+      }
+    } catch {
+      message.error(t('common.fetchFailed'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (treeData) {
+      const convertTreeDataToGroupOptions = (data: TreeDataNode[]): { label: string; value: string }[] => {
+        return data.flatMap((item) => [
+          { label: String(item.title), value: String(item.key) },
+          ...(item.children ? convertTreeDataToGroupOptions(item.children) : []),
+        ]);
       };
+      setGroupOptions(convertTreeDataToGroupOptions(treeData));
+    }
+  }, [treeData]);
 
-      const options = convertTreeDataToGroupOptions(treeData);
-      setGroupOptions(options);
-    }, [treeData]);
-
-    useEffect(() => {
-      if (userVisible) {
-        formRef.current?.resetFields();
-        formRef.current?.setFieldsValue(userForm);
-        fetchRoleInfo();
+  useImperativeHandle(ref, () => ({
+    showModal: ({ type, userId }) => {
+      setVisible(true);
+      setType(type);
+      formRef.current?.resetFields();
+      if (type === 'edit' && userId) {
+        fetchUserDetail(userId);
       }
-    }, [userVisible]);
+      fetchRoleInfo();
+    },
+  }));
 
-    const handleCancel = () => {
-      setUserVisible(false);
-    };
+  const handleCancel = () => {
+    setVisible(false);
+  };
 
-    const handleConfirm = async () => {
-      try {
-        setIsLoading(true);
-        const validData = await formRef.current?.validateFields();
-
-        const formattedData = {
-          ...validData,
-          roles: validData.roles.map((roleId: string) => ({
-            id: roleId,
-            name: roleOptions.find(role => role.value === roleId)?.label,
-          }))
-        };
-
-        if (type === 'add') {
-          await addUser(formattedData);
-          message.success(t('common.addSuccess'));
-        } else {
-          await editUser(userForm.key, formattedData);
-          message.success(t('common.editSuccess'));
-        }
-
-        onSuccess();
-        setUserVisible(false);
-      } catch (error) {
-        console.error('Validation failed:', error);
-      } finally {
-        setIsLoading(false);
+  const handleConfirm = async () => {
+    try {
+      setIsSubmitting(true);
+      const formData = await formRef.current?.validateFields();
+      if (type === 'add') {
+        await addUser(formData);
+        message.success(t('common.addSuccess'));
+      } else {
+        await editUser({ user_id: formData.id, ...formData });
+        message.success(t('common.editSuccess'));
       }
-    };
+      onSuccess();
+      setVisible(false);
+    } catch {
+      message.error(t('common.validationFailed'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    return (
-      <OperateModal
-        title={type === 'add' ? t('common.add') : `${t('common.edit')}-${userForm.username}`}
-        open={userVisible}
-        okText={t('common.confirm')}
-        cancelText={t('common.cancel')}
-        onCancel={handleCancel}
-        width={650}
-        footer={[
-          <Button key="cancel" onClick={handleCancel}>
-            {t('common.cancel')}
-          </Button>,
-          <Button key="submit" type="primary" onClick={handleConfirm} loading={isLoading}>
-            {t('common.confirm')}
-          </Button>
-        ]}
-      >
+  return (
+    <OperateModal
+      title={type === 'add' ? t('common.add') : t('common.edit')}
+      open={visible}
+      onCancel={handleCancel}
+      footer={[
+        <Button key="cancel" onClick={handleCancel}>
+          {t('common.cancel')}
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleConfirm} loading={isSubmitting || loading}>
+          {t('common.confirm')}
+        </Button>,
+      ]}
+    >
+      <Spin spinning={loading}>
         <Form ref={formRef} layout="vertical">
           <Form.Item
             name="username"
             label={t('system.user.form.username')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
-            colon={false}
           >
-            <Input
-              placeholder={`${t('common.inputMsg')}${t('system.user.form.username')}`}
-              disabled={type !== 'add'}
-            />
+            <Input placeholder={t('system.user.form.username')} disabled={type === 'edit'} />
           </Form.Item>
           <Form.Item
             name="email"
             label={t('system.user.form.email')}
-            colon={false}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.email')}`} />
+            <Input placeholder={t('system.user.form.email')} />
           </Form.Item>
           <Form.Item
             name="lastName"
             label={t('system.user.form.lastName')}
-            colon={false}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.lastName')}`} />
+            <Input placeholder={t('system.user.form.lastName')} />
           </Form.Item>
           <Form.Item
             name="groups"
             label={t('system.user.form.group')}
-            colon={false}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Select
-              placeholder={`${t('common.select')} ${t('system.user.form.group')}`}
-              mode="multiple"
-              options={groupOptions}
-            />
+            <Select placeholder={t('system.user.form.group')} mode="multiple" options={groupOptions} />
           </Form.Item>
           <Form.Item
             name="roles"
             label={t('system.user.form.role')}
-            colon={false}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Select
-              placeholder={`${t('common.select')} ${t('system.user.form.role')}`}
-              mode="multiple"
-              loading={infoLoading}
-              options={roleOptions}
-            />
+            <Select placeholder={t('system.user.form.role')} mode="multiple" options={roleOptions} loading={infoLoading} />
           </Form.Item>
         </Form>
-      </OperateModal>
-    );
-  }
-);
+      </Spin>
+    </OperateModal>
+  );
+});
 
 UserModal.displayName = 'UserModal';
 export default UserModal;
-export type { ModalRef };

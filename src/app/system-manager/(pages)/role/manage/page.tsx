@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Form, message, Spin, Popconfirm, Tabs, Select } from 'antd';
+import { Button, Input, Form, message, Spin, Popconfirm, Tabs, Select, Modal } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
 import { useSearchParams } from 'next/navigation';
@@ -16,6 +16,7 @@ import RoleList from './roleList';
 const { Search } = Input;
 const { TabPane } = Tabs;
 const { Option } = Select;
+const { confirm } = Modal;
 
 const RoleManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -246,22 +247,31 @@ const RoleManagement: React.FC = () => {
   const handleBatchDeleteUsers = async () => {
     if (!selectedRole || selectedUserKeys.length === 0) return;
 
-    try {
-      setDeleteLoading(true);
-      await deleteUser({
-        role_id: selectedRole.role_id,
-        user_ids: selectedUserKeys,
-      });
-      message.success(t('common.delSuccess'));
+    confirm({
+      title: t('common.delConfirm'),
+      content: t('common.delConfirmCxt'),
+      centered: true,
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
+      async onOk() {
+        try {
+          setDeleteLoading(true);
+          await deleteUser({
+            role_id: selectedRole.role_id,
+            user_ids: selectedUserKeys,
+          });
+          message.success(t('common.delSuccess'));
 
-      fetchUsersByRole(selectedRole, currentPage, pageSize);
-      setSelectedUserKeys([]);
-    } catch (error) {
-      console.error('Failed to delete users in batch:', error);
-      message.error(t('common.delFailed'));
-    } finally {
-      setDeleteLoading(false);
-    }
+          fetchUsersByRole(selectedRole, currentPage, pageSize);
+          setSelectedUserKeys([]);
+        } catch (error) {
+          console.error('Failed to delete users in batch:', error);
+          message.error(t('common.delFailed'));
+        } finally {
+          setDeleteLoading(false);
+        }
+      },
+    });
   };
 
   const handleDeleteUser = async (record: User) => {

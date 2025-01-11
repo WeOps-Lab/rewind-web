@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Input, message, Modal, Tree, Button, Spin, Tag } from 'antd';
+import { Input, message, Modal, Tree, Button, Spin } from 'antd';
 import type { DataNode as TreeDataNode } from 'antd/lib/tree';
 import { ColumnsType } from 'antd/es/table';
 import TopSection from '@/components/top-section';
@@ -19,8 +19,8 @@ const User: React.FC = () => {
   const [tableData, setTableData] = useState<UserDataType[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isDeleteDisabled, setIsDeleteDisabled] = useState<boolean>(true);
-  const [searchValue, setSearchValue] = useState<string>(''); // 右侧表格搜索
-  const [treeSearchValue, setTreeSearchValue] = useState<string>(''); // 左侧树搜索
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [treeSearchValue, setTreeSearchValue] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
@@ -58,21 +58,12 @@ const User: React.FC = () => {
     {
       title: t('system.user.table.lastName'),
       dataIndex: 'name',
-      width: 100
+      width: 100,
     },
     {
       title: t('system.user.table.email'),
       dataIndex: 'email',
-      width: 185
-    },
-    {
-      title: t('system.user.table.role'),
-      dataIndex: 'role',
-      width: 110,
-      render: (text: string) => {
-        const color = text === 'Administrator' ? 'green' : 'processing';
-        return <Tag color={color}>{text}</Tag>;
-      },
+      width: 185,
     },
     {
       title: t('common.actions'),
@@ -81,18 +72,10 @@ const User: React.FC = () => {
       fixed: 'right',
       render: (key: string) => (
         <>
-          <Button
-            onClick={() => handleEditUser(key)}
-            color="primary"
-            variant="link"
-          >
+          <Button onClick={() => handleEditUser(key)} color="primary" variant="link">
             {t('common.edit')}
           </Button>
-          <Button
-            color="primary"
-            variant="link"
-            onClick={() => showDeleteConfirm(key)}
-          >
+          <Button color="primary" variant="link" onClick={() => showDeleteConfirm(key)}>
             {t('common.delete')}
           </Button>
         </>
@@ -113,8 +96,7 @@ const User: React.FC = () => {
       }));
       setTableData(data);
       setTotal(res.count);
-    } catch (error) {
-      console.error(t('common.fetchFailed'), error);
+    } catch {
       message.error(t('common.fetchFailed'));
     } finally {
       setLoading(false);
@@ -124,11 +106,9 @@ const User: React.FC = () => {
   const fetchTreeData = async () => {
     try {
       const res = await getOrgTree();
-      const convertedGroups = convertGroups(res);
-      setTreeData(convertedGroups);
-      setFilteredTreeData(convertedGroups);
-    } catch (error) {
-      console.error(t('common.fetchFailed'), error);
+      setTreeData(convertGroups(res));
+      setFilteredTreeData(convertGroups(res));
+    } catch {
       message.error(t('common.fetchFailed'));
     }
   };
@@ -146,30 +126,24 @@ const User: React.FC = () => {
   }, [selectedRowKeys]);
 
   const handleTreeSelect = (selectedKeys: React.Key[]) => {
-    fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize, group_id: selectedKeys[0] });
+    fetchUsers({
+      search: searchValue,
+      page: currentPage,
+      page_size: pageSize,
+      group_id: selectedKeys[0],
+    });
   };
 
-  const handleEditUser = (key: React.Key) => {
-    const user = getUser(key.toString());
-    if (user) {
-      openUserModal('edit', {
-        ...user,
-        lastName: user.name || '',
-        roles: user.role?.split(',').map(role => ({ id: role, name: role })) || []
-      });
-    }
+  const handleEditUser = (userId: string) => {
+    userModalRef.current?.showModal({ type: 'edit', userId });
   };
 
   const convertGroups = (groups: OriginalGroup[]): TreeDataNode[] => {
     return groups.map((group) => ({
       key: group.id,
       title: group.name,
-      children: group.subGroups ? convertGroups(group.subGroups) : []
+      children: group.subGroups ? convertGroups(group.subGroups) : [],
     }));
-  };
-
-  const getUser = (key: string) => {
-    return tableData.find((item: any) => item.key === key);
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -193,8 +167,7 @@ const User: React.FC = () => {
           await deleteUser(key);
           fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize });
           message.success(t('common.delSuccess'));
-        } catch (error) {
-          console.error(t('common.delFailed'), error);
+        } catch {
           message.error(t('common.delFailed'));
         }
       },
@@ -210,28 +183,26 @@ const User: React.FC = () => {
       cancelText: t('common.cancel'),
       async onOk() {
         try {
-          const promises = selectedRowKeys.map(key => deleteUser(key as string));
+          const promises = selectedRowKeys.map((key) => deleteUser(key as string));
           await Promise.all(promises);
           setSelectedRowKeys([]);
           fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize });
           message.success(t('common.delSuccess'));
-        } catch (error) {
-          console.error(t('common.delFailed'), error);
+        } catch {
           message.error(t('common.delFailed'));
         }
       },
     });
   };
 
-  const openUserModal = (type: 'add' | 'edit', row: UserDataType) => {
+  const openUserModal = (type: 'add') => {
     userModalRef.current?.showModal({
       type,
-      form: row,
     });
   };
 
   const onSuccessUserModal = () => {
-    message.success("Operation successful!");
+    message.success(t('common.operationSuccess'));
     fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize });
   };
 
@@ -255,9 +226,7 @@ const User: React.FC = () => {
         return acc;
       }, []);
     };
-
-    const filteredTree = filterFunc(treeData, value);
-    setFilteredTreeData(filteredTree);
+    setFilteredTreeData(filterFunc(treeData, value));
   };
 
   const handleTableChange = (page: number, pageSize: number) => {
@@ -269,58 +238,40 @@ const User: React.FC = () => {
     <div className={`${userInfoStyle.userInfo} w-full`}>
       <TopSection title={t('system.user.title')} content={t('system.user.desc')} />
       <div className={`flex w-full overflow-hidden mt-4`} style={{ height: 'calc(100vh - 195px)' }}>
-        <div className={`${userInfoStyle.bgColor} p-4 w-[230px] flex-shrink-0 flex flex-col justify-items-center items-center rounded-md mr-[17px]`}>
+        <div
+          className={`${userInfoStyle.bgColor} p-4 w-[230px] flex-shrink-0 flex flex-col justify-items-center items-center rounded-md mr-[17px]`}
+        >
           <Input
             className="w-[204px]"
             placeholder={`${t('common.search')}...`}
-            onChange={e => handleTreeSearchChange(e.target.value)}
+            onChange={(e) => handleTreeSearchChange(e.target.value)}
             value={treeSearchValue}
           />
           <Tree
             className="w-[230px] mt-4 overflow-auto px-3"
             showLine
             expandAction={false}
-            showIcon={false}
             defaultExpandAll
             treeData={filteredTreeData}
             onSelect={handleTreeSelect}
           />
         </div>
         <div className={`flex-1 h-full rounded-md overflow-hidden p-4 ${userInfoStyle.bgColor}`}>
-          <div className="w-full mb-4">
-            <div className="flex justify-end">
-              <Search
-                allowClear
-                enterButton
-                className='w-60 mr-[8px]'
-                onSearch={handleUserSearch}
-                placeholder={`${t('common.search')}...`}
-              />
-              <Button
-                className="mr-[8px]"
-                type="primary"
-                onClick={() => {
-                  openUserModal('add', {
-                    username: '',
-                    lastName: '',
-                    email: '',
-                    name: '',
-                    groups: [],
-                    roles: [],
-                    key: ''
-                  });
-                }}
-              >
-                +{t('common.add')}
-              </Button>
-              <UserModal ref={userModalRef} treeData={treeData} onSuccess={onSuccessUserModal} />
-              <Button
-                onClick={showDeleteTeamConfirm}
-                disabled={isDeleteDisabled}
-              >
-                {t('system.common.modifydelete')}
-              </Button>
-            </div>
+          <div className="w-full mb-4 flex justify-end">
+            <Search
+              allowClear
+              enterButton
+              className="w-60 mr-2"
+              onSearch={handleUserSearch}
+              placeholder={`${t('common.search')}...`}
+            />
+            <Button type="primary" className="mr-2" onClick={() => openUserModal('add')}>
+              +{t('common.add')}
+            </Button>
+            <UserModal ref={userModalRef} treeData={treeData} onSuccess={onSuccessUserModal} />
+            <Button onClick={showDeleteTeamConfirm} disabled={isDeleteDisabled}>
+              {t('system.common.modifydelete')}
+            </Button>
           </div>
           <Spin spinning={loading}>
             <CustomTable

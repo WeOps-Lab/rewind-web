@@ -1,9 +1,6 @@
 import useApiClient from '@/utils/request';
 export const useRoleApi = () => {
   const { get, post } = useApiClient();
-  async function getClientData() {
-    return await get('/system_mgmt/api/get_client/');
-  }
   const getRoles = async (params: any) => {
     return await get('/system_mgmt/role/search_role_list/', params);
   }
@@ -38,7 +35,6 @@ export const useRoleApi = () => {
     return await post('/system_mgmt/role/delete_user/', params);
   }
   return {
-    getClientData,
     getRoles,
     addRole,
     updateRole,
