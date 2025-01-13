@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Input, message, Modal, Tree, Button, Spin } from 'antd';
+import { Input, message, Modal, Tree, Button, Spin, Popconfirm } from 'antd';
 import type { DataNode as TreeDataNode } from 'antd/lib/tree';
 import { ColumnsType } from 'antd/es/table';
 import TopSection from '@/components/top-section';
@@ -11,7 +11,8 @@ import CustomTable from '@/components/custom-table';
 import { useUserApi } from '@/app/system-manager/api/user/index';
 import { OriginalGroup } from '@/app/system-manager/types/group';
 import { UserDataType, TableRowSelection } from '@/app/system-manager/types/user';
-import userInfoStyle from './index.module.scss';
+import PageLayout from '@/components/page-layout';
+import styles from './index.module.scss'
 
 const { Search } = Input;
 
@@ -75,9 +76,14 @@ const User: React.FC = () => {
           <Button onClick={() => handleEditUser(key)} color="primary" variant="link">
             {t('common.edit')}
           </Button>
-          <Button color="primary" variant="link" onClick={() => showDeleteConfirm(key)}>
-            {t('common.delete')}
-          </Button>
+          <Popconfirm
+            title={t('common.delConfirm')}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+            onConfirm={() => showDeleteConfirm(key)}
+          >
+            <Button type="link">{t('common.delete')}</Button>
+          </Popconfirm>
         </>
       ),
     },
@@ -156,26 +162,17 @@ const User: React.FC = () => {
     onChange: onSelectChange,
   };
 
-  const showDeleteConfirm = (key: string) => {
-    confirm({
-      title: t('common.delConfirm'),
-      content: t('common.delConfirmCxt'),
-      centered: true,
-      okText: t('common.confirm'),
-      cancelText: t('common.cancel'),
-      async onOk() {
-        try {
-          await deleteUser(key);
-          fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize });
-          message.success(t('common.delSuccess'));
-        } catch {
-          message.error(t('common.delFailed'));
-        }
-      },
-    });
+  const showDeleteConfirm = async (key: string) => {
+    try {
+      await deleteUser({ user_ids: [key] });
+      fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize });
+      message.success(t('common.delSuccess'));
+    } catch {
+      message.error(t('common.delFailed'));
+    }
   };
 
-  const showDeleteTeamConfirm = () => {
+  const handleModifyDelete = () => {
     confirm({
       title: t('common.delConfirm'),
       content: t('common.delConfirmCxt'),
@@ -184,8 +181,7 @@ const User: React.FC = () => {
       cancelText: t('common.cancel'),
       async onOk() {
         try {
-          const promises = selectedRowKeys.map((key) => deleteUser(key as string));
-          await Promise.all(promises);
+          await deleteUser({ user_ids: selectedRowKeys });
           setSelectedRowKeys([]);
           fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize });
           message.success(t('common.delSuccess'));
@@ -203,7 +199,6 @@ const User: React.FC = () => {
   };
 
   const onSuccessUserModal = () => {
-    message.success(t('common.operationSuccess'));
     fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize });
   };
 
@@ -235,63 +230,71 @@ const User: React.FC = () => {
     setPageSize(pageSize);
   };
 
-  return (
-    <div className={`${userInfoStyle.userInfo} w-full`}>
-      <TopSection title={t('system.user.title')} content={t('system.user.desc')} />
-      <div className={`flex w-full overflow-hidden mt-4`} style={{ height: 'calc(100vh - 195px)' }}>
-        <div
-          className={`${userInfoStyle.bgColor} p-4 w-[230px] flex-shrink-0 flex flex-col justify-items-center items-center rounded-md mr-[17px]`}
-        >
-          <Input
-            className="w-[204px]"
-            placeholder={`${t('common.search')}...`}
-            onChange={(e) => handleTreeSearchChange(e.target.value)}
-            value={treeSearchValue}
-          />
-          <Tree
-            className="w-[230px] mt-4 overflow-auto px-3"
-            showLine
-            expandAction={false}
-            defaultExpandAll
-            treeData={filteredTreeData}
-            onSelect={handleTreeSelect}
-          />
-        </div>
-        <div className={`flex-1 h-full rounded-md overflow-hidden p-4 ${userInfoStyle.bgColor}`}>
-          <div className="w-full mb-4 flex justify-end">
-            <Search
-              allowClear
-              enterButton
-              className="w-60 mr-2"
-              onSearch={handleUserSearch}
-              placeholder={`${t('common.search')}...`}
-            />
-            <Button type="primary" className="mr-2" onClick={() => openUserModal('add')}>
-              +{t('common.add')}
-            </Button>
-            <UserModal ref={userModalRef} treeData={treeData} onSuccess={onSuccessUserModal} />
-            <Button onClick={showDeleteTeamConfirm} disabled={isDeleteDisabled}>
-              {t('system.common.modifydelete')}
-            </Button>
-          </div>
-          <Spin spinning={loading}>
-            <CustomTable
-              scroll={{ y: 'calc(100vh - 370px)' }}
-              pagination={{
-                pageSize,
-                current: currentPage,
-                total,
-                showSizeChanger: true,
-                onChange: handleTableChange,
-              }}
-              columns={columns}
-              dataSource={tableData}
-              rowSelection={rowSelection}
-            />
-          </Spin>
-        </div>
-      </div>
+  const topSectionContent = (
+    <TopSection title={t('system.user.title')} content={t('system.user.desc')} />
+  );
+
+  const leftSectionContent = (
+    <div className={`h-full flex flex-col ${styles.userInfo}`}>
+      <Input
+        className="w-[204px]"
+        placeholder={`${t('common.search')}...`}
+        onChange={(e) => handleTreeSearchChange(e.target.value)}
+        value={treeSearchValue}
+      />
+      <Tree
+        className="w-[230px] flex-1 mt-4 overflow-auto px-3"
+        showLine
+        expandAction={false}
+        defaultExpandAll
+        treeData={filteredTreeData}
+        onSelect={handleTreeSelect}
+      />
     </div>
+  );
+
+  const rightSectionContent = (
+    <>
+      <div className="w-full mb-4 flex justify-end">
+        <Search
+          allowClear
+          enterButton
+          className="w-60 mr-2"
+          onSearch={handleUserSearch}
+          placeholder={`${t('common.search')}...`}
+        />
+        <Button type="primary" className="mr-2" onClick={() => openUserModal('add')}>
+          +{t('common.add')}
+        </Button>
+        <UserModal ref={userModalRef} treeData={treeData} onSuccess={onSuccessUserModal} />
+        <Button onClick={handleModifyDelete} disabled={isDeleteDisabled}>
+          {t('system.common.modifydelete')}
+        </Button>
+      </div>
+      <Spin spinning={loading}>
+        <CustomTable
+          scroll={{ y: 'calc(100vh - 370px)' }}
+          pagination={{
+            pageSize,
+            current: currentPage,
+            total,
+            showSizeChanger: true,
+            onChange: handleTableChange,
+          }}
+          columns={columns}
+          dataSource={tableData}
+          rowSelection={rowSelection}
+        />
+      </Spin>
+    </>
+  );
+
+  return (
+    <PageLayout
+      topSection={topSectionContent}
+      leftSection={leftSectionContent}
+      rightSection={rightSectionContent}
+    />
   );
 };
 

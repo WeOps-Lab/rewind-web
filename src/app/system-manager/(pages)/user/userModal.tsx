@@ -25,6 +25,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   const { t } = useTranslation();
   const formRef = useRef<FormInstance>(null);
   const { getByName } = useClientData();
+  const [currentUserId, setCurrentUserId] = useState('');
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [infoLoading, setInfoLoading] = useState(false);
@@ -59,6 +60,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
       const curClient = await getByName('OpsPilot');
       const userDetail = await getUserDetail({ params: { user_id: userId, id: curClient?.id } });
       if (userDetail) {
+        setCurrentUserId(userId);
         formRef.current?.setFieldsValue({
           ...userDetail,
           roles: userDetail.roles?.map((role: { role_id: string }) => role.role_id) || [],
@@ -104,17 +106,20 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
     try {
       setIsSubmitting(true);
       const formData = await formRef.current?.validateFields();
+      console.log('formData', formData);
+      const roles = roleOptions.filter(op => formData.roles.includes(op.value)).map(role => ({ id: role.value, name: role.label }))
+      console.log('roles', roles)
       if (type === 'add') {
-        await addUser(formData);
+        await addUser({ ...formData, roles });
         message.success(t('common.addSuccess'));
       } else {
-        await editUser({ user_id: formData.id, ...formData });
-        message.success(t('common.editSuccess'));
+        await editUser({ user_id: currentUserId, ...formData, roles });
+        message.success(t('common.updateSuccess'));
       }
       onSuccess();
       setVisible(false);
     } catch {
-      message.error(t('common.validationFailed'));
+      message.error(t('common.valFailed'));
     } finally {
       setIsSubmitting(false);
     }

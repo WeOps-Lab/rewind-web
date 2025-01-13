@@ -1,6 +1,6 @@
 import useApiClient from '@/utils/request';
 export const useUserApi = () => {
-  const { get, post, del } = useApiClient();
+  const { get, post } = useApiClient();
 
   function getUsersList(params: any) {
     return get('/system_mgmt/user/search_user_list/', { params });
@@ -23,13 +23,8 @@ export const useUserApi = () => {
   async function editUser(params: any) {
     return await post(`/system_mgmt/user/update_user/`, params)
   }
-  //删除单个用户的api
-  async function deleteUser(userId: string) {
-    try {
-      return await del(`/user-manager/internal/user/${userId}`)
-    } catch (error: any) {
-      throw new Error(error?.message || 'Unknown error occurred');
-    }
+  async function deleteUser(params: any) {
+    return await post(`/system_mgmt/user/delete_user/`, params)
   }
   return {
     getUsersList,

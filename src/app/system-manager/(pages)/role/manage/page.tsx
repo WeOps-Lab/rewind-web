@@ -6,9 +6,10 @@ import { useTranslation } from '@/utils/i18n';
 import { useSearchParams } from 'next/navigation';
 import CustomTable from '@/components/custom-table';
 import OperateModal from '@/components/operate-modal';
-import { useUserApi } from '@/app/system-manager/api/user'
+import { useUserApi } from '@/app/system-manager/api/user';
 import { useRoleApi } from '@/app/system-manager/api/role';
 import { Role, User, Menu } from '@/app/system-manager/types/role';
+import PageLayout from '@/components/page-layout';
 import TopSection from '@/components/top-section';
 import PermissionTable from './permissionTable';
 import RoleList from './roleList';
@@ -62,7 +63,7 @@ const RoleManagement: React.FC = () => {
     deleteUser,
     setRoleMenus,
     getAllMenus
-  } = useRoleApi()
+  } = useRoleApi();
   const { getClientDetail } = useUserApi();
 
   useEffect(() => {
@@ -282,7 +283,7 @@ const RoleManagement: React.FC = () => {
         user_ids: [record.id]
       });
       message.success(t('common.delSuccess'));
-      fetchUsersByRole(selectedRole!, currentPage, pageSize);
+      fetchUsersByRole(selectedRole, currentPage, pageSize);
     } catch (error) {
       console.error('Failed:', error);
       message.error(t('common.delFail'));
@@ -363,79 +364,83 @@ const RoleManagement: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
-      <TopSection title={clientName} content={clientDescription} />
-      <div className="flex mt-4 w-full" style={{ height: 'calc(100vh - 195px)' }}>
-        <RoleList
-          loadingRoles={loadingRoles}
-          roleList={roleList}
-          selectedRole={selectedRole}
-          onSelectRole={onSelectRole}
-          showRoleModal={showRoleModal}
-          onDeleteRole={onDeleteRole}
-          t={t}
-        />
-        <div className="flex-1 p-4 overflow-hidden bg-[var(--color-bg-1)] rounded-md">
-          <Tabs defaultActiveKey="1" activeKey={activeTab} onChange={handleTabChange}>
-            <TabPane tab={t('system.role.users')} key="1">
-              <div className="flex justify-end mb-4">
-                <Search
-                  allowClear
-                  enterButton
-                  className='w-60 mr-[8px]'
-                  onSearch={handleUserSearch}
-                  placeholder={`${t('common.search')}`}
+    <>
+      <PageLayout
+        topSection={<TopSection title={clientName} content={clientDescription} />}
+        leftSection={
+          <RoleList
+            loadingRoles={loadingRoles}
+            roleList={roleList}
+            selectedRole={selectedRole}
+            onSelectRole={onSelectRole}
+            showRoleModal={showRoleModal}
+            onDeleteRole={onDeleteRole}
+            t={t}
+          />
+        }
+        rightSection={
+          <div className="flex-1 overflow-hidden bg-[var(--color-bg-1)] rounded-md">
+            <Tabs defaultActiveKey="1" activeKey={activeTab} onChange={handleTabChange}>
+              <TabPane tab={t('system.role.users')} key="1">
+                <div className="flex justify-end mb-4">
+                  <Search
+                    allowClear
+                    enterButton
+                    className='w-60 mr-[8px]'
+                    onSearch={handleUserSearch}
+                    placeholder={`${t('common.search')}`}
+                  />
+                  <Button
+                    className="mr-[8px]"
+                    type="primary"
+                    onClick={openUserModal} // 确保按钮点击事件已正确绑定
+                  >
+                    +{t('common.add')}
+                  </Button>
+                  <Button
+                    loading={deleteLoading}
+                    onClick={handleBatchDeleteUsers}
+                    disabled={selectedUserKeys.length === 0 || deleteLoading}
+                  >
+                    {t('system.common.modifydelete')}
+                  </Button>
+                </div>
+                <Spin spinning={loading}>
+                  <CustomTable
+                    scroll={{ y: 'calc(100vh - 430px)' }}
+                    rowSelection={{
+                      selectedRowKeys: selectedUserKeys,
+                      onChange: (selectedRowKeys) => setSelectedUserKeys(selectedRowKeys as React.Key[]),
+                    }}
+                    columns={columns}
+                    dataSource={tableData}
+                    rowKey={(record) => record.id}
+                    pagination={{
+                      current: currentPage,
+                      pageSize: pageSize,
+                      total: total,
+                      onChange: handleTableChange,
+                    }}
+                  />
+                </Spin>
+              </TabPane>
+              <TabPane tab={t('system.role.permissions')} key="2">
+                <div className="flex justify-end items-center mb-4">
+                  <Button type="primary" loading={loading} onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
+                </div>
+                <PermissionTable
+                  t={t}
+                  loading={loading}
+                  menuData={menuData}
+                  permissionsCheckedKeys={permissionsCheckedKeys}
+                  setPermissionsCheckedKeys={(keyMap) => setPermissionsCheckedKeys(keyMap)}
                 />
-                <Button
-                  className="mr-[8px]"
-                  type="primary"
-                  onClick={openUserModal}
-                >
-                  +{t('common.add')}
-                </Button>
-                <Button
-                  loading={deleteLoading}
-                  onClick={handleBatchDeleteUsers}
-                  disabled={selectedUserKeys.length === 0 || deleteLoading}
-                >
-                  {t('system.common.modifydelete')}
-                </Button>
-              </div>
-              <Spin spinning={loading}>
-                <CustomTable
-                  scroll={{ y: 'calc(100vh - 430px)' }}
-                  rowSelection={{
-                    selectedRowKeys: selectedUserKeys,
-                    onChange: (selectedRowKeys) => setSelectedUserKeys(selectedRowKeys as React.Key[]),
-                  }}
-                  columns={columns}
-                  dataSource={tableData}
-                  rowKey={(record) => record.id}
-                  pagination={{
-                    current: currentPage,
-                    pageSize: pageSize,
-                    total: total,
-                    onChange: handleTableChange,
-                  }}
-                />
-              </Spin>
-            </TabPane>
-            <TabPane tab={t('system.role.permissions')} key="2">
-              <div className="flex justify-end items-center mb-4">
-                <Button type="primary" loading={loading} onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
-              </div>
-              <PermissionTable
-                t={t}
-                loading={loading}
-                menuData={menuData}
-                permissionsCheckedKeys={permissionsCheckedKeys}
-                setPermissionsCheckedKeys={(keyMap) => setPermissionsCheckedKeys(keyMap)}
-              />
-            </TabPane>
-          </Tabs>
-        </div>
-      </div>
-
+              </TabPane>
+            </Tabs>
+          </div>
+        }
+      >
+      </PageLayout>
       <OperateModal
         title={isEditingRole ? t('system.role.updateRole') : t('system.role.addRole')}
         closable={false}
@@ -488,7 +493,7 @@ const RoleManagement: React.FC = () => {
           </Form.Item>
         </Form>
       </OperateModal>
-    </div>
+    </>
   );
 };
 
