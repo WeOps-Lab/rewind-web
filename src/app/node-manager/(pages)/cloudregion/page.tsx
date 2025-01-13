@@ -78,6 +78,7 @@ const Cloudregion = () => {
     setOpeneditcloudregion(true)
   }
 
+
   return (
     <div
       ref={divref}
@@ -93,7 +94,6 @@ const Cloudregion = () => {
         }}
         openModal={() => { }}
         onSearch={onSearch} onCardClick={() => { router.push('/node-manager/cloudregion/node?cloud_region_id=1'); }} ></EntityList>
-
       {/* 编辑默认云区域弹窗 */}
       <OperateModal
         title={t('node-manager.cloudregion.editform.title')}

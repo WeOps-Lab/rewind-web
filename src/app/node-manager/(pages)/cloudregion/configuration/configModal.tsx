@@ -149,7 +149,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               key: item.id,
               ip: item.ip,
               operatingsystem: item.operating_system,
-              sidecar: item.status.status === "0" ? "Error" : "Running",
+              sidecar: item.status.status === 0 ? "Error" : "Running",
             };
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
@@ -182,12 +182,13 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const getApplydata = () => {
       getnodelist(Number(cloudid))
         .then((res) => {
+          debugger
           const data = res.map((item: nodeItemtRes) => {
             return {
               key: item.id,
               ip: item.ip,
               operatingsystem: item.operating_system,
-              sidecar: item.status.status === "0" ? "Error" : "Running",
+              sidecar: item.status.status === 0 ? "Running" : "Error",
             };
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
@@ -264,7 +265,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               <TextArea
                 rows={8}
                 style={{ resize: 'none' }}
-                disabled={true} />
+              />
             </Form.Item></>
           }
         </Form>
@@ -279,7 +280,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         cancelText={t("common.cancel")}
         onCancel={handleCancel}
         onOk={handleConfirm}
-        width={type === "apply" ? 800 : 600}
+        width={type === "apply" ? 800 : 520}
       >
         {showConfigForm(type) || " "}
       </OperateModal>

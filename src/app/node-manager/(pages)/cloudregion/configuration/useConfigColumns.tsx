@@ -66,7 +66,6 @@ export const useConfigColumns = ({
             okText={t("common.confirm")}
             cancelText={t("common.cancel")}
             onConfirm={() => { deleteconfirm(key) }}
-            onCancel={delcancel}
           >
             <Button
               disabled={item.nodecount}
@@ -94,10 +93,6 @@ export const useConfigColumns = ({
     setDeletestate(true);
   }
 
-  const delcancel = (e: any) => {
-    console.log(e);
-    message.error('Click on No');
-  }
   const handleDeleteCollector = (deleted: boolean) => {
     setDeletestate(deleted);
   }
