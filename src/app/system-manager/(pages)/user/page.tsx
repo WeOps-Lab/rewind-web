@@ -126,6 +126,7 @@ const User: React.FC = () => {
   }, [selectedRowKeys]);
 
   const handleTreeSelect = (selectedKeys: React.Key[]) => {
+    setSelectedRowKeys([]);
     fetchUsers({
       search: searchValue,
       page: currentPage,

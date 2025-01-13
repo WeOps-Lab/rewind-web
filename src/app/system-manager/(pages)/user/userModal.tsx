@@ -57,11 +57,11 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
     setLoading(true);
     try {
       const curClient = await getByName('OpsPilot');
-      const userDetail = await getUserDetail({ params: { user_id: userId, client_id: curClient?.id } });
+      const userDetail = await getUserDetail({ params: { user_id: userId, id: curClient?.id } });
       if (userDetail) {
         formRef.current?.setFieldsValue({
           ...userDetail,
-          roles: userDetail.roles?.map((role: { id: string }) => role.id) || [],
+          roles: userDetail.roles?.map((role: { role_id: string }) => role.role_id) || [],
           groups: userDetail.groups?.map((group: { id: string }) => group.id) || [],
         });
       }
