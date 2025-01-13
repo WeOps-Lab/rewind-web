@@ -13,7 +13,8 @@ const Collector = () => {
   const router = useRouter();
   const { isLoading } = useApiClient();
   const [value, setValue] = useState<string | number>();
-  const [cards, setCards] = useState<[]>([])
+  const [cards, setCards] = useState<[]>([]);
+
   useEffect(() => {
     if (!isLoading) {
       getCollectorlist({}).then((res) => {
@@ -30,6 +31,10 @@ const Collector = () => {
     }
   }, [isLoading])
 
+  const navigateToCollectorDetail = (item: any) => {
+    router.push(`/node-manager/collector/detail?id=${item?.id}`);
+  };
+
   return (
     <div className={`${collectorstyle.collection}`}>
       {/* 顶部的提示信息 */}
@@ -40,7 +45,7 @@ const Collector = () => {
         onChange={setValue}
       />
       {/* 卡片的渲染 */}
-      <EntityList data={cards} loading={false} onCardClick={(item: any) => router.push(`collector/detail?id=${item?.id}`)}></EntityList>
+      <EntityList data={cards} loading={false} onSearch={(value: string) => { getCollectorlist({ search: value }) }} onCardClick={(item: any) => navigateToCollectorDetail(item)}></EntityList>
     </div>
   );
 }

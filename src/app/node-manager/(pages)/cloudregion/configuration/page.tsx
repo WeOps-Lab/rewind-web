@@ -219,8 +219,7 @@ const Configration = () => {
         <div className="tablewidth">
           <CustomTable<any>
             loading={loading}
-            className="h-3/4"
-            scroll={{ y: "calc(100vh - 400px)", x: "calc(100vw - 288px)" }}
+            scroll={{ y: "calc(100vh - 400px)", x: 'max-content' }}
             columns={columns}
             dataSource={data}
             rowSelection={rowSelection}

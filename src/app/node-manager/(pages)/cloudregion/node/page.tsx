@@ -59,7 +59,7 @@ const Node = () => {
           key: item.configuration_id,
           name: item.collector_name,
           filename: item.configuration_name,
-          status: item.message,
+          status: item.status,
         };
       });
 
@@ -218,15 +218,16 @@ const Node = () => {
       data = expandedDataMapping[String(key)] || [];
       items = updateDropdownMapping[String(key)] || [];
     }
+    debugger
     return (
       <div className="grid grid-cols-2 gap-4">
-        {data.map((item) => {
-          const statusMapping: { [key: string]: string } = {
-            Running: "yunhangzhongx",
-            Stopped: "yichang-yichang",
-            Default: "weiqiyong",
+        {data.map((item: NodeExpanddata) => {
+          const statusMapping: { [key: number]: string } = {
+            0: "yunhangzhongx",
+            2: "yichang-yichang",
+            4: "weiqiyong",
           };
-          const metricbeattype = statusMapping[item.status] || statusMapping.Default;
+          const metricbeattype = statusMapping[item.status] || statusMapping[4];
           return (
             <div key={item.key} className="flex h-[18px]">
               <p className="w-32 h-full flex items-center justify-center text-center">{item.name}</p>
@@ -287,7 +288,7 @@ const Node = () => {
           key: item.id,
           ip: item.ip,
           operatingsystem: item.operating_system.charAt(0).toUpperCase() + item.operating_system.slice(1),
-          sidecar: item.status.status === "1" ? "Running" : "Error",
+          sidecar: item.status.status === 0 ? "Running" : "Error",
         };
       });
     });
@@ -297,17 +298,22 @@ const Node = () => {
     // 尝试保留之前展开行的数据，根据已有的 `expandedRowKeys`
     const newExpandedDataMapping = { ...expandedDataMapping };
 
+
     for (const key of expandedRowKeys) {
       const resItem = await getnodelist(Number(cloudid), key as string).then((res) => res[0]);
 
       if (resItem) {
-        const expandedData = resItem.status.collectors.map((item: CollectorItem) => ({
-          nodeid: key,
-          key: item.configuration_id,
-          name: item.collector_name,
-          filename: item.configuration_name,
-          status: item.message,
-        })) || [];
+        const expandedData = resItem.status.collectors.map((item: CollectorItem) => {
+          if (item.status) {
+            return {
+              nodeid: key,
+              key: item.configuration_id,
+              name: item.collector_name,
+              filename: item.configuration_name,
+              status: item.status,
+            }
+          }
+        }) || [];
 
         newExpandedDataMapping[String(key)] = expandedData;
       }
@@ -344,7 +350,6 @@ const Node = () => {
     const res = await getnodelist(Number(cloudid));
 
     const newExpandedDataMapping = { ...expandedDataMapping };
-
     res.forEach((resitem: any) => {
       if (expandedRowKeys.includes(resitem.id)) {
         const data = resitem?.status.collectors.map((item: CollectorItem) => ({
@@ -352,7 +357,7 @@ const Node = () => {
           key: item.configuration_id,
           name: item.collector_name,
           filename: item.configuration_name,
-          status: item.message,
+          status: item.status,
         })) || [];
         newExpandedDataMapping[resitem.id] = data;
       }
