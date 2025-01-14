@@ -37,7 +37,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     try {
       setLoading(true);
-      const data = await get('/system_mgmt/api/get_client/');
+      const data = await get('/core/api/get_client/');
       if (data) {
         setClientData(data);
         initializedRef.current = true;
