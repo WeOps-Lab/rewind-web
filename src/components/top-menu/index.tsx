@@ -1,30 +1,53 @@
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Popover } from 'antd';
+import { Popover, Spin } from 'antd';
 import { CaretDownFilled } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
 import { useMenus } from '@/context/menus';
+import { useClientData } from '@/context/client';
 import UserInfo from '../user-info';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
+import { ClientData } from '@/types/index'
 
 const TopMenu = () => {
   const { t } = useTranslation();
   const menuItems = useMenus();
   const pathname = usePathname();
-  const apps: Array<{ name: string; icon: string }> = [
-    { name: 'Monitor', icon: 'jiankong1' },
-    { name: 'Logs', icon: 'rizhiguanli' },
-    { name: 'Resource', icon: 'zichanguanli' },
-    { name: 'System', icon: 'yingyongxitongguanli' },
-  ];
+  const { getAll, loading } = useClientData();
+  const [apps, setApps] = useState<ClientData[]>([]);
 
-  const renderContent = (
-    <div className='grid grid-cols-3 gap-4 max-h-[350px] overflow-auto'>
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        const data: ClientData[] = await getAll();
+        setApps(data);
+      } catch (error) {
+        console.error('Failed to fetch apps:', error);
+      }
+    };
+
+    fetchApps();
+  }, [getAll]);
+
+  const renderContent = loading ? (
+    <div className="flex justify-center items-center h-32">
+      <Spin tip="Loading..." />
+    </div>
+  ) : (
+    <div className="grid grid-cols-3 gap-4 max-h-[350px] overflow-auto">
       {apps.map((app) => (
-        <div key={app.name} className={`group flex flex-col items-center p-4 rounded-sm cursor-pointer ${styles.navApp}`}>
-          <Icon type={app.icon} className="mr-2 text-2xl mb-1 transition-transform duration-300 transform group-hover:scale-125" />
+        <div
+          key={app.name}
+          className={`group flex flex-col items-center p-4 rounded-sm cursor-pointer ${styles.navApp}`}
+          onClick={() => window.open(app.url, '_blank')}
+        >
+          <Icon
+            type={app.icon || 'yingyongxitongguanli'}
+            className="mr-2 text-2xl mb-1 transition-transform duration-300 transform group-hover:scale-125"
+          />
           {app.name}
         </div>
       ))}
@@ -39,7 +62,7 @@ const TopMenu = () => {
           <div>WeOps</div>
           <Popover content={renderContent} title={t('common.appList')} trigger="hover">
             <div className={`flex items-center justify-center cursor-pointer rounded-[10px] px-3 py-2 ${styles.nav}`}>
-              <Icon type='caidandaohang' className='mr-1' />
+              <Icon type="caidandaohang" className="mr-1" />
               <CaretDownFilled className={`text-sm ${styles.icons}`} />
             </div>
           </Popover>

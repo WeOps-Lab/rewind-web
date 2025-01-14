@@ -39,3 +39,12 @@ export interface UserInfoContextType {
   flatGroups: Group[];
   setSelectedGroup: (group: Group) => void;
 }
+
+export interface ClientData {
+  id: string;
+  name: string;
+  client_id: string;
+  description: string;
+  url: string;
+  icon?: string;
+}
