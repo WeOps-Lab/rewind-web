@@ -87,7 +87,7 @@ const RoleManagement: React.FC = () => {
   };
 
   const fetchClientDetail = async () => {
-    const client = await getClientDetail({ params: { client_id: id } });
+    const client = await getClientDetail({ params: { id } });
     setClientName(client.name);
     setClientDescription(client.description);
   };

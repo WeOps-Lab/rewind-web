@@ -9,7 +9,7 @@ export const useUserApi = () => {
     return await get('/system_mgmt/group/search_group_list/');
   }
   async function getClientDetail(params: any) {
-    return await get('/system_mgmt/api/get_client_detail/', params);
+    return await get('/core/api/get_client_detail/', params);
   }
   async function getRoleList(params: any) {
     return await get('/system_mgmt/role/search_role_list/', params);
