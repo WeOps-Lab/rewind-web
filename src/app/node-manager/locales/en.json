@@ -17,12 +17,6 @@
   },
   "node-manager": {
     "cloudregion": {
-      "title": "Default Cloud Region",
-      "editform": {
-        "title": "Edit Cloud Region",
-        "Name": "Name",
-        "Introduction": "Introduction"
-      },
       "node": {
         "node": "Node",
         "desc": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars.",

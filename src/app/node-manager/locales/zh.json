@@ -17,12 +17,6 @@
   },
   "node-manager": {
     "cloudregion": {
-      "title": "默认云区域",
-      "editform": {
-        "title": "编辑云区域",
-        "Name": "名字",
-        "Introduction": "介绍"
-      },
       "node": {
         "node": "节点",
         "desc": "节点管理主要用于在每个节点上安装探针,并通过探针管理各种类型的收集器。",

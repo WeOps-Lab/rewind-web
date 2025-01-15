@@ -6,6 +6,7 @@ import useApiClient from '@/utils/request';
 import useApiCollector from "@/app/node-manager/api/collector/index";
 import EntityList from "@/components/entity-list/index";
 import { useRouter } from "next/navigation";
+import type { collectorItem } from "@/app/node-manager/types/collector"
 
 const Collector = () => {
 
@@ -13,22 +14,31 @@ const Collector = () => {
   const router = useRouter();
   const { isLoading } = useApiClient();
   const [value, setValue] = useState<string | number>();
-  const [cards, setCards] = useState<[]>([])
+  const [cards, setCards] = useState<collectorItem[]>([]);
+
   useEffect(() => {
     if (!isLoading) {
-      getCollectorlist({}).then((res) => {
-        const tempdata = res.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          description: item.introduction,
-          icon: 'caijiqizongshu',
-          tag: [item.node_operating_system]
-        }))
-        setCards(tempdata);
-        setValue(`All(${tempdata.length})`)
-      })
+      fetchCollectorlist()
     }
   }, [isLoading])
+
+  const navigateToCollectorDetail = (item: collectorItem) => {
+    router.push(`/node-manager/collector/detail?id=${item.id}`);
+  };
+
+  const fetchCollectorlist = (value?: string) => {
+    getCollectorlist({ search: value }).then((res) => {
+      const tempdata = res.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        description: item.introduction,
+        icon: 'caijiqizongshu',
+        tag: [item.node_operating_system]
+      }))
+      setCards(tempdata);
+      setValue(`All(${tempdata.length})`)
+    })
+  }
 
   return (
     <div className={`${collectorstyle.collection}`}>
@@ -40,7 +50,7 @@ const Collector = () => {
         onChange={setValue}
       />
       {/* 卡片的渲染 */}
-      <EntityList data={cards} loading={false} onCardClick={(item: any) => router.push(`collector/detail?id=${item?.id}`)}></EntityList>
+      <EntityList data={cards} loading={false} onSearch={(value: string) => { fetchCollectorlist(value) }} onCardClick={(item: collectorItem) => navigateToCollectorDetail(item)}></EntityList>
     </div>
   );
 }

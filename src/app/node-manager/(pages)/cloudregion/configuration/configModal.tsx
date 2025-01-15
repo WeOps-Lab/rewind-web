@@ -111,7 +111,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       })
     }
 
-    const handleUpdate = (name: string, configinfo: string, collector: string) => {
+    const handleUpdate = (name: string, collector: string, configinfo: string) => {
       updatecollector(
         editeConfigId,
         {
@@ -149,7 +149,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               key: item.id,
               ip: item.ip,
               operatingsystem: item.operating_system,
-              sidecar: item.status.status === "0" ? "Error" : "Running",
+              sidecar: !item.status.status ? "Error" : "Running",
             };
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
@@ -187,7 +187,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               key: item.id,
               ip: item.ip,
               operatingsystem: item.operating_system,
-              sidecar: item.status.status === "0" ? "Error" : "Running",
+              sidecar: !item.status.status ? "Error" : "Running",
             };
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
@@ -264,7 +264,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               <TextArea
                 rows={8}
                 style={{ resize: 'none' }}
-                disabled={true} />
+              />
             </Form.Item></>
           }
         </Form>
@@ -274,12 +274,12 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     return (
       <OperateModal
         title={t(`common.${type}`)}
-        visible={configVisible}
+        open={configVisible}
         okText={t("common.confirm")}
         cancelText={t("common.cancel")}
         onCancel={handleCancel}
         onOk={handleConfirm}
-        width={type === "apply" ? 800 : 600}
+        width={type === "apply" ? 800 : 520}
       >
         {showConfigForm(type) || " "}
       </OperateModal>

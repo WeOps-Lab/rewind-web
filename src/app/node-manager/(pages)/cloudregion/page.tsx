@@ -8,7 +8,8 @@ import cloudregionstyle from './index.module.scss';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
-import EntityList from "@/components/entity-list/index"
+import EntityList from "@/components/entity-list/index";
+import type { cloudRegionItem } from "@/app/node-manager/types/cloudregion"
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
 
@@ -29,7 +30,7 @@ const Cloudregion = () => {
   const { getcloudlist, updatecloudintro } = useApiCloudRegion();
   const [selectedRegion, setSelectedRegion] = useState<CloudregioncardProps | null>(null);
   const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
-  const [clouditem, setClouditem] = useState<{ id: string; name: string; description: string; icon: string; }[]>([]);
+  const [clouditem, setClouditem] = useState<cloudRegionItem[]>([]);
 
   // 获取相关的接口
   const fetchCloudRegions = async () => {
@@ -78,6 +79,9 @@ const Cloudregion = () => {
     setOpeneditcloudregion(true)
   }
 
+  const navigateToNode = (item: cloudRegionItem) => {
+    router.push(`/node-manager/cloudregion/node?cloud_region_id=1&name=${item.name}`)
+  }
   return (
     <div
       ref={divref}
@@ -92,8 +96,7 @@ const Cloudregion = () => {
           </Menu>)
         }}
         openModal={() => { }}
-        onSearch={onSearch} onCardClick={() => { router.push('/node-manager/cloudregion/node?cloud_region_id=1'); }} ></EntityList>
-
+        onSearch={onSearch} onCardClick={(item: cloudRegionItem) => { navigateToNode(item) }} ></EntityList>
       {/* 编辑默认云区域弹窗 */}
       <OperateModal
         title={t('node-manager.cloudregion.editform.title')}
