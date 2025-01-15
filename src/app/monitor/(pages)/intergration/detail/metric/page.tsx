@@ -19,6 +19,7 @@ import GroupModal from './groupModal';
 import MetricModal from './metricModal';
 import { useSearchParams } from 'next/navigation';
 import { deepClone } from '@/app/monitor/utils/common';
+import { useUserInfoContext } from '@/context/userInfo';
 const { confirm } = Modal;
 
 interface ListItem {
@@ -32,12 +33,15 @@ interface ListItem {
 const Configure = () => {
   const { get, del, isLoading, post } = useApiClient();
   const { t } = useTranslation();
+  const commonContext = useUserInfoContext();
+  const superRef = useRef(commonContext?.isSuperUser || false);
   const searchParams = useSearchParams();
   const groupName = searchParams.get('name');
   const groupId = searchParams.get('id');
   const pluginID = searchParams.get('plugin_id') || '';
   const groupRef = useRef<ModalRef>(null);
   const metricRef = useRef<ModalRef>(null);
+  const isSuperUser = superRef?.current;
   const [searchText, setSearchText] = useState<string>('');
   const [metricData, setMetricData] = useState<ListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -106,14 +110,14 @@ const Configure = () => {
           <Button
             type="link"
             className="mr-[10px]"
-            disabled={record.is_pre}
+            disabled={record.is_pre && !isSuperUser}
             onClick={() => openMetricModal('edit', record)}
           >
             {t('common.edit')}
           </Button>
           <Button
             type="link"
-            disabled={record.is_pre}
+            disabled={record.is_pre && !isSuperUser}
             onClick={() => showDeleteConfirm(record)}
           >
             {t('common.delete')}

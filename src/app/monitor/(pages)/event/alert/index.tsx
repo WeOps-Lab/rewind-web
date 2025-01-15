@@ -557,7 +557,7 @@ const Alert: React.FC<AlertProps> = ({
                         {(item.options || []).map((optionItem, optionIndex) => (
                           <Checkbox key={optionIndex} value={optionItem.value}>
                             <span
-                              className="inline-block w-[100px] hide-text align-middle"
+                              className="inline-block w-[110px] hide-text align-middle"
                               title={optionItem.label}
                             >
                               {optionItem.label}

@@ -97,6 +97,7 @@
     "more": "详情",
     "organizations": "组织",
     "all": "全部",
+    "copy": "复制",
     "cutomTable": {
       "fieldSetting": "列表字段设置"
     }
@@ -274,7 +275,42 @@
       "originalValue": "原始值",
       "mappedValue": "映射值",
       "manual": "手动配置",
-      "automatic": "自动配置"
+      "automatic": "自动配置",
+      "basicInformation": "基本信息",
+      "MonitoredObject": "监控对象",
+      "node": "节点",
+      "configuration": "采集配置",
+      "metricType": "指标类型",
+      "username": "用户名",
+      "password": "密码",
+      "protocol": "协议",
+      "cpuDes": "监控CPU使用情况，包括利用率百分比、平均负载以及系统时间与用户时间的占比。",
+      "cpuDiskDes": "监控磁盘使用情况，包括磁盘空间、读/写速率以及其他相关指标。",
+      "diskIODes": "监控磁盘输入/输出操作的性能和活动情况。",
+      "memoryDes": "监控内存使用情况，包括内存利用率和可用内存。",
+      "netDes": "监控网络性能，包括网络流量、带宽使用率和延迟。",
+      "processesDes": "监控运行进程的信息，包括进程数量、CPU 使用率和内存消耗。",
+      "systemDes": "监控整体系统性能和运行状况，包括系统运行时间、平均负载以及一般活动水平等指标。",
+      "port": "端口",
+      "version": "版本",
+      "community": "社区",
+      "timeout": "超时时间",
+      "authProtocol": "认证协议",
+      "authPassword": "认证密码",
+      "privProtocol": "加密协议",
+      "privPassword": "加密密码",
+      "usernameDes": "用于访问 IPMI 接口的用户名。",
+      "passwordDes": "对应的登录密码。",
+      "protocolDes": "表示使用 LAN+ 协议进行访问（通常用于较新版本的 IPMI）。",
+      "versionDes": "指定要使用的 SNMP 协议版本，例如 v2c 或 v3，定义通信机制和安全级别。",
+      "communityDes": "用于 SNMPv2c 的认证字符串，类似于密码，允许访问设备的 SNMP 数据。",
+      "timeoutDes": "从设备请求 SNMP 数据的超时时间，超过配置时间（例如 10 秒）的请求将被视为失败。",
+      "nameDes": "用于 SNMPv3 认证的用户名。",
+      "levelDes": "安全级别设置，例如 authPriv 表示同时使用认证和隐私（加密）。",
+      "authProtocolDes": "用于保护认证过程的认证协议。",
+      "authPasswordDes": "用于认证的密码，与选择的认证协议对应。",
+      "privProtocolDes": "用于保护传输数据的加密协议。",
+      "privPasswordDes": "用于加密的密码，与选择的加密协议对应。"
     }
   }
 }

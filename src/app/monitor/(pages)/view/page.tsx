@@ -61,14 +61,14 @@ const Intergration = () => {
     {
       title: t('common.name'),
       dataIndex: 'instance_name',
-      width: 100,
+      width: 140,
       key: 'instance_name',
     },
     {
       title: t('monitor.group'),
       dataIndex: 'organization',
       key: 'organization',
-      width: 120,
+      width: 140,
       render: (_, { organization }) => (
         <>{showGroupName(organization, organizationList)}</>
       ),
@@ -77,7 +77,7 @@ const Intergration = () => {
       title: t('monitor.views.reportTime'),
       dataIndex: 'time',
       key: 'time',
-      width: 120,
+      width: 160,
       render: (_, { time }) => (
         <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
       ),

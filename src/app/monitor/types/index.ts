@@ -51,6 +51,7 @@ export interface UserItem {
 export interface Organization {
   id: string;
   name: string;
+  label?: string;
   value?: string;
   children: Array<SubGroupItem>;
   [key: string]: unknown;

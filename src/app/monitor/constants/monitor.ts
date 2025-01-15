@@ -1243,6 +1243,27 @@ const APPOINT_METRIC_IDS: string[] = [
   'cluster_node_count',
 ];
 
+const TIMEOUT_UNITS: string[] = ['s', 'm', 'd'];
+
+const COLLECT_TYPE_MAP: ObjectIconMap = {
+  Host: 'host',
+  Website: 'http_response',
+  ping: 'ping',
+  'Router SNMP General': 'ping',
+  'Switch SNMP General': 'snmp',
+  'Firewall SNMP General': 'snmp',
+  'Loadbalance SNMP General': 'snmp',
+  'Detection Device SNMP General': 'snmp',
+  'Scanning Device SNMP General': 'snmp',
+  'Bastion Host SNMP General': 'snmp',
+  'Storage SNMP General': 'snmp',
+  'Hardware Server SNMP General': 'snmp',
+  'Hardware Server IPMI': 'ipmi_sensor',
+  'Storage IPMI': 'ipmi_sensor',
+  K8S: 'k8s',
+  'SNMP Trap': 'snmp_trap',
+};
+
 export {
   UNIT_LIST,
   INDEX_CONFIG,
@@ -1253,6 +1274,8 @@ export {
   MONITOR_GROUPS_MAP,
   OBJECT_ICON_MAP,
   APPOINT_METRIC_IDS,
+  TIMEOUT_UNITS,
+  COLLECT_TYPE_MAP,
   useInterfaceLabelMap,
   useScheduleList,
   useMethodList,

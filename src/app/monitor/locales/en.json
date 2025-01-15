@@ -97,6 +97,7 @@
     "more": "More",
     "organizations": "Organizations",
     "all": "All",
+    "copy": "Copy",
     "cutomTable": {
       "fieldSetting": "List field settings"
     }
@@ -274,7 +275,43 @@
       "originalValue": "Original Value",
       "mappedValue": "Mapped Value",
       "manual": "Manual",
-      "automatic": "Automatic"
+      "automatic": "Automatic",
+      "basicInformation": "Basic Information",
+      "MonitoredObject": "Monitored Object",
+      "node": "Node",
+      "configuration": "Configuration",
+      "metricType": "Metric Type",
+      "username": "Username",
+      "password": "Password",
+      "protocol": "Protocol",
+      "cpuDes": "Monitor CPU usage, including utilization percentage, load average, and system versus user time.",
+      "diskDes": "Monitor disk usage, including disk space, read/write rates, and other related metrics.",
+      "diskIoDes": "Monitor the performance and activity of disk input/output operations.",
+      "memoryDes": "Monitor memory usage, including memory utilization and available memory.",
+      "netDes": "Monitor network performance, including network traffic, bandwidth usage, and latency.",
+      "processesDes": "Monitor information about running processes, including the number of processes, CPU usage, and memory consumption.",
+      "systemDes": "Monitor overall system performance and health, including metrics such as system uptime, load averages, and general activity levels.",
+      "port": "Port",
+      "version": "Version",
+      "community": "Community",
+      "timeout": "Timeout",
+      "authProtocol": "Auth Protocol",
+      "authPassword": "Auth Password",
+      "privProtocol": "Priv Protocol",
+      "privPassword": "Priv Password",
+      "usernameDes": "The username used to access the IPMI interface.",
+      "passwordDes": "The corresponding login password.",
+      "protocolDes": "Indicates the use of the LAN+ protocol for access (commonly used in newer versions of IPMI).",
+      "portDes": "Configured SNMP port number, typically using port 161 for communication with the device.",
+      "versionDes": "Specifies the SNMP protocol version to use, such as v2c or v3, defining the communication mechanism and security level.",
+      "communityDes": "The authentication string used for SNMPv2c, similar to a password, allowing access to the device's SNMP data.",
+      "timeoutDes": "The timeout period for SNMP data requests from the device, where requests exceeding the configured time (e.g., 10s) are considered failed.",
+      "nameDes": "The SNMPv3 username used for authentication.",
+      "levelDes": "The security level setting, such as authPriv, which means both authentication and privacy (encryption) are used.",
+      "authProtocolDes": "The authentication protocol to use，for securing the authentication process.",
+      "authPasswordDes": "The password used for authentication, corresponding to the chosen authentication protocol.",
+      "privProtocolDes": "The encryption protocol to use, for securing the data transmitted.",
+      "privPasswordDes": "The password used for encryption, corresponding to the chosen encryption protocol."
     }
   }
 }

@@ -136,6 +136,7 @@ const Intergration = () => {
               ...item,
               plugin_name: plugin?.display_name,
               plugin_id: plugin?.id,
+              collect_type: plugin?.name,
               plugin_description: plugin?.display_description || '--',
             });
           }
