@@ -4,18 +4,21 @@ import SubLayout from "@/components/sub-layout";
 import { useTranslation } from "@/utils/i18n";
 import { usePathname } from "next/navigation";
 import Icon from "@/components/icon/index";
+import { useRouter } from 'next/navigation';
 
 const Collectorintro = () => {
-  const { t } = useTranslation();
+  const searchParams = new URLSearchParams(window.location.search);
+  const name = searchParams.get('name');
   return (<div className="flex h-[58px] flex-col items-center justify-center">
     <Icon type="yunquyu" className="h-16 w-16" style={{ height: '36px', width: '36px' }}></Icon>
-    <h1 className="text-center">{t('node-manager.cloudregion.title')}</h1>
+    <h1 className="text-center">{name}</h1>
   </div>)
 }
 
 const CollectorLayout = ({ children }: Readonly<{
   children: React.ReactNode;
 }>) => {
+  const router = useRouter();
   const { t } = useTranslation();
   const Topsection = () => {
     const pathname = usePathname();
@@ -53,8 +56,9 @@ const CollectorLayout = ({ children }: Readonly<{
           },
         ]}
         topSection={<Topsection></Topsection>}
-        showBackButton={false}
+        showBackButton={true}
         intro={<Collectorintro></Collectorintro>}
+        onBackButtonClick={() => { router.push('/node-manager/cloudregion/') }}
       >
         {children}
       </SubLayout>

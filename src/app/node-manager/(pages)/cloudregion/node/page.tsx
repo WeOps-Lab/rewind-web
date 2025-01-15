@@ -218,16 +218,18 @@ const Node = () => {
       data = expandedDataMapping[String(key)] || [];
       items = updateDropdownMapping[String(key)] || [];
     }
-    debugger
     return (
       <div className="grid grid-cols-2 gap-4">
         {data.map((item: NodeExpanddata) => {
           const statusMapping: { [key: number]: string } = {
             0: "yunhangzhongx",
             2: "yichang-yichang",
-            4: "weiqiyong",
+            3: "weiqiyong",
           };
-          const metricbeattype = statusMapping[item.status] || statusMapping[4];
+          if (item.status === undefined) {
+            return
+          }
+          const metricbeattype = statusMapping[item.status];
           return (
             <div key={item.key} className="flex h-[18px]">
               <p className="w-32 h-full flex items-center justify-center text-center">{item.name}</p>
@@ -288,7 +290,7 @@ const Node = () => {
           key: item.id,
           ip: item.ip,
           operatingsystem: item.operating_system.charAt(0).toUpperCase() + item.operating_system.slice(1),
-          sidecar: item.status.status === 0 ? "Running" : "Error",
+          sidecar: !item.status.status ? "Running" : "Error",
         };
       });
     });

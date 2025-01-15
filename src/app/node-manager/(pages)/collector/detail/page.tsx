@@ -5,11 +5,13 @@ import Icon from '@/components/icon';
 import { useTranslation } from "@/utils/i18n";
 import useApiCollector from "@/app/node-manager/api/collector";
 import type { Collectorcardprops } from "@/app/node-manager/types/index";
+import { useRouter } from "next/navigation"
 
 const Collectordetail = () => {
 
   const { getCollectorlist } = useApiCollector();
   const { t } = useTranslation();
+  const router = useRouter();
   const [detaildata, setDetaildata] = useState<Collectorcardprops>({
     id: "",
     name: "",
@@ -45,13 +47,27 @@ const Collectordetail = () => {
     );
   }
 
+  const Collectorintro = () => {
+    return (
+      <div className="h-[58px] flex flex-col justify-items-center">
+        <div className="flex justify-center mb-[8px]">
+          <Icon type="caijiqizongshu" style={{ height: '34px', width: '34px' }}></Icon>
+        </div>
+        <div className="flex justify-center">
+          <div>{detaildata.name}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full">
       <SubLayout
         menuItems={[{ label: "Overview", path: "/", icon: "shezhi" }]}
         topSection={<Topsection></Topsection>}
-        showBackButton={false}
+        showBackButton={true}
         intro={<Collectorintro></Collectorintro>}
+        onBackButtonClick={() => { router.push('/node-manager/collector/') }}
       >
         <div className="w-full h-full">
           <div>文档介绍的位置</div>
@@ -69,21 +85,6 @@ const Collectordetail = () => {
           </div>
         </div>
       </SubLayout>
-    </div>
-  );
-}
-
-
-
-const Collectorintro = () => {
-  return (
-    <div className="h-[58px] flex flex-col justify-items-center">
-      <div className="flex justify-center mb-[8px]">
-        <Icon type="caijiqizongshu" style={{ height: '34px', width: '34px' }}></Icon>
-      </div>
-      <div className="flex justify-center">
-        <div>Metricbeat</div>
-      </div>
     </div>
   );
 }

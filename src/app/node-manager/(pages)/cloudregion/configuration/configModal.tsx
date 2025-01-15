@@ -111,7 +111,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       })
     }
 
-    const handleUpdate = (name: string, configinfo: string, collector: string) => {
+    const handleUpdate = (name: string, collector: string, configinfo: string) => {
       updatecollector(
         editeConfigId,
         {
@@ -149,7 +149,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               key: item.id,
               ip: item.ip,
               operatingsystem: item.operating_system,
-              sidecar: item.status.status === 0 ? "Error" : "Running",
+              sidecar: !item.status.status ? "Error" : "Running",
             };
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
@@ -182,13 +182,12 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const getApplydata = () => {
       getnodelist(Number(cloudid))
         .then((res) => {
-          debugger
           const data = res.map((item: nodeItemtRes) => {
             return {
               key: item.id,
               ip: item.ip,
               operatingsystem: item.operating_system,
-              sidecar: item.status.status === 0 ? "Running" : "Error",
+              sidecar: !item.status.status ? "Error" : "Running",
             };
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
@@ -275,7 +274,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     return (
       <OperateModal
         title={t(`common.${type}`)}
-        visible={configVisible}
+        open={configVisible}
         okText={t("common.confirm")}
         cancelText={t("common.cancel")}
         onCancel={handleCancel}

@@ -42,7 +42,7 @@ interface CollectorItem {
   configuration_id?: string;
   configuration_name?: string;
   message?: string;
-  status?:number
+  status?: number;
 }
 
 //node展开的数据类型
@@ -79,14 +79,22 @@ interface mappedNodeItem {
   sidecar: string;
 }
 
-interface ConfigDate{
-  key: string,
-  name: string,
-  collector: string,
-  operatingsystem: string,
-  nodecount: number,
-  configinfo: string,
+interface ConfigDate {
+  key: string;
+  name: string;
+  collector: string;
+  operatingsystem: string;
+  nodecount: number;
+  configinfo: string;
 }
+
+interface cloudRegionItem {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+}
+
 export type {
   ConfigurationData,
   sidecarinfotype,
@@ -98,5 +106,6 @@ export type {
   updateConfigReq,
   nodeItemtRes,
   mappedNodeItem,
-  ConfigDate
+  ConfigDate,
+  cloudRegionItem
 };

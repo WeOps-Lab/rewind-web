@@ -20,5 +20,12 @@ export interface CollectorListResponse {
     label: string;
     template: string;
   }
-  
+
+export interface collectorItem{
+  id: string,
+  name:string,
+  description: string,
+  icon:string,
+  tag: string []
+}
 
