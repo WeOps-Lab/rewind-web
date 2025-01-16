@@ -553,7 +553,7 @@ const SearchView: React.FC = () => {
                     <Select
                       mode="multiple"
                       placeholder={t('monitor.instance')}
-                      className={`w-[250px] ${searchStyle.sourceObject}`}
+                      className={`w-[300px] ${searchStyle.sourceObject}`}
                       maxTagCount="responsive"
                       loading={instanceLoading}
                       value={instanceId}
@@ -573,7 +573,7 @@ const SearchView: React.FC = () => {
                   </div>
                   <div className={searchStyle.itemOption}>
                     <Select
-                      className="w-[250px]"
+                      className="w-[300px]"
                       placeholder={t('monitor.metric')}
                       showSearch
                       value={metric}

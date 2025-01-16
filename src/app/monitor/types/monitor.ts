@@ -240,3 +240,7 @@ export interface MonitorGroupMap {
 export interface ObjectIconMap {
   [key: string]: string;
 }
+
+export interface ConfigTypeMap {
+  [key: string]: string[];
+}

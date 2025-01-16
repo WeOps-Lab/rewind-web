@@ -7,6 +7,7 @@ import {
   StateMap,
   MonitorGroupMap,
   ObjectIconMap,
+  ConfigTypeMap,
 } from '@/app/monitor/types/monitor';
 
 const useFrequencyList = (): ListItem[] => {
@@ -1243,13 +1244,13 @@ const APPOINT_METRIC_IDS: string[] = [
   'cluster_node_count',
 ];
 
-const TIMEOUT_UNITS: string[] = ['s', 'm', 'd'];
+const TIMEOUT_UNITS: string[] = ['s'];
 
 const COLLECT_TYPE_MAP: ObjectIconMap = {
   Host: 'host',
-  Website: 'http_response',
-  ping: 'ping',
-  'Router SNMP General': 'ping',
+  Website: 'web',
+  Ping: 'ping',
+  'Router SNMP General': 'snmp',
   'Switch SNMP General': 'snmp',
   'Firewall SNMP General': 'snmp',
   'Loadbalance SNMP General': 'snmp',
@@ -1258,10 +1259,48 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   'Bastion Host SNMP General': 'snmp',
   'Storage SNMP General': 'snmp',
   'Hardware Server SNMP General': 'snmp',
-  'Hardware Server IPMI': 'ipmi_sensor',
-  'Storage IPMI': 'ipmi_sensor',
+  'Hardware Server IPMI': 'ipmi',
+  'Storage IPMI': 'ipmi',
+  K8S: 'k8s',
+  'SNMP Trap': 'trap',
+};
+
+const INSTANCE_TYPE_MAP: ObjectIconMap = {
+  Host: 'os',
+  Website: 'web',
+  Ping: 'ping',
+  'Router SNMP General': 'router',
+  'Switch SNMP General': 'switch',
+  'Firewall SNMP General': 'firewall',
+  'Loadbalance SNMP General': 'loadbalance',
+  'Detection Device SNMP General': 'detection_device',
+  'Scanning Device SNMP General': 'scanning_device',
+  'Bastion Host SNMP General': 'bastion_host',
+  'Storage SNMP General': 'storage',
+  'Hardware Server SNMP General': 'hardware_server',
+  'Hardware Server IPMI': 'hardware_server',
+  'Storage IPMI': 'storage',
   K8S: 'k8s',
   'SNMP Trap': 'snmp_trap',
+};
+
+const CONFIG_TYPE_MAP: ConfigTypeMap = {
+  Host: ['cpu', 'disk', 'diskio', 'mem', 'net', 'processes', 'system'],
+  Website: ['http_response'],
+  Ping: ['ping'],
+  'Router SNMP General': ['router'],
+  'Switch SNMP General': ['switch'],
+  'Firewall SNMP General': ['firewall'],
+  'Loadbalance SNMP General': ['loadbalance'],
+  'Detection Device SNMP General': ['detection_device'],
+  'Scanning Device SNMP General': ['scanning_device'],
+  'Bastion Host SNMP General': ['bastion_host'],
+  'Storage SNMP General': ['storage'],
+  'Hardware Server SNMP General': ['hardware_server'],
+  'Hardware Server IPMI': ['hardware_server'],
+  'Storage IPMI': ['storage'],
+  K8S: ['k8s'],
+  'SNMP Trap': ['snmp_trap'],
 };
 
 export {
@@ -1276,6 +1315,8 @@ export {
   APPOINT_METRIC_IDS,
   TIMEOUT_UNITS,
   COLLECT_TYPE_MAP,
+  INSTANCE_TYPE_MAP,
+  CONFIG_TYPE_MAP,
   useInterfaceLabelMap,
   useScheduleList,
   useMethodList,
