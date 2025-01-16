@@ -250,7 +250,7 @@ const Intergration = () => {
               >
                 <div className="flex items-center space-x-4 my-2">
                   <Icon
-                    type={OBJECT_ICON_MAP[app.name]}
+                    type={OBJECT_ICON_MAP[app.name] || 'Host'}
                     className="text-[48px] min-w-[48px]"
                   />
                   <div
