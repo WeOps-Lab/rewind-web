@@ -1,5 +1,5 @@
 import { useTranslation } from "@/utils/i18n";
-import { Tag } from "antd";
+import { Tag, Tooltip } from "antd";
 import type { TableColumnsType } from 'antd';
 import { TableDataItem } from "@/app/node-manager/types/index"
 interface HookParams {
@@ -50,18 +50,22 @@ export const useColumns = ({
       ],
       onFilter: (value, record) =>
         record.sidecar.indexOf(value as string) === 0,
-      render: (key: string) => {
+      render: (key: string, item) => {
         if (key === "Running") {
           return (
-            <Tag bordered={false} color="success">
-              {key}
-            </Tag>
+            <Tooltip title={`${item.message}`}>
+              <Tag bordered={false} color="success">
+                {key}
+              </Tag>
+            </Tooltip>
           );
         }
         return (
-          <Tag bordered={false} color="error">
-            {key}
-          </Tag>
+          <Tooltip title={`${item.message}`}>
+            <Tag bordered={false} color="error">
+              {key}
+            </Tag>
+          </Tooltip>
         );
       },
     },

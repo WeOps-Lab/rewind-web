@@ -23,6 +23,7 @@ interface ModalConfig {
   key?: string;
   ids?: string[];
   selectedsystem?: string;
+  nodes?:string[]
 }
 
 //调用弹窗的类型
@@ -52,6 +53,11 @@ interface Collectorcardprops {
   introduction: string;
 }
 
+interface DropDownItem {
+  key: string;
+  label: string;
+}
+
 export type {
   ConfigItem,
   TableDataItem,
@@ -61,4 +67,5 @@ export type {
   TopSectionProps,
   OptionItem,
   Collectorcardprops,
+  DropDownItem
 };

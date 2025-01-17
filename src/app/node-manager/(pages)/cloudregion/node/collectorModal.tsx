@@ -14,7 +14,7 @@ import { useTranslation } from "@/utils/i18n";
 import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index"
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 import type { OptionItem } from "@/app/node-manager/types/index";
-import type { CollectorItem } from "@/app/node-manager/types/cloudregion";
+import type { CollectorItem, IConfiglistprops } from "@/app/node-manager/types/cloudregion";
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
 
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
@@ -25,7 +25,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     //设置表当的数据
     const { t } = useTranslation();
     const cloudid = useCloudId();
-    const { getnodelist, batchbindcollector, batchoperationcollector } = useApiCloudRegion();
+    const { getnodelist, batchbindcollector, batchoperationcollector, getconfiglist } = useApiCloudRegion();
     const [type, setType] = useState<string>("");
     const [nodeids, setNodeids] = useState<string[]>([""]);
     //设置弹窗状态
@@ -39,13 +39,15 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const [configlist, setConfiglist] = useState<OptionItem[]>([])
     //用于存储采集器的列表
     const [collectorlist, setCollectorlist] = useState<OptionItem[]>([])
+    const [selectedsystem, setSelectedsystem] = useState<string>()
 
 
     useImperativeHandle(ref, () => ({
-      showModal: ({ type, ids }) => {
+      showModal: ({ type, ids, selectedsystem }) => {
         // 开启弹窗的交互
         setCollectorVisible(true);
         setType(type);
+        setSelectedsystem(selectedsystem);
         if (ids) {
           setNodeids(ids);
         }
@@ -63,26 +65,36 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
         Promise.all(collectorPromises)
           .then((results) => {
             const collectorlisttemp: OptionItem[] = [];
-            const configlisttemp: OptionItem[] = [];
             results.forEach((res) => {
               res[0]?.status?.collectors?.forEach((elem: CollectorItem) => {
                 collectorlisttemp.push({
                   value: String(elem.collector_id),
                   label: String(elem.collector_name)
                 });
-                configlisttemp.push({
-                  value: String(elem.configuration_id),
-                  label: String(elem.configuration_name)
-                });
               });
             });
+
+            getconfiglist(Number(cloudid)).then((res) => {
+              const filtersystem = res.filter((item: IConfiglistprops) => item.operating_system === selectedsystem?.toLowerCase())
+              const filtercollector = filtersystem.filter((item: IConfiglistprops) => item.collector_name === collectorlisttemp[0].label)
+              const tempdata = filtercollector.map((item: IConfiglistprops) => {
+                return {
+                  label: item.name,
+                  value: item.id
+                }
+              })
+              setConfiglist(tempdata);
+            })
             collectorformRef.current?.resetFields();
-            setConfiglist(configlisttemp);
-            setCollectorlist(collectorlisttemp);
+
+            // 去除重复label后的处理逻辑
+            const uniqueCollectorList = Array.from(
+              collectorlisttemp
+                .reduce((map, obj) => map.set(obj.label, obj), new Map())
+                .values()
+            );
+            setCollectorlist(uniqueCollectorList);
           })
-          .catch((error) => {
-            console.error("Error fetching data: ", error);
-          });
       }
     }, [collectorVisible, collectorformRef])
 
@@ -135,9 +147,20 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
       })
     };
 
-    //选择操作系统
+    //选择的采集器
     const handleChangestartcollector = (value: string) => {
-      console.log('选择的操作系统是', value)
+      const tempcollector = collectorlist.find((item) => item.value === value)
+      getconfiglist(Number(cloudid)).then((res) => {
+        const filtersystem = res.filter((item: IConfiglistprops) => item.operating_system === selectedsystem?.toLowerCase())
+        const filtercollector = filtersystem.filter((item: IConfiglistprops) => item.collector_name === tempcollector?.label)
+        const tempdata = filtercollector.map((item: IConfiglistprops) => {
+          return {
+            label: item.name,
+            value: item.id
+          }
+        })
+        setConfiglist(tempdata);
+      })
     }
 
     //二次确认的弹窗
@@ -155,6 +178,14 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
       })
     }
 
+
+    const navigateToConfig = () => {
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const name = searchParams.get('name')
+      const cloud_region_id = searchParams.get('cloud_region_id')
+      router.push(`/node-manager/cloudregion/configuration?could_region_id=${cloud_region_id}&name=${name}`);
+    }
     return (
       <OperateModal
         title={t(`node-manager.cloudregion.node.${type}`)}
@@ -217,8 +248,18 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
             </Select>
           </Form.Item>
           }
-          <p>{t('node-manager.cloudregion.node.btntext1')}<Button className="p-0 mx-1" type="link" onClick={() => { router.push("/node-manager/cloudregion/configuration") }}>{t('node-manager.cloudregion.node.btntext2')}</Button>{t('node-manager.cloudregion.node.btntext3')}</p>
         </Form>
+        {configarr.includes(type) ?
+          <><div className="text-xs h-5">
+            <p>{t('node-manager.cloudregion.node.btntext1')}<Button className="p-0 mx-1 h-3" type="link" onClick={() => { navigateToConfig() }}>{t('node-manager.cloudregion.node.btntext2')}</Button>{t('node-manager.cloudregion.node.btntext3')}</p>
+          </div>
+          {
+            type === "bindconfig" ? <div className="text-xs h-5">
+              <p>{t('node-manager.cloudregion.node.bindaditinfo')}</p>
+            </div> : ''
+          }
+          </> : ''
+        }
       </OperateModal>
     );
   }

@@ -13,10 +13,16 @@
     "refSuccess": "Refresh successful",
     "success":"Successfully",
     "quesuccess":"Query successful!",
-    "applysuccess":"Apply success!"
+    "applysuccess":"Apply success!",
+    "unapply":"Unapply"
   },
   "node-manager": {
     "cloudregion": {
+      "editform":{
+        "title":"Edit Cloud Region",
+        "Name":"Name",
+        "Introduction":"Introduction"
+      },
       "node": {
         "node": "Node",
         "desc": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars.",
@@ -37,6 +43,7 @@
         "btntext1": "If you do not have the configuration file you need, please click",
         "btntext2": "here",
         "btntext3": "to create one.",
+        "bindaditinfo":"After binding the configuration file, the corresponding collector will start automatically.",
         "bindconfig": "Bind Configuration",
         "updataconfig": "Update Configuration",
         "restarinfo": "Are you sure to restart the collector?",
@@ -58,7 +65,8 @@
         "modifydeltitle": "Modify Delete Configurations",
         "modifydelinfo": "Are you sure to delete this Configurations?",
         "deltitle": "Delete Configuration",
-        "deleteinfo": "Are you sure to delete this Configuration?"
+        "deleteinfo": "Are you sure to delete this Configuration?",
+        "template":"Template"
       },
       "variable": {
         "Name": "NAME",

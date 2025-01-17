@@ -33,12 +33,12 @@ const Configration = () => {
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
   const [loading, setLoading] = useState<boolean>(true)
-  const [data, setData] = useState<ConfigDate[]>([])
+  const [configdata, setConfigdata] = useState<ConfigDate[]>([])
   const [addform, setAddform] = useState<CollectorListResponse[]>([])
 
   //点击编辑配置文件的触发事件
   const configurationClick = (key: string) => {
-    const configurationformdata = data.find((item) => item.key === key);
+    const configurationformdata = configdata.find((item) => item.key === key);
     configurationRef.current?.showModal({
       type: "edit",
       form: configurationformdata,
@@ -46,11 +46,12 @@ const Configration = () => {
   }
 
   //点击应用的配置文件的触发事件
-  const applyconfigurationClick = (key: string, selectedsystem: string) => {
+  const applyconfigurationClick = (key: string, selectedsystem: string, nodes: string[]) => {
     configurationRef.current?.showModal({
       type: "apply",
       key,
-      selectedsystem
+      selectedsystem,
+      nodes
     });
   }
 
@@ -63,28 +64,37 @@ const Configration = () => {
     })
   }
 
+  const onDelSuccess = () => {
+    getConfiglist();
+    handleDeleteCollector();
+  }
   // 表格的列
-  const { columns, deletestate, handleDeleteCollector } = useConfigColumns({
+  const { columns, handleDeleteCollector } = useConfigColumns({
     configurationClick,
-    applyconfigurationClick
+    applyconfigurationClick,
+    onDelSuccess
   });
 
   const emptytabledata = {
     name: "",
     key: "",
-    collector: addform[0]?.label,
+    collector: '',
     operatingsystem: 'linux',
     configinfo: addform[0]?.template
   };
 
   //组件初始化渲染
   useEffect(() => {
-    if (!isLoading) {
-      const searchParams = new URLSearchParams(window.location.search);
-      const id = searchParams.get("id");
-      if (!id) {
-        getConfiglist();
-      }
+    // 根据 URL 查询参数决定查询逻辑
+    const searchParams = new URLSearchParams(window.location.search);
+    const id = searchParams.get("id");
+
+    if (isLoading) return;
+
+    if (id) {
+      getConfiglist(id);
+    } else {
+      getConfiglist();
     }
   }, [isLoading]);
 
@@ -92,29 +102,12 @@ const Configration = () => {
   useEffect(() => {
     getCollectorlist({ node_operating_system: 'linux' }).then((res: CollectorItem[]) => {
       const tempdate: CollectorListResponse[] = res.map((item: CollectorItem) => {
-        return { value: item.name, label: item.name, template: item.default_template }
+        return { value: item.id, label: item.name, template: item.default_template }
       })
       setAddform(tempdate)
     })
   }, [])
 
-  //删除配置文件刷新页面
-  useEffect(() => {
-    if (!deletestate) {
-      return
-    }
-    getConfiglist();
-    handleDeleteCollector(false);
-  }, [deletestate])
-
-  //判断是否是点击配置文件来查询的
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const id = searchParams.get("id");
-    if (typeof id === 'string') {
-      getConfiglist(id);
-    }
-  }, []);
 
   //组价初始渲染
   useEffect(() => {
@@ -160,10 +153,11 @@ const Configration = () => {
           collector: item.collector,
           operatingsystem: item.operating_system,
           nodecount: item.node_count,
-          configinfo: item.config_template
+          configinfo: item.config_template,
+          nodes: item.nodes
         }
       })
-      setData(data)
+      setConfigdata(data)
     }).finally(() => {
       setLoading(false)
     })
@@ -221,7 +215,7 @@ const Configration = () => {
             loading={loading}
             scroll={{ y: "calc(100vh - 400px)", x: 'max-content' }}
             columns={columns}
-            dataSource={data}
+            dataSource={configdata}
             rowSelection={rowSelection}
           />
         </div>

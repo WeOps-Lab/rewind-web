@@ -10,16 +10,18 @@ import { Input, Form, Select, message, Button } from "antd";
 import OperateModal from "@/components/operate-modal";
 import { useTranslation } from "@/utils/i18n";
 import type { FormInstance } from "antd";
-import { ModalSuccess, ModalRef } from "@/app/node-manager/types/index";
-import type { TableDataItem } from "@/app/node-manager/types/index";
+import type { TableDataItem, OptionItem, ModalSuccess, ModalRef } from "@/app/node-manager/types/index";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
-const { TextArea } = Input;
+import { useUserInfoContext } from '@/context/userInfo';
+import { Typography } from 'antd';
+const { Text } = Typography;
 
 const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
   ({ }, ref) => {
     const sidecarformRef = useRef<FormInstance>(null);
     const { t } = useTranslation();
     const { getsidecarstep } = useApiCloudRegion();
+    const commonContext = useUserInfoContext();
     //设置弹窗状态
     const [SidecarVisible, setSidecarVisible] =
       useState<boolean>(false);
@@ -27,16 +29,26 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
     const [sidecarFormData, setSidecarFormData] =
       useState<TableDataItem>();
     const [type, setType] = useState<string>("");
+    const [selectgroup, setSelectgroup] = useState<OptionItem[]>()
 
     useImperativeHandle(ref, () => ({
       showModal: ({ type }) => {
         // 开启弹窗的交互
         setSidecarVisible(true);
         setType(type);
+        //设置组织列表
+        const grouptemp: OptionItem[] = []
+        commonContext?.groups.forEach((item) => {
+          grouptemp.push({
+            label: item.name,
+            value: item.id
+          })
+        })
+        setSelectgroup(grouptemp)
         setSidecarFormData({
           ipaddress: '',
           operatingsystem: 'linux',
-          group: 'group1',
+          group: commonContext?.groups[0].id,
           installationguide: ''
         });
       },
@@ -68,21 +80,31 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
     };
 
     const showSidecarForm = (type: string) => {
+      const CustomText = ({ value }: { value: string }) => {
+        return (
+          <Text
+            type='secondary'
+            copyable={{ tooltips: ['点击复制', '复制成功！'] }}>
+            {value}
+          </Text>
+        )
+      }
+
       if (type === 'uninstall') {
         return (
           <div>
             <h1>1.Windows</h1>
-            <TextArea
-              rows={8}
-              style={{ resize: 'none' }}
-              disabled={true}
-            />
+            <Text
+              className="h-36 w-full bg-gray-100 inline-block p-4 rounded border-gray-300"
+              type='secondary'
+              copyable={{ tooltips: ['点击复制', '复制成功！'] }}>
+            </Text>
             <h1 className="mt-2">2.Linux</h1>
-            <TextArea
-              rows={8}
-              style={{ resize: 'none' }}
-              disabled={true}
-            />
+            <Text
+              className="h-36 w-full bg-gray-100 inline-block p-4 rounded border-gray-300"
+              type='secondary'
+              copyable={{ tooltips: ['点击复制', '复制成功！'] }}>
+            </Text>
           </div>
         );
       }
@@ -128,10 +150,7 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
           ]}
         >
           <Select
-            options={[
-              { value: 'group1', label: 'group1' },
-              { value: 'group2', label: 'group2' }
-            ]}
+            options={selectgroup}
           >
           </Select>
         </Form.Item>
@@ -139,11 +158,7 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
           name="installationguide"
           label={t("node-manager.cloudregion.node.guide")}
         >
-          <TextArea
-            rows={8}
-            style={{ resize: 'none' }}
-            disabled={true}
-          />
+          <CustomText value={""}></CustomText>
         </Form.Item>
       </Form>);
     }

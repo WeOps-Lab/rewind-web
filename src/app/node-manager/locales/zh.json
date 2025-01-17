@@ -13,10 +13,16 @@
     "refSuccess": "刷新成功",
     "success":"成功",
     "quesuccess":"查询成功",
-     "applysuccess":"应用成功!"
+    "applysuccess":"应用成功!",
+    "unapply":"解绑"
   },
   "node-manager": {
     "cloudregion": {
+      "editform":{
+        "title":"编辑云区域",
+        "Name":"名字",
+        "Introduction":"简介"
+      },
       "node": {
         "node": "节点",
         "desc": "节点管理主要用于在每个节点上安装探针,并通过探针管理各种类型的收集器。",
@@ -37,6 +43,7 @@
         "btntext1": "如果您没有所需的配置文件，请单击",
         "btntext2": "这里",
         "btntext3": "创建一个。",
+        "bindaditinfo":"绑定配置文件后，对应的采集器会自动启动。",
         "bindconfig": "绑定配置",
         "updataconfig": "更新配置",
         "restarinfo": "您确定要重新启动收集器吗？",
@@ -58,7 +65,8 @@
         "modifydeltitle": "批量删除配置",
         "modifydelinfo": "您确定要删除此配置吗？",
         "deltitle": "删除配置",
-        "deleteinfo": "您确定要删除此配置吗？"
+        "deleteinfo": "您确定要删除此配置吗？",
+        "template":"模板"
       },
       "variable": {
         "Name": "名字",
