@@ -278,13 +278,7 @@ const Alert: React.FC<AlertProps> = ({
   useEffect(() => {
     if (isLoading) return;
     getChartData('refresh');
-  }, [
-    isLoading,
-    timeRange,
-    filters.level,
-    filters.state,
-    filters.monitor_objects,
-  ]);
+  }, [isLoading, timeRange, filters.level, filters.monitor_objects]);
 
   const changeTab = (val: string) => {
     setActiveTab(val);
@@ -377,6 +371,7 @@ const Alert: React.FC<AlertProps> = ({
     delete chartParams.page_size;
     chartParams.content = '';
     chartParams.type = 'count';
+    chartParams.status_in = '';
     try {
       setChartLoading(type !== 'timer');
       const data = await get('/monitor/api/monitor_alert/', {
@@ -479,9 +474,12 @@ const Alert: React.FC<AlertProps> = ({
     checkedValues: string[],
     field: keyof FiltersConfig
   ) => {
-    const _filters = deepClone(filters);
-    _filters[field] = checkedValues;
-    setFilters(_filters);
+    setFilters((pre) => {
+      pre[field] = checkedValues;
+      return {
+        ...pre,
+      };
+    });
   };
 
   const enterText = () => {
@@ -537,7 +535,28 @@ const Alert: React.FC<AlertProps> = ({
               </Checkbox.Group>
             </Collapse>
           </div>
-          <div className="mb-[15px]">
+          {activeTab === 'historicalAlarms' && (
+            <div className="mb-[15px]">
+              <Collapse title={t('monitor.events.state')}>
+                <Checkbox.Group
+                  value={filters.state}
+                  className="ml-[20px]"
+                  onChange={(checkeds) => onFilterChange(checkeds, 'state')}
+                >
+                  <Space direction="vertical">
+                    {/* <Checkbox value="new">{t('monitor.events.new')}</Checkbox> */}
+                    <Checkbox value="recovered">
+                      {t('monitor.events.recovery')}
+                    </Checkbox>
+                    <Checkbox value="closed">
+                      {t('monitor.events.closed')}
+                    </Checkbox>
+                  </Space>
+                </Checkbox.Group>
+              </Collapse>
+            </div>
+          )}
+          <div>
             <Collapse title={t('monitor.events.assetType')}>
               <Checkbox.Group
                 className="ml-[20px]"
@@ -571,27 +590,6 @@ const Alert: React.FC<AlertProps> = ({
               </Checkbox.Group>
             </Collapse>
           </div>
-          {activeTab === 'historicalAlarms' && (
-            <div className="mb-[15px]">
-              <Collapse title={t('monitor.events.state')}>
-                <Checkbox.Group
-                  value={filters.state}
-                  className="ml-[20px]"
-                  onChange={(checkeds) => onFilterChange(checkeds, 'state')}
-                >
-                  <Space direction="vertical">
-                    {/* <Checkbox value="new">{t('monitor.events.new')}</Checkbox> */}
-                    <Checkbox value="recovered">
-                      {t('monitor.events.recovery')}
-                    </Checkbox>
-                    <Checkbox value="closed">
-                      {t('monitor.events.closed')}
-                    </Checkbox>
-                  </Space>
-                </Checkbox.Group>
-              </Collapse>
-            </div>
-          )}
         </div>
         <div>
           <Spin spinning={chartLoading}>

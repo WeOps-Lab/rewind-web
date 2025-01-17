@@ -271,6 +271,9 @@ const AutomaticConfiguration: React.FC = () => {
   };
 
   const getFilterNodes = (id: string) => {
+    if (['ipmi', 'snmp'].includes(collectType)) {
+      return nodeList;
+    }
     const nodeIds = dataSource
       .map((item) => item.node_ids)
       .filter((item) => item !== id);
@@ -379,8 +382,10 @@ const AutomaticConfiguration: React.FC = () => {
   const handleFilterNodeChange = (val: string, index: number) => {
     const _dataSource = deepClone(dataSource);
     _dataSource[index].node_ids = val;
-    _dataSource[index].instance_name =
-      nodeList.find((item) => item.id === val)?.name || '';
+    if (['host', 'trap'].includes(collectType)) {
+      _dataSource[index].instance_name =
+        nodeList.find((item) => item.id === val)?.name || '';
+    }
     setDataSource(_dataSource);
   };
 
@@ -546,7 +551,7 @@ const AutomaticConfiguration: React.FC = () => {
         };
       case 'snmp':
         return {
-          displaycolumns: [...columns.slice(1, 3), ...columns.slice(4, 7)],
+          displaycolumns: [columns[0], columns[2], ...columns.slice(4, 7)],
           formItems: (
             <>
               <Form.Item required label={t('monitor.intergrations.port')}>
@@ -808,7 +813,7 @@ const AutomaticConfiguration: React.FC = () => {
         };
       case 'ipmi':
         return {
-          displaycolumns: [...columns.slice(1, 3), ...columns.slice(4, 7)],
+          displaycolumns: [columns[0], columns[2], ...columns.slice(4, 7)],
           formItems: (
             <>
               <Form.Item label={t('monitor.intergrations.username')} required>
