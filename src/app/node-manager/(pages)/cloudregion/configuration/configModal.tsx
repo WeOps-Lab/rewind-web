@@ -243,6 +243,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           onChange(newValue);
         }
       };
+      debugger
       return (
         <div className="flex h-52">
           {/* 左侧输入区域 */}
@@ -251,13 +252,12 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           {/* 右侧参数说明和表格 */}
           <div className="flex flex-col w-4/12 overflow-hidden">
             {/* 标题和描述 */}
-            <h1 className="font-bold flex-shrink-0">参数说明</h1>
-            <p className="flex-shrink-0">这些变量可用于配置中</p>
+            <h1 className="font-bold flex-shrink-0 text-lg">参数说明</h1>
+            <p className="flex-shrink-0 text-sm">这些变量可用于配置中</p>
             <div className="h-30">
               <CustomTable
-                className="w-full"
-                scroll={{ y: '170px' }}
-                style={{ height: '100%' }}
+                className="w-full h-36"
+                scroll={{ y: '120px' }}
                 dataSource={vardataSource}
                 columns={columns}
               />
