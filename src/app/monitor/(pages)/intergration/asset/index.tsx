@@ -102,62 +102,62 @@ const Asset = () => {
     },
   ];
 
-  //   const childColumns: ColumnItem[] = [
-  //     {
-  //       title: t('monitor.intergrations.collectionMethod'),
-  //       dataIndex: 'method',
-  //       key: 'method',
-  //     },
-  //     {
-  //       title: t('monitor.intergrations.collectionNode'),
-  //       dataIndex: 'node',
-  //       key: 'node',
-  //     },
-  //     {
-  //       title: t('monitor.intergrations.reportingStatus'),
-  //       dataIndex: 'status',
-  //       key: 'status',
-  //       render: (_, { status }) => (
-  //         <Tag
-  //           color={
-  //             status === 'normal'
-  //               ? 'green'
-  //               : status === 'inactive'
-  //                 ? 'yellow'
-  //                 : 'gray'
-  //           }
-  //         >
-  //           {status}
-  //         </Tag>
-  //       ),
-  //     },
-  //     {
-  //       title: t('monitor.intergrations.lastReportTime'),
-  //       dataIndex: 'report_time',
-  //       key: 'report_time',
-  //       render: (_, { time }) => (
-  //         <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
-  //       ),
-  //     },
-  //     {
-  //       title: t('monitor.intergrations.installationMethod'),
-  //       dataIndex: 'install_method',
-  //       key: 'install_method',
-  //     },
-  //     {
-  //       title: t('common.action'),
-  //       key: 'action',
-  //       dataIndex: 'action',
-  //       fixed: 'right',
-  //       render: (_, record) => (
-  //         <>
-  //           <Button type="link" onClick={() => checkDetail(record)}>
-  //             {t('common.detail')}
-  //           </Button>
-  //         </>
-  //       ),
-  //     },
-  //   ];
+  const childColumns: ColumnItem[] = [
+    {
+      title: t('monitor.intergrations.collectionMethod'),
+      dataIndex: 'method',
+      key: 'method',
+    },
+    {
+      title: t('monitor.intergrations.collectionNode'),
+      dataIndex: 'node',
+      key: 'node',
+    },
+    {
+      title: t('monitor.intergrations.reportingStatus'),
+      dataIndex: 'status',
+      key: 'status',
+      render: (_, { status }) => (
+        <Tag
+          color={
+            status === 'normal'
+              ? 'green'
+              : status === 'inactive'
+                ? 'yellow'
+                : 'gray'
+          }
+        >
+          {status}
+        </Tag>
+      ),
+    },
+    {
+      title: t('monitor.intergrations.lastReportTime'),
+      dataIndex: 'report_time',
+      key: 'report_time',
+      render: (_, { time }) => (
+        <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
+      ),
+    },
+    {
+      title: t('monitor.intergrations.installationMethod'),
+      dataIndex: 'install_method',
+      key: 'install_method',
+    },
+    {
+      title: t('common.action'),
+      key: 'action',
+      dataIndex: 'action',
+      fixed: 'right',
+      render: (_, record) => (
+        <>
+          <Button type="link" onClick={() => checkDetail(record)}>
+            {t('common.detail')}
+          </Button>
+        </>
+      ),
+    },
+  ];
 
   useEffect(() => {
     if (!isLoading) {
@@ -379,7 +379,12 @@ const Asset = () => {
               pagination={pagination}
               loading={tableLoading}
               expandable={{
-                expandedRowRender: () => <p style={{ margin: 0 }}>{'123'}</p>,
+                expandedRowRender: (record) => (
+                  <CustomTable
+                    dataSource={record.dataSource || []}
+                    columns={childColumns}
+                  />
+                ),
                 onExpand: (expanded, record) => {
                   console.log(expanded, record);
                 },
