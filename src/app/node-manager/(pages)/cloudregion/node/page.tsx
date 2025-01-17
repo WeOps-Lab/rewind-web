@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Input, message, Space, Typography } from "antd";
+import { Button, Input, message, Space } from "antd";
 import { DownOutlined, ReloadOutlined } from "@ant-design/icons";
 import Icon from "@/components/icon";
 import type { MenuProps, TableProps } from "antd";
@@ -33,12 +33,11 @@ const Node = () => {
   const { t } = useTranslation();
   const cloudid = useCloudId();
   const { isLoading } = useApiClient();
-  const { getnodelist, batchbindcollector } = useApiCloudRegion();
+  const { getnodelist } = useApiCloudRegion();
   const [nodelist, setNodelist] = useState<TableDataItem[]>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
   const [expandedDataMapping, setExpandedDataMapping] = useState<Record<string, NodeExpanddata[]>>({});
-  const [updateDropdownMapping, setUpdateDropdownMapping] = useState<Record<string, { key: string, label: string }[]>>({});
   const [loading, setLoading] = useState<boolean>(true)
 
   const toggleExpandRow = (key: React.Key) => {
@@ -52,8 +51,10 @@ const Node = () => {
       return;
     }
 
-    getnodelist(Number(cloudid), key as string).then((res) => {
-      const data = res[0].status.collectors.map((item: CollectorItem) => {
+    //获取展开行的数据
+    const nodelistpromise = getnodelist(Number(cloudid), key as string);
+    Promise.all([nodelistpromise]).then(([noderes]) => {
+      const data = noderes[0].status.collectors.map((item: CollectorItem) => {
         return {
           nodeid: key,
           key: item.configuration_id,
@@ -68,25 +69,14 @@ const Node = () => {
         [String(key)]: data,
       }));
 
-      const tempdata = data.map((elem: { key: string; filename: string; }) => {
-        return {
-          key: elem.key,
-          label: elem.filename || '--',
-        };
-      });
-
-      setUpdateDropdownMapping((prev) => ({
-        ...prev,
-        [String(key)]: tempdata,
-      }));
-
       setExpandedRowKeys(newExpandedRowKeys);
-    });
+    })
   };
 
   const columns = useColumns({ toggleExpandRow });
   const [visibleRowKeys, setVisibleRowKeys] = useState<string>();
   const [colbtnshow, setColbtnshow] = useState<boolean>(true);
+
 
   const sidecaritems: MenuProps["items"] = [
     {
@@ -123,6 +113,9 @@ const Node = () => {
   ];
 
   useEffect(() => {
+
+  })
+  useEffect(() => {
     if (!isLoading) {
       getNodelist();
     }
@@ -156,6 +149,7 @@ const Node = () => {
     collectorRef.current?.showModal({
       type: obj[e.key as OperationKey],
       ids: selectedRowKeys as string[],
+      selectedsystem: visibleRowKeys
     });
   };
 
@@ -173,13 +167,30 @@ const Node = () => {
     console.log("params", pagination, filters, sorter, extra);
   };
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[], selectedRowKeys: TableDataItem[]) => {
-    if (newSelectedRowKeys.length === 1) {
-      setVisibleRowKeys(selectedRowKeys[0].operatingsystem);
-    } else if (newSelectedRowKeys.length === 0) {
-      setVisibleRowKeys("");
+  //选择相同的系统节点，判断是否禁用按钮
+  const onSelectChange = (newSelectedRowKeys: React.Key[], selectedRows: TableDataItem[]) => {
+    const length = newSelectedRowKeys.length;
+    if (length === 0) {
+      // 没有选中的行
+      setVisibleRowKeys('');
+      setSelectedRowKeys([]);
+      return;
     }
-    setSelectedRowKeys(newSelectedRowKeys);
+    if (length === 1) {
+      // 只选中了一行
+      setVisibleRowKeys(selectedRows[0].operatingsystem);
+      setSelectedRowKeys(newSelectedRowKeys);
+      return;
+    }
+    // 如果选中大于1行
+    const isSameOS = selectedRows.every(
+      row => row.operatingsystem === selectedRows[0].operatingsystem
+    );
+    if (isSameOS) {
+      // 如果所有选中行的操作系统相同
+      setVisibleRowKeys(selectedRows[0].operatingsystem);
+      setSelectedRowKeys(newSelectedRowKeys);
+    }
   };
 
   const getCheckboxProps = (record: TableDataItem) => {
@@ -198,25 +209,11 @@ const Node = () => {
     getCheckboxProps: getCheckboxProps,
   };
 
-  //单个配置文件的更新
-  const updateConfig = (data: {
-    node_ids: string[];
-    collector_configuration_id: string
-  }) => {
-    batchbindcollector(data).then(() => {
-      message.success(t('common.batchbindSuccess'))
-    })
-    getNodelist();
-
-  }
-
   //获取节点的展开的行
   const getExpandedRowData = (key: React.Key) => {
     let data: NodeExpanddata[] = [];
-    let items: any[] = [];
     if (key) {
       data = expandedDataMapping[String(key)] || [];
-      items = updateDropdownMapping[String(key)] || [];
     }
     return (
       <div className="grid grid-cols-2 gap-4">
@@ -232,43 +229,26 @@ const Node = () => {
           const metricbeattype = statusMapping[item.status];
           return (
             <div key={item.key} className="flex h-[18px]">
-              <p className="w-32 h-full flex items-center justify-center text-center">{item.name}</p>
-              <div className="flex justify-center items-center ml-4 w-[30px] h-[18px}">
+              <p className="ml-8 h-full leading-[18px] text-center">{item.name}</p>
+              <div className="ml-8 h-[18px}">
                 <Icon
                   type={metricbeattype}
                   style={{ height: "18px", width: "18px" }}
                 ></Icon>
               </div>
-              <div className="flex items-center justify-center w-32 h-full">
+              <div className="flex items-center ml-8 h-full">
                 <Button
                   type="link"
                   onClick={() => {
-                    router.push(`/node-manager/cloudregion/configuration?id=${item.key}`);
+                    const searchParams = new URLSearchParams(window.location.search);
+                    const name = searchParams.get("name");
+                    const cloud_region_id = searchParams.get("cloud_region_id");
+                    router.push(`/node-manager/cloudregion/configuration?id=${item.key}&name=${name}&cloud_region_id=${cloud_region_id}`);
                   }}
                 >
                   {item.filename || '--'}
                 </Button>
               </div>
-              <Dropdown
-                className="w-32"
-                menu={{
-                  items,
-                  selectable: true,
-                  defaultSelectedKeys: ['3'],
-                  onClick: () => {
-                    updateConfig({
-                      node_ids: [item.nodeid],
-                      collector_configuration_id: item.key
-                    });
-                  }
-                }}
-              >
-                <Typography.Link>
-                  <Space>
-                    {t('common.update')}
-                  </Space>
-                </Typography.Link>
-              </Dropdown>
             </div>
           );
         })}
@@ -280,50 +260,62 @@ const Node = () => {
     getNodelist(value);
   };
 
+
   const updatenodelist = async () => {
     setLoading(true);
 
-    // 获取节点数据
-    const newNodeList = await getnodelist(Number(cloudid)).then((res) => {
-      return res.map((item: any) => {
-        return {
+    try {
+      // 获取节点数据
+      const newNodeList = await getnodelist(Number(cloudid)).then((res) => {
+        return res.map((item: any) => ({
           key: item.id,
           ip: item.ip,
           operatingsystem: item.operating_system.charAt(0).toUpperCase() + item.operating_system.slice(1),
-          sidecar: !item.status.status ? "Running" : "Error",
-        };
+          sidecar: !item.status?.status ? "Running" : "Error",
+          message: item.status.message
+        }));
       });
-    });
 
-    setNodelist(newNodeList);
+      setNodelist(newNodeList);
 
-    // 尝试保留之前展开行的数据，根据已有的 `expandedRowKeys`
-    const newExpandedDataMapping = { ...expandedDataMapping };
+      // 收集已展开行的请求
+      const requests = expandedRowKeys.map(key =>
+        getnodelist(Number(cloudid), key as string).then((res) => ({
+          key,
+          result: res[0],
+        }))
+      );
 
+      // 保证所有请求并行处理后得到统一结果
+      const results = await Promise.all(requests);
 
-    for (const key of expandedRowKeys) {
-      const resItem = await getnodelist(Number(cloudid), key as string).then((res) => res[0]);
+      const newExpandedDataMapping = { ...expandedDataMapping };
 
-      if (resItem) {
-        const expandedData = resItem.status.collectors.map((item: CollectorItem) => {
-          if (item.status) {
-            return {
-              nodeid: key,
-              key: item.configuration_id,
-              name: item.collector_name,
-              filename: item.configuration_name,
-              status: item.status,
-            }
-          }
-        }) || [];
+      results.forEach(({ key, result }) => {
+        if (result && Array.isArray(result.status?.collectors)) {
+          const expandedData = result.status.collectors.map((item: CollectorItem) => ({
+            nodeid: key,
+            key: item.configuration_id,
+            name: item.collector_name,
+            filename: item.configuration_name,
+            status: item.status,
+          }));
+          newExpandedDataMapping[String(key)] = expandedData;
+        } else {
+          console.warn(`No collectors found or error with key ${key}`);
+          newExpandedDataMapping[String(key)] = []; // Handle empty or error case
+        }
+      });
 
-        newExpandedDataMapping[String(key)] = expandedData;
-      }
+      setExpandedDataMapping(newExpandedDataMapping);
+    } catch (error) {
+      console.error('Failed to update node list', error);
+      message.error('Error updating node list');
+    } finally {
+      setLoading(false); // 无论上述情况是否默认执行完成，此行均应恢复原逻辑状态置
     }
-
-    setExpandedDataMapping(newExpandedDataMapping);
-    setLoading(false);
   };
+
 
 
   const getNodelist = (search?: string) => {
@@ -336,6 +328,7 @@ const Node = () => {
             ip: item.ip,
             operatingsystem: item.operating_system.charAt(0).toUpperCase() + item.operating_system.slice(1),
             sidecar: item.status.status === "1" ? "Running" : "Error",
+            message: item.status.message
           };
         });
         setNodelist(data);

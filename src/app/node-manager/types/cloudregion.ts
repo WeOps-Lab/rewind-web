@@ -15,7 +15,8 @@ interface sidecarinfotype {
 //配置页面的table的列定义
 interface ConfigHookParams {
   configurationClick: (key: string) => void;
-  applyconfigurationClick: (key: string, selectedsystem: string) => void;
+  applyconfigurationClick: (key: string, selectedsystem: string,nodes:string[]) => void;
+  onDelSuccess:()=>void
 }
 interface VariableProps {
   openUerModal: (type: string, form: TableDataItem) => void;
@@ -28,10 +29,12 @@ interface VariableProps {
 interface IConfiglistprops {
   id: string;
   name: string;
-  collector: string;
+  collector_name: string;
   operating_system: string;
   node_count: string;
   config_template?: string;
+  collector?:string
+  nodes?:string[]
 }
 
 //后端返回的采集器列表
@@ -95,6 +98,38 @@ interface cloudRegionItem {
   icon: string;
 }
 
+interface ConfigResItem {
+  collector?: string;
+  config_template?: string;
+  id: string;
+  name: string;
+  bode_count?: number;
+  nodes?: string[];
+  not_applied_nodes?: string[];
+  operating_system?: string;
+}
+
+interface MapCollectorItem {
+  nodeid: string;
+  key: string;
+  name: string;
+  filename: string;
+  status: number;
+}
+
+interface VarSourceItem {
+  key: string;
+  name: string;
+  description: string;
+}
+
+interface VarResItem {
+  id: string;
+  key: string;
+  value: string;
+  description: string;
+}
+
 export type {
   ConfigurationData,
   sidecarinfotype,
@@ -107,5 +142,9 @@ export type {
   nodeItemtRes,
   mappedNodeItem,
   ConfigDate,
-  cloudRegionItem
+  cloudRegionItem,
+  ConfigResItem,
+  MapCollectorItem,
+  VarSourceItem,
+  VarResItem
 };

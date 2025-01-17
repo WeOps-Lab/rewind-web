@@ -15,13 +15,14 @@ import { useTranslation } from '@/utils/i18n';
 import type { GetProps } from 'antd';
 import { useApplyColumns } from "./useApplyColumns";
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
-import { nodeItemtRes, mappedNodeItem } from '@/app/node-manager/types/cloudregion';
+import { nodeItemtRes, mappedNodeItem, VarSourceItem, VarResItem } from '@/app/node-manager/types/cloudregion';
 import type { OptionItem } from '@/app/node-manager/types/index';
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
-import useApiCollector from "@/app/node-manager/api/collector/index"
+import useApiCollector from "@/app/node-manager/api/collector/index";
+import Editor from '@monaco-editor/react';
 
 type SearchProps = GetProps<typeof Input.Search>;
-const { Search, TextArea } = Input;
+const { Search } = Input;
 
 const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
@@ -33,7 +34,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const { t } = useTranslation();
     const { getCollectorlist } = useApiCollector();
     const cloudid = useCloudId();
-    const { createconfig, getnodelist, applyconfig, updatecollector } = useApiCloudRegion();
+    const { createconfig, getnodelist, applyconfig, updatecollector, getvariablelist } = useApiCloudRegion();
     const [configForm, setConfigForm] = useState<TableDataItem>();
     const [applydata, setApplydata] = useState<mappedNodeItem[]>();
     const [colselectitems, setColselectitems] = useState<OptionItem[]>([])
@@ -41,9 +42,22 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const [editeConfigId, setEditeConfigId] = useState<string>('')
     const [type, setType] = useState<string>("");
     const [selectedsystem, setSelectedsystem] = useState<string>('Windows');
+    const [vardataSource, setVardataSource] = useState<VarSourceItem[]>([]);
+    const [nodes, setNodes] = useState<string[]>([])
+    const columns = [
+      {
+        title: '变量',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      {
+        title: '描述',
+        dataIndex: 'description',
+        key: 'description',
+      }
+    ];
     //处理应用的事件
     const handleApply = (key: string) => {
-
       applyconfig(
         cloudid,
         {
@@ -54,14 +68,16 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       })
       setConfigVisible(true);
     }
-    const applycolumns = useApplyColumns({ handleApply })
+    const applycolumns = useApplyColumns({ handleApply, nodes })
 
     useImperativeHandle(ref, () => ({
-      showModal: ({ type, form, key, selectedsystem }) => {
+      showModal: ({ type, form, key, selectedsystem, nodes }) => {
         // 开启弹窗的交互 
         setConfigVisible(true);
         setType(type);
-        if (type === 'apply' && selectedsystem && key) {
+        if (type === 'apply' && selectedsystem && key && nodes) {
+          //配置文件运用到那个节点
+          setNodes(nodes)
           setConfigid(key)
           setSelectedsystem(selectedsystem)
         } else {
@@ -78,6 +94,19 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         getApplydata();
         return
       }
+
+      //获取变量列表
+      getvariablelist(Number(cloudid)).then((res) => {
+        const tempdata: VarSourceItem[] = []
+        res.forEach((item: VarResItem) => {
+          tempdata.push({
+            key: item.id,
+            name: item.key,
+            description: item.description
+          })
+        })
+        setVardataSource(tempdata)
+      })
       //add发起请求，设置表单的数据
       if (configVisible && (['add', 'edit'].includes(type))) {
         configformRef.current?.resetFields();
@@ -85,10 +114,13 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
       }
 
       //获取系统的类型，并根据系统的类型设置采集器的列表
-      getCollectorlist({ node_operating_system: configForm?.operatingsystem || 'linux' }).then((res) => {
+      getCollectorlist({ node_operating_system: configForm?.operatingsystem }).then((res) => {
         const tempdate = res.map((item: any) => {
-          return { value: item.name, label: item.name, template: item.default_template }
+          return { value: item.id, label: item.name, template: item.default_template }
         })
+        if (!configformRef.current?.getFieldValue('collector')) {
+          configformRef.current?.setFieldValue('collector', tempdate[0].value);
+        }
         setColselectitems(tempdate);
       })
 
@@ -161,7 +193,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const handleChangeOperatingsystem = (value: string) => {
       getCollectorlist({ node_operating_system: value }).then((res) => {
         const tempdate = res.map((item: any) => {
-          return { value: item.name, label: item.name, template: item.default_template }
+          return { value: item.id, label: item.name, template: item.default_template }
         })
         configformRef.current?.setFieldValue("collector", tempdate[0].value);
         configformRef.current?.setFieldValue("configinfo", tempdate[0].template);
@@ -187,7 +219,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               key: item.id,
               ip: item.ip,
               operatingsystem: item.operating_system,
-              sidecar: !item.status.status ? "Error" : "Running",
+              sidecar: !item.status.status ? "Running" : "Error",
             };
           });
           const tempdata = data.filter((item: mappedNodeItem) => item.operatingsystem === selectedsystem);
@@ -195,22 +227,74 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         })
     }
 
+    const ConfigEditorWithParams = ({
+      value,
+      vardataSource,
+      columns,
+      onChange
+    }: {
+      value: string
+      vardataSource: VarSourceItem[]
+      columns: any,
+      onChange: any
+    }) => {
+      const handleEditorChange = (newValue: string | undefined) => {
+        if (newValue !== undefined) {
+          onChange(newValue);
+        }
+      };
+      return (
+        <div className="flex h-52">
+          {/* 左侧输入区域 */}
+          <Editor value={value} onChange={handleEditorChange} className="w-6/12 m-4" defaultLanguage="javascript" />
+
+          {/* 右侧参数说明和表格 */}
+          <div className="flex flex-col w-4/12 overflow-hidden">
+            {/* 标题和描述 */}
+            <h1 className="font-bold flex-shrink-0">参数说明</h1>
+            <p className="flex-shrink-0">这些变量可用于配置中</p>
+            <div className="h-30">
+              <CustomTable
+                className="w-full"
+                scroll={{ y: '170px' }}
+                style={{ height: '100%' }}
+                dataSource={vardataSource}
+                columns={columns}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     const showConfigForm = (type: string) => {
 
       return (
         <Form ref={configformRef} layout="vertical" initialValues={{ operatingsystem: 'linux' }} colon={false}>
-          {type === "apply" ? <div>
-            <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
-            <CustomTable
-              className="mt-4"
-              columns={applycolumns}
-              dataSource={applydata}
-              pagination={{
-                pageSize: 20,
-              }}
-              scroll={{ y: "calc(100vh - 480px)", x: "calc(100vw - 700px)" }}
-            />
-          </div>
+          {type === "apply" ?
+            <div className="w-full h-full overflow-hidden">
+              <div className="sticky top-0 z-10 bg-white">
+                <Search
+                  className="w-64 mr-[8px] h-[40px]"
+                  placeholder="input search text"
+                  enterButton
+                  onSearch={onSearch}
+                />
+              </div>
+              <div
+                className="overflow-y-auto mt-2"
+                style={{ maxHeight: "calc(100% - 50px)" }}
+              >
+                <CustomTable
+                  columns={applycolumns}
+                  dataSource={applydata}
+                  pagination={{
+                    pageSize: 10,
+                  }}
+                />
+              </div>
+            </div>
+
             :
             <><Form.Item
               name="name"
@@ -259,12 +343,17 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
               </Select>
             </Form.Item><Form.Item
               name="configinfo"
-              label=" "
+              label={t('node-manager.cloudregion.Configuration.template')}
+              rules={[
+                {
+                  required: true,
+                  message: t("common.inputMsg"),
+                },
+              ]}
             >
-              <TextArea
-                rows={8}
-                style={{ resize: 'none' }}
-              />
+              {
+                <ConfigEditorWithParams vardataSource={vardataSource} columns={columns} value={''} onChange={undefined}></ConfigEditorWithParams>
+              }
             </Form.Item></>
           }
         </Form>
@@ -279,7 +368,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         cancelText={t("common.cancel")}
         onCancel={handleCancel}
         onOk={handleConfirm}
-        width={type === "apply" ? 800 : 520}
+        width={700}
       >
         {showConfigForm(type) || " "}
       </OperateModal>
