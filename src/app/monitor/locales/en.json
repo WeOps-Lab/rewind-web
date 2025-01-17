@@ -98,7 +98,6 @@
     "organizations": "Organizations",
     "all": "All",
     "copy": "Copy",
-    "update": "Update",
     "remove": "Remove",
     "cutomTable": {
       "fieldSetting": "List field settings"
@@ -318,7 +317,7 @@
       "reportingStatus": "Reporting Status",
       "lastReportTime": "Last Report Time",
       "installationMethod": "Installation Method",
-      "configration": "Configration"
+      "updateConfigration": "Update Configration"
     }
   }
 }

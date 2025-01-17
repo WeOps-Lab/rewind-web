@@ -36,16 +36,18 @@ import { useCommon } from '@/app/monitor/context/common';
 import { deepClone, showGroupName } from '@/app/monitor/utils/common';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import CustomCascader from '@/components/custom-cascader';
+import EditConfig from './editConfig';
 const { confirm } = Modal;
 
 const Asset = () => {
-  const { get, del, isLoading } = useApiClient();
+  const { get, post, del, isLoading } = useApiClient();
   const { t } = useTranslation();
   const commonContext = useCommon();
   const { convertToLocalizedTime } = useLocalizedTime();
   const authList = useRef(commonContext?.authOrganizations || []);
   const organizationList: Organization[] = authList.current;
   const ruleRef = useRef<ModalRef>(null);
+  const configRef = useRef<ModalRef>(null);
   const [pagination, setPagination] = useState<Pagination>({
     current: 1,
     total: 0,
@@ -64,6 +66,7 @@ const Asset = () => {
     []
   );
   const [objects, setObjects] = useState<ObectItem[]>([]);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
   const columns: ColumnItem[] = [
     {
@@ -107,11 +110,13 @@ const Asset = () => {
       title: t('monitor.intergrations.collectionMethod'),
       dataIndex: 'method',
       key: 'method',
+      render: (_, record) => <>{record.method || '--'}</>,
     },
     {
       title: t('monitor.intergrations.collectionNode'),
       dataIndex: 'node',
       key: 'node',
+      render: (_, record) => <>{record.node || '--'}</>,
     },
     {
       title: t('monitor.intergrations.reportingStatus'),
@@ -127,7 +132,7 @@ const Asset = () => {
                 : 'gray'
           }
         >
-          {status}
+          {status || 'Unavailable'}
         </Tag>
       ),
     },
@@ -143,6 +148,7 @@ const Asset = () => {
       title: t('monitor.intergrations.installationMethod'),
       dataIndex: 'install_method',
       key: 'install_method',
+      render: (_, record) => <>{record.install_method || '--'}</>,
     },
     {
       title: t('common.action'),
@@ -151,8 +157,8 @@ const Asset = () => {
       fixed: 'right',
       render: (_, record) => (
         <>
-          <Button type="link" onClick={() => checkDetail(record)}>
-            {t('common.detail')}
+          <Button type="link" onClick={() => openConfigModal(record)}>
+            {t('monitor.intergrations.updateConfigration')}
           </Button>
         </>
       ),
@@ -184,6 +190,14 @@ const Asset = () => {
     });
   };
 
+  const openConfigModal = (row = {}) => {
+    configRef.current?.showModal({
+      title: t('monitor.intergrations.updateConfigration'),
+      type: 'edit',
+      form: row,
+    });
+  };
+
   const checkDetail = (row: ObjectInstItem) => {
     const _row = deepClone(row);
     const _objId = selectedKeys[0];
@@ -201,6 +215,7 @@ const Asset = () => {
   const getAssetInsts = async (objectId: React.Key, type?: string) => {
     try {
       setTableLoading(true);
+      setExpandedRowKeys([]);
       const data = await get(
         `/monitor/api/monitor_instance/${objectId}/list/`,
         {
@@ -329,6 +344,30 @@ const Asset = () => {
     getAssetInsts(selectedKeys[0], 'clear');
   };
 
+  const expandRow = async (expanded: boolean, row: any) => {
+    const _dataSource = deepClone(tableData);
+    const targetIndex = _dataSource.findIndex(
+      (item: any) => item.instance_id === row.instance_id
+    );
+    try {
+      if (targetIndex != -1 && expanded) {
+        _dataSource[targetIndex].loading = true;
+        setTableData(_dataSource);
+        const res = await post(
+          `/monitor/api/node_mgmt/get_instance_child_config/`,
+          {
+            collect_instance_id: row.instance_id,
+          }
+        );
+        _dataSource[targetIndex].dataSource = res;
+        setTableData([..._dataSource]);
+      }
+    } finally {
+      _dataSource[targetIndex].loading = false;
+      setTableData([..._dataSource]);
+    }
+  };
+
   return (
     <Spin spinning={pageLoading}>
       <div className={assetStyle.asset}>
@@ -381,13 +420,17 @@ const Asset = () => {
               expandable={{
                 expandedRowRender: (record) => (
                   <CustomTable
+                    loading={record.loading}
+                    rowKey="id"
                     dataSource={record.dataSource || []}
                     columns={childColumns}
                   />
                 ),
                 onExpand: (expanded, record) => {
-                  console.log(expanded, record);
+                  expandRow(expanded, record);
                 },
+                expandedRowKeys: expandedRowKeys,
+                onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as any),
               }}
               rowKey="instance_id"
               onChange={handleTableChange}
@@ -490,6 +533,10 @@ const Asset = () => {
           monitorObject={selectedKeys[0]}
           groupList={organizationList}
           onSuccess={operateRule}
+        />
+        <EditConfig
+          ref={configRef}
+          onSuccess={() => getAssetInsts(selectedKeys[0])}
         />
       </div>
     </Spin>

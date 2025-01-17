@@ -27,6 +27,12 @@ export interface RuleInfo {
   id?: number;
 }
 
+export interface NodeConfigInfo {
+  content?: string;
+  id?: number;
+  [key: string]: unknown;
+}
+
 export interface GroupingRules {
   query?: string;
   instances?: string[];

@@ -98,7 +98,6 @@
     "organizations": "组织",
     "all": "全部",
     "copy": "复制",
-    "update": "更新",
     "remove": "删除",
     "cutomTable": {
       "fieldSetting": "列表字段设置"
@@ -317,7 +316,7 @@
       "reportingStatus": "报告状态",
       "lastReportTime": "最新上报时间",
       "installationMethod": "安装方法",
-      "configration": "配置"
+      "updateConfigration": "更新配置"
     }
   }
 }
