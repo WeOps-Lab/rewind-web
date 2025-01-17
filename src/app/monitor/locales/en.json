@@ -98,6 +98,8 @@
     "organizations": "Organizations",
     "all": "All",
     "copy": "Copy",
+    "update": "Update",
+    "remove": "Remove",
     "cutomTable": {
       "fieldSetting": "List field settings"
     }
@@ -311,7 +313,12 @@
       "authProtocolDes": "The authentication protocol to use，for securing the authentication process.",
       "authPasswordDes": "The password used for authentication, corresponding to the chosen authentication protocol.",
       "privProtocolDes": "The encryption protocol to use, for securing the data transmitted.",
-      "privPasswordDes": "The password used for encryption, corresponding to the chosen encryption protocol."
+      "privPasswordDes": "The password used for encryption, corresponding to the chosen encryption protocol.",
+      "collectionMethod": "Collection Method",
+      "reportingStatus": "Reporting Status",
+      "lastReportTime": "Last Report Time",
+      "installationMethod": "Installation Method",
+      "configration": "Configration"
     }
   }
 }

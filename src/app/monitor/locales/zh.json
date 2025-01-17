@@ -98,6 +98,8 @@
     "organizations": "组织",
     "all": "全部",
     "copy": "复制",
+    "update": "更新",
+    "remove": "删除",
     "cutomTable": {
       "fieldSetting": "列表字段设置"
     }
@@ -310,7 +312,12 @@
       "authProtocolDes": "用于保护认证过程的认证协议。",
       "authPasswordDes": "用于认证的密码，与选择的认证协议对应。",
       "privProtocolDes": "用于保护传输数据的加密协议。",
-      "privPasswordDes": "用于加密的密码，与选择的加密协议对应。"
+      "privPasswordDes": "用于加密的密码，与选择的加密协议对应。",
+      "collectionMethod": "采集方法",
+      "reportingStatus": "报告状态",
+      "lastReportTime": "最新上报时间",
+      "installationMethod": "安装方法",
+      "configration": "配置"
     }
   }
 }

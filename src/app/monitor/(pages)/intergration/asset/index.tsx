@@ -9,6 +9,7 @@ import {
   message,
   Tooltip,
   Dropdown,
+  Tag,
 } from 'antd';
 import useApiClient from '@/utils/request';
 import assetStyle from './index.module.scss';
@@ -101,6 +102,63 @@ const Asset = () => {
     },
   ];
 
+  //   const childColumns: ColumnItem[] = [
+  //     {
+  //       title: t('monitor.intergrations.collectionMethod'),
+  //       dataIndex: 'method',
+  //       key: 'method',
+  //     },
+  //     {
+  //       title: t('monitor.intergrations.collectionNode'),
+  //       dataIndex: 'node',
+  //       key: 'node',
+  //     },
+  //     {
+  //       title: t('monitor.intergrations.reportingStatus'),
+  //       dataIndex: 'status',
+  //       key: 'status',
+  //       render: (_, { status }) => (
+  //         <Tag
+  //           color={
+  //             status === 'normal'
+  //               ? 'green'
+  //               : status === 'inactive'
+  //                 ? 'yellow'
+  //                 : 'gray'
+  //           }
+  //         >
+  //           {status}
+  //         </Tag>
+  //       ),
+  //     },
+  //     {
+  //       title: t('monitor.intergrations.lastReportTime'),
+  //       dataIndex: 'report_time',
+  //       key: 'report_time',
+  //       render: (_, { time }) => (
+  //         <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
+  //       ),
+  //     },
+  //     {
+  //       title: t('monitor.intergrations.installationMethod'),
+  //       dataIndex: 'install_method',
+  //       key: 'install_method',
+  //     },
+  //     {
+  //       title: t('common.action'),
+  //       key: 'action',
+  //       dataIndex: 'action',
+  //       fixed: 'right',
+  //       render: (_, record) => (
+  //         <>
+  //           <Button type="link" onClick={() => checkDetail(record)}>
+  //             {t('common.detail')}
+  //           </Button>
+  //         </>
+  //       ),
+  //     },
+  //   ];
+
   useEffect(() => {
     if (!isLoading) {
       getObjects();
@@ -143,14 +201,17 @@ const Asset = () => {
   const getAssetInsts = async (objectId: React.Key, type?: string) => {
     try {
       setTableLoading(true);
-      const data = await get(`/monitor/api/monitor_instance/${objectId}/list/`, {
-        params: {
-          page: pagination.current,
-          page_size: pagination.pageSize,
-          name: type === 'clear' ? '' : searchText,
-          organizations: selectedOrganizations.join(','),
-        },
-      });
+      const data = await get(
+        `/monitor/api/monitor_instance/${objectId}/list/`,
+        {
+          params: {
+            page: pagination.current,
+            page_size: pagination.pageSize,
+            name: type === 'clear' ? '' : searchText,
+            organizations: selectedOrganizations.join(','),
+          },
+        }
+      );
       setTableData(data?.results || []);
       setPagination((prev: Pagination) => ({
         ...prev,
@@ -294,12 +355,12 @@ const Asset = () => {
                 className="mr-[8px] w-[250px]"
                 showSearch
                 maxTagCount="responsive"
+                multiple
+                allowClear
                 options={organizationList}
                 onChange={(value) =>
                   setSelectedOrganizations(value as string[])
                 }
-                multiple
-                allowClear
               />
               <Input
                 allowClear
@@ -317,6 +378,12 @@ const Asset = () => {
               dataSource={tableData}
               pagination={pagination}
               loading={tableLoading}
+              expandable={{
+                expandedRowRender: () => <p style={{ margin: 0 }}>{'123'}</p>,
+                onExpand: (expanded, record) => {
+                  console.log(expanded, record);
+                },
+              }}
               rowKey="instance_id"
               onChange={handleTableChange}
             ></CustomTable>

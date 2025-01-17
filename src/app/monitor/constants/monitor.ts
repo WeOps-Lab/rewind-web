@@ -59,7 +59,7 @@ const useKeyMetricLabelMap = (): ObjectIconMap => {
   return useMemo(
     () => ({
       'cpu_summary.usage': t('monitor.views.cpu_summary.usage'),
-      'mem.pct_usable': t('monitor.views.mem.pct_usable'),
+      'mem.pct_used': t('monitor.views.mem.pct_usable'),
       load5: t('monitor.views.load5'),
       sysUpTime: t('monitor.views.sysUpTime'),
       iftotalInOctets: t('monitor.views.iftotalInOctets'),
@@ -345,7 +345,7 @@ const INDEX_CONFIG = [
         },
       },
       {
-        indexId: 'mem.pct_usable',
+        indexId: 'mem.pct_used',
         displayType: 'lineChart',
         sortIndex: 6,
         displayDimension: ['device '],
@@ -387,7 +387,7 @@ const INDEX_CONFIG = [
     ],
     tableDiaplay: [
       { type: 'progress', key: 'cpu_summary.usage' },
-      { type: 'progress', key: 'mem.pct_usable' },
+      { type: 'progress', key: 'mem.pct_used' },
       { type: 'value', key: 'load5' },
     ],
   },

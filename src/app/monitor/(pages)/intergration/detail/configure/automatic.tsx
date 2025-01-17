@@ -352,7 +352,7 @@ const AutomaticConfiguration: React.FC = () => {
         return hostTarget?.ip + '-' + hostTarget?.cloud_region;
       case 'trap':
         const target: any = nodeList.find((item) => row.node_ids === item.id);
-        return target?.ip + '-' + target?.cloud_region;
+        return 'trap' + target?.ip + '-' + target?.cloud_region;
       case 'web':
         return row.url;
       case 'ping':
