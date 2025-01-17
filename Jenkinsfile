@@ -55,17 +55,37 @@ pipeline {
             }
        }
 
-       stage('更新环境'){
+       stage('更新云环境'){
             steps {
                 script {
                     sh """
-                    echo "finished"
-                    // cd ${env.KUBE_DIR}/munchkin-web/overlays/lite/ && \
-                    //     sudo kubectl delete -k . || true &&\
-                    //     sudo kubectl apply -k .
-                    // cd ${env.KUBE_DIR}/munchkin-web/overlays/cwoa/ && \
-                    //     sudo kubectl delete -k . || true &&\
-                    //     sudo kubectl apply -k .
+                        cd ${env.KUBE_DIR}/munchkin-web/overlays/cwoa/ && \
+                            sudo kubectl delete -k . || true &&\
+                            sudo kubectl apply -k .
+                    """
+                }
+            }
+       }
+
+
+       stage('更新环境'){
+            agent {
+                label 'docker'
+            }
+            options {
+                skipDefaultCheckout true
+            }
+            steps {
+                script {
+                    sh """
+                        docker pull ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker stop opspilot-web || true
+                        docker rm opspilot-web|| true
+                        docker run -itd --name opspilot-web --restart always \
+                            -v /root/codes/conf/opspilot-web/.env:/apps/.env \
+                            --add-host=kube-service.lite:${env.CLOUD_SERVER}  \
+                            --network lite \
+                            etherfurnace/opspilot-web
                     """
                 }
             }
