@@ -461,7 +461,7 @@ const SearchView: React.FC = () => {
       },
       {} as Record<string, TreeItem>
     );
-    return Object.values(groupedData);
+    return Object.values(groupedData).filter((item) => item.key !== 'Other');
   };
 
   const filterTree = (data: TreeItem[], searchValue: string): TreeItem[] => {

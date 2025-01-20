@@ -57,6 +57,7 @@ const Intergration = () => {
     pageSize: 20,
   });
   const [frequence, setFrequence] = useState<number>(0);
+  const [plugins, setPlugins] = useState<IntergrationItem[]>([]);
   const columns: ColumnItem[] = [
     {
       title: t('common.name'),
@@ -167,18 +168,27 @@ const Intergration = () => {
       name: searchText,
       organizations: selectedOrganizations.join(','),
     };
+    const objParams = {
+      monitor_object_id: objectId,
+    };
 
     const getInstList = get(`/monitor/api/monitor_instance/${objectId}/list/`, {
       params,
     });
     const getMetrics = get('/monitor/api/metrics/', {
-      params: {
-        monitor_object_id: objectId,
-      },
+      params: objParams,
+    });
+    const getPlugins = get('/monitor/api/monitor_plugin/', {
+      params: objParams,
     });
     setTableLoading(true);
     try {
-      const res = await Promise.all([getInstList, getMetrics]);
+      const res = await Promise.all([getInstList, getMetrics, getPlugins]);
+      const _plugins = res[2].map((item: IntergrationItem) => ({
+        label: item.display_name,
+        value: item.id,
+      }));
+      setPlugins(_plugins);
       setTableData(res[0]?.results || []);
       setPagination((prev: Pagination) => ({
         ...prev,
@@ -320,7 +330,7 @@ const Intergration = () => {
       },
       {} as Record<string, any>
     );
-    return Object.values(groupedData);
+    return Object.values(groupedData).filter((item) => item.value !== 'Other');
   };
 
   const onTabChange = (val: string) => {
@@ -414,6 +424,7 @@ const Intergration = () => {
       </Spin>
       <ViewModal
         ref={viewRef}
+        plugins={plugins}
         monitorObject={objectId}
         monitorName={apps.find((item) => item.key === objectId)?.name || ''}
         monitorId={apps.find((item) => item.key === objectId)?.key || ''}

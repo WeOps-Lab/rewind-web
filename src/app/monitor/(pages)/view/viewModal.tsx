@@ -7,7 +7,7 @@ import React, {
   useImperativeHandle,
   useEffect,
 } from 'react';
-import { Button, Spin, Select, Tooltip } from 'antd';
+import { Button, Spin, Select, Tooltip, Segmented } from 'antd';
 import { BellOutlined, SearchOutlined } from '@ant-design/icons';
 import OperateDrawer from '@/app/monitor/components/operate-drawer';
 import TimeSelector from '@/components/time-selector';
@@ -25,6 +25,7 @@ import {
   IndexViewItem,
   SearchParams,
   ChartDataItem,
+  IntergrationItem,
 } from '@/app/monitor/types/monitor';
 import { useTranslation } from '@/utils/i18n';
 import { deepClone, findUnitNameById } from '@/app/monitor/utils/common';
@@ -35,17 +36,18 @@ interface ModalProps {
   monitorObject: React.Key;
   monitorName: string;
   monitorId: string;
+  plugins: IntergrationItem[];
 }
 
 const ViewModal = forwardRef<ModalRef, ModalProps>(
-  ({ monitorObject, monitorName, monitorId }, ref) => {
+  ({ monitorObject, monitorName, monitorId, plugins }, ref) => {
     const { get } = useApiClient();
     const { t } = useTranslation();
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const [groupVisible, setGroupVisible] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [title, setTitle] = useState<string>('');
-    const [metricId, setMetricId] = useState<number>();
+    const [metricId, setMetricId] = useState<number | null>();
     const beginTime: number = dayjs().subtract(15, 'minute').valueOf();
     const lastTime: number = dayjs().valueOf();
     const [timeRange, setTimeRange] = useState<number[]>([beginTime, lastTime]);
@@ -61,14 +63,18 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
     );
     const [instId, setInstId] = useState<string>('');
     const [expandId, setExpandId] = useState<number>(0);
+    const [activeTab, setActiveTab] = useState<string>('');
 
     useImperativeHandle(ref, () => ({
       showModal: ({ title, form }) => {
         // 开启弹窗的交互
         setGroupVisible(true);
         setTitle(title);
-        setInstId(form.instance_id);
-        getInitData(form.instance_id);
+        const _instId = form.instance_id;
+        const _activeTab = plugins[0]?.value || '';
+        setInstId(_instId);
+        setActiveTab(_activeTab);
+        getInitData(_instId, _activeTab);
       },
     }));
 
@@ -80,20 +86,27 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         }, frequence);
       }
       return () => clearTimer();
-    }, [frequence, timeRange, metricId]);
+    }, [frequence, timeRange, metricId, activeTab]);
 
     useEffect(() => {
       handleSearch('refresh');
     }, [timeRange]);
+
+    const onTabChange = (val: string) => {
+      setActiveTab(val);
+      setMetricId(null);
+      getInitData(instId, val);
+    };
 
     const handleCancel = () => {
       setGroupVisible(false);
       clearTimer();
     };
 
-    const getInitData = async (id: string) => {
+    const getInitData = async (id: string, tab: string) => {
       const params = {
         monitor_object_id: monitorObject,
+        monitor_plugin_id: tab,
       };
       const getGroupList = get(`/monitor/api/metrics_group/`, { params });
       const getMetrics = get('/monitor/api/metrics/', { params });
@@ -290,7 +303,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
           fetchViewData(filteredData, _groupId, instId);
         }
       } else {
-        getInitData(instId);
+        getInitData(instId, activeTab);
       }
     };
 
@@ -383,6 +396,12 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
               onRefresh={onRefresh}
             />
           </div>
+          <Segmented
+            className="mb-[20px]"
+            value={activeTab}
+            options={plugins}
+            onChange={onTabChange}
+          />
           <div className="groupList">
             <Spin spinning={loading}>
               {metricData.map((metricItem) => (
