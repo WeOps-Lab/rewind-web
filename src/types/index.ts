@@ -21,9 +21,9 @@ export interface ListItem {
 }
 
 export interface groupProps {
-  id: string,
-  name: string,
-  path: string
+  id: string;
+  name: string;
+  path: string;
 }
 
 export interface Group {
@@ -37,6 +37,7 @@ export interface UserInfoContextType {
   groups: Group[];
   selectedGroup: Group | null;
   flatGroups: Group[];
+  isSuperUser: boolean;
   setSelectedGroup: (group: Group) => void;
 }
 
