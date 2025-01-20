@@ -83,22 +83,16 @@ const Asset = () => {
       ),
     },
     {
-      title: t('monitor.views.reportTime'),
-      dataIndex: 'time',
-      key: 'time',
-      render: (_, { time }) => (
-        <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
-      ),
-    },
-    {
       title: t('common.action'),
       key: 'action',
       dataIndex: 'action',
-      fixed: 'right',
       render: (_, record) => (
         <>
           <Button type="link" onClick={() => checkDetail(record)}>
             {t('common.detail')}
+          </Button>
+          <Button type="link" className="ml-[10px]">
+            {t('common.remove')}
           </Button>
         </>
       ),
@@ -108,9 +102,9 @@ const Asset = () => {
   const childColumns: ColumnItem[] = [
     {
       title: t('monitor.intergrations.collectionMethod'),
-      dataIndex: 'method',
-      key: 'method',
-      render: (_, record) => <>{record.method || '--'}</>,
+      dataIndex: 'collect_type',
+      key: 'collect_type',
+      render: (_, record) => <>{record.collect_type || '--'}</>,
     },
     {
       title: t('monitor.intergrations.collectionNode'),
