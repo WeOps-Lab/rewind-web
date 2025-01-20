@@ -80,11 +80,15 @@ const Node = () => {
 
   const sidecaritems: MenuProps["items"] = [
     {
-      label: t("node-manager.cloudregion.node.install"),
+      label: (<div style={{ whiteSpace: 'nowrap' }}>
+        {t("node-manager.cloudregion.node.install")}
+      </div>),
       key: "installSidecar",
     },
     {
-      label: t("node-manager.cloudregion.node.uninstall"),
+      label: (<div style={{ whiteSpace: 'nowrap' }}>
+        {t("node-manager.cloudregion.node.uninstall")}
+      </div>),
       key: "uninstallSidecar",
     },
   ];
