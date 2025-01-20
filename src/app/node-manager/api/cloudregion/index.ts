@@ -20,7 +20,9 @@ const useApiCloudRegion = () => {
   //节点的模块
   //获取节点列表
   const getnodelist = async (cloud_region_id: number, search?: string) => {
-    return await get('/node_mgmt/api/node/', { params: { cloud_region_id, search } });
+    return await get('/node_mgmt/api/node/', {
+      params: { cloud_region_id, search },
+    });
   };
 
   //获取sidecar的安装步骤

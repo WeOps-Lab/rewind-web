@@ -14,6 +14,7 @@ import type { TableDataItem, OptionItem, ModalSuccess, ModalRef } from "@/app/no
 import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
 import { useUserInfoContext } from '@/context/userInfo';
 import { Typography } from 'antd';
+import sidecarStyle from "./sidecar.module.scss";
 const { Text } = Typography;
 
 const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
@@ -92,16 +93,16 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
 
       if (type === 'uninstall') {
         return (
-          <div>
+          <div className={`${sidecarStyle.sidecar}`}>
             <h1>1.Windows</h1>
             <Text
-              className="h-36 w-full bg-gray-100 inline-block p-4 rounded border-gray-300"
+              className="h-36 w-full sidecarbg inline-block p-4 rounded border-gray-300"
               type='secondary'
               copyable={{ tooltips: ['点击复制', '复制成功！'] }}>
             </Text>
             <h1 className="mt-2">2.Linux</h1>
             <Text
-              className="h-36 w-full bg-gray-100 inline-block p-4 rounded border-gray-300"
+              className="h-36 w-full sidecarbg inline-block p-4 rounded border-gray-300"
               type='secondary'
               copyable={{ tooltips: ['点击复制', '复制成功！'] }}>
             </Text>

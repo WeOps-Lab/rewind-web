@@ -5,8 +5,7 @@ import { VariableProps } from "@/app/node-manager/types/cloudregion";
 export const useVarColumns = ({
   openUerModal,
   getFormDataById,
-  delconfirm,
-  delcancel
+  delconfirm
 }: VariableProps): TableColumnsType<TableDataItem> => {
   const { t } = useTranslation();
   const columns: TableColumnsType<TableDataItem> = [
@@ -45,7 +44,6 @@ export const useVarColumns = ({
             okText={t("common.confirm")}
             cancelText={t("common.cancel")}
             onConfirm={() => { delconfirm(key, text) }}
-            onCancel={delcancel}
           >
             <Button
               color="primary"

@@ -3,14 +3,6 @@ interface TableDataItem {
   [key: string]: any;
 }
 
-interface ConfigItem<T> {
-  name?: string;
-  title: string;
-  dataIndex: string;
-  render?: (text: string | number, record: T) => JSX.Element;
-  [key: string]: unknown;
-}
-
 //传入modal的参数类型成功的回调
 interface ModalSuccess {
   onSuccess: () => void;
@@ -23,7 +15,7 @@ interface ModalConfig {
   key?: string;
   ids?: string[];
   selectedsystem?: string;
-  nodes?:string[]
+  nodes?: string[];
 }
 
 //调用弹窗的类型
@@ -59,13 +51,11 @@ interface DropDownItem {
 }
 
 export type {
-  ConfigItem,
   TableDataItem,
   ModalSuccess,
   ModalRef,
-  ModalConfig,
   TopSectionProps,
   OptionItem,
   Collectorcardprops,
-  DropDownItem
+  DropDownItem,
 };

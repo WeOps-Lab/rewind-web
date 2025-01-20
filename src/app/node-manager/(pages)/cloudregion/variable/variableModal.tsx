@@ -75,7 +75,7 @@ const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =>
   return (
     <OperateModal
       title={type === "add" ? t("common.add") : t("common.edit")}
-      visible={variableVisible}
+      open={variableVisible}
       okText={t("common.confirm")}
       cancelText={t("common.cancel")}
       onCancel={handleCancel}

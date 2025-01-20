@@ -65,11 +65,10 @@ const Configration = () => {
   }
 
   const onDelSuccess = () => {
-    getConfiglist();
-    handleDeleteCollector();
+    getConfiglist()
   }
   // 表格的列
-  const { columns, handleDeleteCollector } = useConfigColumns({
+  const { columns } = useConfigColumns({
     configurationClick,
     applyconfigurationClick,
     onDelSuccess
@@ -123,15 +122,9 @@ const Configration = () => {
   //处理多选触发的事件逻辑
   const rowSelection: TableProps<TableProps>["rowSelection"] = {
     onChange: (
-      selectedRowKeys: React.Key[],
-      selectedRows: TableProps[]
+      selectedRowKeys: React.Key[]
     ) => {
       setSelectedconfigurationRowKeys(selectedRowKeys);
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        "selectedRows: ",
-        selectedRows
-      );
     },
     //禁止选中
     getCheckboxProps: (record: any) => {
@@ -176,9 +169,6 @@ const Configration = () => {
     getConfiglist(value);
   };
 
-  const delcancel = (e: any) => {
-    console.log(e);
-  }
   return (
     <Mainlayout>
       <div className={`${configstyle.config} w-full h-full`}>
@@ -200,7 +190,6 @@ const Configration = () => {
             okText={t("common.confirm")}
             cancelText={t("common.cancel")}
             onConfirm={modifydeleteconfirm}
-            onCancel={delcancel}
           >
             <Button
               className="mr-[8px]"

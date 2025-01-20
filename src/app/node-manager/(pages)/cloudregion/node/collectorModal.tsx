@@ -248,8 +248,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
             </Select>
           </Form.Item>
           }
-        </Form>
-        {configarr.includes(type) ?
+        </Form>{configarr.includes(type) ?
           <><div className="text-xs h-5">
             <p>{t('node-manager.cloudregion.node.btntext1')}<Button className="p-0 mx-1 h-3" type="link" onClick={() => { navigateToConfig() }}>{t('node-manager.cloudregion.node.btntext2')}</Button>{t('node-manager.cloudregion.node.btntext3')}</p>
           </div>
