@@ -9,17 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
 import EntityList from "@/components/entity-list/index";
-import type { cloudRegionItem } from "@/app/node-manager/types/cloudregion"
-import type { GetProps } from 'antd';
-type SearchProps = GetProps<typeof Input.Search>;
-
-interface CloudregioncardProps {
-  id: number;
-  name: string;
-  introduction: string;
-  [key: string]: any;
-}
-
+import type { cloudRegionItem, CloudregioncardProps } from "@/app/node-manager/types/cloudregion"
 
 const Cloudregion = () => {
   const cloudregionformRef = useRef<FormInstance>(null);
@@ -72,9 +62,6 @@ const Cloudregion = () => {
     setOpeneditcloudregion(false);
   };
 
-  const onSearch: SearchProps['onSearch'] = (value, _e, info) =>
-    console.log(info?.source, value);
-
   const handleEdit = () => {
     setOpeneditcloudregion(true)
   }
@@ -96,7 +83,7 @@ const Cloudregion = () => {
           </Menu>)
         }}
         openModal={() => { }}
-        onSearch={onSearch} onCardClick={(item: cloudRegionItem) => { navigateToNode(item) }} ></EntityList>
+        onCardClick={(item: cloudRegionItem) => { navigateToNode(item) }} ></EntityList>
       {/* 编辑默认云区域弹窗 */}
       <OperateModal
         title={t('node-manager.cloudregion.editform.title')}

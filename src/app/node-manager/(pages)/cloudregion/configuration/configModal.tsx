@@ -20,6 +20,7 @@ import type { OptionItem } from '@/app/node-manager/types/index';
 import useCloudId from "@/app/node-manager/hooks/useCloudid";
 import useApiCollector from "@/app/node-manager/api/collector/index";
 import Editor from '@monaco-editor/react';
+import useConfigModalColumns from "./configModalColumns";
 
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
@@ -30,6 +31,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     //设置弹窗状态
     const [configVisible, setConfigVisible] =
       useState<boolean>(false);
+    const columns = useConfigModalColumns();
     //设置表当的数据
     const { t } = useTranslation();
     const { getCollectorlist } = useApiCollector();
@@ -44,18 +46,8 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
     const [selectedsystem, setSelectedsystem] = useState<string>('Windows');
     const [vardataSource, setVardataSource] = useState<VarSourceItem[]>([]);
     const [nodes, setNodes] = useState<string[]>([])
-    const columns = [
-      {
-        title: '变量',
-        dataIndex: 'name',
-        key: 'name',
-      },
-      {
-        title: '描述',
-        dataIndex: 'description',
-        key: 'description',
-      }
-    ];
+
+
     //处理应用的事件
     const handleApply = (key: string) => {
       applyconfig(
@@ -243,17 +235,16 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
           onChange(newValue);
         }
       };
-      debugger
       return (
         <div className="flex h-52">
           {/* 左侧输入区域 */}
-          <Editor value={value} onChange={handleEditorChange} className="w-6/12 m-4" defaultLanguage="javascript" />
+          <Editor value={value} onChange={handleEditorChange} className="w-6/12 m-4" theme="vs-dark" defaultLanguage="javascript" />
 
           {/* 右侧参数说明和表格 */}
           <div className="flex flex-col w-4/12 overflow-hidden">
             {/* 标题和描述 */}
-            <h1 className="font-bold flex-shrink-0 text-lg">参数说明</h1>
-            <p className="flex-shrink-0 text-sm">这些变量可用于配置中</p>
+            <h1 className="font-bold flex-shrink-0 text-sm">{t('node-manager.cloudregion.Configuration.parameterdes')}</h1>
+            <p className="flex-shrink-0 text-xs">{t('node-manager.cloudregion.Configuration.varconfig')}</p>
             <div className="h-30">
               <CustomTable
                 className="w-full h-36"
@@ -273,7 +264,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(
         <Form ref={configformRef} layout="vertical" initialValues={{ operatingsystem: 'linux' }} colon={false}>
           {type === "apply" ?
             <div className="w-full h-full overflow-hidden">
-              <div className="sticky top-0 z-10 bg-white">
+              <div className="sticky top-0 z-10">
                 <Search
                   className="w-64 mr-[8px] h-[40px]"
                   placeholder="input search text"

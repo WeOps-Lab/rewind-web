@@ -80,11 +80,15 @@ const Node = () => {
 
   const sidecaritems: MenuProps["items"] = [
     {
-      label: t("node-manager.cloudregion.node.install"),
+      label: (<div style={{ whiteSpace: 'nowrap' }}>
+        {t("node-manager.cloudregion.node.install")}
+      </div>),
       key: "installSidecar",
     },
     {
-      label: t("node-manager.cloudregion.node.uninstall"),
+      label: (<div style={{ whiteSpace: 'nowrap' }}>
+        {t("node-manager.cloudregion.node.uninstall")}
+      </div>),
       key: "uninstallSidecar",
     },
   ];
@@ -112,9 +116,6 @@ const Node = () => {
     },
   ];
 
-  useEffect(() => {
-
-  })
   useEffect(() => {
     if (!isLoading) {
       getNodelist();
@@ -161,10 +162,6 @@ const Node = () => {
   const CollectormenuProps = {
     items: collectoritems,
     onClick: handleCollectorMenuClick,
-  };
-
-  const onChange: TableProps<TableDataItem>["onChange"] = (pagination, filters, sorter, extra) => {
-    console.log("params", pagination, filters, sorter, extra);
   };
 
   //选择相同的系统节点，判断是否禁用按钮
@@ -266,15 +263,14 @@ const Node = () => {
 
     try {
       // 获取节点数据
-      const newNodeList = await getnodelist(Number(cloudid)).then((res) => {
-        return res.map((item: any) => ({
-          key: item.id,
-          ip: item.ip,
-          operatingsystem: item.operating_system.charAt(0).toUpperCase() + item.operating_system.slice(1),
-          sidecar: !item.status?.status ? "Running" : "Error",
-          message: item.status.message
-        }));
-      });
+      const res = await getnodelist(Number(cloudid))
+      const newNodeList = res.map((item: any) => ({
+        key: item.id,
+        ip: item.ip,
+        operatingsystem: item.operating_system.charAt(0).toUpperCase() + item.operating_system.slice(1),
+        sidecar: !item.status?.status ? "Running" : "Error",
+        message: item.status.message
+      }));
 
       setNodelist(newNodeList);
 
@@ -403,7 +399,6 @@ const Node = () => {
                 expandedRowKeys,
                 expandedRowRender: (record) => getExpandedRowData(record.key),
               }}
-              onChange={onChange}
             />
           </div>
           <SidecarModal

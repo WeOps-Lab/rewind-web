@@ -8,20 +8,20 @@
     "config": "配置",
     "node": "节点",
     "topdes": "节点管理主要用于在每个节点上安装探针,并通过探针管理各种类型的收集器。",
-    "batchbindSuccess":"绑定成功",
-    "batchbindFailed":"绑定失败",
+    "batchbindSuccess": "绑定成功",
+    "batchbindFailed": "绑定失败",
     "refSuccess": "刷新成功",
-    "success":"成功",
-    "quesuccess":"查询成功",
-    "applysuccess":"应用成功!",
-    "unapply":"解绑"
+    "success": "成功",
+    "quesuccess": "查询成功",
+    "applysuccess": "应用成功!",
+    "unapply": "解绑"
   },
   "node-manager": {
     "cloudregion": {
-      "editform":{
-        "title":"编辑云区域",
-        "Name":"名字",
-        "Introduction":"简介"
+      "editform": {
+        "title": "编辑云区域",
+        "Name": "名字",
+        "Introduction": "简介"
       },
       "node": {
         "node": "节点",
@@ -39,18 +39,18 @@
         "start": "开启采集器",
         "restart": "重启采集器",
         "stop": "停止采集器",
-        "config": "配置", 
+        "config": "配置",
         "btntext1": "如果您没有所需的配置文件，请单击",
         "btntext2": "这里",
         "btntext3": "创建一个。",
-        "bindaditinfo":"绑定配置文件后，对应的采集器会自动启动。",
+        "bindaditinfo": "绑定配置文件后，对应的采集器会自动启动。",
         "bindconfig": "绑定配置",
         "updataconfig": "更新配置",
         "restarinfo": "您确定要重新启动收集器吗？",
         "stopinfo": "您确定要停止收集器吗？",
-        "ruleinputinfo":"请输入你的IP地址!",
-        "group":"组织",
-        "stopsuccess":"停止采集器成功"
+        "ruleinputinfo": "请输入你的IP地址!",
+        "group": "组织",
+        "stopsuccess": "停止采集器成功"
       },
       "Configuration": {
         "name": "姓名",
@@ -66,7 +66,11 @@
         "modifydelinfo": "您确定要删除此配置吗？",
         "deltitle": "删除配置",
         "deleteinfo": "您确定要删除此配置吗？",
-        "template":"模板"
+        "template": "模板",
+        "variable": "变量",
+        "description": "描述",
+        "parameterdes": "参数说明",
+        "varconfig": "这些变量可用于配置中"
       },
       "variable": {
         "Name": "名字",
@@ -77,7 +81,7 @@
         "desc": "描述",
         "deletevariable": "删除变量",
         "deleteinfo": "您确定要删除此变量吗？",
-        "actions":"操作"
+        "actions": "操作"
       }
     },
     "collector": {

@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Input, message } from "antd";
 import CustomTable from '@/components/custom-table/index';
-import type { TableProps } from "antd";
 import { useTranslation } from "@/utils/i18n";
 import VariableModal from "./variableModal";
 import { ModalRef } from "@/app/node-manager/types/index";
@@ -57,26 +56,11 @@ const Variable = () => {
     });
   };
 
-  const delcancel = () => {
-
-  };
   const columns = useVarColumns({
     openUerModal,
     getFormDataById,
-    delconfirm,
-    delcancel
+    delconfirm
   })
-
-  //处理多选触发的事件逻辑
-  const rowSelection: TableProps<TableDataItem>["rowSelection"] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: TableDataItem[]) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        "selectedRows: ",
-        selectedRows
-      );
-    },
-  };
 
   //添加和编辑成功后，重新获取表格数据
   const onsuccessvariablemodal = () => {
@@ -142,7 +126,6 @@ const Variable = () => {
             loading={loading}
             columns={columns}
             dataSource={data}
-            rowSelection={rowSelection}
           />
         </div>
         <VariableModal

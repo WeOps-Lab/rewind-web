@@ -8,20 +8,20 @@
     "configuration": "Configuration",
     "node": "Node",
     "topdes": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars.",
-    "batchbindSuccess":"Batchbinded successfully",
-    "batchbindFailed":"Failed to batchbind",
+    "batchbindSuccess": "Batchbinded successfully",
+    "batchbindFailed": "Failed to batchbind",
     "refSuccess": "Refresh successful",
-    "success":"Successfully",
-    "quesuccess":"Query successful!",
-    "applysuccess":"Apply success!",
-    "unapply":"Unapply"
+    "success": "Successfully",
+    "quesuccess": "Query successful!",
+    "applysuccess": "Apply success!",
+    "unapply": "Unapply"
   },
   "node-manager": {
     "cloudregion": {
-      "editform":{
-        "title":"Edit Cloud Region",
-        "Name":"Name",
-        "Introduction":"Introduction"
+      "editform": {
+        "title": "Edit Cloud Region",
+        "Name": "Name",
+        "Introduction": "Introduction"
       },
       "node": {
         "node": "Node",
@@ -43,14 +43,14 @@
         "btntext1": "If you do not have the configuration file you need, please click",
         "btntext2": "here",
         "btntext3": "to create one.",
-        "bindaditinfo":"After binding the configuration file, the corresponding collector will start automatically.",
+        "bindaditinfo": "After binding the configuration file, the corresponding collector will start automatically.",
         "bindconfig": "Bind Configuration",
         "updataconfig": "Update Configuration",
         "restarinfo": "Are you sure to restart the collector?",
         "stopinfo": "Are you sure to stop the collector?",
-        "ruleinputinfo":"Please input your IP address!",
-        "group":"Group",
-        "stopsuccess":"The collector was stopped successfully"
+        "ruleinputinfo": "Please input your IP address!",
+        "group": "Group",
+        "stopsuccess": "The collector was stopped successfully"
       },
       "Configuration": {
         "name": "NAME",
@@ -66,7 +66,11 @@
         "modifydelinfo": "Are you sure to delete this Configurations?",
         "deltitle": "Delete Configuration",
         "deleteinfo": "Are you sure to delete this Configuration?",
-        "template":"Template"
+        "template": "Template",
+        "variable": "VARIABLE",
+        "description": "DESCRIPTION",
+        "parameterdes": "Parameter description",
+        "varconfig": "These variables are available in the configuration"
       },
       "variable": {
         "Name": "NAME",
@@ -77,7 +81,7 @@
         "desc": "Description",
         "deletevariable": "Delete Variable",
         "deleteinfo": "Are you sure to delete this variable?",
-        "actions":"ACTIONS"
+        "actions": "ACTIONS"
       }
     },
     "collector": {

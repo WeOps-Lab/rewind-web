@@ -1,23 +1,26 @@
 {
   "zh": [
     {
-    "label": "云区域",
-    "icon": "yunchang-yunquyu",
-    "path": "/node-manager/cloudregion"
-  },
-  {
-    "label": "采集器",
-    "icon": "xiaocaijiqi",
-    "path": "/node-manager/collector"
-  }],
+      "label": "云区域",
+      "icon": "yunchang-yunquyu",
+      "path": "/node-manager/cloudregion"
+    },
+    {
+      "label": "采集器",
+      "icon": "xiaocaijiqi",
+      "path": "/node-manager/collector"
+    }
+  ],
   "en": [
     {
-    "label": "Cloud Region",
-    "icon": "yunchang-yunquyu",
-    "path": "/node-manager/cloudregion"
-  }, {
-    "label": "Collector",
-    "icon": "xiaocaijiqi",
-    "path": "/node-manager/collector"
-  }]
+      "label": "Cloud Region",
+      "icon": "yunchang-yunquyu",
+      "path": "/node-manager/cloudregion"
+    },
+    {
+      "label": "Collector",
+      "icon": "xiaocaijiqi",
+      "path": "/node-manager/collector"
+    }
+  ]
 }

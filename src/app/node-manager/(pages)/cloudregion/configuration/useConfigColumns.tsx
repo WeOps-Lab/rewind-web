@@ -85,11 +85,7 @@ export const useConfigColumns = ({
     onDelSuccess()
   }
 
-  const handleDeleteCollector = () => {
-  }
-
   return {
-    columns,
-    handleDeleteCollector
+    columns
   };
 };
