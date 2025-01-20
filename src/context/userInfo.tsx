@@ -12,15 +12,17 @@ export const UserInfoProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [roles, setRoles] = useState<string[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [flatGroups, setFlatGroups] = useState<Group[]>([]);
+  const [isSuperUser, setIsSuperUser] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchLoginInfo = async () => {
       try {
         const data = await get('/core/api/login_info/');
-        const { group_list: groupList, roles } = data;
+        const { group_list: groupList, roles, is_superuser } = data;
 
         setGroups(groupList);
         setRoles(roles);
+        setIsSuperUser(is_superuser);
 
         if (groupList?.length) {
           const flattenedGroups = convertTreeDataToGroupOptions(groupList);
@@ -46,7 +48,7 @@ export const UserInfoProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <UserInfoContext.Provider value={{ roles, groups, selectedGroup, flatGroups, setSelectedGroup }}>
+    <UserInfoContext.Provider value={{ roles, groups, selectedGroup, flatGroups, isSuperUser, setSelectedGroup }}>
       {children}
     </UserInfoContext.Provider>
   );

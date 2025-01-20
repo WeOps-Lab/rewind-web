@@ -4,6 +4,7 @@ import { SettingFilled } from '@ant-design/icons';
 import customTableStyle from './index.module.scss';
 import FieldSettingModal from './fieldSettingModal';
 import { ColumnItem } from '@/types/index';
+import { TableCurrentDataSource } from 'antd/es/table/interface';
 
 interface CustomTableProps<T>
   extends Omit<
@@ -34,6 +35,7 @@ const CustomTable = <T extends object>({
   loading,
   scroll,
   pagination,
+  onChange,
   ...TableProps
 }: CustomTableProps<T>) => {
   const fieldRef = useRef<FieldRef>(null);
@@ -44,7 +46,7 @@ const CustomTable = <T extends object>({
       if (scroll?.y) {
         setTableHeight(parseCalcY(scroll.y as string));
       }
-    }
+    };
     updateTableHeight();
     window.addEventListener('resize', updateTableHeight);
     return () => {
@@ -89,6 +91,19 @@ const CustomTable = <T extends object>({
     fieldRef.current?.showModal();
   };
 
+  const handlePageChange = (current: number, pageSize: number) => {
+    if (pagination && pagination.onChange) {
+      pagination.onChange(current, pageSize);
+    }
+    onChange &&
+      onChange(
+        { current, pageSize },
+        {}, // filters
+        [], // sorter
+        {} as TableCurrentDataSource<T> // extra
+      );
+  };
+
   return (
     <div
       className={`relative ${customTableStyle.customTable}`}
@@ -106,7 +121,7 @@ const CustomTable = <T extends object>({
           showSizeChanger
           current={pagination?.current}
           pageSize={pagination?.pageSize}
-          onChange={pagination?.onChange}
+          onChange={handlePageChange}
         />
       </div>)}
       {fieldSetting.showSetting ? (
