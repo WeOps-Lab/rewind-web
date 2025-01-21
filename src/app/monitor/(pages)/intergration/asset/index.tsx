@@ -127,10 +127,10 @@ const Asset = () => {
       dataIndex: 'status',
       key: 'status',
       width: 150,
-      render: (_, { time }) =>
+      render: (_, { time, status }) =>
         time ? (
-          <Tag color={NODE_STATUS_MAP[getStatusByTimestamp(time)] || 'gray'}>
-            {t(`monitor.intergrations.${getStatusByTimestamp(time)}`)}
+          <Tag color={NODE_STATUS_MAP[status] || 'gray'}>
+            {t(`monitor.intergrations.${status}`)}
           </Tag>
         ) : (
           <>--</>
@@ -189,20 +189,6 @@ const Asset = () => {
       getAssetInsts(selectedKeys[0]);
     }
   }, [pagination.current, pagination.pageSize, selectedOrganizations]);
-
-  const getStatusByTimestamp = (timestamp: number): string => {
-    const now = Date.now(); // 当前时间戳
-    const diff = now - timestamp * 1000; // 差值，单位为毫秒
-    const fiveMinutes = 5 * 60 * 1000; // 5分钟，单位为毫秒
-    const oneHour = 60 * 60 * 1000; // 1小时，单位为毫秒
-    if (diff <= fiveMinutes) {
-      return 'normal';
-    } else if (diff > fiveMinutes && diff <= oneHour) {
-      return 'inactive';
-    } else {
-      return 'unavailable';
-    }
-  };
 
   const openRuleModal = (type: string, row = {}) => {
     const title: string = t(
