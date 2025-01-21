@@ -317,7 +317,10 @@
       "reportingStatus": "Reporting Status",
       "lastReportTime": "Last Report Time",
       "installationMethod": "Installation Method",
-      "updateConfigration": "Update"
+      "updateConfigration": "Update",
+      "normal": "Normal",
+      "inactive": "Inactive",
+      "unavailable": "Unavailable"
     }
   }
 }

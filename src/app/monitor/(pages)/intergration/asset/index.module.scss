@@ -2,6 +2,8 @@
     display: flex;
 
     .tree {
+        width: 220px;
+        min-width: 220px;
         display: flex;
         flex-direction: column;
         height: calc(100vh - 140px);
@@ -18,9 +20,10 @@
     }
 
     .rule {
-        width: 250px;
+        width: 220px;
+        min-width: 220px;
         height: calc(100vh - 140px);
-        padding: 20px 30px;
+        padding: 20px;
         background: var(--color-bg-1);
         margin-left: 10px;
 
@@ -81,6 +84,7 @@
     }
 
     .table {
+        width: calc(100vw - 490px);
         background: var(--color-bg-1);
         height: calc(100vh - 140px);
         padding: 20px;
@@ -89,12 +93,6 @@
         .search {
             display: flex;
             margin-bottom: 10px;
-        }
-
-        :global {
-            .ant-table {
-                width: calc(100vw - 580px);
-            }
         }
     }
 }

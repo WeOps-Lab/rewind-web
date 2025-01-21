@@ -1265,6 +1265,25 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   'SNMP Trap': 'trap',
 };
 
+const OBJECT_COLLECT_TYPE_MAP: ObjectIconMap = {
+  Host: 'os',
+  Website: 'web',
+  Ping: 'ping',
+  Swtich: 'switch',
+  Router: 'router',
+  Firewall: 'firewall',
+  Loadbalance: 'loadbalance',
+  'Detection Device': 'detection_device',
+  'Scanning Device': 'scanning_device',
+  'Bastion Host': 'bastion_host',
+  Storage: 'storage',
+  'Hardware Server': 'hardware_server',
+  Cluster: 'k8s',
+  Pod: 'k8s',
+  Node: 'k8s',
+  'SNMP Trap': 'trap',
+};
+
 const INSTANCE_TYPE_MAP: ObjectIconMap = {
   Host: 'os',
   Website: 'web',
@@ -1303,6 +1322,12 @@ const CONFIG_TYPE_MAP: ConfigTypeMap = {
   'SNMP Trap': ['snmp_trap'],
 };
 
+const NODE_STATUS_MAP: ObjectIconMap = {
+  normal: 'green',
+  inactive: 'yellow',
+  unavailable: 'gray',
+};
+
 export {
   UNIT_LIST,
   INDEX_CONFIG,
@@ -1317,6 +1342,8 @@ export {
   COLLECT_TYPE_MAP,
   INSTANCE_TYPE_MAP,
   CONFIG_TYPE_MAP,
+  OBJECT_COLLECT_TYPE_MAP,
+  NODE_STATUS_MAP,
   useInterfaceLabelMap,
   useScheduleList,
   useMethodList,

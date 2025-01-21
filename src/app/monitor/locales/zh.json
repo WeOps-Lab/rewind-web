@@ -275,8 +275,8 @@
       "generateConfiguration": "生成配置",
       "originalValue": "原始值",
       "mappedValue": "映射值",
-      "manual": "手动配置",
-      "automatic": "自动配置",
+      "manual": "手动",
+      "automatic": "自动",
       "basicInformation": "基本信息",
       "MonitoredObject": "监控对象",
       "node": "节点",
@@ -314,9 +314,12 @@
       "privPasswordDes": "用于加密的密码，与选择的加密协议对应。",
       "collectionMethod": "采集方法",
       "reportingStatus": "报告状态",
-      "lastReportTime": "最新上报时间",
+      "lastReportTime": "最后上报时间",
       "installationMethod": "安装方法",
-      "updateConfigration": "更新配置"
+      "updateConfigration": "更新配置",
+      "normal": "正常",
+      "inactive": "不活跃",
+      "unavailable": "失联"
     }
   }
 }

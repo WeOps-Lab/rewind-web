@@ -37,6 +37,10 @@ import { deepClone, showGroupName } from '@/app/monitor/utils/common';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import CustomCascader from '@/components/custom-cascader';
 import EditConfig from './editConfig';
+import {
+  OBJECT_COLLECT_TYPE_MAP,
+  NODE_STATUS_MAP,
+} from '@/app/monitor/constants/monitor';
 const { confirm } = Modal;
 
 const Asset = () => {
@@ -73,11 +77,13 @@ const Asset = () => {
       title: t('common.name'),
       dataIndex: 'instance_name',
       key: 'instance_name',
+      width: 200,
     },
     {
       title: t('monitor.group'),
       dataIndex: 'organization',
       key: 'organization',
+      width: 200,
       render: (_, { organization }) => (
         <>{showGroupName(organization, organizationList)}</>
       ),
@@ -86,12 +92,14 @@ const Asset = () => {
       title: t('common.action'),
       key: 'action',
       dataIndex: 'action',
+      width: 140,
+      fixed: 'right',
       render: (_, record) => (
         <>
           <Button type="link" onClick={() => checkDetail(record)}>
             {t('common.detail')}
           </Button>
-          <Button type="link" className="ml-[10px]">
+          <Button type="link" disabled className="ml-[10px]">
             {t('common.remove')}
           </Button>
         </>
@@ -104,54 +112,65 @@ const Asset = () => {
       title: t('monitor.intergrations.collectionMethod'),
       dataIndex: 'collect_type',
       key: 'collect_type',
+      width: 150,
       render: (_, record) => <>{record.collect_type || '--'}</>,
     },
     {
       title: t('monitor.intergrations.collectionNode'),
-      dataIndex: 'node',
-      key: 'node',
-      render: (_, record) => <>{record.node || '--'}</>,
+      dataIndex: 'agent_id',
+      key: 'agent_id',
+      width: 150,
+      render: (_, record) => <>{record.agent_id || '--'}</>,
     },
     {
       title: t('monitor.intergrations.reportingStatus'),
       dataIndex: 'status',
       key: 'status',
-      render: (_, { status }) => (
-        <Tag
-          color={
-            status === 'normal'
-              ? 'green'
-              : status === 'inactive'
-                ? 'yellow'
-                : 'gray'
-          }
-        >
-          {status || 'Unavailable'}
-        </Tag>
-      ),
+      width: 150,
+      render: (_, { status, time }) =>
+        time ? (
+          <Tag color={NODE_STATUS_MAP[status] || 'gray'}>
+            {getStatusByTimestamp(time)}
+          </Tag>
+        ) : (
+          <>--</>
+        ),
     },
     {
       title: t('monitor.intergrations.lastReportTime'),
-      dataIndex: 'report_time',
-      key: 'report_time',
+      dataIndex: 'time',
+      key: 'time',
+      width: 160,
       render: (_, { time }) => (
         <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
       ),
     },
     {
       title: t('monitor.intergrations.installationMethod'),
-      dataIndex: 'install_method',
-      key: 'install_method',
-      render: (_, record) => <>{record.install_method || '--'}</>,
+      dataIndex: 'config_id',
+      key: 'config_id',
+      width: 170,
+      render: (_, record) => (
+        <>
+          {record.config_id
+            ? t('monitor.intergrations.automatic')
+            : t('monitor.intergrations.manual')}
+        </>
+      ),
     },
     {
       title: t('common.action'),
       key: 'action',
       dataIndex: 'action',
       fixed: 'right',
+      width: 100,
       render: (_, record) => (
         <>
-          <Button type="link" onClick={() => openConfigModal(record)}>
+          <Button
+            type="link"
+            disabled={!record.config_id}
+            onClick={() => openConfigModal(record)}
+          >
             {t('monitor.intergrations.updateConfigration')}
           </Button>
         </>
@@ -170,6 +189,20 @@ const Asset = () => {
       getAssetInsts(selectedKeys[0]);
     }
   }, [pagination.current, pagination.pageSize, selectedOrganizations]);
+
+  const getStatusByTimestamp = (timestamp: number): string => {
+    const now = Date.now(); // 当前时间戳
+    const diff = now - timestamp * 1000; // 差值，单位为毫秒
+    const fiveMinutes = 5 * 60 * 1000; // 5分钟，单位为毫秒
+    const oneHour = 60 * 60 * 1000; // 1小时，单位为毫秒
+    if (diff <= fiveMinutes) {
+      return 'normal';
+    } else if (diff > fiveMinutes && diff <= oneHour) {
+      return 'inactive';
+    } else {
+      return 'unavailable';
+    }
+  };
 
   const openRuleModal = (type: string, row = {}) => {
     const title: string = t(
@@ -350,10 +383,19 @@ const Asset = () => {
         const res = await post(
           `/monitor/api/node_mgmt/get_instance_child_config/`,
           {
-            collect_instance_id: row.instance_id,
+            instance_id: row.instance_id,
+            instance_type:
+              OBJECT_COLLECT_TYPE_MAP[
+                objects.find((item) => item.id === selectedKeys[0])?.name || ''
+              ],
           }
         );
-        _dataSource[targetIndex].dataSource = res;
+        _dataSource[targetIndex].dataSource = res.map(
+          (item: TableDataItem, index: number) => ({
+            ...item,
+            id: index,
+          })
+        );
         setTableData([..._dataSource]);
       }
     } finally {
@@ -372,7 +414,6 @@ const Asset = () => {
             onSearch={onSearchTree}
           />
           <Tree
-            className={assetStyle.tree}
             showLine
             selectedKeys={selectedKeys}
             expandedKeys={expandedKeys}
@@ -406,7 +447,7 @@ const Asset = () => {
               ></Input>
             </div>
             <CustomTable
-              scroll={{ y: 'calc(100vh - 320px)' }}
+              scroll={{ y: 'calc(100vh - 320px)', x: 'calc(100vh - 500px)' }}
               columns={columns}
               dataSource={tableData}
               pagination={pagination}
@@ -414,6 +455,7 @@ const Asset = () => {
               expandable={{
                 expandedRowRender: (record) => (
                   <CustomTable
+                    scroll={{ x: 'calc(100vh - 500px)' }}
                     loading={record.loading}
                     rowKey="id"
                     dataSource={record.dataSource || []}

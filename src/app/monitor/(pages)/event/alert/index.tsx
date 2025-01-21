@@ -45,20 +45,6 @@ import {
   useStateMap,
 } from '@/app/monitor/constants/monitor';
 
-const INIT_HISTORY_FILTERS = {
-  level: [],
-  state: [],
-  notify: [],
-  monitor_objects: [],
-};
-
-const INIT_ACTIVE_FILTERS = {
-  level: [],
-  state: ['new'],
-  notify: [],
-  monitor_objects: [],
-};
-
 const Alert: React.FC<AlertProps> = ({
   objects,
   metrics,
@@ -93,7 +79,12 @@ const Alert: React.FC<AlertProps> = ({
       selectValue: 1440,
       rangePickerVaule: null,
     })?.current || {};
-  const [filters, setFilters] = useState<FiltersConfig>(INIT_ACTIVE_FILTERS);
+  const [filters, setFilters] = useState<FiltersConfig>({
+    level: [],
+    state: [],
+    notify: [],
+    monitor_objects: [],
+  });
   const [activeTab, setActiveTab] = useState<string>('activeAlarms');
   const [chartData, setChartData] = useState<Record<string, any>[]>([]);
 
@@ -255,6 +246,7 @@ const Alert: React.FC<AlertProps> = ({
   }, [
     frequence,
     timeRange,
+    activeTab,
     filters.level,
     filters.state,
     filters.monitor_objects,
@@ -268,6 +260,7 @@ const Alert: React.FC<AlertProps> = ({
   }, [
     isLoading,
     timeRange,
+    activeTab,
     filters.level,
     filters.state,
     filters.monitor_objects,
@@ -278,17 +271,16 @@ const Alert: React.FC<AlertProps> = ({
   useEffect(() => {
     if (isLoading) return;
     getChartData('refresh');
-  }, [isLoading, timeRange, filters.level, filters.monitor_objects]);
+  }, [
+    isLoading,
+    timeRange,
+    filters.state,
+    filters.level,
+    filters.monitor_objects,
+  ]);
 
   const changeTab = (val: string) => {
     setActiveTab(val);
-    setChartData([]);
-    if (val === 'activeAlarms') {
-      setFilters(INIT_ACTIVE_FILTERS);
-      return;
-    }
-    setTimeRange([beginTime, lastTime]);
-    setFilters(INIT_HISTORY_FILTERS);
   };
 
   const showAlertCloseConfirm = (row: TableDataItem) => {
@@ -319,19 +311,15 @@ const Alert: React.FC<AlertProps> = ({
 
   const getParams = () => {
     const params = {
-      status_in: filters.state.join(',') || 'recovered,closed',
-      level_in: filters.level.join(','),
+      status_in: filters.state,
+      level_in: filters.level,
       monitor_objects: filters.monitor_objects.join(','),
       content: searchText,
       page: pagination.current,
       page_size: pagination.pageSize,
-      created_at_after: '',
-      created_at_before: '',
+      created_at_after: dayjs(timeRange[0]).toISOString(),
+      created_at_before: dayjs(timeRange[1]).toISOString(),
     };
-    if (activeTab === 'historicalAlarms') {
-      params.created_at_after = dayjs(timeRange[0]).toISOString();
-      params.created_at_before = dayjs(timeRange[1]).toISOString();
-    }
     return params;
   };
 
@@ -347,9 +335,34 @@ const Alert: React.FC<AlertProps> = ({
   };
 
   const getAssetInsts = async (type: string, text?: string) => {
-    const params = getParams();
+    const params: any = getParams();
     if (text) {
       params.content = '';
+    }
+    if (activeTab === 'activeAlarms') {
+      params.created_at_before = '';
+      params.created_at_after = '';
+      if (params.status_in.length && !params.status_in.includes('new')) {
+        setTableData([]);
+        setPagination((pre) => ({
+          ...pre,
+          total: 0,
+        }));
+        return;
+      }
+      params.status_in = 'new';
+    } else {
+      if (params.status_in.length === 1 && params.status_in[0] === 'new') {
+        setTableData([]);
+        setPagination((pre) => ({
+          ...pre,
+          total: 0,
+        }));
+        return;
+      }
+      params.status_in =
+        params.status_in.filter((item: any) => item !== 'new').join(',') ||
+        'recovered,closed';
     }
     try {
       setTableLoading(type !== 'timer');
@@ -371,7 +384,7 @@ const Alert: React.FC<AlertProps> = ({
     delete chartParams.page_size;
     chartParams.content = '';
     chartParams.type = 'count';
-    chartParams.status_in = '';
+    chartParams.status_in = chartParams.status_in.join(',');
     try {
       setChartLoading(type !== 'timer');
       const data = await get('/monitor/api/monitor_alert/', {
@@ -535,27 +548,25 @@ const Alert: React.FC<AlertProps> = ({
               </Checkbox.Group>
             </Collapse>
           </div>
-          {activeTab === 'historicalAlarms' && (
-            <div className="mb-[15px]">
-              <Collapse title={t('monitor.events.state')}>
-                <Checkbox.Group
-                  value={filters.state}
-                  className="ml-[20px]"
-                  onChange={(checkeds) => onFilterChange(checkeds, 'state')}
-                >
-                  <Space direction="vertical">
-                    {/* <Checkbox value="new">{t('monitor.events.new')}</Checkbox> */}
-                    <Checkbox value="recovered">
-                      {t('monitor.events.recovery')}
-                    </Checkbox>
-                    <Checkbox value="closed">
-                      {t('monitor.events.closed')}
-                    </Checkbox>
-                  </Space>
-                </Checkbox.Group>
-              </Collapse>
-            </div>
-          )}
+          <div className="mb-[15px]">
+            <Collapse title={t('monitor.events.state')}>
+              <Checkbox.Group
+                value={filters.state}
+                className="ml-[20px]"
+                onChange={(checkeds) => onFilterChange(checkeds, 'state')}
+              >
+                <Space direction="vertical">
+                  <Checkbox value="new">{t('monitor.events.new')}</Checkbox>
+                  <Checkbox value="recovered">
+                    {t('monitor.events.recovery')}
+                  </Checkbox>
+                  <Checkbox value="closed">
+                    {t('monitor.events.closed')}
+                  </Checkbox>
+                </Space>
+              </Checkbox.Group>
+            </Collapse>
+          </div>
           <div>
             <Collapse title={t('monitor.events.assetType')}>
               <Checkbox.Group
@@ -600,7 +611,6 @@ const Alert: React.FC<AlertProps> = ({
                 </span>
                 <TimeSelector
                   defaultValue={timeDefaultValue}
-                  onlyRefresh={activeTab === 'activeAlarms'}
                   onChange={(value) => onTimeChange(value)}
                   onFrequenceChange={onFrequenceChange}
                   onRefresh={onRefresh}
