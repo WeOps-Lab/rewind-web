@@ -127,10 +127,10 @@ const Asset = () => {
       dataIndex: 'status',
       key: 'status',
       width: 150,
-      render: (_, { status, time }) =>
+      render: (_, { time }) =>
         time ? (
-          <Tag color={NODE_STATUS_MAP[status] || 'gray'}>
-            {getStatusByTimestamp(time)}
+          <Tag color={NODE_STATUS_MAP[getStatusByTimestamp(time)] || 'gray'}>
+            {t(`monitor.intergrations.${getStatusByTimestamp(time)}`)}
           </Tag>
         ) : (
           <>--</>

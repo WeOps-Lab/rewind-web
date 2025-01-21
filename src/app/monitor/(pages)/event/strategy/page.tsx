@@ -91,6 +91,7 @@ const StrategyOperation = () => {
   const [labels, setLabels] = useState<string[]>([]);
   const [unit, setUnit] = useState<string>('min');
   const [periodUnit, setPeriodUnit] = useState<string>('min');
+  const [nodataUnit, setNodataUnit] = useState<string>('min');
   const [conditions, setConditions] = useState<FilterItem[]>([]);
   const [noDataAlert, setNoDataAlert] = useState<number | null>(null);
   const [noDataLevel, setNoDataLevel] = useState<string>();
@@ -164,6 +165,7 @@ const StrategyOperation = () => {
     const plugins = data.map((item: PluginItem) => ({
       label: item.display_name,
       value: item.id,
+      name: item.name,
     }));
     setPluginList(plugins);
   };
@@ -326,6 +328,11 @@ const StrategyOperation = () => {
     });
   };
 
+  const handleNodataUnitChange = (val: string) => {
+    setNodataUnit(val);
+    setNoDataAlert(null);
+  };
+
   const handleThresholdMethodChange = (val: string, index: number) => {
     const _conditions = deepClone(threshold);
     _conditions[index].method = val;
@@ -431,6 +438,13 @@ const StrategyOperation = () => {
     }
   };
 
+  const isPlugin = (callBack: any) => {
+    const target: any = pluginList.find(
+      (item) => item.value === callBack('plugin_id')
+    );
+    return target?.name === 'SNMP Trap';
+  };
+
   return (
     <Spin spinning={pageLoading} className="w-full">
       <div className={strategyStyle.strategy}>
@@ -526,7 +540,7 @@ const StrategyOperation = () => {
                         }
                       >
                         {({ getFieldValue }) =>
-                          getFieldValue('plugin_id') === 1000 ? (
+                          isPlugin(getFieldValue) ? (
                             <Form.Item<StrategyFields>
                               label={<span className="w-[100px]">PromQL</span>}
                               name="prom_ql"
@@ -959,73 +973,120 @@ const StrategyOperation = () => {
                           </div>
                         ))}
                       </Form.Item>
-                      <Form.Item<StrategyFields>
-                        label={
-                          <span className="w-[100px]">
-                            {t('monitor.events.recovery')}
-                          </span>
+                      <Form.Item
+                        noStyle
+                        shouldUpdate={(prevValues, currentValues) =>
+                          prevValues.plugin_id !== currentValues.plugin_id
                         }
                       >
-                        {t('monitor.events.recoveryCondition')}
-                        <Form.Item
-                          name="recovery_condition"
-                          noStyle
-                          rules={[
-                            { required: false, message: t('common.required') },
-                          ]}
-                        >
-                          <InputNumber
-                            className="mx-[10px] w-[100px]"
-                            min={1}
-                            precision={0}
-                          />
-                        </Form.Item>
-                        {t('monitor.events.consecutivePeriods')}
-                        <div className="text-[var(--color-text-3)] mt-[10px]">
-                          {t('monitor.events.setRecovery')}
-                        </div>
-                      </Form.Item>
-                      <Form.Item<StrategyFields>
-                        name="no_data_alert"
-                        label={
-                          <span className="w-[100px]">
-                            {t('monitor.events.nodata')}
-                          </span>
+                        {({ getFieldValue }) =>
+                          isPlugin(getFieldValue) ? null : (
+                            <>
+                              <Form.Item<StrategyFields>
+                                label={
+                                  <span className="w-[100px]">
+                                    {t('monitor.events.recovery')}
+                                  </span>
+                                }
+                              >
+                                {t('monitor.events.recoveryCondition')}
+                                <Form.Item
+                                  name="recovery_condition"
+                                  noStyle
+                                  rules={[
+                                    {
+                                      required: false,
+                                      message: t('common.required'),
+                                    },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    className="mx-[10px] w-[100px]"
+                                    min={1}
+                                    precision={0}
+                                  />
+                                </Form.Item>
+                                {t('monitor.events.consecutivePeriods')}
+                                <div className="text-[var(--color-text-3)] mt-[10px]">
+                                  {t('monitor.events.setRecovery')}
+                                </div>
+                              </Form.Item>
+                              <Form.Item<StrategyFields>
+                                name="no_data_alert"
+                                label={
+                                  <span className="w-[100px]">
+                                    {t('monitor.events.nodata')}
+                                  </span>
+                                }
+                                rules={[
+                                  { required: true, validator: validateNoData },
+                                ]}
+                              >
+                                <Switch
+                                  checked={openNoData}
+                                  onChange={handleNoDataChange}
+                                />
+                                {openNoData && (
+                                  <div className="mt-[10px]">
+                                    {t('monitor.events.reportedFor')}
+                                    <InputNumber
+                                      className="mx-[10px]"
+                                      min={
+                                        SCHEDULE_UNIT_MAP[`${nodataUnit}Min`]
+                                      }
+                                      max={
+                                        SCHEDULE_UNIT_MAP[`${nodataUnit}Max`]
+                                      }
+                                      value={noDataAlert}
+                                      precision={0}
+                                      addonAfter={
+                                        <Select
+                                          value={nodataUnit}
+                                          style={{ width: 120 }}
+                                          onChange={handleNodataUnitChange}
+                                        >
+                                          {SCHEDULE_LIST.map((item) => (
+                                            <Option
+                                              key={item.value}
+                                              value={item.value}
+                                            >
+                                              {item.label}
+                                            </Option>
+                                          ))}
+                                        </Select>
+                                      }
+                                      onChange={handleNoDataAlertChange}
+                                    />
+                                    {t('monitor.events.nodataPeriods')}
+                                    <Select
+                                      value={noDataLevel}
+                                      style={{
+                                        width: '100px',
+                                        margin: '0 10px',
+                                      }}
+                                      placeholder={t('monitor.events.level')}
+                                      onChange={(val: string) =>
+                                        setNoDataLevel(val)
+                                      }
+                                    >
+                                      {LEVEL_LIST.map((item: ListItem) => (
+                                        <Option
+                                          value={item.value}
+                                          key={item.value}
+                                        >
+                                          {item.label}
+                                        </Option>
+                                      ))}
+                                    </Select>
+                                    {t('monitor.events.nodataRecoverCondition')}
+                                    {` ${noDataAlert || ''} ${SCHEDULE_LIST.find((item) => item.value === nodataUnit)?.label} `}
+                                    {t('monitor.events.nodataRecover')}
+                                  </div>
+                                )}
+                              </Form.Item>
+                            </>
+                          )
                         }
-                        rules={[{ required: true, validator: validateNoData }]}
-                      >
-                        <Switch
-                          checked={openNoData}
-                          onChange={handleNoDataChange}
-                        />
-                        {openNoData && (
-                          <div className="mt-[10px]">
-                            {t('monitor.events.reportedFor')}
-                            <InputNumber
-                              className="mx-[10px] w-[100px]"
-                              min={1}
-                              precision={0}
-                              onChange={handleNoDataAlertChange}
-                              value={noDataAlert}
-                            />
-                            {t('monitor.events.nodataPeriods')}
-                            <Select
-                              value={noDataLevel}
-                              style={{
-                                width: '100px',
-                                marginLeft: '10px',
-                              }}
-                              placeholder={t('monitor.events.level')}
-                              onChange={(val: string) => setNoDataLevel(val)}
-                            >
-                              {LEVEL_LIST.map((item: ListItem) => (
-                                <Option value={item.value} key={item.value}>
-                                  {item.label}
-                                </Option>
-                              ))}
-                            </Select>
-                          </div>
-                        )}
                       </Form.Item>
                     </>
                   ),
