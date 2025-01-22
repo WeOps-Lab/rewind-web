@@ -49,6 +49,7 @@ const Configure = () => {
   const [activeTab, setActiveTab] = useState<string>('');
   const [items, setItems] = useState<IntergrationItem[]>([]);
   const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
+  const [dragOverTargetId, setDragOverTargetId] = useState<string | null>(null); // 新增状态，用于存储当前拖拽悬停的目标 ID
 
   const columns: ColumnItem[] = [
     {
@@ -298,10 +299,11 @@ const Configure = () => {
     setDraggingItemId(id);
   };
 
-  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>, targetId: string) => {
     if (draggingItemId) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      setDragOverTargetId(targetId); // 设置当前悬停的目标 ID
     }
   };
 
@@ -310,6 +312,7 @@ const Configure = () => {
     targetId: string
   ) => {
     e.preventDefault();
+    setDragOverTargetId(null); // 清除悬停目标 ID
     if (draggingItemId && draggingItemId !== targetId) {
       const draggingIndex = metricData.findIndex(
         (item) => item.id === draggingItemId
@@ -379,11 +382,16 @@ const Configure = () => {
           {!!metricData.length ? (
             metricData.map((metricItem, index) => (
               <Collapse
-                className="mb-[10px]"
+                className={`mb-[10px] ${
+                  dragOverTargetId === metricItem.id &&
+                  draggingItemId !== dragOverTargetId
+                    ? 'border-t-[1px] border-blue-200'
+                    : ''
+                }`}
                 key={metricItem.id}
                 sortable
                 onDragStart={(e) => onDragStart(e, metricItem.id)}
-                onDragOver={onDragOver}
+                onDragOver={(e) => onDragOver(e, metricItem.id)}
                 onDrop={(e) => onDrop(e, metricItem.id)}
                 title={metricItem.display_name || ''}
                 isOpen={!index}

@@ -13,7 +13,7 @@ import {
 import CustomTooltip from './customTooltips';
 import {
   generateUniqueRandomColor,
-  formatTime,
+  useFormatTime,
   isStringArray,
 } from '@/app/monitor/utils/common';
 import chartLineStyle from './index.module.scss';
@@ -57,6 +57,7 @@ const LineChart: React.FC<LineChartProps> = ({
   allowSelect = true,
   onXRangeChange,
 }) => {
+  const { formatTime } = useFormatTime();
   const [startX, setStartX] = useState<number | null>(null);
   const [endX, setEndX] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -134,37 +135,22 @@ const LineChart: React.FC<LineChartProps> = ({
 
   const renderYAxisTick = (props: any) => {
     const { x, y, payload } = props;
-    const tickWidth = 80; // 设置标签的最大宽度
-    const words = String(payload.value).split('');
-    const lines = [];
-    let currentLine = '';
-
-    words.forEach((word) => {
-      if ((currentLine + word).length < tickWidth / 10) {
-        currentLine += `${word}`;
-      } else {
-        lines.push(currentLine.trim());
-        currentLine = `${word}`;
-      }
-    });
-    lines.push(currentLine.trim());
-
+    const label = String(payload.value);
+    const maxLength = 7; // 设置标签的最大长度
     return (
-      <g transform={`translate(${x},${y})`}>
-        {lines.map((line, index) => (
-          <text
-            key={index}
-            x={0}
-            y={0}
-            dy={index * 12}
-            textAnchor="end"
-            fill="var(--color-text-3)"
-            fontSize={14}
-          >
-            {line}
-          </text>
-        ))}
-      </g>
+      <text
+        x={x}
+        y={y}
+        textAnchor="end"
+        fontSize={14}
+        fill="var(--color-text-3)"
+        dy={4}
+      >
+        {label.length > maxLength && <title>{label}</title>}
+        {label.length > maxLength
+          ? `${label.slice(0, maxLength - 2)}...`
+          : label}
+      </text>
     );
   };
 

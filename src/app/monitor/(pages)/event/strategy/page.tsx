@@ -30,6 +30,8 @@ import {
   FilterItem,
   ThresholdField,
   PluginItem,
+  IndexViewItem,
+  GroupInfo,
 } from '@/app/monitor/types/monitor';
 import { useCommon } from '@/app/monitor/context/common';
 import { deepClone } from '@/app/monitor/utils/common';
@@ -42,6 +44,7 @@ import {
 import SelectAssets from './selectAssets';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useConditionList } from '@/app/monitor/constants/monitor';
+import { useUserInfoContext } from '@/context/userInfo';
 import {
   useScheduleList,
   COMPARISON_METHOD,
@@ -73,6 +76,9 @@ const StrategyOperation = () => {
   const organizationList: Organization[] = authList.current;
   const userList: UserItem[] = users.current;
   const instRef = useRef<ModalRef>(null);
+  const userContext = useUserInfoContext();
+  const currentGroup = useRef(userContext?.selectedGroup);
+  const groupId = [currentGroup?.current?.id || ''];
   const monitorObjId = searchParams.get('monitorObjId');
   const monitorName = searchParams.get('monitorName');
   const type = searchParams.get('type');
@@ -120,6 +126,7 @@ const StrategyOperation = () => {
     },
   ]);
   const [pluginList, setPluginList] = useState<SegmentedItem[]>([]);
+  const [originMetricData, setOriginMetricData] = useState<IndexViewItem[]>([]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -137,6 +144,7 @@ const StrategyOperation = () => {
     form.resetFields();
     if (type === 'add') {
       form.setFieldsValue({
+        organizations: groupId,
         notice_type: 'email',
         notice: false,
         period: 5,
@@ -284,11 +292,33 @@ const StrategyOperation = () => {
   const getMetrics = async (params = {}) => {
     try {
       setMetricsLoading(true);
-      const data: MetricItem[] = await get('/monitor/api/metrics/', {
-        params,
-      });
-      setMetrics(data);
-    } finally {
+      const getGroupList = get(`/monitor/api/metrics_group/`, { params });
+      const getMetrics = get('/monitor/api/metrics/', { params });
+      Promise.all([getGroupList, getMetrics])
+        .then((res) => {
+          const metricData = deepClone(res[1] || []);
+          setMetrics(res[1] || []);
+          const groupData = res[0].map((item: GroupInfo) => ({
+            ...item,
+            child: [],
+          }));
+          metricData.forEach((metric: MetricItem) => {
+            const target = groupData.find(
+              (item: GroupInfo) => item.id === metric.metric_group
+            );
+            if (target) {
+              target.child.push(metric);
+            }
+          });
+          const _groupData = groupData.filter(
+            (item: any) => !!item.child?.length
+          );
+          setOriginMetricData(_groupData);
+        })
+        .finally(() => {
+          setMetricsLoading(false);
+        });
+    } catch {
       setMetricsLoading(false);
     }
   };
@@ -611,14 +641,18 @@ const StrategyOperation = () => {
                                     showSearch
                                     value={metric}
                                     loading={metricsLoading}
+                                    options={originMetricData.map((item) => ({
+                                      label: item.display_name,
+                                      title: item.name,
+                                      options: (item.child || []).map(
+                                        (tex) => ({
+                                          label: tex.display_name,
+                                          value: tex.name,
+                                        })
+                                      ),
+                                    }))}
                                     onChange={handleMetricChange}
-                                  >
-                                    {metrics.map((item) => (
-                                      <Option value={item.name} key={item.name}>
-                                        {item.display_name}
-                                      </Option>
-                                    ))}
-                                  </Select>
+                                  />
                                   <div className={strategyStyle.conditionItem}>
                                     {conditions.length ? (
                                       <ul className={strategyStyle.conditions}>

@@ -10,11 +10,9 @@ import {
   ObectItem,
   MetricItem,
 } from '@/app/monitor/types/monitor';
-import CustomCascader from '@/components/custom-cascader';
 import ViewModal from './viewModal';
 import {
   TabItem,
-  Organization,
   ColumnItem,
   ModalRef,
   Pagination,
@@ -23,8 +21,6 @@ import {
 import { useKeyMetricLabelMap } from '@/app/monitor/constants/monitor';
 import CustomTable from '@/components/custom-table';
 import TimeSelector from '@/components/time-selector';
-import { useCommon } from '@/app/monitor/context/common';
-import { showGroupName } from '@/app/monitor/utils/common';
 import { INDEX_CONFIG } from '@/app/monitor/constants/monitor';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import viewStyle from './index.module.scss';
@@ -34,11 +30,8 @@ const Intergration = () => {
   const { t } = useTranslation();
   const KEY_METRIC_LABEL_MAP = useKeyMetricLabelMap();
   const router = useRouter();
-  const commonContext = useCommon();
   const { convertToLocalizedTime } = useLocalizedTime();
-  const authList = useRef(commonContext?.authOrganizations || []);
   const viewRef = useRef<ModalRef>(null);
-  const organizationList: Organization[] = authList.current;
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [pageLoading, setPageLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('');
@@ -47,9 +40,6 @@ const Intergration = () => {
   const [apps, setApps] = useState<TabItem[]>([]);
   const [objectId, setObjectId] = useState<string>('');
   const [tableLoading, setTableLoading] = useState<boolean>(false);
-  const [selectedOrganizations, setSelectedOrganizations] = useState<string[]>(
-    []
-  );
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     current: 1,
@@ -64,15 +54,6 @@ const Intergration = () => {
       dataIndex: 'instance_name',
       width: 140,
       key: 'instance_name',
-    },
-    {
-      title: t('monitor.group'),
-      dataIndex: 'organization',
-      key: 'organization',
-      width: 140,
-      render: (_, { organization }) => (
-        <>{showGroupName(organization, organizationList)}</>
-      ),
     },
     {
       title: t('monitor.views.reportTime'),
@@ -138,7 +119,7 @@ const Intergration = () => {
     if (objectId) {
       onRefresh();
     }
-  }, [pagination.current, pagination.pageSize, selectedOrganizations]);
+  }, [pagination.current, pagination.pageSize]);
 
   useEffect(() => {
     if (!frequence) {
@@ -156,7 +137,6 @@ const Intergration = () => {
     objectId,
     pagination.current,
     pagination.pageSize,
-    selectedOrganizations,
     searchText,
   ]);
 
@@ -166,7 +146,6 @@ const Intergration = () => {
       page_size: pagination.pageSize,
       add_metrics: true,
       name: searchText,
-      organizations: selectedOrganizations.join(','),
     };
     const objParams = {
       monitor_object_id: objectId,
@@ -288,7 +267,6 @@ const Intergration = () => {
       page_size: pagination.pageSize,
       add_metrics: true,
       name: searchText,
-      organizations: selectedOrganizations.join(','),
     };
     if (type === 'clear') {
       params.name = '';
@@ -383,17 +361,6 @@ const Intergration = () => {
           <div>
             <div className="flex justify-between mb-[10px]">
               <div className="flex items-center">
-                <CustomCascader
-                  className="mr-[8px] w-[250px]"
-                  showSearch
-                  options={organizationList}
-                  multiple
-                  maxTagCount="responsive"
-                  allowClear
-                  onChange={(value) =>
-                    setSelectedOrganizations(value as string[])
-                  }
-                />
                 <Input
                   allowClear
                   className="w-[320px]"

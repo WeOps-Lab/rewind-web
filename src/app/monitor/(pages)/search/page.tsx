@@ -26,6 +26,8 @@ import {
   TableDataItem,
   ConditionItem,
   SearchParams,
+  IndexViewItem,
+  GroupInfo,
 } from '@/app/monitor/types/monitor';
 import { deepClone, findUnitNameById } from '@/app/monitor/utils/common';
 import { useSearchParams } from 'next/navigation';
@@ -78,6 +80,7 @@ const SearchView: React.FC = () => {
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
   const [originalTreeData, setOriginalTreeData] = useState<TreeItem[]>([]); // 保存原始树数据
   const [treeSearchValue, setTreeSearchValue] = useState<string>(''); // 搜索值
+  const [originMetricData, setOriginMetricData] = useState<IndexViewItem[]>([]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -106,7 +109,11 @@ const SearchView: React.FC = () => {
   const getObjects = async () => {
     try {
       setObjLoading(true);
-      const data: ObectItem[] = await get('/monitor/api/monitor_object/');
+      const data: ObectItem[] = await get('/monitor/api/monitor_object/', {
+        params: {
+          add_instance_count: true,
+        },
+      });
       const _treeData = getTreeData(deepClone(data));
       setTreeData(_treeData);
       setOriginalTreeData(_treeData); // 保存原始数据
@@ -120,11 +127,33 @@ const SearchView: React.FC = () => {
   const getMetrics = async (params = {}) => {
     try {
       setMetricsLoading(true);
-      const data: MetricItem[] = await get('/monitor/api/metrics/', {
-        params,
-      });
-      setMetrics(data);
-    } finally {
+      const getGroupList = get(`/monitor/api/metrics_group/`, { params });
+      const getMetrics = get('/monitor/api/metrics/', { params });
+      Promise.all([getGroupList, getMetrics])
+        .then((res) => {
+          const metricData = deepClone(res[1] || []);
+          setMetrics(res[1] || []);
+          const groupData = res[0].map((item: GroupInfo) => ({
+            ...item,
+            child: [],
+          }));
+          metricData.forEach((metric: MetricItem) => {
+            const target = groupData.find(
+              (item: GroupInfo) => item.id === metric.metric_group
+            );
+            if (target) {
+              target.child.push(metric);
+            }
+          });
+          const _groupData = groupData.filter(
+            (item: any) => !!item.child?.length
+          );
+          setOriginMetricData(_groupData);
+        })
+        .finally(() => {
+          setMetricsLoading(false);
+        });
+    } catch {
       setMetricsLoading(false);
     }
   };
@@ -452,7 +481,7 @@ const SearchView: React.FC = () => {
           };
         }
         acc[item.type].children.push({
-          title: item.display_name || '--',
+          title: (item.display_name || '--') + `(${item.instance_count || 0})`,
           label: item.name || '--',
           key: item.name,
           children: [],
@@ -578,14 +607,16 @@ const SearchView: React.FC = () => {
                       showSearch
                       value={metric}
                       loading={metricsLoading}
+                      options={originMetricData.map((item) => ({
+                        label: item.display_name,
+                        title: item.name,
+                        options: (item.child || []).map((tex) => ({
+                          label: tex.display_name,
+                          value: tex.name,
+                        })),
+                      }))}
                       onChange={handleMetricChange}
-                    >
-                      {metrics.map((item) => (
-                        <Option value={item.name} key={item.name}>
-                          {item.display_name}
-                        </Option>
-                      ))}
-                    </Select>
+                    />
                   </div>
                 </div>
                 <div className={searchStyle.conditionItem}>

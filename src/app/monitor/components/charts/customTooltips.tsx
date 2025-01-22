@@ -1,9 +1,9 @@
 import React from 'react';
 import { TooltipProps } from 'recharts';
 import customTooltipStyle from './index.module.scss';
-import dayjs from 'dayjs';
 import { getEnumValue } from '@/app/monitor/utils/common';
 import { MetricItem } from '@/app/monitor/types/monitor';
+import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 
 interface CustomToolTipProps extends Omit<TooltipProps<any, string>, 'unit'> {
   unit?: string;
@@ -18,6 +18,7 @@ const CustomTooltip: React.FC<CustomToolTipProps> = ({
   metric = {},
   visible = true,
 }) => {
+  const { convertToLocalizedTime } = useLocalizedTime();
   if (active && payload?.length && visible) {
     // 对payload进行排序
     const sortedPayload = [...payload].sort((a, b) => {
@@ -28,9 +29,7 @@ const CustomTooltip: React.FC<CustomToolTipProps> = ({
 
     return (
       <div className={customTooltipStyle.customTooltip}>
-        <p className="label font-[600]">{`${dayjs
-          .unix(label)
-          .format('YYYY-MM-DD HH:mm:ss')}`}</p>
+        <p className="label font-[600]">{`${convertToLocalizedTime(new Date(label * 1000) + '')}`}</p>
         {sortedPayload.map((item: any, index: number) => (
           <div key={index}>
             <div className="flex items-center mt-[4px]">

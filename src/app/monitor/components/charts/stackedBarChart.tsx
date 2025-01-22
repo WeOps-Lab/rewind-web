@@ -65,7 +65,7 @@ const StackedBarChart: React.FC<StackedBarChartProps> = ({
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="time"
-          tick={{ fill: 'var(--color-text-3)', fontSize: 12 }}
+          tick={{ fill: 'var(--color-text-3)', fontSize: 13 }}
         />
         <YAxis
           tick={{ fill: 'var(--color-text-3)', fontSize: 12 }}

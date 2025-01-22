@@ -12,7 +12,7 @@ import {
 import CustomTooltip from './customTooltips';
 import {
   generateUniqueRandomColor,
-  formatTime,
+  useFormatTime,
 } from '@/app/monitor/utils/common';
 import barChartStyle from './index.module.scss';
 import dayjs, { Dayjs } from 'dayjs';
@@ -50,6 +50,7 @@ const CustomBarChart: React.FC<BarChartProps> = ({
   showDimensionFilter = false,
   onXRangeChange,
 }) => {
+  const { formatTime } = useFormatTime();
   const [startX, setStartX] = useState<number | null>(null);
   const [endX, setEndX] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
