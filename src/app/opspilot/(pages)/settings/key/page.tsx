@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Table, Space, Popconfirm, message, Tooltip, Spin } from 'antd';
 import { CopyOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import TopSection from '@/components/top-section';
+import PermissionWrapper from '@/components/permission';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
@@ -148,14 +149,16 @@ const ScrectKeyPage: React.FC = () => {
             icon={<CopyOutlined />}
             onClick={() => handleCopy(record.api_secret)}
           ></Button>
-          <Popconfirm
-            title={t('settings.secret.deleteConfirm')}
-            onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="text" icon={<DeleteOutlined />} danger></Button>
-          </Popconfirm>
+          <PermissionWrapper requiredPermissions={['Delete']}>
+            <Popconfirm
+              title={t('settings.secret.deleteConfirm')}
+              onConfirm={() => handleDelete(record.id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button type="text" icon={<DeleteOutlined />} danger></Button>
+            </Popconfirm>
+          </PermissionWrapper>
         </Space>
       ),
     },
@@ -180,15 +183,17 @@ const ScrectKeyPage: React.FC = () => {
         ) : (
           <>
             <div className="flex justify-end mb-4">
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={handleCreate}
-                loading={creating}
-                disabled={creating}
-              >
-                {t('settings.secret.create')}
-              </Button>
+              <PermissionWrapper requiredPermissions={['Add']}>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={handleCreate}
+                  loading={creating}
+                  disabled={creating}
+                >
+                  {t('settings.secret.create')}
+                </Button>
+              </PermissionWrapper>
             </div>
             <Table
               dataSource={dataSource}

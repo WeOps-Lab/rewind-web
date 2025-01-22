@@ -1,18 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRedirectFirstChild } from '@/hooks/useRedirectFirstChild';
 
-export default function KnowledgeDetailPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-    const targetUrl = `/opspilot/skill/detail/settings?${params.toString()}`;
-    console.log('targetUrl', targetUrl);
-    router.push(targetUrl);
-  }, [router, searchParams]);
-
+export default function SkillsDetailPage() {
+  useRedirectFirstChild();
   return null;
 }

@@ -12,6 +12,7 @@ import { Skill } from '@/app/opspilot/types/skill';
 import { CustomChatMessage } from '@/app/opspilot/types/global';
 import OperateModal from '@/app/opspilot/components/studio/operateModal';
 import CustomChat from '@/app/opspilot/components/custom-chat';
+import PermissionWrapper from '@/components/permission';
 import styles from '@/app/opspilot/styles/common.module.scss';
 import Icon from '@/components/icon';
 
@@ -160,14 +161,18 @@ const StudioSettingsPage: React.FC = () => {
       </Menu.Item>
       <Menu.Divider />
       <Menu.Item key="save_publish">
-        <Button type="primary" style={{ width: '100%' }} onClick={handleSaveAndPublish}>
-          {t('common.save')} & {t('common.publish')}
-        </Button>
+        <PermissionWrapper requiredPermissions={['Save&Publish']}>
+          <Button type="primary" style={{ width: '100%' }} onClick={handleSaveAndPublish}>
+            {t('common.save')} & {t('common.publish')}
+          </Button>
+        </PermissionWrapper>
       </Menu.Item>
       <Menu.Item key="save_only">
-        <Button style={{ width: '100%' }} onClick={() => handleSave(false)}>
-          {t('common.saveOnly')}
-        </Button>
+        <PermissionWrapper requiredPermissions={['Edit']}>
+          <Button style={{ width: '100%' }} onClick={() => handleSave(false)}>
+            {t('common.saveOnly')}
+          </Button>
+        </PermissionWrapper>
       </Menu.Item>
       {online && (
         <Menu.Item key="offline" onClick={toggleOnlineStatus}>

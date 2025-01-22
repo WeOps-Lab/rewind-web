@@ -1,56 +1,250 @@
 {
   "zh": [
     {
-      "label": "机器人",
+      "title": "机器人",
       "icon": "jiqiren2",
-      "path": "/opspilot/studio"
+      "url": "/opspilot/studio",
+      "name": "bot_list",
+      "children": [
+        {
+          "title": "设置",
+          "url": "/opspilot/studio/detail/settings",
+          "icon": "shezhi",
+          "name": "bot_settings"
+        },
+        {
+          "title": "通知",
+          "url": "/opspilot/studio/detail/channel",
+          "icon": "channel1",
+          "name": "bot_channel"
+        },
+        {
+          "title": "日志",
+          "url": "/opspilot/studio/detail/logs",
+          "icon": "talk-line",
+          "name": "bot_conversation_log"
+        },
+        {
+          "title": "统计",
+          "url": "/opspilot/studio/detail/statistics",
+          "icon": "tongji",
+          "name": "bot_statistics"
+        }
+      ]
     },
     {
-      "label": "技能",
+      "title": "技能",
       "icon": "weibiaoti3",
-      "path": "/opspilot/skill"
+      "url": "/opspilot/skill",
+      "name": "skill_list",
+      "children": [
+        {
+          "title": "设置",
+          "url": "/opspilot/skill/detail/settings",
+          "icon": "shezhi",
+          "name": "skill_setting"
+        },
+        {
+          "title": "规则",
+          "url": "/opspilot/skill/detail/rules",
+          "icon": "guize",
+          "name": "skill_rule"
+        },
+        {
+          "title": "接口",
+          "url": "/opspilot/skill/detail/api",
+          "icon": "api",
+          "name": "skill_api"
+        }
+      ]
     },
     {
-      "label": "知识库",
+      "title": "知识库",
       "icon": "zhishiku1",
-      "path": "/opspilot/knowledge"
+      "url": "/opspilot/knowledge",
+      "name": "knowledge_list",
+      "children": [
+        {
+          "title": "文档",
+          "url": "/opspilot/knowledge/detail/documents",
+          "icon": "shiyongwendang",
+          "name": "knowledge_document"
+        },
+        {
+          "title": "测试",
+          "url": "/opspilot/knowledge/detail/testing",
+          "icon": "ceshi",
+          "name": "knowledge_testing"
+        },
+        {
+          "title": "设置",
+          "url": "/opspilot/knowledge/detail/settings",
+          "icon": "shezhi",
+          "name": "knowledge_setting"
+        },
+        {
+          "title": "接口",
+          "url": "/opspilot/knowledge/detail/api",
+          "icon": "api",
+          "name": "knowledge_api"
+        }
+      ]
     },
     {
-      "label": "提供者",
+      "title": "提供",
       "icon": "moxing2",
-      "path": "/opspilot/provider"
+      "url": "/opspilot/provider",
+      "name": "provide_list"
     },
     {
-      "label": "设置",
+      "title": "设置",
       "icon": "settings-fill",
-      "path": "/opspilot/settings"
+      "url": "/opspilot/settings",
+      "name": "Setting",
+      "children": [
+        {
+          "title": "管理凭据",
+          "url": "/opspilot/settings/manage",
+          "icon": "_quota_management",
+          "name": "mange_quota"
+        },
+        {
+          "title": "我的凭据",
+          "url": "/opspilot/settings/quota",
+          "icon": "quota",
+          "name": "my_quota"
+        },
+        {
+          "title": "接口秘密值",
+          "url": "/opspilot/settings/key",
+          "icon": "key",
+          "name": "api_secret_key"
+        }
+      ]
     }
   ],
   "en": [
     {
-      "label": "Studio",
+      "title": "Studio",
       "icon": "jiqiren2",
-      "path": "/opspilot/studio"
+      "url": "/opspilot/studio",
+      "name": "bot_list",
+      "children": [
+        {
+          "title": "Settings",
+          "url": "/opspilot/studio/detail/settings",
+          "icon": "shezhi",
+          "name": "bot_settings"
+        },
+        {
+          "title": "Channel",
+          "url": "/opspilot/studio/detail/channel",
+          "icon": "channel1",
+          "name": "bot_channel"
+        },
+        {
+          "title": "Logs",
+          "url": "/opspilot/studio/detail/logs",
+          "icon": "talk-line",
+          "name": "bot_conversation_log"
+        },
+        {
+          "title": "Statistics",
+          "url": "/opspilot/studio/detail/statistics",
+          "icon": "tongji",
+          "name": "bot_statistics"
+        }
+      ]
     },
     {
-      "label": "Skill",
+      "title": "Skill",
       "icon": "weibiaoti3",
-      "path": "/opspilot/skill"
+      "url": "/opspilot/skill",
+      "name": "skill_list",
+      "children": [
+        {
+          "title": "Setting",
+          "url": "/opspilot/skill/detail/settings",
+          "icon": "shezhi",
+          "name": "skill_setting"
+        },
+        {
+          "title": "Rules",
+          "url": "/opspilot/skill/detail/rules",
+          "icon": "guize",
+          "name": "skill_rule"
+        },
+        {
+          "title": "API",
+          "url": "/opspilot/skill/detail/api",
+          "icon": "api",
+          "name": "skill_api"
+        }
+      ]
     },
     {
-      "label": "Knowledge",
+      "title": "Knowledge",
       "icon": "zhishiku1",
-      "path": "/opspilot/knowledge"
+      "url": "/opspilot/knowledge",
+      "name": "knowledge_list",
+      "children": [
+        {
+          "title": "Documents",
+          "url": "/opspilot/knowledge/detail/documents",
+          "icon": "shiyongwendang",
+          "name": "knowledge_document"
+        },
+        {
+          "title": "Testing",
+          "url": "/opspilot/knowledge/detail/testing",
+          "icon": "ceshi",
+          "name": "knowledge_testing"
+        },
+        {
+          "title": "Settings",
+          "url": "/opspilot/knowledge/detail/settings",
+          "icon": "shezhi",
+          "name": "knowledge_setting"
+        },
+        {
+          "title": "API",
+          "url": "/opspilot/knowledge/detail/api",
+          "icon": "api",
+          "name": "knowledge_api"
+        }
+      ]
     },
     {
-      "label": "Provider",
+      "title": "Provider",
       "icon": "moxing2",
-      "path": "/opspilot/provider"
+      "url": "/opspilot/provider",
+      "name": "provide_list"
     },
     {
-      "label": "Settings",
+      "title": "Settings",
       "icon": "settings-fill",
-      "path": "/opspilot/settings"
+      "url": "/opspilot/settings",
+      "name": "Setting",
+      "children": [
+        {
+          "title": "Manage Quota",
+          "url": "/opspilot/settings/manage",
+          "icon": "_quota_management",
+          "name": "mange_quota"
+        },
+        {
+          "title": "My Quota",
+          "url": "/opspilot/settings/quota",
+          "icon": "quota",
+          "name": "my_quota"
+        },
+        {
+          "title": "API Secret Keys",
+          "url": "/opspilot/settings/key",
+          "icon": "key",
+          "name": "api_secret_key"
+        }
+      ]
     }
   ]
 }

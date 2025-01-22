@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import useApiClient from '@/utils/request';
 import { ChannelProps } from '@/app/opspilot/types/studio';
 import OperateModal from '@/components/operate-modal';
+import PermissionWrapper from '@/components/permission';
 
 const ChannelPage: React.FC = () => {
   const { t } = useTranslation();
@@ -121,30 +122,34 @@ const ChannelPage: React.FC = () => {
             <div
               className='border shadow-sm hover:shadow-md transition-shadow duration-300 ease-in-out rounded-lg p-4 relative cursor-pointer group'>
               <div className="absolute top-2 right-2">
-                <Switch
-                  size="small"
-                  checked={app.enabled}
-                  loading={switchLoading[app.id] || false}
-                  checkedChildren={t('common.open')}
-                  unCheckedChildren={t('common.close')}
-                  onChange={(checked) => handleSwitchChange(checked, app)}
-                />
+                <PermissionWrapper requiredPermissions={['Setting']}>
+                  <Switch
+                    size="small"
+                    checked={app.enabled}
+                    loading={switchLoading[app.id] || false}
+                    checkedChildren={t('common.open')}
+                    unCheckedChildren={t('common.close')}
+                    onChange={(checked) => handleSwitchChange(checked, app)}
+                  />
+                </PermissionWrapper>
               </div>
               <div className="flex justify-center items-center space-x-4 my-10">
                 <Icon type={app.icon} className="text-6xl" />
                 <h2 className="text-xl font-bold m-0">{app.name}</h2>
               </div>
               <div className="w-full h-[32px] flex justify-center items-end">
-                <Button
-                  type="primary"
-                  className="w-full rounded-md transition-opacity duration-300"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenModal(app);
-                  }}
-                >
-                  <Icon type="shezhi" /> {t('studio.channel.setting')}
-                </Button>
+                <PermissionWrapper requiredPermissions={['Setting']}>
+                  <Button
+                    type="primary"
+                    className="w-full rounded-md transition-opacity duration-300"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenModal(app);
+                    }}
+                  >
+                    <Icon type="shezhi" /> {t('studio.channel.setting')}
+                  </Button>
+                </PermissionWrapper>
               </div>
             </div>
           </div>

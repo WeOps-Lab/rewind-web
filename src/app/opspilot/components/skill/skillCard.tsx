@@ -2,16 +2,16 @@
 
 import React from 'react';
 import EntityCard from '@/app/opspilot/components/entity-card';
-import { Skill } from '@/app/opspilot/types/skill';
+import { Studio } from '@/app/opspilot/types/studio';
 
-interface SkillCardProps extends Skill {
+interface StudioCardProps extends Studio {
   index: number;
-  onMenuClick: (action: string, skill: Skill) => void;
+  onMenuClick: (action: string, studio: Studio) => void;
 }
 
-const SkillCard: React.FC<SkillCardProps> = (props) => {
-  const { id, name, introduction, created_by, team_name, team, index, onMenuClick } = props;
-  const iconTypeMapping: [string, string] = ['jishuqianyan', 'theory'];
+const StudioCard: React.FC<StudioCardProps> = (props) => {
+  const { id, name, introduction, created_by, team_name, team, index, online, onMenuClick } = props;
+  const iconTypeMapping: [string, string] = ['jiqirenjiaohukapian', 'jiqiren'];
 
   return (
     <EntityCard
@@ -22,6 +22,7 @@ const SkillCard: React.FC<SkillCardProps> = (props) => {
       team_name={team_name}
       team={team}
       index={index}
+      online={online}
       onMenuClick={onMenuClick}
       redirectUrl="/opspilot/skill/detail"
       iconTypeMapping={iconTypeMapping}
@@ -29,4 +30,4 @@ const SkillCard: React.FC<SkillCardProps> = (props) => {
   );
 };
 
-export default SkillCard;
+export default StudioCard;

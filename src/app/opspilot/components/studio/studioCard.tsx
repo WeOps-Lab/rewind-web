@@ -24,7 +24,7 @@ const StudioCard: React.FC<StudioCardProps> = (props) => {
       index={index}
       online={online}
       onMenuClick={onMenuClick}
-      redirectUrl="/opspilot/studio/detail/settings"
+      redirectUrl="/opspilot/studio/detail"
       iconTypeMapping={iconTypeMapping}
     />
   );

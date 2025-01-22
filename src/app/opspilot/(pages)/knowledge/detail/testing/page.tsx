@@ -10,6 +10,7 @@ import useFetchConfigData from '@/app/opspilot/hooks/useFetchConfigData';
 import { useTranslation } from '@/utils/i18n';
 import styles from './index.module.scss';
 import ContentDrawer from '@/components/content-drawer';
+import PermissionWrapper from '@/components/permission';
 import useContentDrawer from '@/app/opspilot/hooks/useContentDrawer';
 import KnowledgeResultItem from '@/app/opspilot/components/block-result';
 
@@ -114,15 +115,17 @@ const TestingPage: React.FC = () => {
                 onKeyPress={handleKeyPress}
                 rows={6}
               />
-              <Button
-                type="primary"
-                className="absolute bottom-2 right-2"
-                disabled={!searchText.trim()}
-                onClick={handleTesting}
-                loading={loading}
-              >
-                {t('knowledge.testing.title')}
-              </Button>
+              <PermissionWrapper requiredPermissions={['Edit']}>
+                <Button
+                  type="primary"
+                  className="absolute bottom-2 right-2"
+                  disabled={!searchText.trim()}
+                  onClick={handleTesting}
+                  loading={loading}
+                >
+                  {t('knowledge.testing.title')}
+                </Button>
+              </PermissionWrapper>
             </div>
           </div>
           <div className={`border rounded-md ${styles.testingHeader}`}>
@@ -133,9 +136,11 @@ const TestingPage: React.FC = () => {
                 setConfigData={setConfigData}
               />
               <div className="flex justify-end mt-4">
-                <Button type="primary" onClick={handleApplyConfig} loading={applyLoading}>
-                  {t('knowledge.applyConfig')}
-                </Button>
+                <PermissionWrapper requiredPermissions={['Edit']}>
+                  <Button type="primary" onClick={handleApplyConfig} loading={applyLoading}>
+                    {t('knowledge.applyConfig')}
+                  </Button>
+                </PermissionWrapper>
               </div>
             </div>
           </div>

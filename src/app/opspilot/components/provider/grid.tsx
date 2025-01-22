@@ -136,7 +136,7 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
                 </div>
 
                 <PermissionWrapper
-                  requiredPermissions={['write']}
+                  requiredPermissions={['Setting']}
                   className="absolute top-2 right-2"
                 >
                   <button onClick={() => handleSettingsClick(model)}>

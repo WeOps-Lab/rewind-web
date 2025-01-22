@@ -7,6 +7,7 @@ import Icon from '@/components/icon';
 import Image from 'next/image';
 import { useTranslation } from '@/utils/i18n';
 import styles from '@/app/opspilot/styles/common.module.scss';
+import PermissionWrapper from '@/components/permission';
 import entityStyles from './index.module.scss';
 
 const { Meta } = Card;
@@ -42,12 +43,16 @@ const EntityCard: React.FC<EntityCardProps> = ({
   const { t } = useTranslation();
 
   const menu = (
-    <Menu>
-      <Menu.Item key={`edit-${id}`} onClick={() => onMenuClick('edit', { id, name, introduction, created_by, team_name, team, online })}>
-        {t('common.edit')}
+    <Menu className={`${entityStyles.menuContainer}`}>
+      <Menu.Item key={`edit-${id}`}>
+        <PermissionWrapper requiredPermissions={['Edit']}>
+          <span className="block" onClick={() => onMenuClick('edit', { id, name, introduction, created_by, team_name, team, online })}>{t('common.edit')}</span>
+        </PermissionWrapper>
       </Menu.Item>
-      <Menu.Item key={`delete-${id}`} onClick={() => onMenuClick('delete', { id, name, introduction, created_by, team_name, team, online })}>
-        {t('common.delete')}
+      <Menu.Item key={`delete-${id}`}>
+        <PermissionWrapper requiredPermissions={['Delete']}>
+          <span className="block" onClick={() => onMenuClick('delete', { id, name, introduction, created_by, team_name, team, online })}>{t('common.delete')}</span>
+        </PermissionWrapper>
       </Menu.Item>
     </Menu>
   );
@@ -63,7 +68,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
       <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
         <Dropdown overlay={menu} trigger={['click']} key={`dropdown-${id}`} placement="bottomRight">
           <div className="cursor-pointer">
-            <Icon type="sangedian-copy" className="text-xl"/>
+            <Icon type="sangedian-copy" className="text-xl" />
           </div>
         </Dropdown>
       </div>

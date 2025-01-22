@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 import { Input, Dropdown, Menu, Modal, message, Spin } from 'antd';
 import Icon from '@/components/icon';
 import { KnowledgeValues, Card } from '@/app/opspilot/types/knowledge';
 import ModifyKnowledgeModal from './modifyKnowledge';
+import PermissionWrapper from '@/components/permission';
 import knowledgeStyle from './index.module.scss';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { getIconTypeByIndex } from '@/app/opspilot/utils/knowledgeBaseUtils';
-import Cookies from 'js-cookie';
 
 const KnowledgePage = () => {
   const router = useRouter();
@@ -91,11 +92,15 @@ const KnowledgePage = () => {
 
   const menu = (card: Card) => (
     <Menu>
-      <Menu.Item key="edit" onClick={() => handleMenuClick('edit', card)}>
-        {t('common.edit')}
+      <Menu.Item key="edit">
+        <PermissionWrapper requiredPermissions={['Edit']}>
+          <span className='block' onClick={() => handleMenuClick('edit', card)}>{t('common.edit')}</span>
+        </PermissionWrapper>
       </Menu.Item>
-      <Menu.Item key="delete" onClick={() => handleMenuClick('delete', card)}>
-        {t('common.delete')}
+      <Menu.Item key="delete">
+        <PermissionWrapper requiredPermissions={['Delete']}>
+          <span className='block' onClick={() => handleMenuClick('delete', card)}>{t('common.delete')}</span>
+        </PermissionWrapper>
       </Menu.Item>
     </Menu>
   );
@@ -116,13 +121,18 @@ const KnowledgePage = () => {
       </div>
       <Spin spinning={loading}>
         <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${knowledgeStyle.knowledge}`}>
-          <div
+          <PermissionWrapper
+            requiredPermissions={['Add']}
             className={`p-4 rounded-xl flex items-center justify-center shadow-md cursor-pointer ${knowledgeStyle.add}`}
-            onClick={() => { setIsModalVisible(true); setEditingCard(null); }}
           >
-            <Icon type="tianjia" className="text-2xl" />
-            <span className="ml-2">{t('common.addNew')}</span>
-          </div>
+            <div
+              className="h-full flex items-center justify-center"
+              onClick={() => { setIsModalVisible(true); setEditingCard(null); }}
+            >
+              <Icon type="tianjia" className="text-2xl" />
+              <span className="ml-2">{t('common.addNew')}</span>
+            </div>
+          </PermissionWrapper>
           {filteredCards.map((card, index) => (
             <div
               key={card.id}

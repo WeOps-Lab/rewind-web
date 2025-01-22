@@ -7,6 +7,7 @@ import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
 import useGroups from '@/app/opspilot/hooks/useGroups';
 import { useSearchParams, useRouter } from 'next/navigation';
+import PermissionWrapper from '@/components/permission';
 import useFetchConfigData from '@/app/opspilot/hooks/useFetchConfigData';
 
 const { Option } = Select;
@@ -120,9 +121,11 @@ const SettingsPage: React.FC = () => {
                   </Button>
                 </Col>
                 <Col>
-                  <Button type="primary" onClick={handleConfirm} loading={confirmLoading}>
-                    {t('common.confirm')}
-                  </Button>
+                  <PermissionWrapper requiredPermissions={['Edit']}>
+                    <Button type="primary" onClick={handleConfirm} loading={confirmLoading}>
+                      {t('common.confirm')}
+                    </Button>
+                  </PermissionWrapper>
                 </Col>
               </Row>
             </div>

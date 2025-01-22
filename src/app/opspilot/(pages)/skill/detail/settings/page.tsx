@@ -8,10 +8,11 @@ import useGroups from '@/app/opspilot/hooks/useGroups';
 import useApiClient from '@/utils/request';
 import styles from './index.module.scss';
 import { useSearchParams } from 'next/navigation';
-import { KnowledgeBase, RagScoreThresholdItem, KnowledgeBaseRagSource } from '@/app/opspilot/types/skill';
 import { CustomChatMessage } from '@/app/opspilot/types/global';
 import CustomChat from '@/app/opspilot/components/custom-chat';
+import PermissionWrapper from '@/components/permission';
 import KnowledgeBaseSelector from '@/app/opspilot/components/skill/knowledgeBaseSelector';
+import { KnowledgeBase, RagScoreThresholdItem, KnowledgeBaseRagSource } from '@/app/opspilot/types/skill';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -297,9 +298,12 @@ const SkillSettingsPage: React.FC = () => {
               </div>
             </section>
             <div>
-              <Button type="primary" onClick={handleSave} loading={saveLoading}>
-                {t('common.save')}
-              </Button>
+              <PermissionWrapper
+                requiredPermissions={['Edit']}>
+                <Button type="primary" onClick={handleSave} loading={saveLoading}>
+                  {t('common.save')}
+                </Button>
+              </PermissionWrapper>
             </div>
           </div>
           <div className="w-1/2 space-y-4">

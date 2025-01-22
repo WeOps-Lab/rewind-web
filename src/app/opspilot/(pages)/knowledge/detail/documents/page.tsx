@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Input, Button, Modal, message, Tag, Tabs, Tooltip } from 'antd';
 import { PlusOutlined, DeleteOutlined, TrademarkOutlined, SyncOutlined } from '@ant-design/icons';
 import CustomTable from '@/components/custom-table';
+import PermissionWrapper from '@/components/permission';
 import SelectSourceModal from './selectSourceModal';
 import useApiClient from '@/utils/request';
 import type { TableColumnsType, PaginationProps } from 'antd';
@@ -118,28 +119,34 @@ const DocumentsPage: React.FC = () => {
       key: 'action',
       render: (_, record) => (
         <>
-          <Button
-            type='link'
-            className='mr-[10px]'
-            disabled={[0, 4].includes(record.train_status)}
-            onClick={() => handleSetClick(record)}>
-            {t('common.set')}
-          </Button>
-          <Button
-            type='link'
-            className='mr-[10px]'
-            onClick={() => handleTrain([record.id])}
-            loading={singleTrainLoading[record.id.toString()]}
-            disabled={[0, 4].includes(record.train_status)}
-          >
-            {t('common.train')}
-          </Button>
-          <Button
-            type='link'
-            onClick={() => handleDelete([record.id])}
-            disabled={[0, 4].includes(record.train_status)}>
-            {t('common.delete')}
-          </Button>
+          <PermissionWrapper requiredPermissions={['Set']}>
+            <Button
+              type='link'
+              className='mr-[10px]'
+              disabled={[0, 4].includes(record.train_status)}
+              onClick={() => handleSetClick(record)}>
+              {t('common.set')}
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper requiredPermissions={['Train']}>
+            <Button
+              type='link'
+              className='mr-[10px]'
+              onClick={() => handleTrain([record.id])}
+              loading={singleTrainLoading[record.id.toString()]}
+              disabled={[0, 4].includes(record.train_status)}
+            >
+              {t('common.train')}
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper requiredPermissions={['Delete']}>
+            <Button
+              type='link'
+              onClick={() => handleDelete([record.id])}
+              disabled={[0, 4].includes(record.train_status)}>
+              {t('common.delete')}
+            </Button>
+          </PermissionWrapper>
         </>
       ),
     },
@@ -314,32 +321,38 @@ const DocumentsPage: React.FC = () => {
           <Tooltip className='mr-[8px]' title={t('common.refresh')}>
             <Button icon={<SyncOutlined />} onClick={() => fetchData()} /> {/* Adjusted here */}
           </Tooltip>
-          <Button
-            type='primary'
-            className='mr-[8px]'
-            icon={<PlusOutlined />}
-            onClick={handleAddClick}
-          >
-            {t('common.add')}
-          </Button>
-          <Button
-            type='primary'
-            className='mr-[8px]'
-            icon={<TrademarkOutlined />}
-            onClick={() => handleTrain(selectedRowKeys)}
-            disabled={!selectedRowKeys.length}
-            loading={isTrainLoading}
-          >
-            {t('common.batchTrain')}
-          </Button>
-          <Button
-            type='primary'
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(selectedRowKeys)}
-            disabled={!selectedRowKeys.length}
-          >
-            {t('common.batchDelete')}
-          </Button>
+          <PermissionWrapper requiredPermissions={['Add']}>
+            <Button
+              type='primary'
+              className='mr-[8px]'
+              icon={<PlusOutlined />}
+              onClick={handleAddClick}
+            >
+              {t('common.add')}
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper requiredPermissions={['Train']}>
+            <Button
+              type='primary'
+              className='mr-[8px]'
+              icon={<TrademarkOutlined />}
+              onClick={() => handleTrain(selectedRowKeys)}
+              disabled={!selectedRowKeys.length}
+              loading={isTrainLoading}
+            >
+              {t('common.batchTrain')}
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper requiredPermissions={['Delete']}>
+            <Button
+              type='primary'
+              icon={<DeleteOutlined />}
+              onClick={() => handleDelete(selectedRowKeys)}
+              disabled={!selectedRowKeys.length}
+            >
+              {t('common.batchDelete')}
+            </Button>
+          </PermissionWrapper>s
         </div>
       </div>
       <CustomTable

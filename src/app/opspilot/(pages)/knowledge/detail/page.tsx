@@ -1,18 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRedirectFirstChild } from '@/hooks/useRedirectFirstChild';
 
 export default function KnowledgeDetailPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-    const targetUrl = `/opspilot/knowledge/detail/documents?${params.toString()}`;
-    // 执行重定向
-    router.push(targetUrl);
-  }, [router, searchParams]);
-
+  useRedirectFirstChild();
   return null;
 }

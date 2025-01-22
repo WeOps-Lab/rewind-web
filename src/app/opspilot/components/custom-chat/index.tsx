@@ -1,12 +1,7 @@
 import React, { useState, useCallback, ReactNode } from 'react';
 import { Popconfirm, Button, Tooltip, Flex, ButtonProps } from 'antd';
-import {
-  FullscreenOutlined,
-  FullscreenExitOutlined,
-  SendOutlined
-} from '@ant-design/icons';
+import { FullscreenOutlined, FullscreenExitOutlined, SendOutlined } from '@ant-design/icons';
 import { Bubble, Sender } from '@ant-design/x';
-import { CustomChatMessage, Annotation } from '@/app/opspilot/types/global';
 import { v4 as uuidv4 } from 'uuid';
 import Icon from '@/components/icon';
 import { useTranslation } from '@/utils/i18n';
@@ -17,6 +12,9 @@ import styles from './index.module.scss';
 import MessageActions from './actions';
 import KnowledgeBase from './knowledgeBase';
 import AnnotationModal from './annotationModal';
+import PermissionWrapper from '@/components/permission';
+import { CustomChatMessage, Annotation } from '@/app/opspilot/types/global';
+
 
 interface CustomChatProps {
   handleSendMessage?: (newMessages: CustomChatMessage[]) => Promise<CustomChatMessage[]>;
@@ -151,37 +149,40 @@ const CustomChat: React.FC<CustomChatProps> = ({ handleSendMessage, showMarkOnly
     const { ignoreLoading, placeholder, ...btnProps } = props;
 
     return (
-      <Sender
-        className={styles.sender}
-        value={value}
-        onChange={setValue}
-        loading={loading}
-        onSubmit={(msg: string) => {
-          setValue('');
-          handleSend(msg);
-        }}
-        placeholder={placeholder}
-        onCancel={() => {
-          setLoading(false);
-        }}
-        actions={((_: any, info: { components: { SendButton: React.ComponentType<ButtonProps>; LoadingButton: React.ComponentType<ButtonProps> } }) => {
-          const { SendButton, LoadingButton } = info.components;
-          if (!ignoreLoading && loading) {
-            return (
-              <Tooltip title={t('chat.clickCancel')}>
-                <LoadingButton />
-              </Tooltip>
-            );
-          }
-          let node: ReactNode = <SendButton {...btnProps} />;
-          if (!ignoreLoading) {
-            node = (
-              <Tooltip title={value ? `${t('chat.send')}\u21B5` : t('chat.inputMessage')}>{node}</Tooltip>
-            );
-          }
-          return node;
-        }) as ActionRender}
-      />
+      <PermissionWrapper
+        requiredPermissions={['Test']}>
+        <Sender
+          className={styles.sender}
+          value={value}
+          onChange={setValue}
+          loading={loading}
+          onSubmit={(msg: string) => {
+            setValue('');
+            handleSend(msg);
+          }}
+          placeholder={placeholder}
+          onCancel={() => {
+            setLoading(false);
+          }}
+          actions={((_: any, info: { components: { SendButton: React.ComponentType<ButtonProps>; LoadingButton: React.ComponentType<ButtonProps> } }) => {
+            const { SendButton, LoadingButton } = info.components;
+            if (!ignoreLoading && loading) {
+              return (
+                <Tooltip title={t('chat.clickCancel')}>
+                  <LoadingButton />
+                </Tooltip>
+              );
+            }
+            let node: ReactNode = <SendButton {...btnProps} />;
+            if (!ignoreLoading) {
+              node = (
+                <Tooltip title={value ? `${t('chat.send')}\u21B5` : t('chat.inputMessage')}>{node}</Tooltip>
+              );
+            }
+            return node;
+          }) as ActionRender}
+        />
+      </PermissionWrapper>
     );
   };
 

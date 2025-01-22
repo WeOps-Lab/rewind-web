@@ -30,12 +30,6 @@ const SkillSettingsLayout = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const menuItems = [
-    { label: t('skill.settings.menu'), path: '/opspilot/skill/detail/settings', icon: 'shezhi' },
-    { label: t('skill.rules.menu'), path: '/opspilot/skill/detail/rules', icon: 'api' },
-    { label: t('common.api'), path: '/opspilot/skill/detail/api', icon: 'api' }
-  ];
-
   const intro = (
     <div>
       <h2 className="text-lg font-semibold mb-2">{name}</h2>
@@ -54,7 +48,6 @@ const SkillSettingsLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <WithSideMenuLayout
-      menuItems={menuItems}
       topSection={<TopSection />}
       intro={intro}
       showBackButton={true}

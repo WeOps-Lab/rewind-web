@@ -6,6 +6,7 @@ import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import styles from '@/app/opspilot/styles/common.module.scss';
 import Cookies from 'js-cookie';
+import PermissionWrapper from '@/components/permission';
 
 interface EntityListProps<T> {
   endpoint: string;
@@ -117,15 +118,20 @@ const EntityList = <T,>({ endpoint, CardComponent, ModifyModalComponent, itemTyp
       </div>
       <Spin spinning={loading}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div
+          <PermissionWrapper
+            requiredPermissions={['Add']}
             className={`shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer ${styles.addNew}`}
-            onClick={() => { setIsModalVisible(true); setEditingItem(null); }}
           >
-            <div className="text-center">
-              <div className="text-2xl">+</div>
-              <div className="mt-2">{t('common.addNew')}</div>
+            <div
+              className="h-full flex items-center justify-center"
+              onClick={() => { setIsModalVisible(true); setEditingItem(null); }}
+            >
+              <div className="text-center">
+                <div className="text-2xl">+</div>
+                <div className="mt-2">{t('common.addNew')}</div>
+              </div>
             </div>
-          </div>
+          </PermissionWrapper>
           {filteredItems.map((item, index) => (
             <CardComponent
               key={(item as any).id}

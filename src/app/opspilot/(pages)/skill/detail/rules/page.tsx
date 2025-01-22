@@ -6,6 +6,7 @@ import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import ModifyRuleModal from './modifyRuleModal';
+import PermissionWrapper from '@/components/permission';
 
 const { Search } = Input;
 
@@ -147,19 +148,25 @@ const SkillRules: React.FC = () => {
       key: 'actions',
       render: (text: any, record: SkillRule) => (
         <>
-          <Button type="link" onClick={() => handleEdit(record)}>
-            {t('common.edit')}
-          </Button>
-          <Popconfirm
-            title={t('skill.rules.deleteConfirm')}
-            onConfirm={() => handleDeleteRule(record.id)}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-          >
-            <Button type="link" danger>
-              {t('common.delete')}
+          <PermissionWrapper
+            requiredPermissions={['Edit']}>
+            <Button type="link" onClick={() => handleEdit(record)}>
+              {t('common.edit')}
             </Button>
-          </Popconfirm>
+          </PermissionWrapper>
+          <PermissionWrapper
+            requiredPermissions={['Delete']}>
+            <Popconfirm
+              title={t('skill.rules.deleteConfirm')}
+              onConfirm={() => handleDeleteRule(record.id)}
+              okText={t('common.confirm')}
+              cancelText={t('common.cancel')}
+            >
+              <Button type="link" danger>
+                {t('common.delete')}
+              </Button>
+            </Popconfirm>
+          </PermissionWrapper>
         </>
       ),
     },
@@ -175,7 +182,10 @@ const SkillRules: React.FC = () => {
           enterButton
           className='w-60 mr-2'
         />
-        <Button icon={<PlusOutlined />} type="primary" onClick={handleAdd}>{t('common.add')}</Button>
+        <PermissionWrapper
+          requiredPermissions={['Add']}>
+          <Button icon={<PlusOutlined />} type="primary" onClick={handleAdd}>{t('common.add')}</Button>
+        </PermissionWrapper>
       </div>
       <div className='flex-grow'>
         {loading ? (

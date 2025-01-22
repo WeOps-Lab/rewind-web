@@ -31,13 +31,6 @@ const KnowledgeDetailLayout = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const menuItems = [
-    { label: t('knowledge.documents.title'), path: '/opspilot/knowledge/detail/documents', icon: 'shiyongwendang' },
-    { label: t('knowledge.testing.title'), path: '/opspilot/knowledge/detail/testing', icon: 'ceshi' },
-    { label: t('knowledge.settings.title'), path: '/opspilot/knowledge/detail/settings', icon: 'shezhi' },
-    { label: t('common.api'), path: '/opspilot/knowledge/detail/api', icon: 'api' }
-  ];
-
   const intro = (
     <div>
       <h2 className="text-lg font-semibold mb-2">{name}</h2>
@@ -95,7 +88,6 @@ const KnowledgeDetailLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <WithSideMenuLayout
-        menuItems={menuItems}
         topSection={<TopSection />}
         intro={intro}
         showBackButton={true}
