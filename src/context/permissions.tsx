@@ -91,11 +91,7 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
 
         const permissionMap = collectPermissionOperations(data);
         const filteredMenus = filterMenusByPermission(permissionMap, configMenus);
-        console.log('Filtered menus with permissions:', filteredMenus);
-
         const parsedPermissions = extractPermissions(filteredMenus);
-        console.log('Parsed permissions:', parsedPermissions);
-
         setMenuItems(filteredMenus);
         setPermissions(parsedPermissions);
         setLoading(false);
