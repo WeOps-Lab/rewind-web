@@ -1,35 +1,39 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { MenuItem } from '@/types/index';
 
-interface MenuItem {
-  label: string;
-  icon: string;
-  path: string;
+interface MenusContextType {
+  configMenus: MenuItem[];
+  loading: boolean;
 }
 
-const MenusContext = createContext<MenuItem[]>([]);
+const MenusContext = createContext<MenusContextType>({ configMenus: [], loading: false });
 
 export const MenusProvider = ({ children }: { children: ReactNode }) => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [configMenus, setConfigMenus] = useState<MenuItem[]>([]);
 
   useEffect(() => {
     const fetchMenus = async () => {
       const locale = localStorage.getItem('locale') || 'en';
+      setLoading(true);
       try {
         const response = await fetch(`/api/menu?locale=${locale}`);
         if (!response.ok) {
           throw new Error('Failed to fetch menus');
         }
         const menus = await response.json();
-        setMenuItems(menus);
+        setConfigMenus(menus);
       } catch (error) {
         console.error('Failed to fetch menus:', error);
         try {
           const menuResponse = await fetch(`/menus/${locale}.json`);
           const menus = await menuResponse.json();
-          setMenuItems(menus);
+          setConfigMenus(menus);
         } catch {
           console.error('Failed to load menus from local:', error);
         }
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -37,13 +41,12 @@ export const MenusProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <MenusContext.Provider value={menuItems}>
+    <MenusContext.Provider value={{configMenus, loading}}>
       {children}
     </MenusContext.Provider>
   );
 };
 
-// 创建一个能使用Context数据的钩子函数
 export const useMenus = () => {
   return useContext(MenusContext);
 };

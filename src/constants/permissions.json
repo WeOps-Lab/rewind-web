@@ -1,5 +1,0 @@
-{
-  "/opspilot/provider": {
-    "admin": ["read", "write"]
-  }
-}

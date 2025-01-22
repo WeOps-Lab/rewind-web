@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 
-const EXCLUDED_DIRECTORIES = ['(core)'];
+const EXCLUDED_DIRECTORIES = ['(core)', 'no-permission'];
 
 const getMenuItems = async (locale: string) => {
   const dirPath = path.join(process.cwd(), 'src', 'app');

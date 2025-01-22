@@ -49,3 +49,13 @@ export interface ClientData {
   url: string;
   icon?: string;
 }
+
+export interface MenuItem {
+  name: string;
+  display_name?: string;
+  url: string;
+  icon: string;
+  title: string;
+  operation: string[];
+  children?: MenuItem[];
+}

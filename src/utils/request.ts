@@ -6,7 +6,7 @@ import { signIn } from 'next-auth/react';
 import { useTranslation } from '@/utils/i18n';
 
 const apiClient = axios.create({
-  baseURL: '/reqApi',
+  baseURL: '/api/proxy',
   timeout: 300000,
   headers: {
     'Content-Type': 'application/json',
