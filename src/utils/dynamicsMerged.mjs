@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-const EXCLUDED_DIRECTORIES = ['(core)'];
+const EXCLUDED_DIRECTORIES = ['(core)', 'no-permission'];
 
 const mergeMessages = (target, source) => {
   for (const key in source) {
@@ -68,41 +68,6 @@ const combineLocales = async () => {
   console.log('Locales combined successfully to public/locales directory');
 };
 
-const combineMenus = async () => {
-  const dirPath = path.join(process.cwd(), 'src/app');
-  const publicMenusDir = path.resolve(process.cwd(), 'public/menus');
-  const directories = await fs.readdir(dirPath, { withFileTypes: true });
-
-  let allMenusEn = [];
-  let allMenusZh = [];
-
-  for (const dirent of directories) {
-    if (dirent.isDirectory() && !EXCLUDED_DIRECTORIES.includes(dirent.name)) {
-      try {
-        const menuPath = path.join(dirPath, dirent.name, 'constants', 'menu.json');
-
-        if (await fs.pathExists(menuPath)) {
-          const menu = await fs.readJSON(menuPath);
-
-          if (menu.en && menu.zh) {
-            allMenusEn = allMenusEn.concat(menu.en);
-            allMenusZh = allMenusZh.concat(menu.zh);
-          }
-        }
-      } catch (err) {
-        console.error(`Failed to load menu for ${dirent.name}:`, err);
-      }
-    }
-  }
-
-  await fs.ensureDir(publicMenusDir);
-
-  await fs.writeJSON(path.join(publicMenusDir, 'en.json'), allMenusEn, { spaces: 2 });
-  await fs.writeJSON(path.join(publicMenusDir, 'zh.json'), allMenusZh, { spaces: 2 });
-
-  console.log('Menus combined successfully to public/menus directory');
-};
-
 const copyPublicDirectories = () => {
   const srcDir = path.resolve(process.cwd(), 'src/app');
   const apps = fs.readdirSync(srcDir).filter(file =>
@@ -133,4 +98,4 @@ const copyPublicDirectories = () => {
   });
 };
 
-export { mergeMessages, flattenMessages, combineLocales, combineMenus, copyPublicDirectories };
+export { mergeMessages, flattenMessages, combineLocales, copyPublicDirectories };

@@ -1,14 +1,6 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  ReactNode,
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import useApiClient from '@/utils/request';
-import { ClientData } from '@/types/index'
+import { ClientData } from '@/types/index';
 
 interface ClientDataContextType {
   clientData: ClientData[];
@@ -77,7 +69,9 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   }, []);
 
   return (
-    <ClientDataContext.Provider value={{ clientData, loading, getAll, getByName, reset }}>
+    <ClientDataContext.Provider
+      value={{ clientData, loading, getAll, getByName, reset }}
+    >
       {children}
     </ClientDataContext.Provider>
   );
