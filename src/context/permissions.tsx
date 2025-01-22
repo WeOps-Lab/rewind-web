@@ -110,7 +110,7 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
 
   const hasPermission = useCallback(
     (url: string) => {
-      return Object.keys(permissions).some((permissionUrl) => permissionUrl.startsWith(url));
+      return Object.keys(permissions).some((permissionUrl) => permissionUrl.startsWith(url) || url.startsWith(permissionUrl));
     },
     [permissions]
   );
