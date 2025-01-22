@@ -15,7 +15,6 @@ const useBtnPermissions = () => {
     }
 
     const routePermissions = permissions[currentPath] || [];
-    console.log('routePermissions:', routePermissions);
 
     return (requiredPermissions: string[]): boolean => {
       const userPermissions = new Set<string>();
