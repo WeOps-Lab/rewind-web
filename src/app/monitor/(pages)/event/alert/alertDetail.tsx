@@ -47,6 +47,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
     const [formData, setFormData] = useState<TableDataItem>({});
     const [title, setTitle] = useState<string>('');
     const [chartData, setChartData] = useState<ChartDataItem[]>([]);
+    const [trapData, setTrapData] = useState<TableDataItem>({});
     const [activeTab, setActiveTab] = useState<string>('information');
     const [loading, setLoading] = useState<boolean>(false);
     const [pagination, setPagination] = useState<Pagination>({
@@ -82,7 +83,11 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
     useEffect(() => {
       if (groupVisible) {
         if (isInformation) {
-          getChartData();
+          if (formData.policy?.query_condition?.type === 'metric') {
+            getChartData();
+          } else {
+            getRawData();
+          }
           return;
         }
         getTableData();
@@ -104,10 +109,12 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
 
     const getParams = () => {
       const target =
-        metrics.find((item: MetricItem) => item.id === formData.policy?.metric)
-          ?.query || '';
+        metrics.find(
+          (item: MetricItem) =>
+            item.id === formData.policy?.query_condition?.metric_id
+        )?.query || '';
       const _query: string = target;
-      const instId = formData.monitor_instance?.id;
+      const instId = formData.monitor_instance_id;
       const objName =
         objects.find(
           (item: ObectItem) =>
@@ -164,7 +171,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
                   ? convertToLocalizedTime(item.created_at)
                   : '--'}
               </span>
-              {`${formData.metric?.display_name}`}
+              {`${formData.metric?.display_name || item.content}`}
               <span className="text-[var(--color-text-3)] ml-[10px]">
                 {getEnumValueUnit(formData.metric, item.value)}
               </span>
@@ -197,11 +204,25 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
       }
     };
 
+    const getRawData = async () => {
+      setLoading(true);
+      try {
+        const responseData = await get(
+          `/monitor/api/monitor_event/raw_data/${formData.id}/`
+        );
+        setTrapData(responseData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const processData = (data: ChartDataItem[]): ChartData[] => {
       const result: any[] = [];
       const target =
-        metrics.find((item: MetricItem) => item.id === formData.policy?.metric)
-          ?.dimensions || [];
+        metrics.find(
+          (item: MetricItem) =>
+            item.id === formData.policy?.query_condition?.metric
+        )?.dimensions || [];
       data.forEach((item, index) => {
         item.values.forEach(([timestamp, value]) => {
           const existing = result.find((entry) => entry.time === timestamp);
@@ -212,7 +233,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
                 key === 'instance_name'
                   ? 'Instance Name'
                   : target.find((sec: MetricItem) => sec.name === key)
-                    ?.description || key,
+                      ?.description || key,
               value: dimenValue,
             }))
             .filter(
@@ -234,7 +255,8 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
               time: timestamp,
               title:
                 metrics.find(
-                  (sec: MetricItem) => sec.id === formData.policy?.metric
+                  (sec: MetricItem) =>
+                    sec.id === formData.policy?.query_condition?.metric
                 )?.display_name || '--',
               [`value${index + 1}`]: parseFloat(value),
               details,
@@ -272,6 +294,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
       setGroupVisible(false);
       setActiveTab('information');
       setChartData([]);
+      setTrapData({});
       setTimeLineData([]);
     };
 
@@ -315,7 +338,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
                   {LEVEL_LIST.find((item) => item.value === formData.level)
                     ?.label || '--'}
                 </Tag>
-                <b>{formData.policy?.name || '--'}</b>
+                <b>{formData.content || '--'}</b>
               </div>
               <ul className="flex mt-[10px]">
                 <li className="mr-[20px]">
@@ -347,6 +370,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
                   metrics={metrics}
                   userList={userList}
                   onClose={closeModal}
+                  trapData={trapData}
                   chartData={processData(chartData || [])}
                 />
               ) : (

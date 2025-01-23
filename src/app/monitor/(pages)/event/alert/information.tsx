@@ -20,6 +20,7 @@ const Information: React.FC<TableDataItem> = ({
   objects,
   userList,
   onClose,
+  trapData,
 }) => {
   const { t } = useTranslation();
   const { convertToLocalizedTime } = useLocalizedTime();
@@ -114,17 +115,16 @@ const Information: React.FC<TableDataItem> = ({
             : '--'}
         </Descriptions.Item>
         <Descriptions.Item label={t('monitor.events.information')} span={3}>
-          {`${formData.content},${t('monitor.value')}:${formData.alertValue}`}
+          {formData.content || '--'}
         </Descriptions.Item>
         <Descriptions.Item label={t('monitor.events.assetType')}>
           {objects.find(
-            (item: ObectItem) =>
-              item.id === formData.monitor_instance?.monitor_object
+            (item: ObectItem) => item.id === formData.policy?.monitor_object
           )?.display_name || '--'}
         </Descriptions.Item>
         <Descriptions.Item label={t('monitor.asset')}>
           <div className="flex justify-between">
-            {formData.monitor_instance?.name || '--'}{' '}
+            {formData.monitor_instance_id || '--'}
             <a
               href="#"
               className="text-blue-500 w-[36px]"
@@ -174,33 +174,40 @@ const Information: React.FC<TableDataItem> = ({
         </Button>
       </div>
       <div className="mt-4">
-        <h3 className="font-[600] text-[16px] mb-[15px]">
-          {t('monitor.views.indexView')}
-        </h3>
-        <div className="text-[12px]">{`${
-          formData.metric?.display_name
-        }（${findUnitNameById(formData.metric?.unit)}）`}</div>
-        <div className="h-[250px]">
-          <LineChart
-            allowSelect={false}
-            data={chartData}
-            unit={formData.metric?.unit}
-            metric={formData.metric}
-          />
-        </div>
-        <div className="hidden">
-          <h3 className="font-[600] text-[16px] mb-[15px]">报文</h3>
-          <div className="leading-[24px]">
-            <Editor
-              options={{ readOnly: true }}
-              height={400}
-              theme="vs-dark"
-              defaultLanguage="python"
-              onMount={handleEditorDidMount}
-              value={formData.content || '--'}
-            />
+        {formData.policy?.query_condition?.type === 'metric' ? (
+          <div>
+            <h3 className="font-[600] text-[16px] mb-[15px]">
+              {t('monitor.views.indexView')}
+            </h3>
+            <div className="text-[12px]">{`${
+              formData.metric?.display_name
+            }（${findUnitNameById(formData.metric?.unit)}）`}</div>
+            <div className="h-[250px]">
+              <LineChart
+                allowSelect={false}
+                data={chartData}
+                unit={formData.metric?.unit}
+                metric={formData.metric}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div>
+            <h3 className="font-[600] text-[16px] mb-[15px]">
+              {t('monitor.events.message')}
+            </h3>
+            <div className="leading-[24px]">
+              <Editor
+                options={{ readOnly: true }}
+                height={400}
+                theme="vs-dark"
+                defaultLanguage="python"
+                onMount={handleEditorDidMount}
+                value={JSON.stringify(trapData.metric || {})}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

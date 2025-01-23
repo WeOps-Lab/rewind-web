@@ -27,7 +27,7 @@ import {
   TabItem,
   TimeSelectorDefaultValue,
 } from '@/app/monitor/types';
-import { AlertProps } from '@/app/monitor/types/monitor';
+import { AlertProps, MetricItem } from '@/app/monitor/types/monitor';
 import { AlertOutlined } from '@ant-design/icons';
 import { FiltersConfig } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
@@ -121,18 +121,18 @@ const Alert: React.FC<AlertProps> = ({
       ),
     },
     {
-      title: t('monitor.events.strategyName'),
+      title: t('monitor.events.alertName'),
       dataIndex: 'title',
       key: 'title',
       width: 120,
-      render: (_, record) => <>{record.policy?.name || '--'}</>,
+      render: (_, record) => <>{record.content || '--'}</>,
     },
     {
       title: t('monitor.asset'),
       dataIndex: 'asset',
       key: 'asset',
       width: 100,
-      render: (_, record) => <>{record.monitor_instance?.name || '--'}</>,
+      render: (_, record) => <>{record.monitor_instance_id || '--'}</>,
     },
     {
       title: t('monitor.events.assetType'),
@@ -309,7 +309,7 @@ const Alert: React.FC<AlertProps> = ({
 
   const showObjName = (row: TableDataItem) => {
     return (
-      objects.find((item) => item.id === row.monitor_instance?.monitor_object)
+      objects.find((item) => item.id === row.policy?.monitor_object)
         ?.display_name || '--'
     );
   };
@@ -374,7 +374,11 @@ const Alert: React.FC<AlertProps> = ({
       const data = await get('/monitor/api/monitor_alert/', {
         params: chartParams,
       });
-      setChartData(processDataForStackedBarChart(data.results) as any);
+      setChartData(
+        processDataForStackedBarChart(
+          (data.results || []).filter((item: TableDataItem) => !!item.level)
+        ) as any
+      );
     } finally {
       setChartLoading(false);
     }
@@ -390,13 +394,18 @@ const Alert: React.FC<AlertProps> = ({
   };
 
   const openAlertDetail = (row: TableDataItem) => {
+    const metricInfo =
+      metrics.find(
+        (item) => item.id === row.policy?.query_condition?.metric_id
+      ) || {};
     detailRef.current?.showModal({
       title: t('monitor.events.alertDetail'),
       type: 'add',
       form: {
         ...row,
+        metric: metricInfo,
         alertTitle: showObjName(row),
-        alertValue: getEnumValueUnit(row.metric, row.value),
+        alertValue: getEnumValueUnit(metricInfo as MetricItem, row.value),
       },
     });
   };
