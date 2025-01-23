@@ -233,7 +233,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
                 key === 'instance_name'
                   ? 'Instance Name'
                   : target.find((sec: MetricItem) => sec.name === key)
-                      ?.description || key,
+                    ?.description || key,
               value: dimenValue,
             }))
             .filter(
