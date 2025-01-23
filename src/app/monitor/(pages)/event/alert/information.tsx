@@ -174,7 +174,23 @@ const Information: React.FC<TableDataItem> = ({
         </Button>
       </div>
       <div className="mt-4">
-        {formData.policy?.query_condition?.type === 'metric' ? (
+        {formData.policy?.query_condition?.type === 'pmq' ? (
+          <div>
+            <h3 className="font-[600] text-[16px] mb-[15px]">
+              {t('monitor.events.message')}
+            </h3>
+            <div className="leading-[24px]">
+              <Editor
+                options={{ readOnly: true }}
+                height={400}
+                theme="vs-dark"
+                defaultLanguage="python"
+                onMount={handleEditorDidMount}
+                value={JSON.stringify(trapData.metric || {})}
+              />
+            </div>
+          </div>
+        ) : (
           <div>
             <h3 className="font-[600] text-[16px] mb-[15px]">
               {t('monitor.views.indexView')}
@@ -188,22 +204,6 @@ const Information: React.FC<TableDataItem> = ({
                 data={chartData}
                 unit={formData.metric?.unit}
                 metric={formData.metric}
-              />
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h3 className="font-[600] text-[16px] mb-[15px]">
-              {t('monitor.events.message')}
-            </h3>
-            <div className="leading-[24px]">
-              <Editor
-                options={{ readOnly: true }}
-                height={400}
-                theme="vs-dark"
-                defaultLanguage="python"
-                onMount={handleEditorDidMount}
-                value={JSON.stringify(trapData.metric || {})}
               />
             </div>
           </div>

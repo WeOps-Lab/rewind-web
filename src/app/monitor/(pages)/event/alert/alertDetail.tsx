@@ -83,10 +83,10 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
     useEffect(() => {
       if (groupVisible) {
         if (isInformation) {
-          if (formData.policy?.query_condition?.type === 'metric') {
-            getChartData();
-          } else {
+          if (formData.policy?.query_condition?.type === 'pmq') {
             getRawData();
+          } else {
+            getChartData();
           }
           return;
         }
