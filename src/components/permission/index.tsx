@@ -24,7 +24,7 @@ const PermissionWrapper: React.FC<React.PropsWithChildren<PermissionWrapperProps
 
   return (
     <Tooltip title={tooltip} zIndex={99999}>
-      <span
+      <div
         className={className}
         style={{ display: 'inline-block', cursor: 'not-allowed' }}
         onClick={(e) => e.stopPropagation()}
@@ -32,7 +32,7 @@ const PermissionWrapper: React.FC<React.PropsWithChildren<PermissionWrapperProps
         <span style={{ pointerEvents: 'none', opacity: 0.5 }}>
           {fallback || children}
         </span>
-      </span>
+      </div>
     </Tooltip>
   );
 };
