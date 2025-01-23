@@ -44,44 +44,29 @@ async function handleProxy(req: NextRequest): Promise<NextResponse> {
 
   console.log(`[PROXY] Forwarding Request: ${req.method} ${targetUrl}`);
 
+  // 复制原始请求头，追加 X-Forwarded-* 自定义请求头
   const headers = new Headers(req.headers);
   headers.set('X-Forwarded-Host', req.nextUrl.host || '');
   headers.set('X-Forwarded-For', req.headers.get('x-forwarded-for') || '');
   headers.set('X-Forwarded-Proto', req.nextUrl.protocol || 'http');
 
-  const fetchOptions: RequestInit = {
+  // 直接转发 body，而不对其进行解析
+  const fetchOptions: any = {
     method: req.method,
     headers,
+    body: req.body, // 传递 body，同时 header 保持不变
+    duplex: 'half', // 使用 any 强制传递
   };
-
-  // 处理非 GET 和 HEAD 请求的请求体
-  if (!['GET', 'HEAD'].includes(req.method || '')) {
-    const contentType = req.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      fetchOptions.body = JSON.stringify(await req.json());
-    } else if (contentType.includes('application/x-www-form-urlencoded')) {
-      const formData = await req.formData();
-      const formDataObj: Record<string, string> = {};
-      formData.forEach((value, key) => {
-        formDataObj[key] = value.toString();
-      });
-      fetchOptions.body = new URLSearchParams(formDataObj).toString();
-    } else if (await req.text()) {
-      fetchOptions.body = await req.text();
-    } else {
-      fetchOptions.body = null;
-    }
-  }
 
   try {
     // 转发请求并获取目标服务器响应
     const proxyResponse = await fetch(targetUrl, fetchOptions);
 
-    // 日志记录：目标服务器的返回状态及响应
+    // 转发响应及其内容
     console.log(`[PROXY] Response Status: ${proxyResponse.status} from ${targetUrl}`);
+    const clonedBody = proxyResponse.body;
 
-    // 返回目标服务器的响应
-    return new NextResponse(proxyResponse.body, {
+    return new NextResponse(clonedBody, {
       status: proxyResponse.status,
       headers: proxyResponse.headers,
     });
