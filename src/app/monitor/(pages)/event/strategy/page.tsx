@@ -232,12 +232,14 @@ const StrategyOperation = () => {
       }
     });
     setThreshold(_threshold || []);
-    setSource(
-      source || {
+    if (source?.type) {
+      setSource(source);
+    } else {
+      setSource({
         type: '',
         values: [],
-      }
-    );
+      });
+    }
     setNoDataAlert(no_data_period?.value || null);
     setNodataUnit(no_data_period?.type || '');
     setNoDataLevel(no_data_level || '');
@@ -450,14 +452,15 @@ const StrategyOperation = () => {
           type: 'pmq',
           query: _values.query,
         };
+        _values.source = {};
       } else {
         _values.query_condition = {
           type: 'metric',
           metric_id: metrics.find((item) => item.name === metric)?.id,
           filter: conditions,
         };
+        _values.source = source;
       }
-      _values.source = source;
       _values.threshold = threshold.filter(
         (item) => !!item.value || item.value === 0
       );
@@ -477,10 +480,7 @@ const StrategyOperation = () => {
         };
         _values.no_data_level = noDataLevel;
       } else {
-        _values.no_data_period = {
-          type: '',
-          value: 0,
-        };
+        _values.no_data_period = _values.no_data_recovery_period = {};
       }
       _values.recovery_condition = _values.recovery_condition || 0;
       _values.group_by = groupBy;
