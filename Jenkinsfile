@@ -78,14 +78,14 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker pull ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker pull etherfurnace/opspilot-web
                         docker stop opspilot-web || true
                         docker rm opspilot-web|| true
                         docker run -itd --name opspilot-web --restart always \
                             -v /root/codes/conf/opspilot-web/.env:/apps/.env \
                             --add-host=kube-service.lite:${env.CLOUD_SERVER}  \
                             --network lite \
-                            etherfurnace/opspilot-web
+                            etherfurnace/munchkin-web
                     """
                 }
             }
