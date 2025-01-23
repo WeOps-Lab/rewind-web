@@ -77,7 +77,7 @@ const PreprocessStep: React.FC<PreprocessStepProps> = ({ onConfigChange, knowled
         if (!isInitialConfigApplied && ocrData.length > 0) {
           setFormData((prevState) => ({
             ...prevState,
-            ocrModel: ocrData.find((model) => model.enabled)?.id ?? ocrData[0].id,
+            ocrModel: ocrData.find((model: any) => model.enabled)?.id ?? ocrData[0].id,
           }));
         }
       } catch {
