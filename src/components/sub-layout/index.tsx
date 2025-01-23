@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import SideMenu, { MenuItem } from './side-menu';
+import React, { useState, useEffect, useMemo } from 'react';
+import SideMenu from './side-menu';
 import sideMenuStyle from './index.module.scss';
 import { Segmented } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
+import { MenuItem } from '@/types/index';
 import Icon from '@/components/icon';
+import { usePermissions } from '@/context/permissions';
 
 interface WithSideMenuLayoutProps {
-  menuItems: MenuItem[];
   intro?: React.ReactNode;
   showBackButton?: boolean;
   onBackButtonClick?: () => void;
@@ -21,7 +22,6 @@ interface WithSideMenuLayoutProps {
 }
 
 const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
-  menuItems,
   intro,
   showBackButton,
   onBackButtonClick,
@@ -34,7 +34,18 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { menus } = usePermissions();
   const [selectedKey, setSelectedKey] = useState<string>(pathname);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+
+  const updateMenuItems = useMemo(() => {
+    const currentMenu = menus.find((menu: MenuItem) => menu?.url && pathname.startsWith(menu.url));
+    return currentMenu?.children || [];
+  }, [menus, pathname]);
+
+  useEffect(() => {
+    setMenuItems(updateMenuItems);
+  }, [updateMenuItems]);
 
   useEffect(() => {
     setSelectedKey(pathname);
@@ -79,10 +90,10 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
                 <div className="flex items-center justify-center">
                   {item.icon && (
                     <Icon type={item.icon} className="mr-2 text-sm" />
-                  )} {item.label}
+                  )} {item.title}
                 </div>
               ),
-              value: item.path,
+              value: item.url,
             }))}
             value={selectedKey}
             onChange={handleSegmentChange}

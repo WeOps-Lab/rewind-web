@@ -5,16 +5,16 @@ import Image from 'next/image';
 import { Popover, Spin } from 'antd';
 import { CaretDownFilled } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
-import { useMenus } from '@/context/menus';
+import { usePermissions } from '@/context/permissions';
 import { useClientData } from '@/context/client';
 import UserInfo from '../user-info';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
-import { ClientData } from '@/types/index'
+import { ClientData } from '@/types/index';
 
 const TopMenu = () => {
   const { t } = useTranslation();
-  const menuItems = useMenus();
+  const { menus: menuItems } = usePermissions();
   const pathname = usePathname();
   const { getAll, loading } = useClientData();
   const [apps, setApps] = useState<ClientData[]>([]);
@@ -73,17 +73,19 @@ const TopMenu = () => {
       </div>
       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="flex items-center space-x-4">
-          {menuItems.map((item) => {
-            const isActive = item.path === '/' ? pathname === '/' : pathname.startsWith(item.path);
-            return (
-              <Link key={item.path} href={item.path} prefetch={false} legacyBehavior>
-                <a className={`px-3 py-2 rounded-[10px] flex items-center ${styles.menuCol} ${isActive ? styles.active : ''}`}>
-                  <Icon type={item.icon} className="mr-2 w-4 h-4" />
-                  {item.label}
-                </a>
-              </Link>
-            );
-          })}
+          {menuItems
+            .filter((item) => item.url)
+            .map((item) => {
+              const isActive = item.url === '/' ? pathname === '/' : pathname.startsWith(item.url);
+              return (
+                <Link key={item.url} href={item.url} prefetch={false} legacyBehavior>
+                  <a className={`px-3 py-2 rounded-[10px] flex items-center ${styles.menuCol} ${isActive ? styles.active : ''}`}>
+                    <Icon type={item.icon} className="mr-2 w-4 h-4" />
+                    {item.title}
+                  </a>
+                </Link>
+              );
+            })}
         </div>
       </div>
     </div>

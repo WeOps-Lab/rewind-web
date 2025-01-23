@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 
-const EXCLUDED_DIRECTORIES = ['(core)'];
+const EXCLUDED_DIRECTORIES = ['(core)', 'no-permission'];
 
 interface NestedMessages {
   [key: string]: string | NestedMessages;

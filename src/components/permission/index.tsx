@@ -23,7 +23,7 @@ const PermissionWrapper: React.FC<React.PropsWithChildren<PermissionWrapperProps
   }
 
   return (
-    <Tooltip title={tooltip}>
+    <Tooltip title={tooltip} zIndex={99999}>
       <span
         className={className}
         style={{ display: 'inline-block', cursor: 'not-allowed' }}
@@ -37,4 +37,11 @@ const PermissionWrapper: React.FC<React.PropsWithChildren<PermissionWrapperProps
   );
 };
 
-export default PermissionWrapper;
+export default React.memo(PermissionWrapper, (prevProps, nextProps) => {
+  return (
+    prevProps.requiredPermissions === nextProps.requiredPermissions &&
+    prevProps.fallback === nextProps.fallback &&
+    prevProps.tooltip === nextProps.tooltip &&
+    prevProps.className === nextProps.className
+  );
+});

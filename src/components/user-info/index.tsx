@@ -37,7 +37,7 @@ const UserInfo = () => {
         const newPath = `/${pathSegments.slice(0, 2).join('/')}`;
         router.push(newPath);
       } else {
-        router.refresh();
+        window.location.reload();
       }
     }
   };

@@ -21,9 +21,9 @@ export interface ListItem {
 }
 
 export interface groupProps {
-  id: string,
-  name: string,
-  path: string
+  id: string;
+  name: string;
+  path: string;
 }
 
 export interface Group {
@@ -37,6 +37,7 @@ export interface UserInfoContextType {
   groups: Group[];
   selectedGroup: Group | null;
   flatGroups: Group[];
+  isSuperUser: boolean;
   setSelectedGroup: (group: Group) => void;
 }
 
@@ -47,4 +48,14 @@ export interface ClientData {
   description: string;
   url: string;
   icon?: string;
+}
+
+export interface MenuItem {
+  name: string;
+  display_name?: string;
+  url: string;
+  icon: string;
+  title: string;
+  operation: string[];
+  children?: MenuItem[];
 }

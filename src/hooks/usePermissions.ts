@@ -1,40 +1,35 @@
-import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { usePermissionsContext } from '@/context/permission';
+import { usePermissions } from '@/context/permissions';
+import { useMemo } from 'react';
 
-const usePermissions = () => {
+const useBtnPermissions = () => {
   const { data: session, status } = useSession();
   const currentPath = usePathname();
-  const { permissions, loadPermissions } = usePermissionsContext();
+  const { permissions } = usePermissions();
 
-  useEffect(() => {
-    if (!permissions) {
-      loadPermissions();
+  // 使用 useMemo 避免条件化 Hook 调用
+  const hasPermission = useMemo(() => {
+    if (status === 'loading' || !session || !permissions) {
+      return () => false;
     }
-  }, [permissions, loadPermissions]);
 
-  if (status === 'loading' || !session || permissions === null) {
-    return { hasPermission: () => false };
-  }
+    const routePermissions = permissions[currentPath] || [];
+    console.log('routePermissions:', routePermissions);
 
-  const roles = session?.roles || [];
-
-  const hasPermission = (requiredPermissions: string[]): boolean => {
-    const routePermissions = permissions[currentPath] || {};
-
-    const userPermissions = new Set<string>();
-
-    roles.forEach(role => {
-      routePermissions[role]?.forEach((permission: string) => {
+    return (requiredPermissions: string[]): boolean => {
+      const userPermissions = new Set<string>();
+      routePermissions.forEach((permission: string) => {
         userPermissions.add(permission);
       });
-    });
 
-    return requiredPermissions.every(permission => userPermissions.has(permission));
-  };
+      return requiredPermissions.every((permission) =>
+        userPermissions.has(permission)
+      );
+    };
+  }, [status, session, permissions, currentPath]);
 
   return { hasPermission };
 };
 
-export default usePermissions;
+export default useBtnPermissions;
