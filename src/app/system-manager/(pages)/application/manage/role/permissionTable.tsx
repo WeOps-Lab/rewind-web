@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Checkbox, TableProps } from 'antd';
 import CustomTable from '@/components/custom-table';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
-import { Menu } from '@/app/system-manager/types/role';
+import { Menu } from '@/app/system-manager/types/application';
 
 type TranslateFunction = (key: string) => string;
 

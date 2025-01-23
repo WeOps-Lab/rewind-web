@@ -1,7 +1,7 @@
 import React from 'react';
 import { Skeleton, Popconfirm } from 'antd';
 import Icon from '@/components/icon';
-import { Role } from '@/app/system-manager/types/role';
+import { Role } from '@/app/system-manager/types/application';
 
 type TranslateFunction = (key: string) => string;
 

@@ -6,11 +6,9 @@ import { useTranslation } from '@/utils/i18n';
 import { useSearchParams } from 'next/navigation';
 import CustomTable from '@/components/custom-table';
 import OperateModal from '@/components/operate-modal';
-import { useUserApi } from '@/app/system-manager/api/user';
-import { useRoleApi } from '@/app/system-manager/api/role';
-import { Role, User, Menu } from '@/app/system-manager/types/role';
+import { useRoleApi } from '@/app/system-manager/api/application';
+import { Role, User, Menu } from '@/app/system-manager/types/application';
 import PageLayout from '@/components/page-layout';
-import TopSection from '@/components/top-section';
 import PermissionTable from './permissionTable';
 import RoleList from './roleList';
 
@@ -48,8 +46,6 @@ const RoleManagement: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('1');
   const [menuData, setMenuData] = useState<Menu[]>([]);
-  const [clientName, setClientName] = useState('');
-  const [clientDescription, setClientDescription] = useState('');
 
   const {
     getRoles,
@@ -64,10 +60,8 @@ const RoleManagement: React.FC = () => {
     setRoleMenus,
     getAllMenus
   } = useRoleApi();
-  const { getClientDetail } = useUserApi();
 
   useEffect(() => {
-    fetchClientDetail();
     fetchAllMenus();
     fetchRoles();
   }, []);
@@ -84,12 +78,6 @@ const RoleManagement: React.FC = () => {
     } finally {
       setLoadingRoles(false);
     }
-  };
-
-  const fetchClientDetail = async () => {
-    const client = await getClientDetail({ params: { id } });
-    setClientName(client.name);
-    setClientDescription(client.description);
   };
 
   const fetchAllMenus = async () => {
@@ -352,7 +340,6 @@ const RoleManagement: React.FC = () => {
   };
 
   const handleTabChange = (key: string) => {
-    console.log('key', key);
     setActiveTab(key);
     if (selectedRole) {
       if (key === '1') {
@@ -366,7 +353,7 @@ const RoleManagement: React.FC = () => {
   return (
     <>
       <PageLayout
-        topSection={<TopSection title={clientName} content={clientDescription} />}
+        height="calc(100vh - 195px)"
         leftSection={
           <RoleList
             loadingRoles={loadingRoles}
@@ -393,7 +380,7 @@ const RoleManagement: React.FC = () => {
                   <Button
                     className="mr-[8px]"
                     type="primary"
-                    onClick={openUserModal} // 确保按钮点击事件已正确绑定
+                    onClick={openUserModal}
                   >
                     +{t('common.add')}
                   </Button>

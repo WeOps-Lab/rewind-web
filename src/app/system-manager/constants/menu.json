@@ -1,36 +1,47 @@
 {
   "zh": [
     {
-      "label": "用户",
+      "title": "用户",
       "icon": "yonghu",
-      "path": "/system-manager/user"
+      "url": "/system-manager/user"
     },
     {
-      "label": "组织",
+      "title": "组织",
       "icon": "chatgpt",
-      "path": "/system-manager/group"
+      "url": "/system-manager/group"
     },
      {
-      "label": "角色",
+      "title": "角色",
       "icon": "chatgpt",
-      "path": "/system-manager/role"
+      "url": "/system-manager/role"
     }
   ],
   "en": [
       {
-      "label": "User",
-      "icon": "yonghu",
-      "path": "/system-manager/user"
+      "title": "User",
+      "icon": "yonghu1",
+      "name": "user_list",
+      "url": "/system-manager/user"
     },
     {
-      "label": "Group",
-      "icon": "chatgpt",
-      "path": "/system-manager/group"
+      "title": "Group",
+      "icon": "jiedianhuiyuanfenzu",
+      "name": "group_list",
+      "url": "/system-manager/group"
     },
     {
-      "label": "Role",
-      "icon": "chatgpt",
-      "path": "/system-manager/role"
+      "title": "Application",
+      "icon": "guanli",
+      "name": "application_list",
+      "url": "/system-manager/application",
+      "children": [
+        {
+          "title": "Role",
+          "icon": "guanliyuan_jiaoseguanli",
+          "name": "applicaiton_role",
+          "url": "/system-manager/application/manage/role"
+        }
+      ]
     }
   ]
 }

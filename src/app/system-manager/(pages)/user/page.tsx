@@ -235,15 +235,15 @@ const User: React.FC = () => {
   );
 
   const leftSectionContent = (
-    <div className={`h-full flex flex-col ${styles.userInfo}`}>
+    <div className={`w-full h-full flex flex-col ${styles.userInfo}`}>
       <Input
-        className="w-[204px]"
+        className="w-full"
         placeholder={`${t('common.search')}...`}
         onChange={(e) => handleTreeSearchChange(e.target.value)}
         value={treeSearchValue}
       />
       <Tree
-        className="w-[230px] flex-1 mt-4 overflow-auto px-3"
+        className="w-[230px] flex-1 mt-4 overflow-auto"
         showLine
         expandAction={false}
         defaultExpandAll

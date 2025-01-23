@@ -1,5 +1,5 @@
-import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { Input, Button, Form, Select, message, Spin } from 'antd';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import { Input, Button, Form, TreeSelect, Select, message, Spin } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
 import { useTranslation } from '@/utils/i18n';
@@ -32,7 +32,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [type, setType] = useState<'add' | 'edit'>('add');
   const [roleOptions, setRoleOptions] = useState<{ label: string; value: string }[]>([]);
-  const [groupOptions, setGroupOptions] = useState<{ label: string; value: string }[]>([]);
 
   const { addUser, editUser, getUserDetail, getRoleList } = useUserApi();
 
@@ -74,23 +73,14 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
     }
   };
 
-  useEffect(() => {
-    if (treeData) {
-      const convertTreeDataToGroupOptions = (data: TreeDataNode[]): { label: string; value: string }[] => {
-        return data.flatMap((item) => [
-          { label: String(item.title), value: String(item.key) },
-          ...(item.children ? convertTreeDataToGroupOptions(item.children) : []),
-        ]);
-      };
-      setGroupOptions(convertTreeDataToGroupOptions(treeData));
-    }
-  }, [treeData]);
-
   useImperativeHandle(ref, () => ({
     showModal: ({ type, userId }) => {
       setVisible(true);
       setType(type);
-      formRef.current?.resetFields();
+      // 在showModal方法中添加判断，以确保证在formRef.current存在时调用resetFields和其它相关交互
+      if(formRef.current) {
+        formRef.current.resetFields();
+      }
       if (type === 'edit' && userId) {
         fetchUserDetail(userId);
       }
@@ -106,9 +96,9 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
     try {
       setIsSubmitting(true);
       const formData = await formRef.current?.validateFields();
-      console.log('formData', formData);
-      const roles = roleOptions.filter(op => formData.roles.includes(op.value)).map(role => ({ id: role.value, name: role.label }))
-      console.log('roles', roles)
+      const roles = roleOptions.filter((op) => formData.roles.includes(op.value))
+        .map((role) => ({ id: role.value, name: role.label }));
+
       if (type === 'add') {
         await addUser({ ...formData, roles });
         message.success(t('common.addSuccess'));
@@ -124,6 +114,17 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
       setIsSubmitting(false);
     }
   };
+
+  // 这里通过检查 treeData 和默认值进行填充，确保组件不会因为 treeData 的问题崩溃
+  const filteredTreeData = treeData?.map((node: any) => ({
+    ...node,
+    title: node.title || 'Unknown',
+    value: node.value || node.key,
+    children: node.children ? node.children.map((child: any) => ({
+      ...child,       title: child.title || 'Unknown',
+      value: child.value || child.key,
+    })) : []
+  }));
 
   return (
     <OperateModal
@@ -167,14 +168,28 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
             label={t('system.user.form.group')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Select placeholder={t('system.user.form.group')} mode="multiple" options={groupOptions} />
+            <TreeSelect
+              treeData={filteredTreeData}
+              showSearch
+              style={{ width: '100%' }}
+              dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+              placeholder={t('system.user.form.group')}
+              allowClear
+              multiple
+              treeDefaultExpandAll
+            />
           </Form.Item>
           <Form.Item
             name="roles"
             label={t('system.user.form.role')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Select placeholder={t('system.user.form.role')} mode="multiple" options={roleOptions} loading={infoLoading} />
+            <Select
+              placeholder={t('system.user.form.role')}
+              mode="multiple"
+              options={roleOptions}
+              loading={infoLoading}
+            />
           </Form.Item>
         </Form>
       </Spin>
