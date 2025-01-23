@@ -71,12 +71,12 @@ const Alert: React.FC<AlertProps> = ({
     pageSize: 20,
   });
   const [frequence, setFrequence] = useState<number>(0);
-  const beginTime: number = dayjs().subtract(1440, 'minute').valueOf();
+  const beginTime: number = dayjs().subtract(10080, 'minute').valueOf();
   const lastTime: number = dayjs().valueOf();
   const [timeRange, setTimeRange] = useState<number[]>([beginTime, lastTime]);
   const timeDefaultValue =
     useRef<TimeSelectorDefaultValue>({
-      selectValue: 1440,
+      selectValue: 10080,
       rangePickerVaule: null,
     })?.current || {};
   const [filters, setFilters] = useState<FiltersConfig>({
@@ -259,6 +259,7 @@ const Alert: React.FC<AlertProps> = ({
     isLoading,
     timeRange,
     filters.state,
+    activeTab,
     filters.level,
     filters.monitor_objects,
   ]);
@@ -368,7 +369,29 @@ const Alert: React.FC<AlertProps> = ({
     delete chartParams.page_size;
     chartParams.content = '';
     chartParams.type = 'count';
-    chartParams.status_in = chartParams.status_in.join(',');
+    if (activeTab === 'activeAlarms') {
+      chartParams.created_at_before = '';
+      chartParams.created_at_after = '';
+      if (
+        chartParams.status_in.length &&
+        !chartParams.status_in.includes('new')
+      ) {
+        setChartData([]);
+        return;
+      }
+      chartParams.status_in = 'new';
+    } else {
+      if (
+        chartParams.status_in.length === 1 &&
+        chartParams.status_in[0] === 'new'
+      ) {
+        setChartData([]);
+        return;
+      }
+      chartParams.status_in =
+        chartParams.status_in.filter((item: any) => item !== 'new').join(',') ||
+        'recovered,closed';
+    }
     try {
       setChartLoading(type !== 'timer');
       const data = await get('/monitor/api/monitor_alert/', {
@@ -604,6 +627,7 @@ const Alert: React.FC<AlertProps> = ({
                 </span>
                 <TimeSelector
                   defaultValue={timeDefaultValue}
+                  onlyRefresh={activeTab === 'activeAlarms'}
                   onChange={(value) => onTimeChange(value)}
                   onFrequenceChange={onFrequenceChange}
                   onRefresh={onRefresh}
