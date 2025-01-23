@@ -1,5 +1,6 @@
 .selectInstance {
     display: flex;
+    overflow: hidden;
 
     .instanceList {
         width: 650px;
@@ -12,7 +13,6 @@
         border-left: 1px solid var(--ant-color-border);
 
         .list {
-            overflow-y: hidden;
             overflow-y: auto;
 
             .listItem {

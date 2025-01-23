@@ -11,7 +11,6 @@ import OperateModal from '@/app/monitor/components/operate-drawer';
 import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
 import CustomTable from '@/components/custom-table';
-import CustomCascader from '@/components/custom-cascader';
 import {
   ColumnItem,
   ModalRef,
@@ -23,7 +22,6 @@ import {
 import { CloseOutlined } from '@ant-design/icons';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import selectInstanceStyle from './selectInstance.module.scss';
-import { showGroupName } from '@/app/monitor/utils/common';
 
 const convertCascaderToTreeData = (cascaderData: any) => {
   return cascaderData.map((item: any) => {
@@ -112,9 +110,6 @@ const SelectAssets = forwardRef<ModalRef, ModalConfig>(
     const [selectedRowKeys, setSelectedRowKeys] = useState<Array<string>>([]);
     const [tableData, setTableData] = useState<TableDataItem[]>([]);
     const [searchText, setSearchText] = useState<string>('');
-    const [selectedOrganizations, setSelectedOrganizations] = useState<
-      string[]
-    >([]);
     const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
     const [treeSearchText, setTreeSearchText] = useState<string>('');
 
@@ -135,14 +130,6 @@ const SelectAssets = forwardRef<ModalRef, ModalConfig>(
         key: 'instance_name',
       },
       {
-        title: t('common.group'),
-        dataIndex: 'organization',
-        key: 'organization',
-        render: (_, { organization }) => (
-          <>{showGroupName(organization || [], organizationList)}</>
-        ),
-      },
-      {
         title: t('common.time'),
         dataIndex: 'time',
         key: 'time',
@@ -156,7 +143,7 @@ const SelectAssets = forwardRef<ModalRef, ModalConfig>(
 
     useEffect(() => {
       fetchData();
-    }, [selectedOrganizations, pagination.current, pagination.pageSize]);
+    }, [pagination.current, pagination.pageSize]);
 
     useImperativeHandle(ref, () => ({
       showModal: ({ title }) => {
@@ -217,7 +204,6 @@ const SelectAssets = forwardRef<ModalRef, ModalConfig>(
               page: pagination.current,
               page_size: pagination.pageSize,
               name: type === 'clear' ? '' : searchText,
-              organizations: selectedOrganizations.join(','),
             },
           }
         );
@@ -315,17 +301,6 @@ const SelectAssets = forwardRef<ModalRef, ModalConfig>(
               {isInstance ? (
                 <div className={selectInstanceStyle.instanceList}>
                   <div className="flex items-center justify-between mb-[10px]">
-                    <CustomCascader
-                      className="mr-[8px]"
-                      showSearch
-                      maxTagCount="responsive"
-                      options={organizationList}
-                      onChange={(value) =>
-                        setSelectedOrganizations(value as string[])
-                      }
-                      multiple
-                      allowClear
-                    />
                     <Input
                       className="w-[320px]"
                       allowClear
@@ -343,7 +318,7 @@ const SelectAssets = forwardRef<ModalRef, ModalConfig>(
                     pagination={pagination}
                     loading={tableLoading}
                     rowKey="instance_id"
-                    scroll={{ x: 520, y: 'calc(100vh - 260px)' }}
+                    scroll={{ x: 520, y: 'calc(100vh - 370px)' }}
                     onChange={handleTableChange}
                   />
                 </div>

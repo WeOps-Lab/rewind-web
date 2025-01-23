@@ -21,11 +21,9 @@ import {
 } from '@/app/monitor/types';
 import { CloseOutlined } from '@ant-design/icons';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
-import { showGroupName } from '@/app/monitor/utils/common';
-import CustomCascader from '@/components/custom-cascader';
 
 const SelectInstance = forwardRef<ModalRef, ModalConfig>(
-  ({ onSuccess, organizationList, monitorObject, list }, ref) => {
+  ({ onSuccess, monitorObject, list }, ref) => {
     const { t } = useTranslation();
     const { get } = useApiClient();
     const { convertToLocalizedTime } = useLocalizedTime();
@@ -40,22 +38,11 @@ const SelectInstance = forwardRef<ModalRef, ModalConfig>(
     const [selectedRowKeys, setSelectedRowKeys] = useState<Array<any>>([]);
     const [tableData, setTableData] = useState<TableDataItem[]>([]);
     const [searchText, setSearchText] = useState<string>('');
-    const [selectedOrganizations, setSelectedOrganizations] = useState<
-      string[]
-    >([]);
     const columns: ColumnItem[] = [
       {
         title: t('common.name'),
         dataIndex: 'instance_name',
         key: 'instance_name',
-      },
-      {
-        title: t('common.group'),
-        dataIndex: 'organization',
-        key: 'organization',
-        render: (_, { organization }) => (
-          <>{showGroupName(organization || [], organizationList)}</>
-        ),
       },
       {
         title: t('common.time'),
@@ -71,7 +58,7 @@ const SelectInstance = forwardRef<ModalRef, ModalConfig>(
 
     useEffect(() => {
       fetchData();
-    }, [selectedOrganizations, pagination.current, pagination.pageSize]);
+    }, [pagination.current, pagination.pageSize]);
 
     useImperativeHandle(ref, () => ({
       showModal: ({ title }) => {
@@ -105,14 +92,16 @@ const SelectInstance = forwardRef<ModalRef, ModalConfig>(
     const fetchData = async (type?: string) => {
       try {
         setTableLoading(true);
-        const data = await get(`/monitor/api/monitor_instance/${monitorObject}/list/`, {
-          params: {
-            page: pagination.current,
-            page_size: pagination.pageSize,
-            name: type === 'clear' ? '' : searchText,
-            organizations: selectedOrganizations.join(','),
-          },
-        });
+        const data = await get(
+          `/monitor/api/monitor_instance/${monitorObject}/list/`,
+          {
+            params: {
+              page: pagination.current,
+              page_size: pagination.pageSize,
+              name: type === 'clear' ? '' : searchText,
+            },
+          }
+        );
         setTableData(data?.results || []);
         setPagination((prev: Pagination) => ({
           ...prev,
@@ -170,17 +159,6 @@ const SelectInstance = forwardRef<ModalRef, ModalConfig>(
           <div className={selectInstanceStyle.selectInstance}>
             <div className={selectInstanceStyle.instanceList}>
               <div className="flex items-center justify-between mb-[10px]">
-                <CustomCascader
-                  className="mr-[8px] w-[250px]"
-                  showSearch
-                  maxTagCount="responsive"
-                  options={organizationList}
-                  onChange={(value) =>
-                    setSelectedOrganizations(value as string[])
-                  }
-                  multiple
-                  allowClear
-                />
                 <Input
                   allowClear
                   className="w-[320px]"
@@ -198,7 +176,7 @@ const SelectInstance = forwardRef<ModalRef, ModalConfig>(
                 pagination={pagination}
                 loading={tableLoading}
                 rowKey="instance_id"
-                scroll={{ x: 620, y: 'calc(100vh - 200px)' }}
+                scroll={{ x: 620, y: 'calc(100vh - 450px)' }}
                 onChange={handleTableChange}
               />
             </div>

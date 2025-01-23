@@ -1,17 +1,11 @@
 'use client';
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Spin, Input, Button, Tree, Modal, message, Switch } from 'antd';
 import useApiClient from '@/utils/request';
 import assetStyle from './index.module.scss';
 import { useTranslation } from '@/utils/i18n';
-import {
-  ColumnItem,
-  TreeItem,
-  Organization,
-  Pagination,
-} from '@/app/monitor/types';
-import CustomCascader from '@/components/custom-cascader';
+import { ColumnItem, TreeItem, Pagination } from '@/app/monitor/types';
 import {
   ObectItem,
   RuleInfo,
@@ -20,10 +14,8 @@ import {
 } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
 const { Search } = Input;
-import { useCommon } from '@/app/monitor/context/common';
 import {
   deepClone,
-  showGroupName,
   getRandomColor,
   findLabelById,
 } from '@/app/monitor/utils/common';
@@ -35,13 +27,10 @@ const { confirm } = Modal;
 const Strategy: React.FC<AlertProps> = ({ objects }) => {
   const { t } = useTranslation();
   const { get, del, patch } = useApiClient();
-  const commonContext = useCommon();
   const searchParams = useSearchParams();
   const { convertToLocalizedTime } = useLocalizedTime();
   const objId = searchParams.get('objId');
   const router = useRouter();
-  const authList = useRef(commonContext?.authOrganizations || []);
-  const organizationList: Organization[] = authList.current;
   const [pagination, setPagination] = useState<Pagination>({
     current: 1,
     total: 0,
@@ -54,23 +43,12 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const [searchText, setSearchText] = useState<string>('');
-  const [selectedOrganizations, setSelectedOrganizations] = useState<string[]>(
-    []
-  );
   const [enableLoading, setEnableLoading] = useState<boolean>(false);
   const columns: ColumnItem[] = [
     {
       title: t('common.name'),
       dataIndex: 'name',
       key: 'name',
-    },
-    {
-      title: t('monitor.group'),
-      dataIndex: 'organizations',
-      key: 'organizations',
-      render: (_, { organizations }) => (
-        <>{showGroupName(organizations, organizationList) || '--'}</>
-      ),
     },
     {
       title: t('common.creator'),
@@ -153,19 +131,13 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
     if (selectedKeys[0]) {
       getAssetInsts(selectedKeys[0]);
     }
-  }, [
-    selectedOrganizations,
-    pagination.current,
-    pagination.pageSize,
-    selectedKeys,
-  ]);
+  }, [pagination.current, pagination.pageSize, selectedKeys]);
 
   const getParams = (text?: string) => {
     return {
       name: text ? '' : searchText,
       page: pagination.current,
       page_size: pagination.pageSize,
-      organizations: selectedOrganizations.join(','),
       monitor_object_id: selectedKeys[0] || '',
     };
   };
@@ -332,17 +304,6 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
         <div className={assetStyle.table}>
           <div className={assetStyle.search}>
             <div>
-              <CustomCascader
-                className="mr-[8px] w-[250px]"
-                showSearch
-                maxTagCount="responsive"
-                options={organizationList}
-                onChange={(value) =>
-                  setSelectedOrganizations(value as string[])
-                }
-                multiple
-                allowClear
-              />
               <Input
                 className="w-[320px]"
                 placeholder={t('common.searchPlaceHolder')}

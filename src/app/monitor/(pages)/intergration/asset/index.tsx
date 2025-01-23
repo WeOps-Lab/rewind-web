@@ -33,9 +33,8 @@ import Icon from '@/components/icon';
 import RuleModal from './ruleModal';
 const { Search } = Input;
 import { useCommon } from '@/app/monitor/context/common';
-import { deepClone, showGroupName } from '@/app/monitor/utils/common';
+import { deepClone } from '@/app/monitor/utils/common';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
-import CustomCascader from '@/components/custom-cascader';
 import EditConfig from './editConfig';
 import {
   OBJECT_COLLECT_TYPE_MAP,
@@ -66,9 +65,6 @@ const Asset = () => {
   const [ruleList, setRuleList] = useState<RuleInfo[]>([]);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const [searchText, setSearchText] = useState<string>('');
-  const [selectedOrganizations, setSelectedOrganizations] = useState<string[]>(
-    []
-  );
   const [objects, setObjects] = useState<ObectItem[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
@@ -78,15 +74,6 @@ const Asset = () => {
       dataIndex: 'instance_name',
       key: 'instance_name',
       width: 200,
-    },
-    {
-      title: t('monitor.group'),
-      dataIndex: 'organization',
-      key: 'organization',
-      width: 200,
-      render: (_, { organization }) => (
-        <>{showGroupName(organization, organizationList)}</>
-      ),
     },
     {
       title: t('common.action'),
@@ -188,7 +175,7 @@ const Asset = () => {
     if (selectedKeys.length) {
       getAssetInsts(selectedKeys[0]);
     }
-  }, [pagination.current, pagination.pageSize, selectedOrganizations]);
+  }, [pagination.current, pagination.pageSize]);
 
   const openRuleModal = (type: string, row = {}) => {
     const title: string = t(
@@ -236,7 +223,6 @@ const Asset = () => {
             page: pagination.current,
             page_size: pagination.pageSize,
             name: type === 'clear' ? '' : searchText,
-            organizations: selectedOrganizations.join(','),
           },
         }
       );
@@ -411,17 +397,6 @@ const Asset = () => {
         <Spin spinning={pageLoading}>
           <div className={assetStyle.table}>
             <div className={assetStyle.search}>
-              <CustomCascader
-                className="mr-[8px] w-[250px]"
-                showSearch
-                maxTagCount="responsive"
-                multiple
-                allowClear
-                options={organizationList}
-                onChange={(value) =>
-                  setSelectedOrganizations(value as string[])
-                }
-              />
               <Input
                 allowClear
                 className="w-[320px]"
