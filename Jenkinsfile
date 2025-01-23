@@ -78,7 +78,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker pull etherfurnace/opspilot-web
+                        docker pull etherfurnace/munchkin-web
                         docker stop opspilot-web || true
                         docker rm opspilot-web|| true
                         docker run -itd --name opspilot-web --restart always \
