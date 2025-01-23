@@ -2,13 +2,13 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Breadcrumb, Button, Steps, message, Spin } from 'antd';
 import LocalFileUpload from './localFileUpload';
 import WebLinkForm from './webLinkForm';
 import CustomTextForm from './customTextForm';
 import PreprocessStep from './preprocessStep';
 import useApiClient from '@/utils/request';
+import Icon from '@/components/icon'
 import useSaveConfig from '@/app/opspilot/hooks/useSaveConfig';
 import { useTranslation } from '@/utils/i18n';
 
@@ -224,7 +224,7 @@ const KnowledgeModifyPage = () => {
       title: t('knowledge.finish'),
       content: (
         <div className="flex flex-col items-center">
-          <Image src="/finish.png" alt="Finish" width={150} height={40} />
+          <Icon className="text-8xl mb-2" type="finish" />
           <p>{t('knowledge.finishTip')}</p>
           <p>
             <span className='text-blue-500 cursor-pointer' onClick={handleDone}>{t('knowledge.backToList')}</span>

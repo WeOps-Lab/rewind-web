@@ -352,7 +352,7 @@ const DocumentsPage: React.FC = () => {
             >
               {t('common.batchDelete')}
             </Button>
-          </PermissionWrapper>s
+          </PermissionWrapper>
         </div>
       </div>
       <CustomTable
