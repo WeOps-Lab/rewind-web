@@ -131,8 +131,8 @@ const Alert: React.FC<AlertProps> = ({
       title: t('monitor.asset'),
       dataIndex: 'asset',
       key: 'asset',
-      width: 100,
-      render: (_, record) => <>{record.monitor_instance_id || '--'}</>,
+      width: 140,
+      render: (_, record) => <>{record.monitor_instance_name || '--'}</>,
     },
     {
       title: t('monitor.events.assetType'),

@@ -124,7 +124,7 @@ const Information: React.FC<TableDataItem> = ({
         </Descriptions.Item>
         <Descriptions.Item label={t('monitor.asset')}>
           <div className="flex justify-between">
-            {formData.monitor_instance_id || '--'}
+            {formData.monitor_instance_name || '--'}
             <a
               href="#"
               className="text-blue-500 w-[36px]"

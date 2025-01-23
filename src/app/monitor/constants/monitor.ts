@@ -65,7 +65,9 @@ const useKeyMetricLabelMap = (): ObjectIconMap => {
       iftotalInOctets: t('monitor.views.iftotalInOctets'),
       iftotalOutOctets: t('monitor.views.iftotalOutOctets'),
       'http_success.rate': t('monitor.views.http_success.rate'),
-      'http_total.duration': t('monitor.views.http_total.duration'),
+      http_duration: t('monitor.views.http_duration'),
+      ping_response_time: t('monitor.views.ping_response_time'),
+      ping_error_response_code: t('monitor.views.ping_error_response_code'),
       pod_status: t('monitor.views.pod_status'),
       pod_cpu_utilization: t('monitor.views.pod_cpu_utilization'),
       pod_memory_utilization: t('monitor.views.pod_memory_utilization'),
@@ -406,7 +408,7 @@ const INDEX_CONFIG = [
         },
       },
       {
-        indexId: 'http_total.duration',
+        indexId: 'http_duration',
         displayType: 'single',
         sortIndex: 1,
         displayDimension: [],
@@ -450,23 +452,46 @@ const INDEX_CONFIG = [
       {
         type: 'enum',
         key: 'http_success.rate',
-        list: [
-          {
-            value: '1',
-            label: 'Success',
-          },
-          {
-            value: '0',
-            label: 'Fail',
-          },
-        ],
       },
-      { type: 'value', key: 'http_total.duration' },
+      { type: 'value', key: 'http_duration' },
+    ],
+  },
+  {
+    name: 'Ping',
+    id: 3,
+    dashboardDisplay: [
+      {
+        indexId: 'ping_response_time',
+        displayType: 'single',
+        sortIndex: 0,
+        displayDimension: [],
+        style: {
+          height: '200px',
+          width: '15%',
+        },
+      },
+      {
+        indexId: 'ping_error_response_code',
+        displayType: 'single',
+        sortIndex: 1,
+        displayDimension: [],
+        style: {
+          height: '200px',
+          width: '15%',
+        },
+      },
+    ],
+    tableDiaplay: [
+      { type: 'value', key: 'ping_response_time' },
+      {
+        type: 'enum',
+        key: 'ping_error_response_code',
+      },
     ],
   },
   {
     name: 'Pod',
-    id: 3,
+    id: 4,
     dashboardDisplay: [
       {
         indexId: 'pod_status',
@@ -527,7 +552,7 @@ const INDEX_CONFIG = [
   },
   {
     name: 'Node',
-    id: 4,
+    id: 5,
     dashboardDisplay: [
       {
         indexId: 'node_status_condition',
@@ -630,7 +655,7 @@ const INDEX_CONFIG = [
   },
   {
     name: 'Cluster',
-    id: 5,
+    id: 6,
     dashboardDisplay: [
       {
         indexId: 'cluster_pod_count',
@@ -670,66 +695,6 @@ const INDEX_CONFIG = [
   },
   {
     name: 'Switch',
-    id: 6,
-    dashboardDisplay: [
-      {
-        indexId: 'sysUpTime',
-        displayType: 'single',
-        sortIndex: 0,
-        displayDimension: [],
-        style: {
-          height: '200px',
-          width: '15%',
-        },
-      },
-      {
-        indexId: 'iftotalInOctets',
-        displayType: 'lineChart',
-        sortIndex: 1,
-        displayDimension: [],
-        style: {
-          height: '200px',
-          width: '40%',
-        },
-      },
-      {
-        indexId: 'iftotalOutOctets',
-        displayType: 'lineChart',
-        sortIndex: 2,
-        displayDimension: [],
-        style: {
-          height: '200px',
-          width: '40%',
-        },
-      },
-      {
-        indexId: 'interfaces',
-        displayType: 'multipleIndexsTable',
-        sortIndex: 3,
-        displayDimension: [
-          'ifOperStatus',
-          'ifHighSpeed',
-          'ifInErrors',
-          'ifOutErrors',
-          'ifInUcastPkts',
-          'ifOutUcastPkts',
-          'ifInOctets',
-          'ifOutOctets',
-        ],
-        style: {
-          height: '400px',
-          width: '100%',
-        },
-      },
-    ],
-    tableDiaplay: [
-      { type: 'value', key: 'iftotalInOctets' },
-      { type: 'value', key: 'iftotalOutOctets' },
-      { type: 'value', key: 'sysUpTime' },
-    ],
-  },
-  {
-    name: 'Loadbalance',
     id: 7,
     dashboardDisplay: [
       {
@@ -789,7 +754,7 @@ const INDEX_CONFIG = [
     ],
   },
   {
-    name: 'Router',
+    name: 'Loadbalance',
     id: 8,
     dashboardDisplay: [
       {
@@ -849,7 +814,7 @@ const INDEX_CONFIG = [
     ],
   },
   {
-    name: 'Firewall',
+    name: 'Router',
     id: 9,
     dashboardDisplay: [
       {
@@ -909,8 +874,68 @@ const INDEX_CONFIG = [
     ],
   },
   {
-    name: 'Detection Device',
+    name: 'Firewall',
     id: 10,
+    dashboardDisplay: [
+      {
+        indexId: 'sysUpTime',
+        displayType: 'single',
+        sortIndex: 0,
+        displayDimension: [],
+        style: {
+          height: '200px',
+          width: '15%',
+        },
+      },
+      {
+        indexId: 'iftotalInOctets',
+        displayType: 'lineChart',
+        sortIndex: 1,
+        displayDimension: [],
+        style: {
+          height: '200px',
+          width: '40%',
+        },
+      },
+      {
+        indexId: 'iftotalOutOctets',
+        displayType: 'lineChart',
+        sortIndex: 2,
+        displayDimension: [],
+        style: {
+          height: '200px',
+          width: '40%',
+        },
+      },
+      {
+        indexId: 'interfaces',
+        displayType: 'multipleIndexsTable',
+        sortIndex: 3,
+        displayDimension: [
+          'ifOperStatus',
+          'ifHighSpeed',
+          'ifInErrors',
+          'ifOutErrors',
+          'ifInUcastPkts',
+          'ifOutUcastPkts',
+          'ifInOctets',
+          'ifOutOctets',
+        ],
+        style: {
+          height: '400px',
+          width: '100%',
+        },
+      },
+    ],
+    tableDiaplay: [
+      { type: 'value', key: 'iftotalInOctets' },
+      { type: 'value', key: 'iftotalOutOctets' },
+      { type: 'value', key: 'sysUpTime' },
+    ],
+  },
+  {
+    name: 'Detection Device',
+    id: 11,
     dashboardDisplay: [
       {
         indexId: 'sysUpTime',
@@ -1269,7 +1294,7 @@ const OBJECT_COLLECT_TYPE_MAP: ObjectIconMap = {
   Host: 'os',
   Website: 'web',
   Ping: 'ping',
-  Swtich: 'switch',
+  Switch: 'switch',
   Router: 'router',
   Firewall: 'firewall',
   Loadbalance: 'loadbalance',

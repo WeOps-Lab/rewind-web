@@ -100,7 +100,7 @@ const Asset = () => {
       dataIndex: 'collect_type',
       key: 'collect_type',
       width: 150,
-      render: (_, record) => <>{record.collect_type || '--'}</>,
+      render: (_, record) => <>{getCollectType(record)}</>,
     },
     {
       title: t('monitor.intergrations.collectionNode'),
@@ -176,6 +176,13 @@ const Asset = () => {
       getAssetInsts(selectedKeys[0]);
     }
   }, [pagination.current, pagination.pageSize]);
+
+  const getCollectType = (row: Record<string, string>) => {
+    if (row.collect_type === 'host') {
+      return `${row.collect_type}(${row.config_type})`;
+    }
+    return row.collect_type || '--';
+  };
 
   const openRuleModal = (type: string, row = {}) => {
     const title: string = t(
