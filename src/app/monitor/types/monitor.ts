@@ -50,6 +50,7 @@ export interface IntergrationItem {
   label: string;
   value: string;
   list: ObectItem[];
+  name?: string;
   [key: string]: unknown;
 }
 
@@ -192,7 +193,7 @@ export interface StrategyFields {
   name?: string;
   organizations?: string[];
   source?: SourceFeild;
-  metric?: number;
+  collect_type?: number;
   schedule?: {
     type: string;
     value: number;
@@ -204,17 +205,27 @@ export interface StrategyFields {
   algorithm?: string;
   threshold: ThresholdField[];
   recovery_condition?: number;
-  no_data_alert?: number;
+  no_data_period?: {
+    type: string;
+    value: number;
+  };
+  no_data_recovery_period?: {
+    type: string;
+    value: number;
+  };
   no_data_level?: string;
   notice?: boolean;
   notice_type?: string;
   notice_users?: string[];
   monitor_object?: number;
-  filter?: FilterItem[];
   id?: number;
   group_by?: string[];
-  plugin_id?: number;
-  prom_ql?: string;
+  query_condition?: {
+    type: string;
+    query?: string;
+    metric_id?: number;
+    filter?: FilterItem[];
+  };
   [key: string]: unknown;
 }
 

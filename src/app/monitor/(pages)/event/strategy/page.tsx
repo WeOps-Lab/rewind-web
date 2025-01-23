@@ -11,6 +11,7 @@ import {
   Switch,
   Radio,
   InputNumber,
+  Segmented,
   Tooltip,
 } from 'antd';
 import useApiClient from '@/utils/request';
@@ -54,6 +55,7 @@ import {
   SCHEDULE_UNIT_MAP,
   MONITOR_GROUPS_MAP,
   OBJECT_ICON_MAP,
+  COLLECT_TYPE_MAP,
 } from '@/app/monitor/constants/monitor';
 const { Option } = Select;
 import Icon from '@/components/icon';
@@ -127,12 +129,10 @@ const StrategyOperation = () => {
   ]);
   const [pluginList, setPluginList] = useState<SegmentedItem[]>([]);
   const [originMetricData, setOriginMetricData] = useState<IndexViewItem[]>([]);
+  const [initMetricData, setInitMetricData] = useState<MetricItem[]>([]);
 
   useEffect(() => {
     if (!isLoading) {
-      getMetrics({
-        monitor_object_id: monitorObjId,
-      });
       setPageLoading(true);
       Promise.all([getPlugins(), detailId && getStragyDetail()]).finally(() => {
         setPageLoading(false);
@@ -150,7 +150,7 @@ const StrategyOperation = () => {
         period: 5,
         schedule: 5,
         recovery_condition: 5,
-        plugin_id: pluginList[0]?.value,
+        collect_type: pluginList[0]?.value,
       });
       setMetric(searchParams.get('metricId') || null);
       setSource({
@@ -162,7 +162,14 @@ const StrategyOperation = () => {
     } else {
       dealDetail(formData);
     }
-  }, [type, formData, metrics, pluginList]);
+  }, [type, formData, pluginList, initMetricData]);
+
+  const changeCollectType = (id: string) => {
+    getMetrics({
+      monitor_object_id: monitorObjId,
+      monitor_plugin_id: id,
+    });
+  };
 
   const getPlugins = async () => {
     const data = await get('/monitor/api/monitor_plugin/', {
@@ -171,37 +178,50 @@ const StrategyOperation = () => {
       },
     });
     const plugins = data.map((item: PluginItem) => ({
-      label: item.display_name,
+      label: COLLECT_TYPE_MAP[item.name || ''],
       value: item.id,
       name: item.name,
     }));
     setPluginList(plugins);
+    getMetrics(
+      {
+        monitor_object_id: monitorObjId,
+        monitor_plugin_id: plugins[0]?.value,
+      },
+      'init'
+    );
   };
 
   const dealDetail = (data: StrategyFields) => {
     const {
-      metric,
       source,
       schedule,
       period,
-      filter,
       threshold: thresholdList,
-      no_data_alert,
+      no_data_period,
       no_data_level,
       recovery_condition,
       group_by,
+      query_condition,
+      collect_type,
     } = data;
     form.setFieldsValue({
       ...data,
+      collect_type: collect_type ? +collect_type : '',
       recovery_condition: recovery_condition || null,
       schedule: schedule?.value || null,
       period: period?.value || null,
+      query: query_condition?.query || null,
     });
-    const _metrics = metrics.find((item) => item.id === metric);
-    const _labels = (_metrics?.dimensions || []).map((item) => item.name);
-    setMetric(_metrics?.name || '');
-    setLabels(_labels);
-    setConditions(filter || []);
+    if (query_condition?.type === 'metric') {
+      const _metrics = initMetricData.find(
+        (item) => item.id === query_condition?.metric_id
+      );
+      const _labels = (_metrics?.dimensions || []).map((item) => item.name);
+      setMetric(_metrics?.name || '');
+      setLabels(_labels);
+      setConditions(query_condition?.filter || []);
+    }
     setGroupBy(group_by || []);
     const _threshold = deepClone(threshold);
     _threshold.forEach((item: ThresholdField) => {
@@ -218,9 +238,10 @@ const StrategyOperation = () => {
         values: [],
       }
     );
-    setNoDataAlert(no_data_alert || null);
+    setNoDataAlert(no_data_period?.value || null);
+    setNodataUnit(no_data_period?.type || '');
     setNoDataLevel(no_data_level || '');
-    setOpenNoData(!!no_data_alert);
+    setOpenNoData(!!no_data_period?.value);
     setUnit(schedule?.type || '');
     setPeriodUnit(period?.type || '');
   };
@@ -289,7 +310,7 @@ const StrategyOperation = () => {
     setLabels(_labels);
   };
 
-  const getMetrics = async (params = {}) => {
+  const getMetrics = async (params = {}, type = '') => {
     try {
       setMetricsLoading(true);
       const getGroupList = get(`/monitor/api/metrics_group/`, { params });
@@ -314,6 +335,9 @@ const StrategyOperation = () => {
             (item: any) => !!item.child?.length
           );
           setOriginMetricData(_groupData);
+          if (type === 'init') {
+            setInitMetricData(res[1] || []);
+          }
         })
         .finally(() => {
           setMetricsLoading(false);
@@ -417,9 +441,23 @@ const StrategyOperation = () => {
   const createStrategy = () => {
     form?.validateFields().then((values) => {
       const _values = deepClone(values);
-      _values.filter = conditions;
+      const target: any = pluginList.find(
+        (item) => item.value === _values.collect_type
+      );
+      const isTrapPlugin = target?.name === 'SNMP Trap';
+      if (isTrapPlugin) {
+        _values.query_condition = {
+          type: 'pmq',
+          query: _values.query,
+        };
+      } else {
+        _values.query_condition = {
+          type: 'metric',
+          metric_id: metrics.find((item) => item.name === metric)?.id,
+          filter: conditions,
+        };
+      }
       _values.source = source;
-      _values.metric = metrics.find((item) => item.name === metric)?.id;
       _values.threshold = threshold.filter(
         (item) => !!item.value || item.value === 0
       );
@@ -433,10 +471,16 @@ const StrategyOperation = () => {
         value: values.period,
       };
       if (openNoData) {
-        _values.no_data_alert = noDataAlert;
+        _values.no_data_period = _values.no_data_recovery_period = {
+          type: nodataUnit,
+          value: noDataAlert,
+        };
         _values.no_data_level = noDataLevel;
       } else {
-        _values.no_data_alert = 0;
+        _values.no_data_period = {
+          type: '',
+          value: 0,
+        };
       }
       _values.recovery_condition = _values.recovery_condition || 0;
       _values.group_by = groupBy;
@@ -468,9 +512,9 @@ const StrategyOperation = () => {
     }
   };
 
-  const isPlugin = (callBack: any) => {
+  const isTrap = (callBack: any) => {
     const target: any = pluginList.find(
-      (item) => item.value === callBack('plugin_id')
+      (item) => item.value === callBack('collect_type')
     );
     return target?.name === 'SNMP Trap';
   };
@@ -505,7 +549,9 @@ const StrategyOperation = () => {
                     <>
                       <Form.Item<StrategyFields>
                         label={
-                          <span className="w-[100px]">{t('common.name')}</span>
+                          <span className="w-[100px]">
+                            {t('monitor.events.strategyName')}
+                          </span>
                         }
                         name="name"
                         rules={[
@@ -513,7 +559,23 @@ const StrategyOperation = () => {
                         ]}
                       >
                         <Input
-                          placeholder={t('common.name')}
+                          placeholder={t('monitor.events.strategyName')}
+                          className="w-[300px]"
+                        />
+                      </Form.Item>
+                      <Form.Item<StrategyFields>
+                        label={
+                          <span className="w-[100px]">
+                            {t('monitor.events.alertName')}
+                          </span>
+                        }
+                        name="alert_name"
+                        rules={[
+                          { required: true, message: t('common.required') },
+                        ]}
+                      >
+                        <Input
+                          placeholder={t('monitor.events.alertName')}
                           className="w-[300px]"
                         />
                       </Form.Item>
@@ -551,29 +613,29 @@ const StrategyOperation = () => {
                     <>
                       <Form.Item
                         className={strategyStyle.clusterLabel}
-                        name="plugin_id"
+                        name="collect_type"
                         label={<span className={strategyStyle.label}></span>}
                         rules={[
                           { required: true, message: t('common.required') },
                         ]}
                       >
-                        <Radio.Group
+                        <Segmented
+                          className="custom-tabs"
                           options={pluginList}
-                          optionType="button"
-                          buttonStyle="solid"
+                          onChange={changeCollectType}
                         />
                       </Form.Item>
                       <Form.Item
                         noStyle
                         shouldUpdate={(prevValues, currentValues) =>
-                          prevValues.plugin_id !== currentValues.plugin_id
+                          prevValues.collect_type !== currentValues.collect_type
                         }
                       >
                         {({ getFieldValue }) =>
-                          isPlugin(getFieldValue) ? (
+                          isTrap(getFieldValue) ? (
                             <Form.Item<StrategyFields>
                               label={<span className="w-[100px]">PromQL</span>}
-                              name="prom_ql"
+                              name="query"
                               rules={[
                                 {
                                   required: true,
@@ -782,61 +844,58 @@ const StrategyOperation = () => {
                                   {t('monitor.events.setDimensions')}
                                 </div>
                               </Form.Item>
-                              <Form.Item<StrategyFields>
-                                required
-                                label={
-                                  <span className="w-[100px]">
-                                    {t('monitor.events.method')}
-                                  </span>
-                                }
-                              >
-                                <Form.Item
-                                  name="algorithm"
-                                  noStyle
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: t('common.required'),
-                                    },
-                                  ]}
-                                >
-                                  <Select
-                                    allowClear
-                                    style={{
-                                      width: '300px',
-                                    }}
-                                    placeholder={t('monitor.events.method')}
-                                  >
-                                    {METHOD_LIST.map((item: ListItem) => (
-                                      <Option
-                                        value={item.value}
-                                        key={item.value}
-                                      >
-                                        <Tooltip
-                                          overlayInnerStyle={{
-                                            whiteSpace: 'pre-line',
-                                            color: 'var(--color-text-1)',
-                                          }}
-                                          placement="rightTop"
-                                          arrow={false}
-                                          color="var(--color-bg-1)"
-                                          title={item.title}
-                                        >
-                                          <span className="w-full flex">
-                                            {item.label}
-                                          </span>
-                                        </Tooltip>
-                                      </Option>
-                                    ))}
-                                  </Select>
-                                </Form.Item>
-                                <div className="text-[var(--color-text-3)] mt-[10px]">
-                                  {t('monitor.events.setMethod')}
-                                </div>
-                              </Form.Item>
                             </>
                           )
                         }
+                      </Form.Item>
+                      <Form.Item<StrategyFields>
+                        required
+                        label={
+                          <span className="w-[100px]">
+                            {t('monitor.events.method')}
+                          </span>
+                        }
+                      >
+                        <Form.Item
+                          name="algorithm"
+                          noStyle
+                          rules={[
+                            {
+                              required: true,
+                              message: t('common.required'),
+                            },
+                          ]}
+                        >
+                          <Select
+                            allowClear
+                            style={{
+                              width: '300px',
+                            }}
+                            placeholder={t('monitor.events.method')}
+                          >
+                            {METHOD_LIST.map((item: ListItem) => (
+                              <Option value={item.value} key={item.value}>
+                                <Tooltip
+                                  overlayInnerStyle={{
+                                    whiteSpace: 'pre-line',
+                                    color: 'var(--color-text-1)',
+                                  }}
+                                  placement="rightTop"
+                                  arrow={false}
+                                  color="var(--color-bg-1)"
+                                  title={item.title}
+                                >
+                                  <span className="w-full flex">
+                                    {item.label}
+                                  </span>
+                                </Tooltip>
+                              </Option>
+                            ))}
+                          </Select>
+                        </Form.Item>
+                        <div className="text-[var(--color-text-3)] mt-[10px]">
+                          {t('monitor.events.setMethod')}
+                        </div>
                       </Form.Item>
                       <Form.Item<StrategyFields>
                         required
@@ -1010,11 +1069,11 @@ const StrategyOperation = () => {
                       <Form.Item
                         noStyle
                         shouldUpdate={(prevValues, currentValues) =>
-                          prevValues.plugin_id !== currentValues.plugin_id
+                          prevValues.collect_type !== currentValues.collect_type
                         }
                       >
                         {({ getFieldValue }) =>
-                          isPlugin(getFieldValue) ? null : (
+                          isTrap(getFieldValue) ? null : (
                             <>
                               <Form.Item<StrategyFields>
                                 label={
@@ -1046,7 +1105,7 @@ const StrategyOperation = () => {
                                 </div>
                               </Form.Item>
                               <Form.Item<StrategyFields>
-                                name="no_data_alert"
+                                name="no_data_period"
                                 label={
                                   <span className="w-[100px]">
                                     {t('monitor.events.nodata')}

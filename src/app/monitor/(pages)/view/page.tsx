@@ -18,7 +18,10 @@ import {
   Pagination,
   TableDataItem,
 } from '@/app/monitor/types';
-import { useKeyMetricLabelMap } from '@/app/monitor/constants/monitor';
+import {
+  useKeyMetricLabelMap,
+  COLLECT_TYPE_MAP,
+} from '@/app/monitor/constants/monitor';
 import CustomTable from '@/components/custom-table';
 import TimeSelector from '@/components/time-selector';
 import { INDEX_CONFIG } from '@/app/monitor/constants/monitor';
@@ -164,7 +167,7 @@ const Intergration = () => {
     try {
       const res = await Promise.all([getInstList, getMetrics, getPlugins]);
       const _plugins = res[2].map((item: IntergrationItem) => ({
-        label: item.display_name,
+        label: COLLECT_TYPE_MAP[item.name || ''],
         value: item.id,
       }));
       setPlugins(_plugins);

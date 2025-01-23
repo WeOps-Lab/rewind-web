@@ -142,22 +142,6 @@ const Alert: React.FC<AlertProps> = ({
       render: (_, record) => <>{showObjName(record)}</>,
     },
     {
-      title: t('monitor.metric'),
-      dataIndex: 'index',
-      key: 'index',
-      width: 120,
-      render: (_, record) => <>{record.metric?.display_name || '--'}</>,
-    },
-    {
-      title: t('monitor.value'),
-      dataIndex: 'value',
-      key: 'value',
-      width: 100,
-      render: (_, record) => (
-        <>{getEnumValueUnit(record.metric, record.value)}</>
-      ),
-    },
-    {
       title: t('monitor.events.state'),
       dataIndex: 'status',
       key: 'status',
