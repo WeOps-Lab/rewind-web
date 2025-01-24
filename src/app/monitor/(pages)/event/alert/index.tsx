@@ -133,7 +133,7 @@ const Alert: React.FC<AlertProps> = ({
       title: t('monitor.asset'),
       dataIndex: 'asset',
       key: 'asset',
-      width: 140,
+      width: 200,
       render: (_, record) => <>{record.monitor_instance_name || '--'}</>,
     },
     {
