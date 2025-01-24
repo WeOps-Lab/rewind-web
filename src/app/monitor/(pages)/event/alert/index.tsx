@@ -10,9 +10,11 @@ import {
   message,
   Tabs,
   Spin,
+  Tooltip,
 } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
+import Icon from '@/components/icon';
 import {
   deepClone,
   getRandomColor,
@@ -622,9 +624,26 @@ const Alert: React.FC<AlertProps> = ({
           <Spin spinning={chartLoading}>
             <div className={alertStyle.chartWrapper}>
               <div className="flex items-center justify-between mb-[2px]">
-                <span className="text-[14px] ml-[10px]">
+                <div className="text-[14px] ml-[10px] relative">
                   {t('monitor.events.distributionMap')}
-                </span>
+                  <Tooltip
+                    placement="top"
+                    title={t(`monitor.events.${activeTab}MapTips`)}
+                  >
+                    <div
+                      className="absolute cursor-pointer"
+                      style={{
+                        top: '-4px',
+                        right: '-14px',
+                      }}
+                    >
+                      <Icon
+                        type="a-shuoming2"
+                        className="text-[14px] text-[var(--color-text-3)]"
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
                 <TimeSelector
                   defaultValue={timeDefaultValue}
                   onlyRefresh={activeTab === 'activeAlarms'}
