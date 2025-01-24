@@ -85,9 +85,8 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
     if (!clientLoading && !apiLoading && !menuLoading) {
       setLoading(true);
       try {
-        const data: MenuItem[] = await get('/core/api/get_user_menus/', {
-          params: { id: clientData[0]?.id },
-        });
+        const params = { id: clientData.length > 1 ? clientData.find((item) => item.name === 'Setting')?.id : clientData[0]?.id }
+        const data: MenuItem[] = await get('/core/api/get_user_menus/', { params });
 
         const permissionMap = collectPermissionOperations(data);
         const filteredMenus = filterMenusByPermission(permissionMap, configMenus);
