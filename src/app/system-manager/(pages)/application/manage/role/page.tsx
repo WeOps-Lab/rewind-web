@@ -8,7 +8,6 @@ import CustomTable from '@/components/custom-table';
 import OperateModal from '@/components/operate-modal';
 import { useRoleApi } from '@/app/system-manager/api/application';
 import { Role, User, Menu } from '@/app/system-manager/types/application';
-import PageLayout from '@/components/page-layout';
 import PermissionTable from './permissionTable';
 import RoleList from './roleList';
 
@@ -347,82 +346,76 @@ const RoleManagement: React.FC = () => {
 
   return (
     <>
-      <PageLayout
-        height="calc(100vh - 195px)"
-        leftSection={
-          <RoleList
-            loadingRoles={loadingRoles}
-            roleList={roleList}
-            selectedRole={selectedRole}
-            onSelectRole={onSelectRole}
-            showRoleModal={showRoleModal}
-            onDeleteRole={onDeleteRole}
-            t={t}
-          />
-        }
-        rightSection={
-          <div className="flex-1 overflow-hidden bg-[var(--color-bg-1)] rounded-md">
-            <Tabs defaultActiveKey="1" activeKey={activeTab} onChange={handleTabChange}>
-              <TabPane tab={t('system.role.users')} key="1">
-                <div className="flex justify-end mb-4">
-                  <Search
-                    allowClear
-                    enterButton
-                    className='w-60 mr-[8px]'
-                    onSearch={handleUserSearch}
-                    placeholder={`${t('common.search')}`}
-                  />
-                  <Button
-                    className="mr-[8px]"
-                    type="primary"
-                    onClick={openUserModal}
-                  >
-                    +{t('common.add')}
-                  </Button>
-                  <Button
-                    loading={deleteLoading}
-                    onClick={handleBatchDeleteUsers}
-                    disabled={selectedUserKeys.length === 0 || deleteLoading}
-                  >
-                    {t('system.common.modifydelete')}
-                  </Button>
-                </div>
-                <Spin spinning={loading}>
-                  <CustomTable
-                    scroll={{ y: 'calc(100vh - 430px)' }}
-                    rowSelection={{
-                      selectedRowKeys: selectedUserKeys,
-                      onChange: (selectedRowKeys) => setSelectedUserKeys(selectedRowKeys as React.Key[]),
-                    }}
-                    columns={columns}
-                    dataSource={tableData}
-                    rowKey={(record) => record.id}
-                    pagination={{
-                      current: currentPage,
-                      pageSize: pageSize,
-                      total: total,
-                      onChange: handleTableChange,
-                    }}
-                  />
-                </Spin>
-              </TabPane>
-              <TabPane tab={t('system.role.permissions')} key="2">
-                <div className="flex justify-end items-center mb-4">
-                  <Button type="primary" loading={loading} onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
-                </div>
-                <PermissionTable
-                  t={t}
-                  loading={loading}
-                  menuData={menuData}
-                  permissionsCheckedKeys={permissionsCheckedKeys}
-                  setPermissionsCheckedKeys={(keyMap) => setPermissionsCheckedKeys(keyMap)}
+      <div className="w-full flex justify-between bg-[var(--color-bg-1)] rounded-md h-full p-4">
+        <RoleList
+          loadingRoles={loadingRoles}
+          roleList={roleList}
+          selectedRole={selectedRole}
+          onSelectRole={onSelectRole}
+          showRoleModal={showRoleModal}
+          onDeleteRole={onDeleteRole}
+          t={t}
+        />
+        <div className="flex-1 overflow-hidden bg-[var(--color-bg-1)] rounded-md">
+          <Tabs defaultActiveKey="1" activeKey={activeTab} onChange={handleTabChange}>
+            <TabPane tab={t('system.role.users')} key="1">
+              <div className="flex justify-end mb-4">
+                <Search
+                  allowClear
+                  enterButton
+                  className='w-60 mr-[8px]'
+                  onSearch={handleUserSearch}
+                  placeholder={`${t('common.search')}`}
                 />
-              </TabPane>
-            </Tabs>
-          </div>
-        }
-      >
-      </PageLayout>
+                <Button
+                  className="mr-[8px]"
+                  type="primary"
+                  onClick={openUserModal}
+                >
+                  +{t('common.add')}
+                </Button>
+                <Button
+                  loading={deleteLoading}
+                  onClick={handleBatchDeleteUsers}
+                  disabled={selectedUserKeys.length === 0 || deleteLoading}
+                >
+                  {t('system.common.modifydelete')}
+                </Button>
+              </div>
+              <Spin spinning={loading}>
+                <CustomTable
+                  scroll={{ y: 'calc(100vh - 430px)' }}
+                  rowSelection={{
+                    selectedRowKeys: selectedUserKeys,
+                    onChange: (selectedRowKeys) => setSelectedUserKeys(selectedRowKeys as React.Key[]),
+                  }}
+                  columns={columns}
+                  dataSource={tableData}
+                  rowKey={(record) => record.id}
+                  pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    total: total,
+                    onChange: handleTableChange,
+                  }}
+                />
+              </Spin>
+            </TabPane>
+            <TabPane tab={t('system.role.permissions')} key="2">
+              <div className="flex justify-end items-center mb-4">
+                <Button type="primary" loading={loading} onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
+              </div>
+              <PermissionTable
+                t={t}
+                loading={loading}
+                menuData={menuData}
+                permissionsCheckedKeys={permissionsCheckedKeys}
+                setPermissionsCheckedKeys={(keyMap) => setPermissionsCheckedKeys(keyMap)}
+              />
+            </TabPane>
+          </Tabs>
+        </div>
+      </div>
       <OperateModal
         title={isEditingRole ? t('system.role.updateRole') : t('system.role.addRole')}
         closable={false}

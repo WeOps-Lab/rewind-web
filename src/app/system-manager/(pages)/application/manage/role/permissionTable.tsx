@@ -125,6 +125,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
     {
       title: t('system.role.permission.menu'),
       dataIndex: 'display_name',
+      width: '380px',
       key: 'display_name',
       render: (text: string, record: Menu) => (
         <Checkbox
@@ -158,9 +159,8 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
   ];
 
   return (
-    <div>
+    <div className='flex w-full overflow-y-auto' style={{ height: 'calc(100vh - 350px)' }}>
       <CustomTable
-        scroll={{ y: 'calc(100vh - 370px)' }}
         loading={loading}
         columns={columns}
         dataSource={menuData.map(item => ({ ...item, key: item.name }))}

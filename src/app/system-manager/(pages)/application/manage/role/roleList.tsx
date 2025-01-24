@@ -52,7 +52,7 @@ const RoleList: React.FC<RoleListProps> = ({
   );
 
   return (
-    <div className="w-full bg-[var(--color-bg-1)] rounded-md">
+    <div className="w-[180px] pr-4 mr-4 border-r border-gray-100">
       <div className="flex justify-between items-center">
         <h2 className="font-semibold">{t('system.role.title')}</h2>
         <div onClick={() => showRoleModal(null)}>

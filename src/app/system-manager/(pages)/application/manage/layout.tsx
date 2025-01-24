@@ -39,11 +39,11 @@ const AppManageLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full w-full">
       <TopSection title={clientName} content={clientDescription} />
       <div className="flex mt-4 w-full" style={{ height: 'calc(100vh - 195px)' }}>
         <SideMenu showBackButton={false} menuItems={menuItems} />
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {children}
         </div>
       </div>
