@@ -136,7 +136,7 @@ const LineChart: React.FC<LineChartProps> = ({
   const renderYAxisTick = (props: any) => {
     const { x, y, payload } = props;
     const label = String(payload.value);
-    const maxLength = 7; // 设置标签的最大长度
+    const maxLength = 6; // 设置标签的最大长度
     return (
       <text
         x={x}
@@ -148,7 +148,7 @@ const LineChart: React.FC<LineChartProps> = ({
       >
         {label.length > maxLength && <title>{label}</title>}
         {label.length > maxLength
-          ? `${label.slice(0, maxLength - 2)}...`
+          ? `${label.slice(0, maxLength - 1)}...`
           : label}
       </text>
     );

@@ -45,7 +45,7 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
       formRef.current?.resetFields();
       formRef.current?.setFieldsValue({
         content: configForm.content,
-        id: configForm.id,
+        id: configForm.config_id,
       });
     }
   }, [visible, configForm]);
@@ -71,7 +71,7 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
     formRef.current?.validateFields().then((values) => {
       operateGroup({
         ...values,
-        id: configForm.id,
+        id: configForm.config_id,
       });
     });
   };

@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { Spin, Select, Button, Segmented, Input, Tree } from 'antd';
+import { Spin, Select, Button, Segmented, Input } from 'antd';
 import { BellOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import { useConditionList } from '@/app/monitor/constants/monitor';
 import useApiClient from '@/utils/request';
@@ -32,8 +32,8 @@ import {
 import { deepClone, findUnitNameById } from '@/app/monitor/utils/common';
 import { useSearchParams } from 'next/navigation';
 import dayjs from 'dayjs';
+import TreeSelector from './treeSelector';
 const { Option } = Select;
-const { Search } = Input;
 
 const SearchView: React.FC = () => {
   const { get, isLoading } = useApiClient();
@@ -75,11 +75,7 @@ const SearchView: React.FC = () => {
   const [unit, setUnit] = useState<string>('');
   const isArea: boolean = activeTab === 'area';
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
-  const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
-  const [originalTreeData, setOriginalTreeData] = useState<TreeItem[]>([]); // 保存原始树数据
-  const [treeSearchValue, setTreeSearchValue] = useState<string>(''); // 搜索值
   const [originMetricData, setOriginMetricData] = useState<IndexViewItem[]>([]);
 
   useEffect(() => {
@@ -116,8 +112,6 @@ const SearchView: React.FC = () => {
       });
       const _treeData = getTreeData(deepClone(data));
       setTreeData(_treeData);
-      setOriginalTreeData(_treeData); // 保存原始数据
-      setExpandedKeys(_treeData.map((item) => item.key));
       setObjects(data);
     } finally {
       setObjLoading(false);
@@ -273,7 +267,6 @@ const SearchView: React.FC = () => {
   const handleObjectChange = (val: string) => {
     if (val !== 'otherWay') {
       setObject(val);
-      setSelectedKeys([val]);
       setMetrics([]);
       setLabels([]);
       setMetric(null);
@@ -462,14 +455,6 @@ const SearchView: React.FC = () => {
     handleSearch('refresh', activeTab, _times);
   };
 
-  const onSelect = (selectedKeys: React.Key[], info: any) => {
-    const isFirstLevel = !!info.node?.children?.length;
-    if (!isFirstLevel && selectedKeys?.length) {
-      setSelectedKeys(selectedKeys);
-      handleObjectChange(selectedKeys[0] as string);
-    }
-  };
-
   const getTreeData = (data: ObectItem[]): TreeItem[] => {
     const groupedData = data.reduce(
       (acc, item) => {
@@ -493,33 +478,6 @@ const SearchView: React.FC = () => {
     return Object.values(groupedData).filter((item) => item.key !== 'Other');
   };
 
-  const filterTree = (data: TreeItem[], searchValue: string): TreeItem[] => {
-    return data
-      .map((item: any) => {
-        const children = filterTree(item.children || [], searchValue);
-        if (
-          item.title.toLowerCase().includes(searchValue.toLowerCase()) ||
-          children.length
-        ) {
-          return {
-            ...item,
-            children,
-          };
-        }
-        return null;
-      })
-      .filter(Boolean) as TreeItem[];
-  };
-
-  const onSearchTree = (value: string) => {
-    if (!value) {
-      setTreeData(originalTreeData);
-    } else {
-      const filteredData = filterTree(originalTreeData, value);
-      setTreeData(filteredData);
-    }
-  };
-
   return (
     <div className={searchStyle.searchWrapper}>
       <div className={searchStyle.time}>
@@ -540,24 +498,12 @@ const SearchView: React.FC = () => {
       </div>
       <div className={searchStyle.searchMain}>
         <div className={searchStyle.tree}>
-          <Spin spinning={objLoading}>
-            <Search
-              className="mb-[10px]"
-              placeholder={t('common.searchPlaceHolder')}
-              value={treeSearchValue}
-              enterButton
-              onChange={(e) => setTreeSearchValue(e.target.value)}
-              onSearch={onSearchTree}
-            />
-            <Tree
-              showLine
-              selectedKeys={selectedKeys}
-              expandedKeys={expandedKeys}
-              onExpand={(keys) => setExpandedKeys(keys)}
-              onSelect={onSelect}
-              treeData={treeData}
-            />
-          </Spin>
+          <TreeSelector
+            data={treeData}
+            defaultSelectedKey={url_obj_name || ''}
+            onNodeSelect={handleObjectChange}
+            loading={objLoading}
+          />
         </div>
         <div className={searchStyle.search}>
           <div className={searchStyle.criteria}>
