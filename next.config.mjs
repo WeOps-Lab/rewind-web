@@ -1,5 +1,5 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
-import { combineLocales, copyPublicDirectories } from './src/utils/dynamicsMerged.mjs';
+import { combineLocales, combineMenus, copyPublicDirectories } from './src/utils/dynamicsMerged.mjs';
 
 let hasCombinedLocalesAndMenus = false;
 let hasCopiedPublicDirs = false;
@@ -14,6 +14,7 @@ const withCombineLocalesAndMenus = (nextConfig = {}) => {
             compiler.hooks.beforeCompile.tapPromise('CombineLocalesAndMenusPlugin', async (compilation) => {
               if (!hasCombinedLocalesAndMenus) {
                 await combineLocales();
+                await combineMenus();
                 hasCombinedLocalesAndMenus = true;
               }
             });
