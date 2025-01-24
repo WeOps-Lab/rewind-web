@@ -267,6 +267,13 @@ const UNIT_LIST = [
       { label: 'writes/min (wpm)', value: 'wpm', unit: 'wpm' },
     ],
   },
+  {
+    label: 'Other',
+    children: [
+      { label: 'Watts (W)', value: 'watts', unit: 'W' },
+      { label: 'Volts (V)', value: 'volts', unit: 'V' },
+    ],
+  },
 ];
 
 const INDEX_CONFIG = [
