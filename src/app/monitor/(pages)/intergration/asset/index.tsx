@@ -4,7 +4,6 @@ import {
   Spin,
   Input,
   Button,
-  Tree,
   Modal,
   message,
   Tooltip,
@@ -31,10 +30,10 @@ import CustomTable from '@/components/custom-table';
 import { PlusOutlined } from '@ant-design/icons';
 import Icon from '@/components/icon';
 import RuleModal from './ruleModal';
-const { Search } = Input;
 import { useCommon } from '@/app/monitor/context/common';
 import { deepClone } from '@/app/monitor/utils/common';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
+import TreeSelector from '@/app/monitor/components/treeSelector';
 import EditConfig from './editConfig';
 import {
   OBJECT_COLLECT_TYPE_MAP,
@@ -60,13 +59,13 @@ const Asset = () => {
   const [ruleLoading, setRuleLoading] = useState<boolean>(false);
   const [pageLoading, setPageLoading] = useState<boolean>(false);
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
-  const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [ruleList, setRuleList] = useState<RuleInfo[]>([]);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const [searchText, setSearchText] = useState<string>('');
   const [objects, setObjects] = useState<ObectItem[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
+  const [defaultSelectObj, setDefaultSelectObj] = useState<React.Key>('');
+  const [objectId, setObjectId] = useState<React.Key>('');
 
   const columns: ColumnItem[] = [
     {
@@ -172,10 +171,21 @@ const Asset = () => {
   }, [isLoading]);
 
   useEffect(() => {
-    if (selectedKeys.length) {
-      getAssetInsts(selectedKeys[0]);
+    if (objectId) {
+      getAssetInsts(objectId);
+      getRuleList(objectId);
+    }
+  }, [objectId]);
+
+  useEffect(() => {
+    if (objectId) {
+      getAssetInsts(objectId);
     }
   }, [pagination.current, pagination.pageSize]);
+
+  const handleObjectChange = async (id: string) => {
+    setObjectId(id);
+  };
 
   const getCollectType = (row: Record<string, string>) => {
     if (row.collect_type === 'host') {
@@ -207,9 +217,8 @@ const Asset = () => {
 
   const checkDetail = (row: ObjectInstItem) => {
     const _row = deepClone(row);
-    const _objId = selectedKeys[0];
-    _row.monitorObjId = _objId;
-    _row.name = objects.find((item) => item.id === _objId)?.name || '';
+    _row.monitorObjId = objectId;
+    _row.name = objects.find((item) => item.id === objectId)?.name || '';
     const queryString = new URLSearchParams(_row).toString();
     const url = `/monitor/view/detail/overview?${queryString}`;
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -269,13 +278,9 @@ const Asset = () => {
       setObjects(data);
       const _treeData = getTreeData(deepClone(data));
       setTreeData(_treeData);
-      setExpandedKeys(_treeData.map((item) => item.key));
-      const defaultChildren = _treeData[0]?.children;
-      if (defaultChildren?.length) {
-        const key = defaultChildren[0].key;
-        setSelectedKeys([key]);
-        getAssetInsts(key);
-        getRuleList(key);
+      const defaultKey = data[0]?.id || '';
+      if (defaultKey) {
+        setDefaultSelectObj(defaultKey);
       }
     } finally {
       setPageLoading(false);
@@ -304,26 +309,8 @@ const Asset = () => {
     return Object.values(groupedData);
   };
 
-  const onSelect = (selectedKeys: React.Key[], info: any) => {
-    const isFirstLevel = !!info.node?.children?.length;
-    if (!isFirstLevel && selectedKeys?.length) {
-      setPagination((prev: Pagination) => ({
-        ...prev,
-        current: 1,
-      }));
-      setTableData([]);
-      setSelectedKeys(selectedKeys);
-      getAssetInsts(selectedKeys[0]);
-      getRuleList(selectedKeys[0]);
-    }
-  };
-
-  const onSearchTree = (value: string) => {
-    getObjects(value);
-  };
-
   const operateRule = () => {
-    getRuleList(selectedKeys[0]);
+    getRuleList(objectId);
   };
 
   const showDeleteConfirm = (row: RuleInfo) => {
@@ -336,7 +323,7 @@ const Asset = () => {
           try {
             await del(`/monitor/api/monitor_instance_group_rule/${row.id}/`);
             message.success(t('common.successfullyDeleted'));
-            getRuleList(selectedKeys[0]);
+            getRuleList(objectId);
           } finally {
             resolve(true);
           }
@@ -347,7 +334,7 @@ const Asset = () => {
 
   const clearText = () => {
     setSearchText('');
-    getAssetInsts(selectedKeys[0], 'clear');
+    getAssetInsts(objectId, 'clear');
   };
 
   const expandRow = async (expanded: boolean, row: any) => {
@@ -365,7 +352,7 @@ const Asset = () => {
             instance_id: row.instance_id,
             instance_type:
               OBJECT_COLLECT_TYPE_MAP[
-                objects.find((item) => item.id === selectedKeys[0])?.name || ''
+                objects.find((item) => item.id === objectId)?.name || ''
               ],
           }
         );
@@ -387,18 +374,10 @@ const Asset = () => {
     <Spin spinning={pageLoading}>
       <div className={assetStyle.asset}>
         <div className={assetStyle.tree}>
-          <Search
-            className="mb-[10px]"
-            placeholder={t('common.searchPlaceHolder')}
-            onSearch={onSearchTree}
-          />
-          <Tree
-            showLine
-            selectedKeys={selectedKeys}
-            expandedKeys={expandedKeys}
-            onExpand={(keys) => setExpandedKeys(keys)}
-            onSelect={onSelect}
-            treeData={treeData}
+          <TreeSelector
+            data={treeData}
+            defaultSelectedKey={defaultSelectObj as string}
+            onNodeSelect={handleObjectChange}
           />
         </div>
         <Spin spinning={pageLoading}>
@@ -410,7 +389,7 @@ const Asset = () => {
                 placeholder={t('common.searchPlaceHolder')}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                onPressEnter={() => getAssetInsts(selectedKeys[0])}
+                onPressEnter={() => getAssetInsts(objectId)}
                 onClear={clearText}
               ></Input>
             </div>
@@ -534,14 +513,11 @@ const Asset = () => {
         </Spin>
         <RuleModal
           ref={ruleRef}
-          monitorObject={selectedKeys[0]}
+          monitorObject={objectId}
           groupList={organizationList}
           onSuccess={operateRule}
         />
-        <EditConfig
-          ref={configRef}
-          onSuccess={() => getAssetInsts(selectedKeys[0])}
-        />
+        <EditConfig ref={configRef} onSuccess={() => getAssetInsts(objectId)} />
       </div>
     </Spin>
   );
