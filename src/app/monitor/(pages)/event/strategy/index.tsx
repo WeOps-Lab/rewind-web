@@ -1,7 +1,6 @@
 'use client';
-'use client';
 import React, { useEffect, useState } from 'react';
-import { Spin, Input, Button, Tree, Modal, message, Switch } from 'antd';
+import { Spin, Input, Button, Modal, message, Switch } from 'antd';
 import useApiClient from '@/utils/request';
 import assetStyle from './index.module.scss';
 import { useTranslation } from '@/utils/i18n';
@@ -13,7 +12,6 @@ import {
   TableDataItem,
 } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
-const { Search } = Input;
 import {
   deepClone,
   getRandomColor,
@@ -23,6 +21,7 @@ import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import { PlusOutlined } from '@ant-design/icons';
 import { useRouter, useSearchParams } from 'next/navigation';
 const { confirm } = Modal;
+import TreeSelector from '@/app/monitor/components/treeSelector';
 
 const Strategy: React.FC<AlertProps> = ({ objects }) => {
   const { t } = useTranslation();
@@ -37,13 +36,13 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
     pageSize: 20,
   });
   const [tableLoading, setTableLoading] = useState<boolean>(false);
-  const [pageLoading, setPageLoading] = useState<boolean>(false);
+  const [treeLoading, setTreeLoading] = useState<boolean>(false);
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
-  const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const [searchText, setSearchText] = useState<string>('');
   const [enableLoading, setEnableLoading] = useState<boolean>(false);
+  const [defaultSelectObj, setDefaultSelectObj] = useState<React.Key>('');
+  const [objectId, setObjectId] = useState<React.Key>('');
   const columns: ColumnItem[] = [
     {
       title: t('common.name'),
@@ -123,22 +122,26 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
 
   useEffect(() => {
     if (objects?.length) {
-      getObjects('', objId || '');
+      getObjects();
     }
-  }, [objects, objId]);
+  }, [objects]);
 
   useEffect(() => {
-    if (selectedKeys[0]) {
-      getAssetInsts(selectedKeys[0]);
+    if (objectId) {
+      getAssetInsts(objectId);
     }
-  }, [pagination.current, pagination.pageSize, selectedKeys]);
+  }, [pagination.current, pagination.pageSize, objectId]);
+
+  const handleObjectChange = async (id: string) => {
+    setObjectId(id);
+  };
 
   const getParams = (text?: string) => {
     return {
       name: text ? '' : searchText,
       page: pagination.current,
       page_size: pagination.pageSize,
-      monitor_object_id: selectedKeys[0] || '',
+      monitor_object_id: objectId || '',
     };
   };
 
@@ -149,7 +152,7 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
         enable: val,
       });
       message.success(t(val ? 'common.started' : 'common.closed'));
-      getAssetInsts(selectedKeys[0]);
+      getAssetInsts(objectId);
     } finally {
       setEnableLoading(false);
     }
@@ -177,28 +180,14 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
     }
   };
 
-  const getObjects = async (text: string, id?: string) => {
+  const getObjects = async () => {
     try {
-      setPageLoading(true);
-      let data: ObectItem[] = objects;
-      if (text) {
-        data = await get(`/monitor/api/monitor_object/`, {
-          params: {
-            name: text || '',
-            add_policy_count: true,
-          },
-        });
-      }
-      const _treeData = getTreeData(deepClone(data));
+      setTreeLoading(true);
+      const _treeData = getTreeData(deepClone(objects));
+      setDefaultSelectObj(objId ? +objId : objects[0]?.id);
       setTreeData(_treeData);
-      setExpandedKeys(_treeData.map((item) => item.key));
-      const defaultChildren = _treeData[0]?.children;
-      if (defaultChildren?.length) {
-        const key = id || defaultChildren[0].key;
-        setSelectedKeys([+key]);
-      }
     } finally {
-      setPageLoading(false);
+      setTreeLoading(false);
     }
   };
 
@@ -225,21 +214,6 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
     return Object.values(groupedData);
   };
 
-  const onSelect = (selectedKeys: React.Key[], info: any) => {
-    const isFirstLevel = !!info.node?.children?.length;
-    if (!isFirstLevel && selectedKeys?.length) {
-      setPagination((prev: Pagination) => ({
-        ...prev,
-        current: 1,
-      }));
-      setSelectedKeys(selectedKeys);
-    }
-  };
-
-  const onSearchTree = (value: string) => {
-    getObjects(value);
-  };
-
   const showDeleteConfirm = (row: RuleInfo) => {
     confirm({
       title: t('common.deleteTitle'),
@@ -250,7 +224,7 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
           try {
             await del(`/monitor/api/monitor_policy/${row.id}/`);
             message.success(t('common.successfullyDeleted'));
-            getAssetInsts(selectedKeys[0]);
+            getAssetInsts(objectId);
           } finally {
             resolve(true);
           }
@@ -260,16 +234,16 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
   };
 
   const enterText = () => {
-    getAssetInsts(selectedKeys[0]);
+    getAssetInsts(objectId);
   };
 
   const clearText = () => {
     setSearchText('');
-    getAssetInsts(selectedKeys[0], 'clear');
+    getAssetInsts(objectId, 'clear');
   };
 
   const linkToStrategyDetail = (type: string, row = { id: '', name: '' }) => {
-    const monitorObjId = selectedKeys[0] as string;
+    const monitorObjId = objectId as string;
     const monitorName = findLabelById(treeData, monitorObjId) as string;
     const params = new URLSearchParams({
       monitorObjId,
@@ -283,22 +257,14 @@ const Strategy: React.FC<AlertProps> = ({ objects }) => {
   };
 
   return (
-    <Spin spinning={pageLoading}>
+    <Spin spinning={treeLoading}>
       <div className={assetStyle.asset}>
         <div className={assetStyle.assetTree}>
-          <Search
-            className="mb-[10px]"
-            placeholder={t('common.searchPlaceHolder')}
-            onSearch={onSearchTree}
-          />
-          <Tree
-            className={assetStyle.tree}
-            showLine
-            selectedKeys={selectedKeys}
-            expandedKeys={expandedKeys}
-            onExpand={(keys) => setExpandedKeys(keys)}
-            onSelect={onSelect}
-            treeData={treeData}
+          <TreeSelector
+            data={treeData}
+            defaultSelectedKey={defaultSelectObj as string}
+            loading={treeLoading}
+            onNodeSelect={handleObjectChange}
           />
         </div>
         <div className={assetStyle.table}>
