@@ -74,7 +74,7 @@ const TreeComponent: React.FC<TreeComponentProps> = ({
   };
 
   return (
-    <div>
+    <div className='h-full'>
       <Spin spinning={loading}>
         <Search
           className="mb-[10px]"

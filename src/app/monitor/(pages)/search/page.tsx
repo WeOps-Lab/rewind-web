@@ -32,7 +32,7 @@ import {
 import { deepClone, findUnitNameById } from '@/app/monitor/utils/common';
 import { useSearchParams } from 'next/navigation';
 import dayjs from 'dayjs';
-import TreeSelector from './treeSelector';
+import TreeSelector from '@/app/monitor/components/treeSelector';
 const { Option } = Select;
 
 const SearchView: React.FC = () => {
@@ -501,8 +501,8 @@ const SearchView: React.FC = () => {
           <TreeSelector
             data={treeData}
             defaultSelectedKey={url_obj_name || ''}
-            onNodeSelect={handleObjectChange}
             loading={objLoading}
+            onNodeSelect={handleObjectChange}
           />
         </div>
         <div className={searchStyle.search}>

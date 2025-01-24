@@ -60,7 +60,7 @@ export interface ObectItem {
   type: string;
   plugin_name?: string;
   plugin_id?: number;
-  plugin_description: string;
+  display_description?: string;
   description: string;
   display_name?: string;
   display_type?: string;

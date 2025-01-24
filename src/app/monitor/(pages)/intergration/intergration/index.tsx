@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { Spin, Input, Button, Segmented, Tag, message } from 'antd';
+import { Spin, Input, Button, Tag, message } from 'antd';
 import useApiClient from '@/utils/request';
 import intergrationStyle from './index.module.scss';
 import { SettingOutlined } from '@ant-design/icons';
@@ -8,16 +8,16 @@ import { useTranslation } from '@/utils/i18n';
 import Icon from '@/components/icon';
 import { deepClone } from '@/app/monitor/utils/common';
 import { useRouter } from 'next/navigation';
+import { ObectItem } from '@/app/monitor/types/monitor';
 import {
-  IntergrationItem,
-  ObectItem,
-  PluginItem,
-} from '@/app/monitor/types/monitor';
-import { OBJECT_ICON_MAP } from '@/app/monitor/constants/monitor';
-import { ModalRef } from '@/app/monitor/types';
+  OBJECT_ICON_MAP,
+  COLLECT_TYPE_MAP,
+} from '@/app/monitor/constants/monitor';
+import { ModalRef, TreeItem } from '@/app/monitor/types';
 import ImportModal from './importModal';
 import axios from 'axios';
 import { useAuth } from '@/context/auth';
+import TreeSelector from '@/app/monitor/components/treeSelector';
 
 const Intergration = () => {
   const { get, isLoading } = useApiClient();
@@ -28,44 +28,82 @@ const Intergration = () => {
   const token = authContext?.token || null;
   const tokenRef = useRef(token);
   const [pageLoading, setPageLoading] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('');
   const [searchText, setSearchText] = useState<string>('');
-  const [items, setItems] = useState<IntergrationItem[]>([]);
-  const [originObjects, setOriginObjects] = useState<ObectItem[]>([]);
-  const [apps, setApps] = useState<ObectItem[]>([]);
   const [exportDisabled, setExportDisabled] = useState<boolean>(true);
   const [exportLoading, setExportLoading] = useState<boolean>(false);
   const [selectedApp, setSelectedApp] = useState<ObectItem | null>(null);
-
-  useEffect(() => {
-    if (activeTab) {
-      setApps(items.find((item) => item.value === activeTab)?.list || []);
-    }
-  }, [activeTab, items]);
+  const [treeData, setTreeData] = useState<TreeItem[]>([]);
+  const [objects, setObjects] = useState<ObectItem[]>([]);
+  const [pluginList, setPluginList] = useState<ObectItem[]>([]);
+  const [treeLoading, setTreeLoading] = useState<boolean>(false);
+  const [objectId, setObjectId] = useState<React.Key>('');
+  const [defaultSelectObj, setDefaultSelectObj] = useState<React.Key>('');
 
   useEffect(() => {
     if (isLoading) return;
-    getInitData();
+    getObjects();
   }, [isLoading]);
 
-  const getInitData = async () => {
+  const handleObjectChange = async (id: string) => {
+    setObjectId(id);
+    getPluginList({
+      monitor_object_id: id,
+    });
+  };
+
+  const getObjectInfo = (): Record<string, string> => {
+    const target: any = objects.find((item) => item.id === objectId);
+    return target || {};
+  };
+
+  const getPluginList = async (params = {}) => {
+    setSelectedApp(null);
+    setExportDisabled(true);
     setPageLoading(true);
     try {
-      const getObjects = get('/monitor/api/monitor_object/');
-      const getPlugins = get('/monitor/api/monitor_plugin/');
-      Promise.all([getObjects, getPlugins])
-        .then((res) => {
-          setOriginObjects(res[0] || []);
-          const _items = getAppsByType(res[0], res[1]);
-          setItems(_items);
-          setActiveTab('All');
-        })
-        .finally(() => {
-          setPageLoading(false);
-        });
-    } catch {
+      const data = await get('/monitor/api/monitor_plugin/', {
+        params,
+      });
+      setPluginList(data);
+    } finally {
       setPageLoading(false);
     }
+  };
+
+  const getObjects = async () => {
+    try {
+      setTreeLoading(true);
+      const data: ObectItem[] = await get('/monitor/api/monitor_object/');
+      const _treeData = getTreeData(deepClone(data));
+      setTreeData(_treeData);
+      setObjects(data);
+      setDefaultSelectObj(data[0]?.id);
+    } finally {
+      setTreeLoading(false);
+    }
+  };
+
+  const getTreeData = (data: ObectItem[]): TreeItem[] => {
+    const groupedData = data.reduce(
+      (acc, item) => {
+        if (!acc[item.type]) {
+          acc[item.type] = {
+            title: item.display_type || '--',
+            key: item.type,
+            children: [],
+          };
+        }
+        acc[item.type].children.push({
+          title: item.display_name || '--',
+          label: item.name || '--',
+          key: item.id,
+          children: [],
+        });
+        return acc;
+      },
+      {} as Record<string, TreeItem>
+    );
+    return Object.values(groupedData);
   };
 
   const exportMetric = async () => {
@@ -73,7 +111,7 @@ const Intergration = () => {
     try {
       setExportLoading(true);
       const response = await axios({
-        url: `/reqApi/monitor/api/monitor_plugin/export/${selectedApp.plugin_id}/`, // 替换为你的导出数据的API端点
+        url: `/reqApi/monitor/api/monitor_plugin/export/${selectedApp.id}/`, // 替换为你的导出数据的API端点
         method: 'GET',
         responseType: 'blob', // 确保响应类型为blob
         headers: {
@@ -89,7 +127,7 @@ const Intergration = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${selectedApp.plugin_name}.json`;
+      link.download = `${selectedApp.display_name}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -101,82 +139,24 @@ const Intergration = () => {
     }
   };
 
-  const getObjects = async (text?: string) => {
-    try {
-      setPageLoading(true);
-      const data = await get(`/monitor/api/monitor_plugin/`, {
-        params: {
-          name: text || '',
-        },
-      });
-      const _items = getAppsByType(originObjects, data);
-      setItems(_items);
-      setActiveTab('All');
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
-  const getAppsByType = (
-    data: ObectItem[],
-    plugins: PluginItem[]
-  ): IntergrationItem[] => {
-    const groupedData = data.reduce(
-      (acc, item) => {
-        if (!acc[item.type]) {
-          acc[item.type] = {
-            label: item.display_type || '--',
-            value: item.type,
-            list: [],
-          };
-        }
-        plugins.forEach((plugin) => {
-          if ((plugin.monitor_object || []).includes(item.id)) {
-            acc[item.type].list.push({
-              ...item,
-              plugin_name: plugin?.display_name,
-              plugin_id: plugin?.id,
-              collect_type: plugin?.name,
-              plugin_description: plugin?.display_description || '--',
-            });
-          }
-        });
-        acc[item.type].label = `${item.display_type}(${
-          acc[item.type].list.length
-        })`;
-        return acc;
-      },
-      {} as Record<string, IntergrationItem>
-    );
-    const _list = Object.values(groupedData);
-    const objectList = _list.reduce((pre, cur: any) => {
-      return pre.concat(cur.list);
-    }, []);
-    return [
-      {
-        label: `${t('common.all')}(${objectList.length})`,
-        value: 'All',
-        list: objectList,
-      },
-      ..._list,
-    ];
-  };
-
-  const onTabChange = (val: string) => {
-    setActiveTab(val);
-  };
-
   const onSearchTxtChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
   };
 
   const onTxtPressEnter = () => {
-    getObjects(searchText);
+    const params = {
+      monitor_object_id: objectId,
+      name: searchText,
+    };
+    getPluginList(params);
   };
 
   const onTxtClear = () => {
     setSearchText('');
-    getObjects('');
+    getPluginList({
+      monitor_object_id: objectId,
+      name: '',
+    });
   };
 
   const openImportModal = () => {
@@ -188,7 +168,13 @@ const Intergration = () => {
   };
 
   const linkToDetial = (app: ObectItem) => {
-    const row = deepClone(app);
+    const row: any = {
+      ...getObjectInfo(),
+      plugin_name: app?.display_name,
+      plugin_id: app?.id,
+      collect_type: app?.name,
+      plugin_description: app?.display_description || '--',
+    };
     const params = new URLSearchParams(row);
     const targetUrl = `/monitor/intergration/detail?${params.toString()}`;
     router.push(targetUrl);
@@ -201,97 +187,108 @@ const Intergration = () => {
 
   return (
     <div className={intergrationStyle.intergration}>
-      <div className="flex">
-        <Input
-          className="mb-[20px] w-[400px]"
-          placeholder={t('common.searchPlaceHolder')}
-          value={searchText}
-          allowClear
-          onChange={onSearchTxtChange}
-          onPressEnter={onTxtPressEnter}
-          onClear={onTxtClear}
+      <div className={intergrationStyle.tree}>
+        <TreeSelector
+          data={treeData}
+          defaultSelectedKey={defaultSelectObj as string}
+          loading={treeLoading}
+          onNodeSelect={handleObjectChange}
         />
-        <div>
-          <Button className="mx-[8px]" type="primary" onClick={openImportModal}>
-            {t('common.import')}
-          </Button>
-          <Button
-            disabled={exportDisabled}
-            loading={exportLoading}
-            onClick={exportMetric}
-          >
-            {t('common.export')}
-          </Button>
-        </div>
       </div>
-      <Spin spinning={pageLoading}>
-        <Segmented
-          className="mb-[20px] custom-tabs"
-          value={activeTab}
-          options={items}
-          onChange={onTabChange}
-        />
-        <div
-          className={`flex flex-wrap w-full ${intergrationStyle.intergrationList}`}
-        >
-          {apps.map((app) => (
-            <div
-              key={app.plugin_id + app.name}
-              className="w-full sm:w-1/4 p-2 min-w-[200px]"
-              onClick={() => onAppClick(app)}
+      <div className={intergrationStyle.cards}>
+        <div className="flex">
+          <Input
+            className="mb-[20px] w-[400px]"
+            placeholder={t('common.searchPlaceHolder')}
+            value={searchText}
+            allowClear
+            onChange={onSearchTxtChange}
+            onPressEnter={onTxtPressEnter}
+            onClear={onTxtClear}
+          />
+          <div>
+            <Button
+              className="mx-[8px]"
+              type="primary"
+              onClick={openImportModal}
             >
+              {t('common.import')}
+            </Button>
+            <Button
+              disabled={exportDisabled}
+              loading={exportLoading}
+              onClick={exportMetric}
+            >
+              {t('common.export')}
+            </Button>
+          </div>
+        </div>
+        <Spin spinning={pageLoading}>
+          <div
+            className={`flex flex-wrap w-full ${intergrationStyle.intergrationList}`}
+          >
+            {pluginList.map((app) => (
               <div
-                className={`bg-[var(--color-bg-1)] border shadow-sm hover:shadow-md transition-shadow duration-300 ease-in-out rounded-lg p-4 relative cursor-pointer group ${
-                  (selectedApp?.plugin_id || '') + (selectedApp?.name || '') ===
-                  app.plugin_id + app.name
-                    ? 'border-2 border-blue-300'
-                    : ''
-                }`}
+                key={app.id}
+                className="w-full sm:w-1/4 p-2 min-w-[400px]"
+                onClick={() => onAppClick(app)}
               >
-                <div className="flex items-center space-x-4 my-2">
-                  <Icon
-                    type={OBJECT_ICON_MAP[app.name] || 'Host'}
-                    className="text-[48px] min-w-[48px]"
-                  />
-                  <div
-                    style={{
-                      width: 'calc(100% - 60px)',
-                    }}
-                  >
-                    <h2
-                      title={app.plugin_name}
-                      className="text-xl font-bold m-0 hide-text"
+                <div
+                  className={`bg-[var(--color-bg-1)] shadow-sm hover:shadow-md transition-shadow duration-300 ease-in-out rounded-lg p-4 relative cursor-pointer group ${
+                    selectedApp?.id === app.id
+                      ? 'border-2 border-blue-300'
+                      : 'border'
+                  }`}
+                >
+                  <div className="flex items-center space-x-4 my-2">
+                    <Icon
+                      type={
+                        OBJECT_ICON_MAP[getObjectInfo().name || ''] || 'Host'
+                      }
+                      className="text-[48px] min-w-[48px]"
+                    />
+                    <div
+                      style={{
+                        width: 'calc(100% - 60px)',
+                      }}
                     >
-                      {app.plugin_name || '--'}
-                    </h2>
-                    <Tag className="mt-[4px]">{app.display_name || '--'}</Tag>
+                      <h2
+                        title={app.display_name}
+                        className="text-xl font-bold m-0 hide-text"
+                      >
+                        {app.display_name || '--'}
+                      </h2>
+                      <Tag className="mt-[4px]">
+                        {COLLECT_TYPE_MAP[app.name] || '--'}
+                      </Tag>
+                    </div>
+                  </div>
+                  <p
+                    className={`mb-[15px] text-[var(--color-text-3)] text-[13px] ${intergrationStyle.lineClamp3}`}
+                    title={app.display_description || '--'}
+                  >
+                    {app.display_description || '--'}
+                  </p>
+                  <div className="w-full h-[32px] flex justify-center items-end">
+                    <Button
+                      icon={<SettingOutlined />}
+                      type="primary"
+                      className="w-full rounded-md transition-opacity duration-300"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        linkToDetial(app);
+                      }}
+                    >
+                      {t('common.setting')}
+                    </Button>
                   </div>
                 </div>
-                <p
-                  className={`mb-[15px] text-[var(--color-text-3)] text-[13px] ${intergrationStyle.lineClamp3}`}
-                  title={app.plugin_description || '--'}
-                >
-                  {app.plugin_description || '--'}
-                </p>
-                <div className="w-full h-[32px] flex justify-center items-end">
-                  <Button
-                    icon={<SettingOutlined />}
-                    type="primary"
-                    className="w-full rounded-md transition-opacity duration-300"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      linkToDetial(app);
-                    }}
-                  >
-                    {t('common.setting')}
-                  </Button>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </Spin>
-      <ImportModal ref={importRef} onSuccess={getObjects} />
+            ))}
+          </div>
+        </Spin>
+      </div>
+      <ImportModal ref={importRef} onSuccess={onTxtClear} />
     </div>
   );
 };

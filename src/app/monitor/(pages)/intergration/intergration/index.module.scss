@@ -1,28 +1,26 @@
 .intergration {
     width: 100%;
-    // display: flex;
+    display: flex;
 
-    // .tree {
-    //     padding: 20px 10px 10px 10px;
-    //     background: var(--color-bg-1);
-    //     width: 210px;
-    //     min-width: 210px;
-    //     margin-right: 10px;
-    //     overflow-y: auto;
-    // }
-
-    // .cards {
-    //     background: var(--color-bg-1);
-    //     padding: 20px;
-
-    //     .intergrationList {
-    //         max-height: calc(100vh - 250px);
-    //         overflow-y: auto;
-    //     }
-    // }
-    .intergrationList {
-        max-height: calc(100vh - 250px);
+    .tree {
+        height: calc(100vh - 140px);
+        padding: 20px 10px 10px 10px;
+        background: var(--color-bg-1);
+        width: 210px;
+        min-width: 210px;
+        margin-right: 10px;
         overflow-y: auto;
+    }
+
+    .cards {
+        width: 100%;
+        background: var(--color-bg-1);
+        padding: 20px;
+
+        .intergrationList {
+            height: calc(100vh - 236px);
+            overflow-y: auto;
+        }
     }
 
     .lineClamp3 {
