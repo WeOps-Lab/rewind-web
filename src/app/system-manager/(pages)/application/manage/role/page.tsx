@@ -213,11 +213,6 @@ const RoleManagement: React.FC = () => {
       key: 'lastName',
     },
     {
-      title: t('system.user.form.group'),
-      dataIndex: 'group',
-      key: 'group',
-    },
-    {
       title: t('common.actions'),
       key: 'actions',
       render: (_: any, record: User) => (

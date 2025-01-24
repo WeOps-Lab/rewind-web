@@ -21,7 +21,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
   setPermissionsCheckedKeys,
   t
 }) => {
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>(menuData.map((item) => item.name));
 
   const getAllOperationKeys = (record: Menu): string[] => {
     let keys: string[] = [];
@@ -163,7 +163,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
         scroll={{ y: 'calc(100vh - 370px)' }}
         loading={loading}
         columns={columns}
-        dataSource={menuData.map(item => ({ ...item, key: item.name }))} // Ensure unique key for each item
+        dataSource={menuData.map(item => ({ ...item, key: item.name }))}
         expandable={{
           childrenColumnName: 'children',
           expandedRowKeys: expandedKeys,

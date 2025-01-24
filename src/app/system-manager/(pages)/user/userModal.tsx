@@ -15,6 +15,7 @@ interface ModalProps {
 interface ModalConfig {
   type: 'add' | 'edit';
   userId?: string;
+  groupKeys?: string[];
 }
 
 export interface ModalRef {
@@ -38,7 +39,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   const fetchRoleInfo = async () => {
     setInfoLoading(true);
     try {
-      const curClient = await getByName('OpsPilot');
+      const curClient = await getByName('Setting');
       const roleData = await getRoleList({ params: { client_id: curClient?.id } });
       setRoleOptions(
         roleData.map((role: { role_name: string; role_id: string }) => ({
@@ -74,15 +75,17 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   };
 
   useImperativeHandle(ref, () => ({
-    showModal: ({ type, userId }) => {
+    showModal: ({ type, userId, groupKeys = [] }) => {
       setVisible(true);
       setType(type);
-      // 在showModal方法中添加判断，以确保证在formRef.current存在时调用resetFields和其它相关交互
-      if(formRef.current) {
-        formRef.current.resetFields();
-      }
+      formRef.current?.resetFields();
+
       if (type === 'edit' && userId) {
         fetchUserDetail(userId);
+      } else if (type === 'add') {
+        setTimeout(() => {
+          formRef.current?.setFieldsValue({ groups: groupKeys });
+        }, 0);
       }
       fetchRoleInfo();
     },

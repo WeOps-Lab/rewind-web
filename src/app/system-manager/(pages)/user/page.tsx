@@ -18,6 +18,7 @@ const { Search } = Input;
 
 const User: React.FC = () => {
   const [tableData, setTableData] = useState<UserDataType[]>([]);
+  const [selectedTreeKeys, setSelectedTreeKeys] = useState<React.Key[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isDeleteDisabled, setIsDeleteDisabled] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -92,7 +93,10 @@ const User: React.FC = () => {
   const fetchUsers = async (params: any = {}) => {
     setLoading(true);
     try {
-      const res = await getUsersList(params);
+      const res = await getUsersList({
+        group_id: selectedTreeKeys[0],
+        ...params,
+      });
       const data = res.users.map((item: UserDataType) => ({
         key: item.id,
         username: item.username,
@@ -133,6 +137,8 @@ const User: React.FC = () => {
 
   const handleTreeSelect = (selectedKeys: React.Key[]) => {
     setSelectedRowKeys([]);
+    console.log('selectedKeys', selectedKeys);
+    setSelectedTreeKeys(selectedKeys);
     fetchUsers({
       search: searchValue,
       page: currentPage,
@@ -195,6 +201,7 @@ const User: React.FC = () => {
   const openUserModal = (type: 'add') => {
     userModalRef.current?.showModal({
       type,
+      groupKeys: type === 'add' ? (selectedTreeKeys as string[]) : [],
     });
   };
 
