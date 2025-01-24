@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { Spin, Input, Button, Segmented, Tabs, Progress } from 'antd';
+import { Input, Button, Progress } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { deepClone, getEnumValueUnit } from '@/app/monitor/utils/common';
@@ -12,11 +12,11 @@ import {
 } from '@/app/monitor/types/monitor';
 import ViewModal from './viewModal';
 import {
-  TabItem,
   ColumnItem,
   ModalRef,
   Pagination,
   TableDataItem,
+  TreeItem,
 } from '@/app/monitor/types';
 import {
   useKeyMetricLabelMap,
@@ -27,6 +27,7 @@ import TimeSelector from '@/components/time-selector';
 import { INDEX_CONFIG } from '@/app/monitor/constants/monitor';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import viewStyle from './index.module.scss';
+import TreeSelector from '@/app/monitor/components/treeSelector';
 
 const Intergration = () => {
   const { get, isLoading } = useApiClient();
@@ -36,12 +37,7 @@ const Intergration = () => {
   const { convertToLocalizedTime } = useLocalizedTime();
   const viewRef = useRef<ModalRef>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const [pageLoading, setPageLoading] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('');
   const [searchText, setSearchText] = useState<string>('');
-  const [items, setItems] = useState<IntergrationItem[]>([]);
-  const [apps, setApps] = useState<TabItem[]>([]);
-  const [objectId, setObjectId] = useState<string>('');
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
@@ -51,6 +47,11 @@ const Intergration = () => {
   });
   const [frequence, setFrequence] = useState<number>(0);
   const [plugins, setPlugins] = useState<IntergrationItem[]>([]);
+  const [treeData, setTreeData] = useState<TreeItem[]>([]);
+  const [objects, setObjects] = useState<ObectItem[]>([]);
+  const [treeLoading, setTreeLoading] = useState<boolean>(false);
+  const [objectId, setObjectId] = useState<React.Key>('');
+  const [defaultSelectObj, setDefaultSelectObj] = useState<React.Key>('');
   const columns: ColumnItem[] = [
     {
       title: t('common.name'),
@@ -90,17 +91,6 @@ const Intergration = () => {
     },
   ];
   const [tableColumn, setTableColumn] = useState<ColumnItem[]>(columns);
-
-  useEffect(() => {
-    if (activeTab) {
-      const target = items.find((item) => item.value === activeTab);
-      if (target?.list) {
-        const list = deepClone(target.list);
-        setObjectId(list[0].key);
-        setApps(list);
-      }
-    }
-  }, [activeTab, items]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -143,6 +133,10 @@ const Intergration = () => {
     searchText,
   ]);
 
+  const handleObjectChange = async (id: string) => {
+    setObjectId(id);
+  };
+
   const getColoumnAndData = async () => {
     const params = {
       page: pagination.current,
@@ -176,7 +170,7 @@ const Intergration = () => {
         ...prev,
         total: res[0]?.count || 0,
       }));
-      const _objectName = apps.find((item) => item.key === objectId)?.name;
+      const _objectName = objects.find((item) => item.id === objectId)?.name;
       if (_objectName) {
         const filterMetrics =
           INDEX_CONFIG.find((item) => item.name === _objectName)
@@ -244,24 +238,44 @@ const Intergration = () => {
     setPagination(pagination);
   };
 
-  const changeTab = (val: string) => {
-    setObjectId(val);
-  };
-
-  const getObjects = async (text?: string) => {
+  const getObjects = async () => {
     try {
-      setPageLoading(true);
-      const data = await get(`/monitor/api/monitor_object/`, {
+      setTreeLoading(true);
+      const data: ObectItem[] = await get('/monitor/api/monitor_object/', {
         params: {
-          name: text || '',
+          add_instance_count: true,
         },
       });
-      const _items = getAppsByType(data);
-      setItems(_items);
-      setActiveTab(_items[0]?.value || '');
+      const _treeData = getTreeData(deepClone(data));
+      setTreeData(_treeData);
+      setObjects(data);
+      setDefaultSelectObj(data[0]?.id);
     } finally {
-      setPageLoading(false);
+      setTreeLoading(false);
     }
+  };
+
+  const getTreeData = (data: ObectItem[]): TreeItem[] => {
+    const groupedData = data.reduce(
+      (acc, item) => {
+        if (!acc[item.type]) {
+          acc[item.type] = {
+            title: item.display_type || '--',
+            key: item.type,
+            children: [],
+          };
+        }
+        acc[item.type].children.push({
+          title: (item.display_name || '--') + `(${item.instance_count || 0})`,
+          label: item.name || '--',
+          key: item.id,
+          children: [],
+        });
+        return acc;
+      },
+      {} as Record<string, TreeItem>
+    );
+    return Object.values(groupedData);
   };
 
   const getAssetInsts = async (objectId: React.Key, type?: string) => {
@@ -292,36 +306,10 @@ const Intergration = () => {
     }
   };
 
-  const getAppsByType = (data: ObectItem[]): IntergrationItem[] => {
-    const groupedData = data.reduce(
-      (acc, item) => {
-        if (!acc[item.type]) {
-          acc[item.type] = {
-            label: item.display_type,
-            value: item.type,
-            list: [],
-          };
-        }
-        acc[item.type].list.push({
-          label: item.display_name,
-          name: item.name,
-          key: item.id,
-        });
-        return acc;
-      },
-      {} as Record<string, any>
-    );
-    return Object.values(groupedData).filter((item) => item.value !== 'Other');
-  };
-
-  const onTabChange = (val: string) => {
-    setActiveTab(val);
-  };
-
   const linkToDetial = (app: ObectItem) => {
     const row = deepClone(app);
-    row.name = apps.find((item) => item.key === objectId)?.name;
-    row.monitorObjId = apps.find((item) => item.key === objectId)?.key || '';
+    row.name = objects.find((item) => item.id === objectId)?.name;
+    row.monitorObjId = objectId || '';
     const params = new URLSearchParams(row);
     const targetUrl = `/monitor/view/detail/overview?${params.toString()}`;
     router.push(targetUrl);
@@ -350,54 +338,48 @@ const Intergration = () => {
 
   return (
     <div className={`${viewStyle.view} w-full`}>
-      <Spin spinning={pageLoading}>
-        <Segmented
-          className="mb-[20px] custom-tabs"
-          value={activeTab}
-          options={items}
-          onChange={onTabChange}
+      <div className={viewStyle.tree}>
+        <TreeSelector
+          data={treeData}
+          defaultSelectedKey={defaultSelectObj as string}
+          loading={treeLoading}
+          onNodeSelect={handleObjectChange}
         />
-        <div
-          className={`${viewStyle.table} w-full bg-[var(--color-bg-1)] px-[20px] pb-[20px]`}
-        >
-          <Tabs activeKey={objectId} items={apps} onChange={changeTab} />
-          <div>
-            <div className="flex justify-between mb-[10px]">
-              <div className="flex items-center">
-                <Input
-                  allowClear
-                  className="w-[320px]"
-                  placeholder={t('common.searchPlaceHolder')}
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  onPressEnter={onRefresh}
-                  onClear={clearText}
-                ></Input>
-              </div>
-              <TimeSelector
-                onlyRefresh
-                onFrequenceChange={onFrequenceChange}
-                onRefresh={onRefresh}
-              />
-            </div>
-            <CustomTable
-              scroll={{ y: 'calc(100vh - 370px)', x: 'calc(100vw - 90px)' }}
-              columns={tableColumn}
-              dataSource={tableData}
-              pagination={pagination}
-              loading={tableLoading}
-              rowKey="instance_id"
-              onChange={handleTableChange}
-            ></CustomTable>
+      </div>
+      <div className={viewStyle.table}>
+        <div className="flex justify-between mb-[10px]">
+          <div className="flex items-center">
+            <Input
+              allowClear
+              className="w-[320px]"
+              placeholder={t('common.searchPlaceHolder')}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onPressEnter={onRefresh}
+              onClear={clearText}
+            ></Input>
           </div>
+          <TimeSelector
+            onlyRefresh
+            onFrequenceChange={onFrequenceChange}
+            onRefresh={onRefresh}
+          />
         </div>
-      </Spin>
+        <CustomTable
+          scroll={{ y: 'calc(100vh - 270px)', x: 'calc(100vw - 300px)' }}
+          columns={tableColumn}
+          dataSource={tableData}
+          pagination={pagination}
+          loading={tableLoading}
+          rowKey="instance_id"
+          onChange={handleTableChange}
+        ></CustomTable>
+      </div>
       <ViewModal
         ref={viewRef}
         plugins={plugins}
         monitorObject={objectId}
-        monitorName={apps.find((item) => item.key === objectId)?.name || ''}
-        monitorId={apps.find((item) => item.key === objectId)?.key || ''}
+        monitorName={objects.find((item) => item.id === objectId)?.name || ''}
       />
     </div>
   );

@@ -35,12 +35,11 @@ import Icon from '@/components/icon';
 interface ModalProps {
   monitorObject: React.Key;
   monitorName: string;
-  monitorId: string;
   plugins: IntergrationItem[];
 }
 
 const ViewModal = forwardRef<ModalRef, ModalProps>(
-  ({ monitorObject, monitorName, monitorId, plugins }, ref) => {
+  ({ monitorObject, monitorName, plugins }, ref) => {
     const { get } = useApiClient();
     const { t } = useTranslation();
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -349,7 +348,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
     const linkToPolicy = (row: any) => {
       const _row = {
         monitorName: monitorName,
-        monitorObjId: monitorId,
+        monitorObjId: monitorObject + '',
         instanceId: instId,
         metricId: row.name,
         type: 'add',

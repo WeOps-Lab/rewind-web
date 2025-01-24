@@ -1,6 +1,21 @@
 .view {
+    display: flex;
+
+    .tree {
+        height: calc(100vh - 90px);
+        padding: 20px 10px 10px 10px;
+        background: var(--color-bg-1);
+        width: 210px;
+        min-width: 210px;
+        margin-right: 10px;
+        overflow-y: auto;
+    }
+
     .table {
-        height: calc(100vh - 140px);
+        width: calc(100vw - 246px);
+        padding: 20px;
+        background: var(--color-bg-1);
+        height: calc(100vh - 90px);
     }
 
     :global {
