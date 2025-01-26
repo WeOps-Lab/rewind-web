@@ -94,7 +94,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
                 )}
                 <div className={online === undefined ? "absolute bottom-4 right-4 text-xs" : entityStyles.info}>
                   <span className="pr-5">{t('skill.form.owner')}: {created_by}</span>
-                  <span>{t('skill.form.group')}: {Array.isArray(team_name) ? team_name.join(',') : '--'}</span>
+                  {/*<span>{t('skill.form.group')}: {Array.isArray(team_name) ? team_name.join(',') : '--'}</span>*/}
                 </div>
               </div>
             </>
