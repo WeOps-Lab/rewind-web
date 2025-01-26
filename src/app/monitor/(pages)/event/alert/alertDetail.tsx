@@ -73,7 +73,6 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
 
     useImperativeHandle(ref, () => ({
       showModal: ({ title, form }) => {
-        // 开启弹窗的交互
         setGroupVisible(true);
         setTitle(title);
         setFormData(form);
@@ -85,9 +84,9 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
         if (isInformation) {
           if (formData.policy?.query_condition?.type === 'pmq') {
             getRawData();
-          } else {
-            getChartData();
+            return;
           }
+          getChartData();
           return;
         }
         getTableData();

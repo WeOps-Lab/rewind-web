@@ -232,32 +232,6 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 18 }}
           >
-            {/* <Form.Item<MetricInfo>
-              label={t('common.type')}
-              name="type"
-              rules={[{ required: true, message: t('common.required') }]}
-            >
-              <Radio.Group>
-                <Radio value="metric">{t('monitor.metric')}</Radio>
-                <Radio value="calculated_metric">
-                  {t('monitor.calculatedMetric')}
-                </Radio>
-              </Radio.Group>
-            </Form.Item> */}
-            {/* <Form.Item
-              noStyle
-              shouldUpdate={(prevValues, currentValues) =>
-                prevValues.type !== currentValues.type
-              }
-            >
-              <Form.Item<MetricInfo>
-                label={t('common.id')}
-                name="name"
-                rules={[{ required: true, message: t('common.required') }]}
-              >
-                <Input disabled={type === 'edit'} />
-              </Form.Item>
-            </Form.Item> */}
             <Form.Item<MetricInfo>
               label={t('common.id')}
               name="name"
