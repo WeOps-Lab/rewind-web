@@ -500,7 +500,6 @@ const SearchView: React.FC = () => {
         <div className={searchStyle.tree}>
           <TreeSelector
             data={treeData}
-            defaultSelectedKey={url_obj_name || ''}
             loading={objLoading}
             onNodeSelect={handleObjectChange}
           />
