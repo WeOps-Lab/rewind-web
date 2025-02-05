@@ -31,7 +31,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import Icon from '@/components/icon';
 import RuleModal from './ruleModal';
 import { useCommon } from '@/app/monitor/context/common';
-import { deepClone } from '@/app/monitor/utils/common';
+import { deepClone, showGroupName } from '@/app/monitor/utils/common';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import TreeSelector from '@/app/monitor/components/treeSelector';
 import EditConfig from './editConfig';
@@ -73,6 +73,15 @@ const Asset = () => {
       dataIndex: 'instance_name',
       key: 'instance_name',
       width: 200,
+    },
+    {
+      title: t('monitor.group'),
+      dataIndex: 'organization',
+      key: 'organization',
+      width: 200,
+      render: (_, { organization }) => (
+        <>{showGroupName(organization, organizationList)}</>
+      ),
     },
     {
       title: t('common.action'),
