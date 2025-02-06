@@ -274,6 +274,11 @@ const RoleManagement: React.FC = () => {
 
   const onSelectRole = (role: Role) => {
     setSelectedRole(role);
+    if (activeTab === '2' || role.display_name === 'admin') {
+      setActiveTab('1');
+      fetchUsersByRole(role, 1, pageSize);
+      return;
+    }
     if (activeTab === '1') {
       fetchUsersByRole(role, 1, pageSize);
     } else if (activeTab === '2') {
@@ -384,7 +389,7 @@ const RoleManagement: React.FC = () => {
               </div>
               <Spin spinning={loading}>
                 <CustomTable
-                  scroll={{ y: 'calc(100vh - 430px)' }}
+                  scroll={{ y: 'calc(100vh - 450px)' }}
                   rowSelection={{
                     selectedRowKeys: selectedUserKeys,
                     onChange: (selectedRowKeys) => setSelectedUserKeys(selectedRowKeys as React.Key[]),
@@ -401,18 +406,20 @@ const RoleManagement: React.FC = () => {
                 />
               </Spin>
             </TabPane>
-            <TabPane tab={t('system.role.permissions')} key="2">
-              <div className="flex justify-end items-center mb-4">
-                <Button type="primary" loading={loading} onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
-              </div>
-              <PermissionTable
-                t={t}
-                loading={loading}
-                menuData={menuData}
-                permissionsCheckedKeys={permissionsCheckedKeys}
-                setPermissionsCheckedKeys={(keyMap) => setPermissionsCheckedKeys(keyMap)}
-              />
-            </TabPane>
+            {selectedRole?.display_name !== 'admin' && (
+              <TabPane tab={t('system.role.permissions')} key="2">
+                <div className="flex justify-end items-center mb-4">
+                  <Button type="primary" loading={loading} onClick={handleConfirmPermissions}>{t('common.confirm')}</Button>
+                </div>
+                <PermissionTable
+                  t={t}
+                  loading={loading}
+                  menuData={menuData}
+                  permissionsCheckedKeys={permissionsCheckedKeys}
+                  setPermissionsCheckedKeys={(keyMap) => setPermissionsCheckedKeys(keyMap)}
+                />
+              </TabPane>
+            )}
           </Tabs>
         </div>
       </div>
