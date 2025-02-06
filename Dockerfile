@@ -4,6 +4,7 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 ADD . .
+RUN rm -Rf ./src/app/example
 RUN pnpm install
 RUN cp ./.env.example ./.env
 RUN pnpm run build
