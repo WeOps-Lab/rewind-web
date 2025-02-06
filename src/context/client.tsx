@@ -4,6 +4,7 @@ import { ClientData } from '@/types/index';
 
 interface ClientDataContextType {
   clientData: ClientData[];
+  myClientData: ClientData[];
   loading: boolean;
   getAll: () => Promise<ClientData[]>;
   getByName: (name: string) => Promise<ClientData | undefined>;
@@ -15,6 +16,7 @@ const ClientDataContext = createContext<ClientDataContextType | undefined>(undef
 export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { get, isLoading: apiLoading } = useApiClient();
   const [clientData, setClientData] = useState<ClientData[]>([]);
+  const [myClientData, setMyClientData] = useState<ClientData[]>([]);
   const [loading, setLoading] = useState(true);
   const initializedRef = useRef(false);
 
@@ -32,8 +34,12 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const data = await get('/core/api/get_client/');
       if (data) {
         setClientData(data);
-        initializedRef.current = true;
       }
+      const myClientData = await get('/core/api/get_my_client/');
+      if (myClientData) {
+        setMyClientData(myClientData);
+      }
+      initializedRef.current = true;
     } catch (err) {
       console.error('Failed to fetch client data:', err);
     } finally {
@@ -52,6 +58,8 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return [...clientData];
   }, [initialize, clientData, loading, apiLoading]);
 
+
+
   const getByName = useCallback(
     async (name: string) => {
       if (loading || apiLoading) {
@@ -64,13 +72,14 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const reset = useCallback(() => {
     setClientData([]);
+    setMyClientData([]);
     setLoading(true);
     initializedRef.current = false;
   }, []);
 
   return (
     <ClientDataContext.Provider
-      value={{ clientData, loading, getAll, getByName, reset }}
+      value={{ clientData, myClientData, loading, getAll, getByName, reset }}
     >
       {children}
     </ClientDataContext.Provider>
