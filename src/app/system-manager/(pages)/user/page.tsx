@@ -250,7 +250,7 @@ const User: React.FC = () => {
         value={treeSearchValue}
       />
       <Tree
-        className="w-[230px] flex-1 mt-4 overflow-auto"
+        className="w-full flex-1 mt-4 overflow-auto"
         showLine
         expandAction={false}
         defaultExpandAll
