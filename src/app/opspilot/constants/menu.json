@@ -211,6 +211,12 @@
           "url": "/opspilot/knowledge/detail/api",
           "icon": "api",
           "name": "knowledge_api"
+        },
+        {
+          "title": "Invocation Logs",
+          "url": "/opspilot/knowledge/detail/invocationLogs",
+          "icon": "talk-line",
+          "name": "knowledge_invocation_logs"
         }
       ]
     },

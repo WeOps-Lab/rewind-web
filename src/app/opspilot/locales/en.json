@@ -163,6 +163,21 @@
       "prompt": "Prompt",
       "knowledgeBase": "Knowledge Base",
       "deleteConfirm": "Are you sure you want to delete this rule?"
+    },
+    "invocationLogs": {
+      "table": {
+        "time": "TIME",
+        "clientIp": "CLIENT IP",
+        "state": "STATE"
+      },
+      "detail": "DETAIL",
+      "apiDetail": "API Invocation Detail",
+      "requestInfo": "Request Information",
+      "responseInfo": "Response Information",
+      "success": "Success",
+      "failure": "Failure",
+      "copied": "Copied to clipboard",
+      "copyFailed": "Could not copy message"
     }
   },
   "provider": {
