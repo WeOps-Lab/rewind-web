@@ -119,8 +119,8 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   };
 
   // 这里通过检查 treeData 和默认值进行填充，确保组件不会因为 treeData 的问题崩溃
-  const transformTreeData = (data) => {
-    return data.map((node) => ({
+  const transformTreeData = (data: any) => {
+    return data.map((node: any) => ({
       title: node.title || 'Unknown',
       value: node.key,
       key: node.key,
