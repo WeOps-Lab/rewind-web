@@ -27,7 +27,7 @@ const PermissionsContext = createContext<PermissionsContextValue>({
 export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
   const { configMenus, loading: menuLoading } = useMenus();
   const { get, isLoading: apiLoading } = useApiClient();
-  const { clientData, loading: clientLoading } = useClientData();
+  const { myClientData, loading: clientLoading } = useClientData();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [permissions, setPermissions] = useState<Permissions>(defaultPermissions);
   const [loading, setLoading] = useState(true);
@@ -85,7 +85,7 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
     if (!clientLoading && !apiLoading && !menuLoading) {
       setLoading(true);
       try {
-        const params = { id: clientData.length > 1 ? clientData.find((item) => item.name === 'Setting')?.id : clientData[0]?.id }
+        const params = { id: myClientData?.[0]?.id }
         const data: MenuItem[] = await get('/core/api/get_user_menus/', { params });
 
         const permissionMap = collectPermissionOperations(data);
@@ -102,7 +102,7 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
   }, [get, apiLoading, clientLoading, menuLoading]);
 
   useEffect(() => {
-    if (!clientLoading && clientData.length > 0) {
+    if (!clientLoading && myClientData.length) {
       fetchMenus();
     }
   }, [clientLoading, apiLoading, menuLoading]);
