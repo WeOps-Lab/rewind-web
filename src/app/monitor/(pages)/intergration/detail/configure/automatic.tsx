@@ -893,15 +893,15 @@ const AutomaticConfiguration: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="px-[10px]">
       <Form form={form} name="basic" layout="vertical">
         {getColumnsAndFormItem().formItems && (
-          <b className="text-[14px] flex mb-[10px]">
+          <b className="text-[14px] flex mb-[10px] ml-[-10px]">
             {t('monitor.intergrations.configuration')}
           </b>
         )}
         {getColumnsAndFormItem().formItems}
-        <b className="text-[14px] flex mb-[10px]">
+        <b className="text-[14px] flex mb-[10px] ml-[-10px]">
           {t('monitor.intergrations.basicInformation')}
         </b>
         <Form.Item

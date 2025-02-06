@@ -453,6 +453,7 @@ const StrategyOperation = () => {
           query: _values.query,
         };
         _values.source = {};
+        _values.algorithm = 'last_over_time';
       } else {
         _values.query_condition = {
           type: 'metric',
@@ -848,54 +849,65 @@ const StrategyOperation = () => {
                           )
                         }
                       </Form.Item>
-                      <Form.Item<StrategyFields>
-                        required
-                        label={
-                          <span className="w-[100px]">
-                            {t('monitor.events.method')}
-                          </span>
+                      <Form.Item
+                        noStyle
+                        shouldUpdate={(prevValues, currentValues) =>
+                          prevValues.collect_type !== currentValues.collect_type
                         }
                       >
-                        <Form.Item
-                          name="algorithm"
-                          noStyle
-                          rules={[
-                            {
-                              required: true,
-                              message: t('common.required'),
-                            },
-                          ]}
-                        >
-                          <Select
-                            allowClear
-                            style={{
-                              width: '300px',
-                            }}
-                            placeholder={t('monitor.events.method')}
-                          >
-                            {METHOD_LIST.map((item: ListItem) => (
-                              <Option value={item.value} key={item.value}>
-                                <Tooltip
-                                  overlayInnerStyle={{
-                                    whiteSpace: 'pre-line',
-                                    color: 'var(--color-text-1)',
+                        {({ getFieldValue }) =>
+                          isTrap(getFieldValue) ? null : (
+                            <Form.Item<StrategyFields>
+                              required
+                              label={
+                                <span className="w-[100px]">
+                                  {t('monitor.events.method')}
+                                </span>
+                              }
+                            >
+                              <Form.Item
+                                name="algorithm"
+                                noStyle
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: t('common.required'),
+                                  },
+                                ]}
+                              >
+                                <Select
+                                  allowClear
+                                  style={{
+                                    width: '300px',
                                   }}
-                                  placement="rightTop"
-                                  arrow={false}
-                                  color="var(--color-bg-1)"
-                                  title={item.title}
+                                  placeholder={t('monitor.events.method')}
                                 >
-                                  <span className="w-full flex">
-                                    {item.label}
-                                  </span>
-                                </Tooltip>
-                              </Option>
-                            ))}
-                          </Select>
-                        </Form.Item>
-                        <div className="text-[var(--color-text-3)] mt-[10px]">
-                          {t('monitor.events.setMethod')}
-                        </div>
+                                  {METHOD_LIST.map((item: ListItem) => (
+                                    <Option value={item.value} key={item.value}>
+                                      <Tooltip
+                                        overlayInnerStyle={{
+                                          whiteSpace: 'pre-line',
+                                          color: 'var(--color-text-1)',
+                                        }}
+                                        placement="rightTop"
+                                        arrow={false}
+                                        color="var(--color-bg-1)"
+                                        title={item.title}
+                                      >
+                                        <span className="w-full flex">
+                                          {item.label}
+                                        </span>
+                                      </Tooltip>
+                                    </Option>
+                                  ))}
+                                </Select>
+                              </Form.Item>
+                              <div className="text-[var(--color-text-3)] mt-[10px]">
+                                {t('monitor.events.setMethod')}
+                              </div>
+                            </Form.Item>
+                          )
+                        }
                       </Form.Item>
                       <Form.Item<StrategyFields>
                         required
