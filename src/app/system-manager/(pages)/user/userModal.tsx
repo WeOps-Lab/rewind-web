@@ -119,15 +119,16 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   };
 
   // 这里通过检查 treeData 和默认值进行填充，确保组件不会因为 treeData 的问题崩溃
-  const filteredTreeData = treeData?.map((node: any) => ({
-    ...node,
-    title: node.title || 'Unknown',
-    value: node.value || node.key,
-    children: node.children ? node.children.map((child: any) => ({
-      ...child,       title: child.title || 'Unknown',
-      value: child.value || child.key,
-    })) : []
-  }));
+  const transformTreeData = (data) => {
+    return data.map((node) => ({
+      title: node.title || 'Unknown',
+      value: node.key,
+      key: node.key,
+      children: node.children ? transformTreeData(node.children) : []
+    }));
+  };
+
+  const filteredTreeData = treeData ? transformTreeData(treeData) : [];
 
   return (
     <OperateModal
