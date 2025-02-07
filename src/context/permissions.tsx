@@ -89,6 +89,7 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
         const data: MenuItem[] = await get('/core/api/get_user_menus/', { params });
 
         const permissionMap = collectPermissionOperations(data);
+        console.log('permissionMap', permissionMap, configMenus);
         const filteredMenus = filterMenusByPermission(permissionMap, configMenus);
         const parsedPermissions = extractPermissions(filteredMenus);
         setMenuItems(filteredMenus);
