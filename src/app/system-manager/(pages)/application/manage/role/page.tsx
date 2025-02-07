@@ -68,7 +68,7 @@ const RoleManagement: React.FC = () => {
   const fetchRoles = async () => {
     setLoadingRoles(true);
     try {
-      const roles = await getRoles({ params: { client_id: id } });
+      const roles = await getRoles({ client_id: id });
       setRoleList(roles);
       if (roles.length > 0) {
         setSelectedRole(roles[0]);

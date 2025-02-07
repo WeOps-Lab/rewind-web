@@ -25,7 +25,7 @@ export interface ModalRef {
 const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref) => {
   const { t } = useTranslation();
   const formRef = useRef<FormInstance>(null);
-  const { getByName } = useClientData();
+  const { clientData } = useClientData();
   const [currentUserId, setCurrentUserId] = useState('');
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,8 +39,8 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   const fetchRoleInfo = async () => {
     setInfoLoading(true);
     try {
-      const curClient = await getByName('Setting');
-      const roleData = await getRoleList({ params: { client_id: curClient?.id } });
+      const ids = clientData.map(client => client.id);
+      const roleData = await getRoleList({ client_id: ids });
       setRoleOptions(
         roleData.map((role: { role_name: string; role_id: string }) => ({
           label: role.role_name,
@@ -57,8 +57,8 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   const fetchUserDetail = async (userId: string) => {
     setLoading(true);
     try {
-      const curClient = await getByName('OpsPilot');
-      const userDetail = await getUserDetail({ params: { user_id: userId, id: curClient?.id } });
+      const id = clientData.map(client => client.id);
+      const userDetail = await getUserDetail({ user_id: userId, id });
       if (userDetail) {
         setCurrentUserId(userId);
         formRef.current?.setFieldsValue({

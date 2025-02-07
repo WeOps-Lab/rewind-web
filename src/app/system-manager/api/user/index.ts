@@ -12,10 +12,10 @@ export const useUserApi = () => {
     return await get('/core/api/get_client_detail/', params);
   }
   async function getRoleList(params: any) {
-    return await get('/system_mgmt/role/search_role_list/', params);
+    return await post('/system_mgmt/role/search_role_list/', params);
   }
   async function getUserDetail(params: any) {
-    return await get('/system_mgmt/user/get_user_detail/', params);
+    return await post('/system_mgmt/user/get_user_detail/', params);
   }
   async function addUser(params: any) {
     return await post(`/system_mgmt/user/create_user/`, params)
