@@ -46,7 +46,13 @@ export const GET = async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const locale = searchParams.get('locale') === 'en' ? 'en' : 'zh';
 
-    let menuItems = await getDynamicMenuItems(locale);
+    let menuItems;
+
+    try {
+      menuItems = await getDynamicMenuItems(locale);
+    } catch (error) {
+      console.error('Error merging dynamic messages:', error);
+    }
 
     if (!menuItems || menuItems.length === 0) {
       console.warn(`Fallback to public/menus for locale: ${locale}`);
