@@ -25,13 +25,6 @@ export const MenusProvider = ({ children }: { children: ReactNode }) => {
         setConfigMenus(menus);
       } catch (error) {
         console.error('Failed to fetch menus:', error);
-        try {
-          const menuResponse = await fetch(`/menus/${locale}.json`);
-          const menus = await menuResponse.json();
-          setConfigMenus(menus);
-        } catch {
-          console.error('Failed to load menus from local:', error);
-        }
       } finally {
         setLoading(false);
       }
