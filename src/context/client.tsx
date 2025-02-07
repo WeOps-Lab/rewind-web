@@ -7,7 +7,6 @@ interface ClientDataContextType {
   myClientData: ClientData[];
   loading: boolean;
   getAll: () => Promise<ClientData[]>;
-  getByName: (name: string) => Promise<ClientData | undefined>;
   reset: () => void;
 }
 
@@ -58,18 +57,6 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return [...clientData];
   }, [initialize, clientData, loading, apiLoading]);
 
-
-
-  const getByName = useCallback(
-    async (name: string) => {
-      if (loading || apiLoading) {
-        await initialize();
-      }
-      return clientData.find((client) => client.name === name);
-    },
-    [initialize, clientData, loading, apiLoading]
-  );
-
   const reset = useCallback(() => {
     setClientData([]);
     setMyClientData([]);
@@ -79,7 +66,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   return (
     <ClientDataContext.Provider
-      value={{ clientData, myClientData, loading, getAll, getByName, reset }}
+      value={{ clientData, myClientData, loading, getAll, reset }}
     >
       {children}
     </ClientDataContext.Provider>
