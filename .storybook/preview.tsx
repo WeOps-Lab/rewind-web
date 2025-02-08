@@ -6,7 +6,8 @@ import React from 'react';
 import { SessionProvider } from 'next-auth/react';
 import { LocaleProvider } from '@/context/locale';
 import { ThemeProvider } from '@/context/theme';
-import { PermissionsProvider } from '@/context/permission';
+import { ClientProvider } from '@/context/client';
+import { PermissionsProvider } from '@/context/permissions';
 
 const mockSession = {
   username: 'umr',
@@ -21,11 +22,13 @@ const preview: Preview = {
         <Script src="/iconfont.js" strategy="afterInteractive" />
         <LocaleProvider>
           <ThemeProvider>
-            <PermissionsProvider>
-              <AntdRegistry>
-                <Story />
-              </AntdRegistry>
-            </PermissionsProvider>
+            <ClientProvider>
+              <PermissionsProvider>
+                <AntdRegistry>
+                  <Story />
+                </AntdRegistry>
+              </PermissionsProvider>
+            </ClientProvider>
           </ThemeProvider>
         </LocaleProvider>
       </SessionProvider>

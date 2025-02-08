@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 
-const EXCLUDED_DIRECTORIES = ['(core)'];
+const EXCLUDED_DIRECTORIES = ['(core)', 'no-permission'];
 
 interface NestedMessages {
   [key: string]: string | NestedMessages;
@@ -36,7 +36,6 @@ const deepMerge = (target: any, source: any) => {
 const getMergedMessages = async () => {
   const localesDir = path.resolve(process.cwd(), 'src', 'app');
 
-  // Load base messages
   const baseEnMessages = JSON.parse(await fs.readFile(path.resolve(process.cwd(), 'src', 'locales', 'en.json'), 'utf8'));
   const baseZhMessages = JSON.parse(await fs.readFile(path.resolve(process.cwd(), 'src', 'locales', 'zh.json'), 'utf8'));
 
@@ -75,11 +74,38 @@ const getMergedMessages = async () => {
   return mergedMessages;
 };
 
+const getFallbackLocale = async (locale: string): Promise<any> => {
+  try {
+    const localePath = path.resolve(process.cwd(), 'public', 'locales', `${locale}.json`);
+    const fallbackMessages = JSON.parse(await fs.readFile(localePath, 'utf8'));
+    return flattenMessages(fallbackMessages);
+  } catch (error) {
+    console.error(`Failed to load fallback locale (${locale}) from public/locales:`, error);
+    return null;
+  }
+};
+
 export const GET = async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
     const locale = searchParams.get('locale') === 'en' ? 'en' : 'zh';
-    const mergedMessages = await getMergedMessages();
+    let mergedMessages;
+
+    try {
+      mergedMessages = await getMergedMessages();
+    } catch (error) {
+      console.error('Error merging dynamic messages:', error);
+    }
+
+    if (!mergedMessages || !mergedMessages[locale]) {
+      console.warn(`Falling back to public/locales for locale: ${locale}`);
+      const fallbackMessages = await getFallbackLocale(locale);
+      if (!fallbackMessages) {
+        throw new Error(`Failed to load fallback locale: ${locale}`);
+      }
+      return NextResponse.json(fallbackMessages, { status: 200 });
+    }
+
     return NextResponse.json(mergedMessages[locale], { status: 200 });
   } catch (error) {
     console.error('Failed to load locales:', error);
