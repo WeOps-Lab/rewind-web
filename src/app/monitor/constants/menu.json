@@ -1,46 +1,110 @@
 {
   "zh": [
     {
-      "label": "搜索",
+      "title": "搜索",
       "icon": "search-f",
-      "path": "/monitor/search"
+      "url": "/monitor/search",
+      "name": "search"
     },
     {
-      "label": "视图",
+      "title": "视图",
       "icon": "zichan-quanbushebei",
-      "path": "/monitor/view"
+      "url": "/monitor/view",
+      "name": "view",
+      "children": [
+        {
+          "title": "概览",
+          "icon": "shujumoxingguanli",
+          "url": "/monitor/view/detail/overview",
+          "name": "view_overview"
+        }
+      ]
     },
     {
-      "label": "事件",
+      "title": "事件",
       "icon": "mulu",
-      "path": "/monitor/event"
+      "url": "/monitor/event",
+      "name": "event",
+      "children": [
+        {
+          "url": "/monitor/event/strategy",
+          "name": "event_strategy"
+        }
+      ]
     },
     {
-      "label": "集成",
+      "title": "集成",
       "icon": "moxing2",
-      "path": "/monitor/intergration"
+      "url": "/monitor/intergration",
+      "name": "intergration",
+      "children": [
+        {
+          "title": "配置",
+          "icon": "shujumoxingguanli",
+          "url": "/monitor/intergration/detail/configure",
+          "name": "intergration_configure"
+        },
+        {
+          "title": "指标",
+          "icon": "zichan-quanbushebei",
+          "url": "/monitor/intergration/detail/metric",
+          "name": "intergration_metric"
+        }
+      ]
     }
   ],
   "en": [
     {
-      "label": "Search",
+      "title": "Search",
       "icon": "search-f",
-      "path": "/monitor/search"
+      "url": "/monitor/search",
+      "name": "search"
     },
     {
-      "label": "View",
+      "title": "View",
       "icon": "zichan-quanbushebei",
-      "path": "/monitor/view"
+      "url": "/monitor/view",
+      "name": "view",
+      "children": [
+        {
+          "title": "Overview",
+          "icon": "shujumoxingguanli",
+          "url": "/monitor/view/detail/overview",
+          "name": "view_overview"
+        }
+      ]
     },
     {
-      "label": "Event",
+      "title": "Event",
       "icon": "mulu",
-      "path": "/monitor/event"
+      "url": "/monitor/event",
+      "name": "event",
+      "children": [
+        {
+          "url": "/monitor/event/strategy",
+          "name": "event_strategy"
+        }
+      ]
     },
     {
-      "label": "Intergration",
+      "title": "Intergration",
       "icon": "moxing2",
-      "path": "/monitor/intergration"
+      "url": "/monitor/intergration",
+      "name": "intergration",
+      "children": [
+        {
+          "title": "Configure",
+          "icon": "shujumoxingguanli",
+          "url": "/monitor/intergration/detail/configure",
+          "name": "intergration_configure"
+        },
+        {
+          "title": "Metric",
+          "icon": "zichan-quanbushebei",
+          "url": "/monitor/intergration/detail/metric",
+          "name": "intergration_metric"
+        }
+      ]
     }
   ]
 }

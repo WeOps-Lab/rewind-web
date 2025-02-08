@@ -4,7 +4,6 @@ import React from 'react';
 import { Tooltip } from 'antd';
 import WithSideMenuLayout from '@/components/sub-layout';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslation } from '@/utils/i18n';
 import Icon from '@/components/icon';
 import { OBJECT_ICON_MAP } from '@/app/monitor/constants/monitor';
 
@@ -13,24 +12,11 @@ const IntergrationDetailLayout = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
   const groupId = searchParams.get('plugin_name');
   const desc = searchParams.get('plugin_description');
   const icon = OBJECT_ICON_MAP[searchParams.get('name') as string] || 'Host';
-  const menuItems = [
-    {
-      label: t('monitor.intergrations.configure'),
-      path: '/monitor/intergration/detail/configure',
-      icon: 'shujumoxingguanli',
-    },
-    {
-      label: t('monitor.metric'),
-      path: '/monitor/intergration/detail/metric',
-      icon: 'zichan-quanbushebei',
-    },
-  ];
 
   const handleBackButtonClick = () => {
     router.push(`/monitor/intergration`);
@@ -50,7 +36,6 @@ const IntergrationDetailLayout = ({
 
   return (
     <WithSideMenuLayout
-      menuItems={menuItems}
       topSection={<TopSection />}
       showBackButton={true}
       onBackButtonClick={handleBackButtonClick}

@@ -3,7 +3,6 @@
 import React from 'react';
 import WithSideMenuLayout from '@/components/sub-layout';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslation } from '@/utils/i18n';
 import Icon from '@/components/icon';
 import { OBJECT_ICON_MAP } from '@/app/monitor/constants/monitor';
 
@@ -12,7 +11,6 @@ const IntergrationDetailLayout = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
   const desc = searchParams.get('instance_name');
@@ -21,14 +19,6 @@ const IntergrationDetailLayout = ({
   const handleBackButtonClick = () => {
     router.push(`/monitor/view`);
   };
-
-  const menuItems = [
-    {
-      label: t('monitor.views.overview'),
-      path: '/monitor/view/detail/overview',
-      icon: 'shujumoxingguanli',
-    },
-  ];
 
   return (
     <WithSideMenuLayout
@@ -43,7 +33,6 @@ const IntergrationDetailLayout = ({
           </div>
         </div>
       }
-      menuItems={menuItems}
       showBackButton={true}
       onBackButtonClick={handleBackButtonClick}
     >
