@@ -1,6 +1,7 @@
-import { JWT, getToken } from 'next-auth/jwt'
-import { NextRequest, NextResponse } from 'next/server'
+import { JWT, getToken } from 'next-auth/jwt';
+import { NextRequest, NextResponse } from 'next/server';
 
+// Helper function to generate logout parameters
 function logoutParams(token: JWT): Record<string, string> {
   return {
     id_token_hint: token.idToken as string,
@@ -8,39 +9,44 @@ function logoutParams(token: JWT): Record<string, string> {
   };
 }
 
-function handleEmptyToken() {
-  const response = { error: "No session present" };
-  const responseHeaders = { status: 400 };
-  return NextResponse.json(response, responseHeaders);
-}
-
-function sendEndSessionEndpointToURL(token: JWT) {
-  const endSessionEndPoint = new URL(
-    `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/logout`
-  );
-  const params: Record<string, string> = logoutParams(token);
-  const endSessionParams = new URLSearchParams(params);
-  const response = { url: `${endSessionEndPoint.href}/?${endSessionParams}` };
-  return NextResponse.json(response);
-}
-
-export async function GET(req: NextRequest) {
+// Handle the actual logout API
+export const POST = async (req: NextRequest) => {
   try {
-    const token = await getToken({ req })
-    if (token) {
-      return sendEndSessionEndpointToURL(token);
-    }
-    return handleEmptyToken();
-  } catch (error) {
-    console.error(error);
-    const response = {
-      error: "Unable to logout from the session",
-    };
-    const responseHeaders = {
-      status: 500,
-    };
-    return NextResponse.json(response, responseHeaders);
-  }
-}
+    console.log('Received POST request for logout.');
 
+    // Attempt to get the JWT from the request
+    const token = await getToken({ req });
+    if (!token) {
+      console.warn('No token found in the session.');
+      return NextResponse.json(
+        { message: 'No session found', error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const endSessionEndpoint = new URL(
+      `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/logout`
+    );
+
+    const params = new URLSearchParams(logoutParams(token));
+    console.log('Logout URL parameters:', params.toString());
+
+    // Redirect user to the Keycloak logout URL
+    const logoutURL = `${endSessionEndpoint}?${params}`;
+    return NextResponse.json({ url: logoutURL }, { status: 200 });
+  } catch (error) {
+    console.error('Logout error:', error);
+    return NextResponse.json(
+      { message: 'Logout processing failed' },
+      { status: 500 }
+    );
+  }
+};
+
+// Optional: Handle GET requests for debugging or miscommunication
+export const GET = async () => {
+  return NextResponse.json({ message: 'Method Not Allowed' }, { status: 405 });
+};
+
+// Export to force dynamic behavior
 export const dynamic = 'force-dynamic';
