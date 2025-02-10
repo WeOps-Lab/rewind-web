@@ -99,7 +99,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script src="/iconfont.js" strategy="afterInteractive" />
+        <link rel="icon" href="/logo-site.png" type="image/png"/>
+        <Script src="/iconfont.js" strategy="afterInteractive"/>
       </head>
       <body className={inter.className}>
         {/* 全局 Context Provider 配置 */}
