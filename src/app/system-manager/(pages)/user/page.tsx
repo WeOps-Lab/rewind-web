@@ -58,6 +58,11 @@ const User: React.FC = () => {
       },
     },
     {
+      title: t('system.user.table.firstName'),
+      dataIndex: 'firstName',
+      width: 100,
+    },
+    {
       title: t('system.user.table.lastName'),
       dataIndex: 'name',
       width: 100,
@@ -101,6 +106,7 @@ const User: React.FC = () => {
         key: item.id,
         username: item.username,
         name: item.lastName,
+        firstName: item.firstName,
         email: item.email,
         role: item.role,
       }));
@@ -275,7 +281,7 @@ const User: React.FC = () => {
         </Button>
         <UserModal ref={userModalRef} treeData={treeData} onSuccess={onSuccessUserModal} />
         <Button onClick={handleModifyDelete} disabled={isDeleteDisabled}>
-          {t('system.common.modifydelete')}
+          {t('common.batchDelete')}
         </Button>
       </div>
       <Spin spinning={loading}>

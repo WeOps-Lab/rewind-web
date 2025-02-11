@@ -1,5 +1,5 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
-import { Input, Button, Form, TreeSelect, Select, message, Spin } from 'antd';
+import { Input, Button, Form, Transfer, message, Spin, Tree } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
 import { useTranslation } from '@/utils/i18n';
@@ -29,15 +29,15 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   const [currentUserId, setCurrentUserId] = useState('');
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [infoLoading, setInfoLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [type, setType] = useState<'add' | 'edit'>('add');
   const [roleOptions, setRoleOptions] = useState<{ label: string; value: string }[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
   const { addUser, editUser, getUserDetail, getRoleList } = useUserApi();
 
   const fetchRoleInfo = async () => {
-    setInfoLoading(true);
     try {
       const ids = clientData.map(client => client.id);
       const roleData = await getRoleList({ client_id: ids });
@@ -49,8 +49,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
       );
     } catch {
       message.error(t('common.fetchFailed'));
-    } finally {
-      setInfoLoading(false);
     }
   };
 
@@ -66,6 +64,8 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
           roles: userDetail.roles?.map((role: { role_id: string }) => role.role_id) || [],
           groups: userDetail.groups?.map((group: { id: string }) => group.id) || [],
         });
+        setSelectedGroups(userDetail.groups?.map((group: { id: string }) => group.id) || []);
+        setSelectedRoles(userDetail.roles?.map((role: { role_id: string }) => role.role_id) || []);
       }
     } catch {
       message.error(t('common.fetchFailed'));
@@ -83,6 +83,8 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
       if (type === 'edit' && userId) {
         fetchUserDetail(userId);
       } else if (type === 'add') {
+        setSelectedGroups(groupKeys);
+        setSelectedRoles([]);
         setTimeout(() => {
           formRef.current?.setFieldsValue({ groups: groupKeys });
         }, 0);
@@ -130,9 +132,23 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
 
   const filteredTreeData = treeData ? transformTreeData(treeData) : [];
 
+  // 新增：扁平化 treeData 成平面数据
+  const flattenTree = (nodes: any[]): { key: string; title: string }[] => {
+    return nodes.reduce((acc, node) => {
+      acc.push({ key: node.value, title: node.title });
+      if (node.children && node.children.length) {
+        acc = acc.concat(flattenTree(node.children));
+      }
+      return acc;
+    }, [] as { key: string; title: string }[]);
+  };
+
+  const groupDataSource = flattenTree(filteredTreeData);
+
   return (
     <OperateModal
       title={type === 'add' ? t('common.add') : t('common.edit')}
+      width={860}
       open={visible}
       onCancel={handleCancel}
       footer={[
@@ -172,27 +188,59 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
             label={t('system.user.form.group')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <TreeSelect
-              treeData={filteredTreeData}
-              showSearch
-              style={{ width: '100%' }}
-              dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-              placeholder={t('system.user.form.group')}
-              allowClear
-              multiple
-              treeDefaultExpandAll
-            />
+            <Transfer
+              oneWay
+              dataSource={groupDataSource}
+              targetKeys={selectedGroups}
+              className="tree-transfer"
+              render={(item) => item.title}
+              showSelectAll={false}
+              onChange={nextTargetKeys => {
+                setSelectedGroups(nextTargetKeys as string[]);
+                formRef.current?.setFieldsValue({ groups: nextTargetKeys });
+              }}
+            >
+              {({ direction, onItemSelect, selectedKeys }) => {
+                if (direction === 'left') {
+                  const targetKeys = selectedGroups;
+                  const checkedKeys = Array.from(new Set([...selectedKeys, ...targetKeys]));
+                  return (
+                    <div style={{ padding: '4px', maxHeight: 250, overflow: 'auto' }}>
+                      <Tree
+                        blockNode
+                        checkable
+                        checkStrictly
+                        defaultExpandAll
+                        checkedKeys={checkedKeys}
+                        treeData={filteredTreeData}
+                        onCheck={(_, { node: { key } }) => {
+                          onItemSelect(key as string, !checkedKeys.includes(key));
+                        }}
+                        onSelect={(_, { node: { key } }) => {
+                          onItemSelect(key as string, !checkedKeys.includes(key));
+                        }}
+                      />
+                    </div>
+                  );
+                }
+              }}
+            </Transfer>
           </Form.Item>
           <Form.Item
             name="roles"
             label={t('system.user.form.role')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Select
-              placeholder={t('system.user.form.role')}
-              mode="multiple"
-              options={roleOptions}
-              loading={infoLoading}
+            <Transfer
+              oneWay
+              dataSource={roleOptions.map(role => ({ key: role.value, title: role.label }))}
+              targetKeys={selectedRoles}
+              listStyle={{ width: '100%' }}
+              render={item => item.title}
+              onChange={nextTargetKeys => {
+                setSelectedRoles(nextTargetKeys as string[]);
+                formRef.current?.setFieldsValue({ roles: nextTargetKeys });
+              }}
             />
           </Form.Item>
         </Form>

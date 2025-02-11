@@ -202,12 +202,17 @@ const RoleManagement: React.FC = () => {
 
   const columns = [
     {
-      title: t('system.user.form.username'),
+      title: t('system.user.table.username'),
       dataIndex: 'username',
       key: 'username',
     },
     {
-      title: t('system.user.form.lastName'),
+      title: t('system.user.table.firstName'),
+      dataIndex: 'firstName',
+      key: 'firstName',
+    },
+    {
+      title: t('system.user.table.lastName'),
       dataIndex: 'lastName',
       key: 'lastName',
     },

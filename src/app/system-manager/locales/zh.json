@@ -11,7 +11,8 @@
       "desc": "显示所有信息，您可以维护用户信息并分配角色。",
       "table": {
         "username":"用户名",
-        "lastName":"名称",
+        "firstName": "名字",
+        "lastName":"姓",
         "email":"邮箱",
         "number":"号码",
         "group":"团队",

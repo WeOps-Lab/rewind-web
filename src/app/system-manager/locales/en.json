@@ -12,6 +12,7 @@
       "search": "Search",
       "table": {
         "username": "USERNAME",
+        "firstName": "FIRST NAME",
         "lastName": "LAST NAME",
         "email": "EMAIL",
         "number": "NUMBER",

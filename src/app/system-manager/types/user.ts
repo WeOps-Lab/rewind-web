@@ -6,6 +6,7 @@ interface UserDataType {
   username: string;
   email: string;
   lastName: string;
+  firstName: string;
   name?: string;
   team?: string;
   role?: string;
