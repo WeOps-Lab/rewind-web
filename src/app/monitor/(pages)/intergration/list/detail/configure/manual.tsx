@@ -121,8 +121,6 @@ const AutomaticConfiguration: React.FC = () => {
     form.validateFields().then((values) => {
       // 处理表单提交逻辑
       const _values = deepClone(values);
-      delete _values.metric_type;
-      delete _values.nodes;
       getStep3Content(_values);
     });
   };
@@ -130,6 +128,10 @@ const AutomaticConfiguration: React.FC = () => {
   const getStep3Content = async (
     params = { interval: '', monitor_url: '' }
   ) => {
+    if (params) {
+      console.log(params);
+      return;
+    }
     try {
       setConfirmLoading(true);
       const instnaceId = await post(
