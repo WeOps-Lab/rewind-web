@@ -39,29 +39,30 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
 
   const getMenuItemsForPath = (menus: MenuItem[], currentPath: string): MenuItem[] => {
-    let matchedMenu: MenuItem | null = null;
+    const matchedMenu = menus.find(menu => menu.url && menu.url !== currentPath && currentPath.startsWith(menu.url));
 
-    for (const menu of menus) {
-      if (menu.url && currentPath.startsWith(menu.url)) {
-        matchedMenu = menu;
+    if (matchedMenu) {
+      if (matchedMenu.children?.length) {
+        const validChildren = matchedMenu.children.filter(m => !m.isNotMenuItem);
 
-        if (menu.children && menu.children.length > 0) {
-          const childResult = getMenuItemsForPath(menu.children, currentPath);
+        if (validChildren.length > 0) {
+          const childResult = getMenuItemsForPath(validChildren, currentPath);
           if (childResult.length > 0) {
             return childResult;
           }
         }
       }
+
+      return matchedMenu.children || [];
     }
 
-    // 如果递归结束，返回最近的匹配菜单的 `children` 或空数组
-    return matchedMenu?.children || [];
+    return [];
   };
 
-  const updateMenuItems = useMemo(() => getMenuItemsForPath(menus, pathname), [menus, pathname]);
+  const updateMenuItems = useMemo(() => getMenuItemsForPath(menus, pathname), [pathname]);
 
   useEffect(() => {
-    setMenuItems(updateMenuItems);
+    setMenuItems(updateMenuItems?.filter(menu => !menu.isNotMenuItem));
   }, [updateMenuItems]);
 
   useEffect(() => {
@@ -77,7 +78,7 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
     <div className={`flex grow w-full h-full ${sideMenuStyle.sideMenuLayout}`}>
       {layoutType === 'sideMenu' ? (
         <>
-          {showSideMenu && (
+          {showSideMenu && menuItems.length > 0 && (
             <SideMenu
               menuItems={menuItems}
               showBackButton={showBackButton}
@@ -101,23 +102,31 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
         </>
       ) : (
         <div className={`flex flex-col w-full h-full ${sideMenuStyle.segmented}`}>
-          <Segmented
-            options={menuItems.map(item => ({
-              label: (
-                <div className="flex items-center justify-center">
-                  {item.icon && (
-                    <Icon type={item.icon} className="mr-2 text-sm" />
-                  )} {item.title}
-                </div>
-              ),
-              value: item.url,
-            }))}
-            value={selectedKey}
-            onChange={handleSegmentChange}
-          />
-          <div className="flex-1 pt-4 rounded-md overflow-auto">
-            {children}
-          </div>
+          {menuItems.length > 0 ? (
+            <>
+              <Segmented
+                options={menuItems.map(item => ({
+                  label: (
+                    <div className="flex items-center justify-center">
+                      {item.icon && (
+                        <Icon type={item.icon} className="mr-2 text-sm" />
+                      )} {item.title}
+                    </div>
+                  ),
+                  value: item.url,
+                }))}
+                value={selectedKey}
+                onChange={handleSegmentChange}
+              />
+              <div className="flex-1 pt-4 rounded-md overflow-auto">
+                {children}
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 pt-4 rounded-md overflow-auto">
+              {children}
+            </div>
+          )}
         </div>
       )}
     </div>
