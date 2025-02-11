@@ -37,6 +37,9 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
       if (item.url && item.operation?.length) {
         accumulated[item.url] = item.operation;
       }
+      if (item.url && item.isNotMenuItem) {
+        accumulated[item.url] = ['View'];
+      }
       if (item.children) {
         extractPermissions(item.children, accumulated);
       }
