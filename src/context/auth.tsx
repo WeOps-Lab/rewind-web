@@ -1,7 +1,6 @@
 'use client';
 
 import { useSession, signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 import { createContext, useContext, useEffect, useState } from 'react';
 import Spin from '@/components/spin';
@@ -15,7 +14,6 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { data: session, status } = useSession();
   const { t } = useTranslation();
-  const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -34,7 +32,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       console.warn(t('common.noAccessToken'));
     }
-  }, [session, status, router]);
+  }, [status]);
 
   if (status === 'loading' || !isAuthenticated) {
     return (

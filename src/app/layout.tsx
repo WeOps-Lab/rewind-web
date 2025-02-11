@@ -39,7 +39,7 @@ const LayoutWithProviders = ({ children }: { children: React.ReactNode }) => {
 
   const isPathInMenu = useCallback((path: string, menus: MenuItem[]): boolean => {
     for (const menu of menus) {
-      if (menu.url?.startsWith(path) || path.startsWith(menu.url)) {
+      if (menu.url?.startsWith(path)) {
         return true;
       }
       if (menu.children && isPathInMenu(path, menu.children)) {
@@ -99,7 +99,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script src="/iconfont.js" strategy="afterInteractive" />
+        <link rel="icon" href="/logo-site.png" type="image/png"/>
+        <Script src="/iconfont.js" strategy="afterInteractive"/>
       </head>
       <body className={inter.className}>
         {/* 全局 Context Provider 配置 */}

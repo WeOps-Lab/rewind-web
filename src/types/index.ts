@@ -57,5 +57,6 @@ export interface MenuItem {
   icon: string;
   title: string;
   operation: string[];
+  isNotMenuItem?: boolean;
   children?: MenuItem[];
 }

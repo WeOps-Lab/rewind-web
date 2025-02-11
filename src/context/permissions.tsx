@@ -66,7 +66,7 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
   ): MenuItem[] => {
     return menus
       .filter((menu) => {
-        const hasPermission = permissionMap.hasOwnProperty(menu.name);
+        const hasPermission = permissionMap.hasOwnProperty(menu.name) || menu.isNotMenuItem;
         if (!hasPermission) {
           console.warn(`No permission for menu: ${menu.name}`);
         }
@@ -110,7 +110,7 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
 
   const hasPermission = useCallback(
     (url: string) => {
-      return Object.keys(permissions).some((permissionUrl) => permissionUrl.startsWith(url) || url.startsWith(permissionUrl));
+      return Object.keys(permissions).some((permissionUrl) => permissionUrl.startsWith(url));
     },
     [permissions]
   );

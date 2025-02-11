@@ -1,59 +1,84 @@
-import React, { useState } from 'react';
-import { Dropdown, Space, Avatar, Menu, MenuProps } from 'antd';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Dropdown, Space, Avatar, Menu, MenuProps, message } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { DownOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
 import VersionModal from './versionModal';
 import ThemeSwitcher from '@/components/theme';
 import { useUserInfoContext } from '@/context/userInfo';
 
-const UserInfo = () => {
+interface GroupItemProps {
+  id: string;
+  name: string;
+  isSelected: boolean;
+  onClick: (id: string) => void;
+}
+
+const GroupItem: React.FC<GroupItemProps> = ({ id, name, isSelected, onClick }) => (
+  <Space onClick={() => onClick(id)}>
+    <span
+      className={`inline-block w-2 h-2 rounded-full ${
+        isSelected ? 'bg-[var(--color-success)]' : 'bg-[var(--color-fill-4)]'
+      }`}
+    />
+    <span className="text-sm">{name}</span>
+  </Space>
+);
+
+const UserInfo: React.FC = () => {
   const { data: session } = useSession();
   const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
   const { flatGroups, selectedGroup, setSelectedGroup } = useUserInfoContext();
 
-  const username = session?.username || 'Test';
   const [versionVisible, setVersionVisible] = useState<boolean>(false);
   const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: '/' });
-  };
+  const username = session?.username || 'Test';
 
-  const handleVersion = () => {
-    setVersionVisible(true);
-  };
+  const federatedLogout = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/federated-logout', {
+        method: 'POST',
+      });
 
-  const handleChangeGroup = (key: string) => {
-    const nextGroup = flatGroups.find(group => group.id === key);
-    if (nextGroup) {
-      setSelectedGroup(nextGroup);
-      setDropdownVisible(false);
-      const pathSegments = pathname.split('/').filter(Boolean);
-      if (pathSegments.length > 2) {
-        const newPath = `/${pathSegments.slice(0, 2).join('/')}`;
-        router.push(newPath);
+      const data = await response.json();
+      if (response.ok) {
+        window.location.href = data.url;
       } else {
-        window.location.reload();
+        throw new Error(data.error || 'Failed to log out');
       }
+    } catch (error) {
+      console.error('Logout error:', error);
+      message.error(t('common.logoutFailed'));
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [t]);
 
-  const handleMenuClick = ({ key }: any) => {
-    if (key === 'version') handleVersion();
-    if (key === 'logout') handleLogout();
+  const handleChangeGroup = useCallback((key: string) => {
+    const nextGroup = flatGroups.find(group => group.id === key);
+    if (!nextGroup) return;
+
+    setSelectedGroup(nextGroup);
     setDropdownVisible(false);
-  };
 
-  const dropdownItems: MenuProps['items'] = [
+    const pathSegments = pathname.split('/').filter(Boolean);
+    if (pathSegments.length > 2) {
+      router.push(`/${pathSegments.slice(0, 2).join('/')}`);
+    } else {
+      window.location.reload();
+    }
+  }, [flatGroups, pathname, router, setSelectedGroup]);
+
+  const dropdownItems: MenuProps['items'] = useMemo(() => [
     {
       key: 'themeSwitch',
-      label: (
-        <ThemeSwitcher />
-      ),
+      label: <ThemeSwitcher />
     },
     {
       key: 'version',
@@ -76,18 +101,28 @@ const UserInfo = () => {
       children: flatGroups.map(group => ({
         key: group.id,
         label: (
-          <Space onClick={() => handleChangeGroup(group.id)}>
-            <span
-              className={`inline-block w-2 h-2 rounded-full ${selectedGroup?.name === group.name ? 'bg-[var(--color-success)]' : 'bg-[var(--color-fill-4)]'}`}
-            />
-            <span className="text-sm">{group.name}</span>
-          </Space>
+          <GroupItem
+            id={group.id}
+            name={group.name}
+            isSelected={selectedGroup?.name === group.name}
+            onClick={handleChangeGroup}
+          />
         ),
       })),
     },
     { type: 'divider' },
-    { key: 'logout', label: t('common.logout') },
-  ];
+    {
+      key: 'logout',
+      label: t('common.logout'),
+      disabled: isLoading
+    },
+  ], [t, selectedGroup, flatGroups, handleChangeGroup, isLoading]);
+
+  const handleMenuClick = ({ key }: any) => {
+    if (key === 'version') setVersionVisible(true);
+    if (key === 'logout') federatedLogout();
+    setDropdownVisible(false);
+  };
 
   const userMenu = (
     <Menu
