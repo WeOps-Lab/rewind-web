@@ -39,7 +39,7 @@ const LayoutWithProviders = ({ children }: { children: React.ReactNode }) => {
 
   const isPathInMenu = useCallback((path: string, menus: MenuItem[]): boolean => {
     for (const menu of menus) {
-      if (menu.url?.startsWith(path) || path.startsWith(menu.url)) {
+      if (menu.url?.startsWith(path)) {
         return true;
       }
       if (menu.children && isPathInMenu(path, menu.children)) {
