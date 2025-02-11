@@ -92,7 +92,7 @@
       "title": "View",
       "icon": "zichan-quanbushebei",
       "url": "/monitor/view",
-      "name": "veiw_list",
+      "name": "view_list",
       "children": [
         {
           "url": "/monitor/view/detail/overview",
