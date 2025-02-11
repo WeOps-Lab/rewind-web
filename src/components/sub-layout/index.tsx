@@ -38,10 +38,27 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   const [selectedKey, setSelectedKey] = useState<string>(pathname);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
 
-  const updateMenuItems = useMemo(() => {
-    const currentMenu = menus.find((menu: MenuItem) => menu?.url && pathname.startsWith(menu.url));
-    return currentMenu?.children || [];
-  }, [menus, pathname]);
+  const getMenuItemsForPath = (menus: MenuItem[], currentPath: string): MenuItem[] => {
+    let matchedMenu: MenuItem | null = null;
+
+    for (const menu of menus) {
+      if (menu.url && currentPath.startsWith(menu.url)) {
+        matchedMenu = menu;
+
+        if (menu.children && menu.children.length > 0) {
+          const childResult = getMenuItemsForPath(menu.children, currentPath);
+          if (childResult.length > 0) {
+            return childResult;
+          }
+        }
+      }
+    }
+
+    // 如果递归结束，返回最近的匹配菜单的 `children` 或空数组
+    return matchedMenu?.children || [];
+  };
+
+  const updateMenuItems = useMemo(() => getMenuItemsForPath(menus, pathname), [menus, pathname]);
 
   useEffect(() => {
     setMenuItems(updateMenuItems);
