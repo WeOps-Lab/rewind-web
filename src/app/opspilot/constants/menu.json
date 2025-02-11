@@ -175,6 +175,12 @@
           "name": "skill_rule"
         },
         {
+          "title": "Invocation Logs",
+          "url": "/opspilot/skill/detail/invocationLogs",
+          "icon": "talk-line",
+          "name": "skill_invocation_logs"
+        },
+        {
           "title": "API",
           "url": "/opspilot/skill/detail/api",
           "icon": "api",

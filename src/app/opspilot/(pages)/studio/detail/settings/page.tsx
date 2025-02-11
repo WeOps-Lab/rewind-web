@@ -36,17 +36,18 @@ const StudioSettingsPage: React.FC = () => {
   const [isDomainEnabled, setIsDomainEnabled] = useState(false);
   const [isPortMappingEnabled, setIsPortMappingEnabled] = useState(false);
   const [botDomain, setBotDomain] = useState('');
-  const [nodePort, setNodePort] = useState(5005);
+  const [nodePort, setNodePort] = useState<number | string>(5005);
   const [enableSsl, setEnableSsl] = useState(false);
   const [online, setOnline] = useState(false);
   const searchParams = useSearchParams();
   const botId = searchParams.get('id');
 
   const IconMap: any = {
-    enterprise_wechat: 'qiwei',
-    wechat_official_account: 'gongzhonghao',
-    ding_talk: 'dingding1',
-    web: 'wangye'
+    enterprise_wechat: 'qiwei2',
+    wechat_official_account: 'weixingongzhonghao',
+    ding_talk: 'dingding',
+    web: 'icon-08',
+    deepseek: 'a-deepseek1'
   }
 
   useEffect(() => {
@@ -429,7 +430,15 @@ const StudioSettingsPage: React.FC = () => {
                             <Input
                               placeholder={`${t('common.inputMsg')} ${t('studio.settings.portMapping')}`}
                               value={nodePort}
-                              onChange={(e) => setNodePort(Number(e.target.value))}
+                              onChange={(e) => {
+                                const value = Number(e.target.value);
+                                // 端口号的合法范围为 1-65535
+                                if (!Number.isNaN(value) && value > 0 && value <= 65535) {
+                                  setNodePort(value);
+                                } else if (e.target.value === '') {
+                                  setNodePort('');
+                                }
+                              }}
                             />
                           </Form.Item>
                         )}

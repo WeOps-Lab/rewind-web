@@ -46,7 +46,7 @@ const SkillOperateModal: React.FC<OperateModalProps> = ({
   };
 
   const handleConfigureKnowledgeBases = () => {
-    window.open('/knowledge', '_blank');
+    window.open('/opspilot/knowledge', '_blank');
   };
 
   const filteredKnowledgeBases = knowledgeBases.filter((base) =>
@@ -75,7 +75,7 @@ const SkillOperateModal: React.FC<OperateModalProps> = ({
         ) : (
           <>
             <div className="flex justify-end">
-              <Input className="w-[300px]" placeholder={t('common.input')} suffix={<SearchOutlined />} onChange={handleSearch} />
+              <Input className="w-[300px]" placeholder={`${t('common.search')}...`} suffix={<SearchOutlined />} onChange={handleSearch} />
             </div>
             <div className="grid grid-cols-3 gap-4 py-4 max-h-[60vh] overflow-y-auto">
               {filteredKnowledgeBases.map((base, index) => (

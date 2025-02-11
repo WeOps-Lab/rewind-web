@@ -27,10 +27,11 @@ const ChannelPage: React.FC = () => {
   const botId = searchParams.get('id');
 
   const IconMap: any = {
-    enterprise_wechat: 'qiwei',
-    wechat_official_account: 'gongzhonghao',
-    ding_talk: 'dingding1',
-    web: 'wangye'
+    enterprise_wechat: 'qiwei2',
+    wechat_official_account: 'weixingongzhonghao',
+    ding_talk: 'dingding',
+    web: 'icon-08',
+    deepseek: 'a-deepseek1'
   }
   const fetchData = async () => {
     try {
@@ -138,7 +139,7 @@ const ChannelPage: React.FC = () => {
                 <h2 className="text-xl font-bold m-0">{app.name}</h2>
               </div>
               <div className="w-full h-[32px] flex justify-center items-end">
-                <PermissionWrapper requiredPermissions={['Setting']}>
+                <PermissionWrapper className="w-full" requiredPermissions={['Setting']}>
                   <Button
                     type="primary"
                     className="w-full rounded-md transition-opacity duration-300"
