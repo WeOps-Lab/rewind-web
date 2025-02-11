@@ -1,30 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  Form,
-  Input,
-  Select,
-  Button,
-  message,
-  Checkbox,
-  Space,
-  InputNumber,
-} from 'antd';
+import { Form, Input, Select, Button, message } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import CustomTable from '@/components/custom-table';
 import { v4 as uuidv4 } from 'uuid';
 import { deepClone } from '@/app/monitor/utils/common';
 import {
-  TIMEOUT_UNITS,
   COLLECT_TYPE_MAP,
   INSTANCE_TYPE_MAP,
   CONFIG_TYPE_MAP,
 } from '@/app/monitor/constants/monitor';
-import { EditOutlined } from '@ant-design/icons';
 import { useSearchParams, useRouter } from 'next/navigation';
 import useApiClient from '@/utils/request';
 import { useCommon } from '@/app/monitor/context/common';
 import { Organization, ListItem } from '@/app/monitor/types';
 import { useUserInfoContext } from '@/context/userInfo';
+import { useColumnsAndFormItems } from '@/app/monitor/hooks/intergration';
 
 const { Option } = Select;
 
@@ -212,6 +202,48 @@ const AutomaticConfiguration: React.FC = () => {
     },
   ];
 
+  const handleEditAuthPassword = () => {
+    if (authPasswordDisabled) {
+      form.setFieldsValue({
+        authPassword: '',
+      });
+    }
+    setAuthPasswordDisabled(false);
+  };
+
+  const handleEditPrivPassword = () => {
+    if (privPasswordDisabled) {
+      form.setFieldsValue({
+        privPassword: '',
+      });
+    }
+    setPrivPasswordDisabled(false);
+  };
+
+  const handleEditPassword = () => {
+    if (passwordDisabled) {
+      form.setFieldsValue({
+        password: '',
+      });
+    }
+    setPasswordDisabled(false);
+  };
+
+  // 使用自定义 Hook
+  const { displaycolumns, formItems } = useColumnsAndFormItems({
+    collectType,
+    columns,
+    authPasswordRef,
+    privPasswordRef,
+    passwordRef,
+    authPasswordDisabled,
+    privPasswordDisabled,
+    passwordDisabled,
+    handleEditAuthPassword,
+    handleEditPrivPassword,
+    handleEditPassword,
+  });
+
   useEffect(() => {
     if (!authPasswordDisabled && authPasswordRef?.current) {
       authPasswordRef.current.focus();
@@ -293,12 +325,9 @@ const AutomaticConfiguration: React.FC = () => {
 
   const handleCopy = (row: any) => {
     const index = dataSource.findIndex((item) => item.key === row.key);
-    const newData: MonitoredObject = {
-      ...row,
-      key: uuidv4(), // 每条数据的唯一标识
-    };
+    const newData: MonitoredObject = { ...row, key: uuidv4() };
     const updatedData = [...dataSource];
-    updatedData.splice(index + 1, 0, newData); // 在当前行下方插入新数据
+    updatedData.splice(index + 1, 0, newData);
     setDataSource(updatedData);
   };
 
@@ -373,7 +402,7 @@ const AutomaticConfiguration: React.FC = () => {
         params
       );
       message.success(t('common.addSuccess'));
-      router.push('/monitor/intergration/list');
+      router.push('/monitor/intergration');
     } finally {
       setConfirmLoading(false);
     }
@@ -428,479 +457,15 @@ const AutomaticConfiguration: React.FC = () => {
     setDataSource(_dataSource);
   };
 
-  const handleEditAuthPassword = () => {
-    if (authPasswordDisabled) {
-      form.setFieldsValue({
-        authPassword: '',
-      });
-    }
-    setAuthPasswordDisabled(false);
-  };
-
-  const handleEditPrivPassword = () => {
-    if (privPasswordDisabled) {
-      form.setFieldsValue({
-        privPassword: '',
-      });
-    }
-    setPrivPasswordDisabled(false);
-  };
-
-  const handleEditPassword = () => {
-    if (passwordDisabled) {
-      form.setFieldsValue({
-        password: '',
-      });
-    }
-    setPasswordDisabled(false);
-  };
-
-  const getColumnsAndFormItem = () => {
-    switch (collectType) {
-      case 'host':
-        return {
-          displaycolumns: [columns[0], ...columns.slice(4, 7)],
-          formItems: (
-            <Form.Item
-              label={t('monitor.intergrations.metricType')}
-              name="metric_type"
-              rules={[
-                {
-                  required: true,
-                  message: t('common.required'),
-                },
-              ]}
-            >
-              <Checkbox.Group>
-                <Space direction="vertical">
-                  <Checkbox value="cpu">
-                    <span>
-                      <span className="w-[80px] inline-block">CPU</span>
-                      <span className="text-[var(--color-text-3)] text-[12px]">
-                        {t('monitor.intergrations.cpuDes')}
-                      </span>
-                    </span>
-                  </Checkbox>
-                  <Checkbox value="disk">
-                    <span>
-                      <span className="w-[80px] inline-block">Disk</span>
-                      <span className="text-[var(--color-text-3)] text-[12px]">
-                        {t('monitor.intergrations.diskDes')}
-                      </span>
-                    </span>
-                  </Checkbox>
-                  <Checkbox value="diskio">
-                    <span>
-                      <span className="w-[80px] inline-block">Disk IO</span>
-                      <span className="text-[var(--color-text-3)] text-[12px]">
-                        {t('monitor.intergrations.diskIoDes')}
-                      </span>
-                    </span>
-                  </Checkbox>
-                  <Checkbox value="mem">
-                    <span>
-                      <span className="w-[80px] inline-block">Memory</span>
-                      <span className="text-[var(--color-text-3)] text-[12px]">
-                        {t('monitor.intergrations.memoryDes')}
-                      </span>
-                    </span>
-                  </Checkbox>
-                  <Checkbox value="net">
-                    <span>
-                      <span className="w-[80px] inline-block">Net</span>
-                      <span className="text-[var(--color-text-3)] text-[12px]">
-                        {t('monitor.intergrations.netDes')}
-                      </span>
-                    </span>
-                  </Checkbox>
-                  <Checkbox value="processes">
-                    <span>
-                      <span className="w-[80px] inline-block">Processes</span>
-                      <span className="text-[var(--color-text-3)] text-[12px]">
-                        {t('monitor.intergrations.processesDes')}
-                      </span>
-                    </span>
-                  </Checkbox>
-                  <Checkbox value="system">
-                    <span>
-                      <span className="w-[80px] inline-block">System</span>
-                      <span className="text-[var(--color-text-3)] text-[12px]">
-                        {t('monitor.intergrations.systemDes')}
-                      </span>
-                    </span>
-                  </Checkbox>
-                </Space>
-              </Checkbox.Group>
-            </Form.Item>
-          ),
-        };
-      case 'trap':
-        return {
-          displaycolumns: [columns[0], ...columns.slice(4, 7)],
-          formItems: null,
-        };
-      case 'web':
-        return {
-          displaycolumns: [columns[1], ...columns.slice(3, 7)],
-          formItems: null,
-        };
-      case 'ping':
-        return {
-          displaycolumns: [columns[1], ...columns.slice(3, 7)],
-          formItems: null,
-        };
-      case 'snmp':
-        return {
-          displaycolumns: [columns[0], columns[2], ...columns.slice(4, 7)],
-          formItems: (
-            <>
-              <Form.Item required label={t('monitor.intergrations.port')}>
-                <Form.Item
-                  noStyle
-                  name="port"
-                  rules={[
-                    {
-                      required: true,
-                      message: t('common.required'),
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    className="w-[300px] mr-[10px]"
-                    min={1}
-                    precision={0}
-                  />
-                </Form.Item>
-                <span className="text-[12px] text-[var(--color-text-3)]">
-                  {t('monitor.intergrations.portDes')}
-                </span>
-              </Form.Item>
-              <Form.Item required label={t('monitor.intergrations.version')}>
-                <Form.Item
-                  noStyle
-                  name="version"
-                  rules={[
-                    {
-                      required: true,
-                      message: t('common.required'),
-                    },
-                  ]}
-                >
-                  <Select className="mr-[10px]" style={{ width: '300px' }}>
-                    <Option value={2}>v2c</Option>
-                    <Option value={3}>v3</Option>
-                  </Select>
-                </Form.Item>
-                <span className="text-[12px] text-[var(--color-text-3)]">
-                  {t('monitor.intergrations.versionDes')}
-                </span>
-              </Form.Item>
-              <Form.Item
-                noStyle
-                shouldUpdate={(prevValues, currentValues) =>
-                  prevValues.version !== currentValues.version
-                }
-              >
-                {({ getFieldValue }) =>
-                  getFieldValue('version') === 2 ? (
-                    <Form.Item
-                      required
-                      label={t('monitor.intergrations.community')}
-                    >
-                      <Form.Item
-                        noStyle
-                        name="community"
-                        rules={[
-                          {
-                            required: true,
-                            message: t('common.required'),
-                          },
-                        ]}
-                      >
-                        <Input className="w-[300px] mr-[10px]" />
-                      </Form.Item>
-                      <span className="text-[12px] text-[var(--color-text-3)]">
-                        {t('monitor.intergrations.communityDes')}
-                      </span>
-                    </Form.Item>
-                  ) : (
-                    <>
-                      <Form.Item required label={t('common.name')}>
-                        <Form.Item
-                          noStyle
-                          name="sec_name"
-                          rules={[
-                            {
-                              required: true,
-                              message: t('common.required'),
-                            },
-                          ]}
-                        >
-                          <Input className="w-[300px] mr-[10px]" />
-                        </Form.Item>
-                        <span className="text-[12px] text-[var(--color-text-3)]">
-                          {t('monitor.intergrations.nameDes')}
-                        </span>
-                      </Form.Item>
-                      <Form.Item required label={t('monitor.events.level')}>
-                        <Form.Item
-                          noStyle
-                          name="sec_level"
-                          rules={[
-                            {
-                              required: true,
-                              message: t('common.required'),
-                            },
-                          ]}
-                        >
-                          <Select
-                            className="mr-[10px]"
-                            style={{ width: '300px' }}
-                          >
-                            <Option value="noAuthNoPriv">noAuthNoPriv</Option>
-                            <Option value="authNoPriv">authNoPriv</Option>
-                            <Option value="authPriv">authPriv</Option>
-                          </Select>
-                        </Form.Item>
-                        <span className="text-[12px] text-[var(--color-text-3)]">
-                          {t('monitor.intergrations.levelDes')}
-                        </span>
-                      </Form.Item>
-                      <Form.Item
-                        required
-                        label={t('monitor.intergrations.authProtocol')}
-                      >
-                        <Form.Item
-                          noStyle
-                          name="auth_protocol"
-                          rules={[
-                            {
-                              required: true,
-                              message: t('common.required'),
-                            },
-                          ]}
-                        >
-                          <Input className="w-[300px] mr-[10px]" />
-                        </Form.Item>
-                        <span className="text-[12px] text-[var(--color-text-3)]">
-                          {t('monitor.intergrations.authProtocolDes')}
-                        </span>
-                      </Form.Item>
-                      <Form.Item
-                        required
-                        label={t('monitor.intergrations.authPassword')}
-                      >
-                        <Form.Item
-                          noStyle
-                          name="auth_password"
-                          rules={[
-                            {
-                              required: true,
-                              message: t('common.required'),
-                            },
-                          ]}
-                        >
-                          <Input
-                            ref={authPasswordRef}
-                            disabled={authPasswordDisabled}
-                            className="w-[300px] mr-[10px]"
-                            type="password"
-                            suffix={
-                              <EditOutlined
-                                className="text-[var(--color-text-2)]"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditAuthPassword();
-                                }}
-                              />
-                            }
-                          />
-                        </Form.Item>
-                        <span className="text-[12px] text-[var(--color-text-3)]">
-                          {t('monitor.intergrations.authPasswordDes')}
-                        </span>
-                      </Form.Item>
-                      <Form.Item
-                        required
-                        label={t('monitor.intergrations.privProtocol')}
-                      >
-                        <Form.Item
-                          noStyle
-                          name="priv_protocol"
-                          rules={[
-                            {
-                              required: true,
-                              message: t('common.required'),
-                            },
-                          ]}
-                        >
-                          <Input className="w-[300px] mr-[10px]" />
-                        </Form.Item>
-                        <span className="text-[12px] text-[var(--color-text-3)]">
-                          {t('monitor.intergrations.privProtocolDes')}
-                        </span>
-                      </Form.Item>
-                      <Form.Item
-                        required
-                        label={t('monitor.intergrations.privPassword')}
-                      >
-                        <Form.Item
-                          noStyle
-                          name="priv_password"
-                          rules={[
-                            {
-                              required: true,
-                              message: t('common.required'),
-                            },
-                          ]}
-                        >
-                          <Input
-                            ref={privPasswordRef}
-                            disabled={privPasswordDisabled}
-                            className="w-[300px] mr-[10px]"
-                            type="password"
-                            suffix={
-                              <EditOutlined
-                                className="text-[var(--color-text-2)]"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditPrivPassword();
-                                }}
-                              />
-                            }
-                          />
-                        </Form.Item>
-                        <span className="text-[12px] text-[var(--color-text-3)]">
-                          {t('monitor.intergrations.privPasswordDes')}
-                        </span>
-                      </Form.Item>
-                    </>
-                  )
-                }
-              </Form.Item>
-              <Form.Item required label={t('monitor.intergrations.timeout')}>
-                <Form.Item
-                  noStyle
-                  name="timeout"
-                  rules={[
-                    {
-                      required: true,
-                      message: t('common.required'),
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    className="mr-[10px]"
-                    min={1}
-                    precision={0}
-                    addonAfter={
-                      <Select style={{ width: 116 }} defaultValue="s">
-                        {TIMEOUT_UNITS.map((item: string) => (
-                          <Option key={item} value={item}>
-                            {item}
-                          </Option>
-                        ))}
-                      </Select>
-                    }
-                  />
-                </Form.Item>
-                <span className="text-[12px] text-[var(--color-text-3)]">
-                  {t('monitor.intergrations.timeoutDes')}
-                </span>
-              </Form.Item>
-            </>
-          ),
-        };
-      case 'ipmi':
-        return {
-          displaycolumns: [columns[0], columns[2], ...columns.slice(4, 7)],
-          formItems: (
-            <>
-              <Form.Item label={t('monitor.intergrations.username')} required>
-                <Form.Item
-                  noStyle
-                  name="username"
-                  rules={[
-                    {
-                      required: true,
-                      message: t('common.required'),
-                    },
-                  ]}
-                >
-                  <Input className="w-[300px] mr-[10px]" />
-                </Form.Item>
-                <span className="text-[12px] text-[var(--color-text-3)]">
-                  {t('monitor.intergrations.usernameDes')}
-                </span>
-              </Form.Item>
-              <Form.Item label={t('monitor.intergrations.password')} required>
-                <Form.Item
-                  noStyle
-                  name="password"
-                  rules={[
-                    {
-                      required: true,
-                      message: t('common.required'),
-                    },
-                  ]}
-                >
-                  <Input
-                    ref={passwordRef}
-                    disabled={passwordDisabled}
-                    className="w-[300px] mr-[10px]"
-                    type="password"
-                    suffix={
-                      <EditOutlined
-                        className="text-[var(--color-text-2)]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditPassword();
-                        }}
-                      />
-                    }
-                  />
-                </Form.Item>
-                <span className="text-[12px] text-[var(--color-text-3)]">
-                  {t('monitor.intergrations.passwordDes')}
-                </span>
-              </Form.Item>
-              <Form.Item label={t('monitor.intergrations.protocol')} required>
-                <Form.Item
-                  noStyle
-                  name="protocol"
-                  rules={[
-                    {
-                      required: true,
-                      message: t('common.required'),
-                    },
-                  ]}
-                >
-                  <Input className="w-[300px] mr-[10px]" />
-                </Form.Item>
-                <span className="text-[12px] text-[var(--color-text-3)]">
-                  {t('monitor.intergrations.protocolDes')}
-                </span>
-              </Form.Item>
-            </>
-          ),
-        };
-      default:
-        return {
-          displaycolumns: [columns[0], ...columns.slice(4, 7)],
-          formItems: null,
-        };
-    }
-  };
-
   return (
     <div className="px-[10px]">
       <Form form={form} name="basic" layout="vertical">
-        {getColumnsAndFormItem().formItems && (
+        {formItems && (
           <b className="text-[14px] flex mb-[10px] ml-[-10px]">
             {t('monitor.intergrations.configuration')}
           </b>
         )}
-        {getColumnsAndFormItem().formItems}
+        {formItems}
         <b className="text-[14px] flex mb-[10px] ml-[-10px]">
           {t('monitor.intergrations.basicInformation')}
         </b>
@@ -929,7 +494,7 @@ const AutomaticConfiguration: React.FC = () => {
           <CustomTable
             scroll={{ y: 'calc(100vh - 490px)', x: 'calc(100vw - 320px)' }}
             dataSource={dataSource}
-            columns={getColumnsAndFormItem().displaycolumns}
+            columns={displaycolumns}
             rowKey="key"
             pagination={false}
           />

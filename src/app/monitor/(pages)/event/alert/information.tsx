@@ -12,7 +12,9 @@ import { useCommon } from '@/app/monitor/context/common';
 import { Modal, message, Button } from 'antd';
 import useApiClient from '@/utils/request';
 import { LEVEL_MAP, useLevelList } from '@/app/monitor/constants/monitor';
-import Editor from '@monaco-editor/react';
+import ReactAce from 'react-ace';
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/theme-monokai';
 
 const Information: React.FC<TableDataItem> = ({
   formData,
@@ -30,11 +32,6 @@ const Information: React.FC<TableDataItem> = ({
   const commonContext = useCommon();
   const authList = useRef(commonContext?.authOrganizations || []);
   const organizationList: Organization[] = authList.current;
-  const editorRef = useRef(null);
-
-  const handleEditorDidMount = (editor: any) => {
-    editorRef.current = editor;
-  };
 
   const checkDetail = (row: TableDataItem) => {
     const params = {
@@ -180,12 +177,14 @@ const Information: React.FC<TableDataItem> = ({
               {t('monitor.events.message')}
             </h3>
             <div className="leading-[24px]">
-              <Editor
-                options={{ readOnly: true }}
-                height={400}
-                theme="vs-dark"
-                defaultLanguage="python"
-                onMount={handleEditorDidMount}
+              <ReactAce
+                className="mb-[10px]"
+                mode="python"
+                theme="monokai"
+                name="editor"
+                width="100%"
+                height="400px"
+                readOnly
                 value={JSON.stringify(trapData.metric || {})}
               />
             </div>

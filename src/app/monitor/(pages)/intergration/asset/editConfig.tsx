@@ -15,7 +15,9 @@ import { ModalRef } from '@/app/monitor/types';
 import { NodeConfigInfo } from '@/app/monitor/types/monitor';
 import { useTranslation } from '@/utils/i18n';
 import { deepClone } from '@/app/monitor/utils/common';
-import Editor from '@monaco-editor/react';
+import ReactAce from 'react-ace';
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/theme-monokai';
 
 interface ModalProps {
   onSuccess: () => void;
@@ -29,7 +31,6 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [configForm, setConfigForm] = useState<NodeConfigInfo>({});
   const [title, setTitle] = useState<string>('');
-  const editorRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
     showModal: ({ title, form }) => {
@@ -80,10 +81,6 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
     setVisible(false);
   };
 
-  const handleEditorDidMount = (editor: any) => {
-    editorRef.current = editor;
-  };
-
   return (
     <div>
       <OperateModal
@@ -111,11 +108,12 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
             name="content"
             rules={[{ required: true, message: t('common.required') }]}
           >
-            <Editor
-              height="calc(100vh - 320px)"
-              theme="vs-dark"
-              defaultLanguage="python"
-              onMount={handleEditorDidMount}
+            <ReactAce
+              mode="python"
+              theme="monokai"
+              name="editor"
+              width="100%"
+              height="500px"
             />
           </Form.Item>
         </Form>
