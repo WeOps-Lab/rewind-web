@@ -176,7 +176,7 @@ const Intergration = () => {
       plugin_description: app?.display_description || '--',
     };
     const params = new URLSearchParams(row);
-    const targetUrl = `/monitor/intergration/detail?${params.toString()}`;
+    const targetUrl = `/monitor/intergration/list/detail/configure?${params.toString()}`;
     router.push(targetUrl);
   };
 

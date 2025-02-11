@@ -1,18 +1,18 @@
 .asset {
     display: flex;
+    overflow: hidden;
 
     .assetTree {
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 140px);
+        height: calc(100vh - 146px);
         padding: 20px 10px;
         background-color: var(--color-bg-1);
-        // width: 240px;
+        overflow-y: auto;
+        overflow-x: hidden;
 
         .tree {
             height: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
         }
 
         :global {
@@ -24,10 +24,9 @@
 
     .table {
         background: var(--color-bg-1);
-        height: calc(100vh - 140px);
+        height: calc(100vh - 146px);
         padding: 20px;
         margin-left: 10px;
-        // flex: 1;
 
         .search {
             display: flex;

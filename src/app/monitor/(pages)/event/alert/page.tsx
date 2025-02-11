@@ -29,7 +29,7 @@ import {
   TabItem,
   TimeSelectorDefaultValue,
 } from '@/app/monitor/types';
-import { AlertProps, MetricItem } from '@/app/monitor/types/monitor';
+import { MetricItem, ObectItem } from '@/app/monitor/types/monitor';
 import { AlertOutlined } from '@ant-design/icons';
 import { FiltersConfig } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
@@ -47,11 +47,7 @@ import {
   useStateMap,
 } from '@/app/monitor/constants/monitor';
 
-const Alert: React.FC<AlertProps> = ({
-  objects,
-  metrics,
-  groupObjects = [],
-}) => {
+const Alert: React.FC = () => {
   const { get, patch, isLoading } = useApiClient();
   const { t } = useTranslation();
   const STATE_MAP = useStateMap();
@@ -89,6 +85,10 @@ const Alert: React.FC<AlertProps> = ({
   });
   const [activeTab, setActiveTab] = useState<string>('activeAlarms');
   const [chartData, setChartData] = useState<Record<string, any>[]>([]);
+  const [pageLoading, setPageLoading] = useState<boolean>(false);
+  const [objects, setObjects] = useState<ObectItem[]>([]);
+  const [groupObjects, setGroupObjects] = useState<ObectItem[]>([]);
+  const [metrics, setMetrics] = useState<MetricItem[]>([]);
 
   const tabs: TabItem[] = [
     {
@@ -266,8 +266,52 @@ const Alert: React.FC<AlertProps> = ({
     filters.monitor_objects,
   ]);
 
+  useEffect(() => {
+    if (isLoading) return;
+    getInitData();
+  }, [isLoading]);
+
   const changeTab = (val: string) => {
     setActiveTab(val);
+  };
+
+  const getInitData = () => {
+    setPageLoading(true);
+    Promise.all([getMetrics(), getObjects()]).finally(() => {
+      setPageLoading(false);
+    });
+  };
+
+  const getMetrics = async () => {
+    const data = await get(`/monitor/api/metrics/`);
+    setMetrics(data);
+  };
+
+  const getObjects = async () => {
+    const data: ObectItem[] = await get('/monitor/api/monitor_object/', {
+      params: {
+        add_policy_count: true,
+      },
+    });
+    const groupedData = data.reduce(
+      (acc, item) => {
+        if (!acc[item.type]) {
+          acc[item.type] = {
+            label: item.display_type,
+            title: item.type,
+            options: [],
+          };
+        }
+        acc[item.type].options.push({
+          label: item.display_name,
+          value: item.id,
+        });
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+    setGroupObjects(Object.values(groupedData));
+    setObjects(data);
   };
 
   const showAlertCloseConfirm = (row: TableDataItem) => {
@@ -524,163 +568,170 @@ const Alert: React.FC<AlertProps> = ({
 
   return (
     <div className="w-full">
-      <div className={alertStyle.alert}>
-        <div className={alertStyle.filters}>
-          <h3 className="font-[800] mb-[15px] text-[15px]">
-            {t('monitor.events.filterItems')}
-          </h3>
-          <div className="mb-[15px]">
-            <Collapse title={t('monitor.events.level')}>
-              <Checkbox.Group
-                className="ml-[20px]"
-                value={filters.level}
-                onChange={(checkeds) => onFilterChange(checkeds, 'level')}
-              >
-                <Space direction="vertical">
-                  <Checkbox value="critical">
-                    <div className={alertStyle.level}>
-                      {t('monitor.events.critical')}
-                    </div>
-                  </Checkbox>
-                  <Checkbox value="error">
-                    <div
-                      className={alertStyle.level}
-                      style={{
-                        borderLeft: `4px solid ${LEVEL_MAP.error}`,
-                      }}
-                    >
-                      {t('monitor.events.error')}
-                    </div>
-                  </Checkbox>
-                  <Checkbox value="warning">
-                    <div
-                      className={alertStyle.level}
-                      style={{
-                        borderLeft: `4px solid ${LEVEL_MAP.warning}`,
-                      }}
-                    >
-                      {t('monitor.events.warning')}
-                    </div>
-                  </Checkbox>
-                </Space>
-              </Checkbox.Group>
-            </Collapse>
-          </div>
-          <div className="mb-[15px]">
-            <Collapse title={t('monitor.events.state')}>
-              <Checkbox.Group
-                value={filters.state}
-                className="ml-[20px]"
-                onChange={(checkeds) => onFilterChange(checkeds, 'state')}
-              >
-                <Space direction="vertical">
-                  <Checkbox value="new">{t('monitor.events.new')}</Checkbox>
-                  <Checkbox value="recovered">
-                    {t('monitor.events.recovery')}
-                  </Checkbox>
-                  <Checkbox value="closed">
-                    {t('monitor.events.closed')}
-                  </Checkbox>
-                </Space>
-              </Checkbox.Group>
-            </Collapse>
+      <Spin spinning={pageLoading} className="w-full">
+        <div className={alertStyle.alert}>
+          <div className={alertStyle.filters}>
+            <h3 className="font-[800] mb-[15px] text-[15px]">
+              {t('monitor.events.filterItems')}
+            </h3>
+            <div className="mb-[15px]">
+              <Collapse title={t('monitor.events.level')}>
+                <Checkbox.Group
+                  className="ml-[20px]"
+                  value={filters.level}
+                  onChange={(checkeds) => onFilterChange(checkeds, 'level')}
+                >
+                  <Space direction="vertical">
+                    <Checkbox value="critical">
+                      <div className={alertStyle.level}>
+                        {t('monitor.events.critical')}
+                      </div>
+                    </Checkbox>
+                    <Checkbox value="error">
+                      <div
+                        className={alertStyle.level}
+                        style={{
+                          borderLeft: `4px solid ${LEVEL_MAP.error}`,
+                        }}
+                      >
+                        {t('monitor.events.error')}
+                      </div>
+                    </Checkbox>
+                    <Checkbox value="warning">
+                      <div
+                        className={alertStyle.level}
+                        style={{
+                          borderLeft: `4px solid ${LEVEL_MAP.warning}`,
+                        }}
+                      >
+                        {t('monitor.events.warning')}
+                      </div>
+                    </Checkbox>
+                  </Space>
+                </Checkbox.Group>
+              </Collapse>
+            </div>
+            <div className="mb-[15px]">
+              <Collapse title={t('monitor.events.state')}>
+                <Checkbox.Group
+                  value={filters.state}
+                  className="ml-[20px]"
+                  onChange={(checkeds) => onFilterChange(checkeds, 'state')}
+                >
+                  <Space direction="vertical">
+                    <Checkbox value="new">{t('monitor.events.new')}</Checkbox>
+                    <Checkbox value="recovered">
+                      {t('monitor.events.recovery')}
+                    </Checkbox>
+                    <Checkbox value="closed">
+                      {t('monitor.events.closed')}
+                    </Checkbox>
+                  </Space>
+                </Checkbox.Group>
+              </Collapse>
+            </div>
+            <div>
+              <Collapse title={t('monitor.events.assetType')}>
+                <Checkbox.Group
+                  className="ml-[20px]"
+                  value={filters.monitor_objects}
+                  onChange={(checkeds) =>
+                    onFilterChange(checkeds, 'monitor_objects')
+                  }
+                >
+                  <Space direction="vertical">
+                    {groupObjects.map((item, index) => {
+                      return (
+                        <Collapse
+                          key={index}
+                          title={item.label || '--'}
+                          className={alertStyle.assetType}
+                        >
+                          {(item.options || []).map(
+                            (optionItem, optionIndex) => (
+                              <Checkbox
+                                key={optionIndex}
+                                value={optionItem.value}
+                              >
+                                <span
+                                  className="inline-block w-[110px] hide-text align-middle"
+                                  title={optionItem.label}
+                                >
+                                  {optionItem.label}
+                                </span>
+                              </Checkbox>
+                            )
+                          )}
+                        </Collapse>
+                      );
+                    })}
+                  </Space>
+                </Checkbox.Group>
+              </Collapse>
+            </div>
           </div>
           <div>
-            <Collapse title={t('monitor.events.assetType')}>
-              <Checkbox.Group
-                className="ml-[20px]"
-                value={filters.monitor_objects}
-                onChange={(checkeds) =>
-                  onFilterChange(checkeds, 'monitor_objects')
-                }
-              >
-                <Space direction="vertical">
-                  {groupObjects.map((item, index) => {
-                    return (
-                      <Collapse
-                        key={index}
-                        title={item.label || '--'}
-                        className={alertStyle.assetType}
-                      >
-                        {(item.options || []).map((optionItem, optionIndex) => (
-                          <Checkbox key={optionIndex} value={optionItem.value}>
-                            <span
-                              className="inline-block w-[110px] hide-text align-middle"
-                              title={optionItem.label}
-                            >
-                              {optionItem.label}
-                            </span>
-                          </Checkbox>
-                        ))}
-                      </Collapse>
-                    );
-                  })}
-                </Space>
-              </Checkbox.Group>
-            </Collapse>
-          </div>
-        </div>
-        <div>
-          <Spin spinning={chartLoading}>
-            <div className={alertStyle.chartWrapper}>
-              <div className="flex items-center justify-between mb-[2px]">
-                <div className="text-[14px] ml-[10px] relative">
-                  {t('monitor.events.distributionMap')}
-                  <Tooltip
-                    placement="top"
-                    title={t(`monitor.events.${activeTab}MapTips`)}
-                  >
-                    <div
-                      className="absolute cursor-pointer"
-                      style={{
-                        top: '-4px',
-                        right: '-14px',
-                      }}
+            <Spin spinning={chartLoading}>
+              <div className={alertStyle.chartWrapper}>
+                <div className="flex items-center justify-between mb-[2px]">
+                  <div className="text-[14px] ml-[10px] relative">
+                    {t('monitor.events.distributionMap')}
+                    <Tooltip
+                      placement="top"
+                      title={t(`monitor.events.${activeTab}MapTips`)}
                     >
-                      <Icon
-                        type="a-shuoming2"
-                        className="text-[14px] text-[var(--color-text-3)]"
-                      />
-                    </div>
-                  </Tooltip>
+                      <div
+                        className="absolute cursor-pointer"
+                        style={{
+                          top: '-4px',
+                          right: '-14px',
+                        }}
+                      >
+                        <Icon
+                          type="a-shuoming2"
+                          className="text-[14px] text-[var(--color-text-3)]"
+                        />
+                      </div>
+                    </Tooltip>
+                  </div>
+                  <TimeSelector
+                    defaultValue={timeDefaultValue}
+                    onlyRefresh={activeTab === 'activeAlarms'}
+                    onChange={(value) => onTimeChange(value)}
+                    onFrequenceChange={onFrequenceChange}
+                    onRefresh={onRefresh}
+                  />
                 </div>
-                <TimeSelector
-                  defaultValue={timeDefaultValue}
-                  onlyRefresh={activeTab === 'activeAlarms'}
-                  onChange={(value) => onTimeChange(value)}
-                  onFrequenceChange={onFrequenceChange}
-                  onRefresh={onRefresh}
+                <div className={alertStyle.chart}>
+                  <StackedBarChart data={chartData} colors={LEVEL_MAP as any} />
+                </div>
+              </div>
+            </Spin>
+            <div className={alertStyle.table}>
+              <Tabs activeKey={activeTab} items={tabs} onChange={changeTab} />
+              <div className="flex justify-between mb-[10px]">
+                <Input
+                  allowClear
+                  className="w-[350px]"
+                  placeholder={t('common.searchPlaceHolder')}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onPressEnter={enterText}
+                  onClear={clearText}
                 />
               </div>
-              <div className={alertStyle.chart}>
-                <StackedBarChart data={chartData} colors={LEVEL_MAP as any} />
-              </div>
-            </div>
-          </Spin>
-          <div className={alertStyle.table}>
-            <Tabs activeKey={activeTab} items={tabs} onChange={changeTab} />
-            <div className="flex justify-between mb-[10px]">
-              <Input
-                allowClear
-                className="w-[350px]"
-                placeholder={t('common.searchPlaceHolder')}
-                onChange={(e) => setSearchText(e.target.value)}
-                onPressEnter={enterText}
-                onClear={clearText}
+              <CustomTable
+                scroll={{ y: 'calc(100vh - 540px)', x: 'calc(100vw - 320px)' }}
+                columns={columns}
+                dataSource={tableData}
+                pagination={pagination}
+                loading={tableLoading}
+                rowKey="id"
+                onChange={handleTableChange}
               />
             </div>
-            <CustomTable
-              scroll={{ y: 'calc(100vh - 540px)', x: 'calc(100vw - 320px)' }}
-              columns={columns}
-              dataSource={tableData}
-              pagination={pagination}
-              loading={tableLoading}
-              rowKey="id"
-              onChange={handleTableChange}
-            />
           </div>
         </div>
-      </div>
+      </Spin>
       <AlertDetail
         ref={detailRef}
         objects={objects}

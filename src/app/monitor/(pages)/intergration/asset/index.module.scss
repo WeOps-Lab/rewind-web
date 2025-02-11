@@ -1,12 +1,13 @@
 .asset {
     display: flex;
+    overflow: hidden;
 
     .tree {
-        width: 220px;
-        min-width: 220px;
+        width: 210px;
+        min-width: 210px;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 140px);
+        height: calc(100vh - 146px);
         overflow-y: auto;
         overflow-x: hidden;
         padding: 20px 10px;
@@ -20,9 +21,9 @@
     }
 
     .rule {
-        width: 220px;
-        min-width: 220px;
-        height: calc(100vh - 140px);
+        width: 210px;
+        min-width: 210px;
+        height: calc(100vh - 146px);
         padding: 20px;
         background: var(--color-bg-1);
         margin-left: 10px;
@@ -84,9 +85,9 @@
     }
 
     .table {
-        width: calc(100vw - 490px);
+        width: calc(100vw - 470px);
         background: var(--color-bg-1);
-        height: calc(100vh - 140px);
+        height: calc(100vh - 146px);
         padding: 20px;
         margin-left: 10px;
 

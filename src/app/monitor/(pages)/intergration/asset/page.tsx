@@ -403,7 +403,7 @@ const Asset = () => {
               ></Input>
             </div>
             <CustomTable
-              scroll={{ y: 'calc(100vh - 320px)', x: 'calc(100vh - 500px)' }}
+              scroll={{ y: 'calc(100vh - 320px)', x: 'calc(100vh - 480px)' }}
               columns={columns}
               dataSource={tableData}
               pagination={pagination}
@@ -411,7 +411,7 @@ const Asset = () => {
               expandable={{
                 expandedRowRender: (record) => (
                   <CustomTable
-                    scroll={{ x: 'calc(100vh - 500px)' }}
+                    scroll={{ x: 'calc(100vh - 480px)' }}
                     loading={record.loading}
                     rowKey="id"
                     dataSource={record.dataSource || []}

@@ -373,7 +373,7 @@ const AutomaticConfiguration: React.FC = () => {
         params
       );
       message.success(t('common.addSuccess'));
-      router.push('/monitor/intergration');
+      router.push('/monitor/intergration/list');
     } finally {
       setConfirmLoading(false);
     }

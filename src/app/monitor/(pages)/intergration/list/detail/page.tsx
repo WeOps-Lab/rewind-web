@@ -9,7 +9,7 @@ export default function IntergrationDetialPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    const targetUrl = `/monitor/intergration/detail/configure?${params.toString()}`;
+    const targetUrl = `/monitor/intergration/list/detail/configure?${params.toString()}`;
     router.push(targetUrl);
   }, [router, searchParams]);
 

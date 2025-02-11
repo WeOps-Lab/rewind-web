@@ -19,7 +19,7 @@ const IntergrationDetailLayout = ({
   const icon = OBJECT_ICON_MAP[searchParams.get('name') as string] || 'Host';
 
   const handleBackButtonClick = () => {
-    router.push(`/monitor/intergration`);
+    router.push(`/monitor/intergration/list`);
   };
 
   const TopSection = () => (

@@ -10,13 +10,12 @@
       "title": "视图",
       "icon": "zichan-quanbushebei",
       "url": "/monitor/view",
-      "name": "view",
+      "name": "veiw_list",
       "children": [
         {
-          "title": "概览",
-          "icon": "shujumoxingguanli",
           "url": "/monitor/view/detail/overview",
-          "name": "view_overview"
+          "name": "Detail",
+          "isNotMenuItem": true
         }
       ]
     },
@@ -27,8 +26,23 @@
       "name": "event",
       "children": [
         {
+          "icon": "weiwangguanicon-defuben-",
+          "title": "告警",
+          "url": "/monitor/event/alert",
+          "name": "alert_list"
+        },
+        {
+          "icon": "策略",
+          "title": "Strategy",
           "url": "/monitor/event/strategy",
-          "name": "event_strategy"
+          "name": "strategy_list",
+          "children": [
+            {
+              "url": "/monitor/event/strategy/detail",
+              "name": "strategy_list_detail",
+              "isNotMenuItem": true
+            }
+          ]
         }
       ]
     },
@@ -39,16 +53,30 @@
       "name": "intergration",
       "children": [
         {
-          "title": "配置",
+          "title": "资产",
           "icon": "shujumoxingguanli",
-          "url": "/monitor/intergration/detail/configure",
-          "name": "intergration_configure"
+          "url": "/monitor/intergration/asset",
+          "name": "asset"
         },
         {
-          "title": "指标",
+          "title": "集成",
           "icon": "zichan-quanbushebei",
-          "url": "/monitor/intergration/detail/metric",
-          "name": "intergration_metric"
+          "url": "/monitor/intergration/list",
+          "name": "intergration_list",
+          "children": [
+            {
+              "title": "配置",
+              "icon": "shujumoxingguanli",
+              "url": "/monitor/intergration/list/detail/configure",
+              "name": "intergration_configure"
+            },
+            {
+              "title": "指标",
+              "icon": "zichan-quanbushebei",
+              "url": "/monitor/intergration/list/detail/metric",
+              "name": "intergration_metric"
+            }
+          ]
         }
       ]
     }
@@ -64,13 +92,12 @@
       "title": "View",
       "icon": "zichan-quanbushebei",
       "url": "/monitor/view",
-      "name": "view",
+      "name": "veiw_list",
       "children": [
         {
-          "title": "Overview",
-          "icon": "shujumoxingguanli",
           "url": "/monitor/view/detail/overview",
-          "name": "view_overview"
+          "name": "Detail",
+          "isNotMenuItem": true
         }
       ]
     },
@@ -78,11 +105,26 @@
       "title": "Event",
       "icon": "mulu",
       "url": "/monitor/event",
-      "name": "event",
+      "name": "Event",
       "children": [
         {
+          "icon": "weiwangguanicon-defuben-",
+          "title": "Alert",
+          "url": "/monitor/event/alert",
+          "name": "alert_list"
+        },
+        {
+          "icon": "moxing2",
+          "title": "Strategy",
           "url": "/monitor/event/strategy",
-          "name": "event_strategy"
+          "name": "strategy_list",
+          "children": [
+            {
+              "url": "/monitor/event/strategy/detail",
+              "name": "strategy_list_detail",
+              "isNotMenuItem": true
+            }
+          ]
         }
       ]
     },
@@ -90,19 +132,33 @@
       "title": "Intergration",
       "icon": "moxing2",
       "url": "/monitor/intergration",
-      "name": "intergration",
+      "name": "Intergration",
       "children": [
         {
-          "title": "Configure",
+          "title": "Asset",
           "icon": "shujumoxingguanli",
-          "url": "/monitor/intergration/detail/configure",
-          "name": "intergration_configure"
+          "url": "/monitor/intergration/asset",
+          "name": "asset"
         },
         {
-          "title": "Metric",
+          "title": "Intergration",
           "icon": "zichan-quanbushebei",
-          "url": "/monitor/intergration/detail/metric",
-          "name": "intergration_metric"
+          "url": "/monitor/intergration/list",
+          "name": "intergration_list",
+          "children": [
+            {
+              "title": "Configure",
+              "icon": "shujumoxingguanli",
+              "url": "/monitor/intergration/list/detail/configure",
+              "name": "intergration_configure"
+            },
+            {
+              "title": "Metric",
+              "icon": "zichan-quanbushebei",
+              "url": "/monitor/intergration/list/detail/metric",
+              "name": "intergration_metric"
+            }
+          ]
         }
       ]
     }

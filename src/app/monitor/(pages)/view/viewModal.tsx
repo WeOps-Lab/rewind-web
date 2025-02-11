@@ -354,7 +354,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         type: 'add',
       };
       const queryString = new URLSearchParams(_row).toString();
-      const url = `/monitor/event/strategy?${queryString}`;
+      const url = `/monitor/event/strategy/detail?${queryString}`;
       window.open(url, '_blank', 'noopener,noreferrer');
     };
 
