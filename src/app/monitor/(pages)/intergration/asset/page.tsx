@@ -94,7 +94,11 @@ const Asset = () => {
           <Button type="link" onClick={() => checkDetail(record)}>
             {t('common.detail')}
           </Button>
-          <Button type="link" disabled className="ml-[10px]">
+          <Button
+            type="link"
+            onClick={() => showDeleteInstConfirm(record)}
+            className="ml-[10px]"
+          >
             {t('common.remove')}
           </Button>
         </>
@@ -287,7 +291,7 @@ const Asset = () => {
       setObjects(data);
       const _treeData = getTreeData(deepClone(data));
       setTreeData(_treeData);
-      const defaultKey = data[0]?.id || '';
+      const defaultKey = data[0]?.id || defaultSelectObj || '';
       if (defaultKey) {
         setDefaultSelectObj(defaultKey);
       }
@@ -333,6 +337,32 @@ const Asset = () => {
             await del(`/monitor/api/monitor_instance_group_rule/${row.id}/`);
             message.success(t('common.successfullyDeleted'));
             getRuleList(objectId);
+          } finally {
+            resolve(true);
+          }
+        });
+      },
+    });
+  };
+
+  const showDeleteInstConfirm = (row: any) => {
+    confirm({
+      title: t('common.deleteTitle'),
+      content: t('common.deleteContent'),
+      centered: true,
+      onOk() {
+        return new Promise(async (resolve) => {
+          try {
+            await post(
+              `/monitor/api/monitor_instance/remove_monitor_instance/`,
+              {
+                instance_ids: [row.instance_id],
+                clean_child_config: true,
+              }
+            );
+            message.success(t('common.successfullyDeleted'));
+            getObjects();
+            getAssetInsts(objectId);
           } finally {
             resolve(true);
           }
