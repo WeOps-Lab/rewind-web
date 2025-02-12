@@ -12,9 +12,7 @@ import { useCommon } from '@/app/monitor/context/common';
 import { Modal, message, Button } from 'antd';
 import useApiClient from '@/utils/request';
 import { LEVEL_MAP, useLevelList } from '@/app/monitor/constants/monitor';
-import ReactAce from 'react-ace';
-import 'ace-builds/src-noconflict/mode-python';
-import 'ace-builds/src-noconflict/theme-monokai';
+import CodeEditor from '@/app/monitor/components/codeEditor';
 
 const Information: React.FC<TableDataItem> = ({
   formData,
@@ -177,8 +175,9 @@ const Information: React.FC<TableDataItem> = ({
               {t('monitor.events.message')}
             </h3>
             <div className="leading-[24px]">
-              <ReactAce
+              <CodeEditor
                 className="mb-[10px]"
+                showCopy
                 mode="python"
                 theme="monokai"
                 name="editor"

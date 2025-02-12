@@ -15,9 +15,7 @@ import { ModalRef } from '@/app/monitor/types';
 import { NodeConfigInfo } from '@/app/monitor/types/monitor';
 import { useTranslation } from '@/utils/i18n';
 import { deepClone } from '@/app/monitor/utils/common';
-import ReactAce from 'react-ace';
-import 'ace-builds/src-noconflict/mode-python';
-import 'ace-builds/src-noconflict/theme-monokai';
+import CodeEditor from '@/app/monitor/components/codeEditor';
 
 interface ModalProps {
   onSuccess: () => void;
@@ -108,7 +106,7 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
             name="content"
             rules={[{ required: true, message: t('common.required') }]}
           >
-            <ReactAce
+            <CodeEditor
               mode="python"
               theme="monokai"
               name="editor"

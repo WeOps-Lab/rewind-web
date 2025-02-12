@@ -10,9 +10,7 @@ import {
 import { useSearchParams } from 'next/navigation';
 import useApiClient from '@/utils/request';
 import { useFormItems } from '@/app/monitor/hooks/intergration';
-import ReactAce from 'react-ace';
-import 'ace-builds/src-noconflict/mode-python';
-import 'ace-builds/src-noconflict/theme-monokai';
+import CodeEditor from '@/app/monitor/components/codeEditor';
 
 const AutomaticConfiguration: React.FC = () => {
   const [form] = Form.useForm();
@@ -147,7 +145,15 @@ const AutomaticConfiguration: React.FC = () => {
   };
 
   const getStep3Content = async (params: any) => {
-    if (params) {
+    try {
+      setConfirmLoading(true);
+      await post(
+        `/monitor/api/monitor_instance/${objId}/check_monitor_instance/`,
+        {
+          instance_id: params.instance_id,
+          instance_name: params.instance_id,
+        }
+      );
       let _configMsg = deepClone(configText);
       if (collectType === 'snmp') {
         _configMsg = _configMsg[`v${params.version}`];
@@ -158,17 +164,6 @@ const AutomaticConfiguration: React.FC = () => {
         }, '');
       }
       setConfigMsg(replaceTemplate(_configMsg as string, params));
-      return;
-    }
-    try {
-      setConfirmLoading(true);
-      await post(
-        `/monitor/api/monitor_instance/${objId}/create_monitor_instance/`,
-        {
-          instance_id: params.instance_id,
-          instance_name: params.instance_id,
-        }
-      );
       message.success(t('common.successfullyAdded'));
     } finally {
       setConfirmLoading(false);
@@ -201,7 +196,7 @@ const AutomaticConfiguration: React.FC = () => {
         {t('monitor.intergrations.generateConfiguration')}
       </Button>
       {!!configMsg && (
-        <ReactAce
+        <CodeEditor
           className="mt-[10px]"
           mode="python"
           theme="monokai"
@@ -210,6 +205,7 @@ const AutomaticConfiguration: React.FC = () => {
           height="300px"
           readOnly
           value={configMsg}
+          showCopy
         />
       )}
     </div>
