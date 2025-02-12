@@ -71,6 +71,18 @@
           "name": "knowledge_document"
         },
         {
+          "title": "文档编辑",
+          "url": "/opspilot/knowledge/detail/documents/modify",
+          "name": "knowledge_document_modify",
+          "isNotMenuItem": true
+        },
+        {
+          "title": "文档详情",
+          "url": "/opspilot/knowledge/detail/documents/result",
+          "name": "knowledge_document_result",
+          "isNotMenuItem": true
+        },
+        {
           "title": "测试",
           "url": "/opspilot/knowledge/detail/testing",
           "icon": "ceshi",
