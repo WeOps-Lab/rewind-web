@@ -275,7 +275,7 @@ const Intergration = () => {
       },
       {} as Record<string, TreeItem>
     );
-    return Object.values(groupedData);
+    return Object.values(groupedData).filter((item) => item.key !== 'Other');
   };
 
   const getAssetInsts = async (objectId: React.Key, type?: string) => {

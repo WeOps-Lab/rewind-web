@@ -507,7 +507,7 @@ const useFormItems = ({
         return {
           formItems: (
             <>
-              <Form.Item required label="Ip">
+              <Form.Item required label="IP">
                 <Form.Item
                   noStyle
                   name="monitor_ip"
@@ -637,7 +637,7 @@ const useFormItems = ({
       case 'trap':
         return {
           formItems: (
-            <Form.Item required label="Ip">
+            <Form.Item required label="IP">
               <Form.Item
                 noStyle
                 name="monitor_ip"
@@ -712,7 +712,7 @@ const useFormItems = ({
         return {
           formItems: (
             <>
-              <Form.Item required label="Ip">
+              <Form.Item required label="IP">
                 <Form.Item
                   noStyle
                   name="monitor_ip"
@@ -1048,7 +1048,7 @@ const useFormItems = ({
         return {
           formItems: (
             <>
-              <Form.Item required label="Ip">
+              <Form.Item required label="IP">
                 <Form.Item
                   noStyle
                   name="monitor_ip"
