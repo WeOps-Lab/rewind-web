@@ -143,7 +143,6 @@ const User: React.FC = () => {
 
   const handleTreeSelect = (selectedKeys: React.Key[]) => {
     setSelectedRowKeys([]);
-    console.log('selectedKeys', selectedKeys);
     setSelectedTreeKeys(selectedKeys);
     fetchUsers({
       search: searchValue,
