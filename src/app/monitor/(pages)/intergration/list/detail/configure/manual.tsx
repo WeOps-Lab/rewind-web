@@ -5,6 +5,7 @@ import { deepClone } from '@/app/monitor/utils/common';
 import {
   COLLECT_TYPE_MAP,
   CONFIG_TYPE_MAP,
+  INSTANCE_TYPE_MAP,
 } from '@/app/monitor/constants/monitor';
 import { useSearchParams } from 'next/navigation';
 import useApiClient from '@/utils/request';
@@ -20,8 +21,10 @@ const AutomaticConfiguration: React.FC = () => {
   const { post, isLoading } = useApiClient();
   const collectTypeId = searchParams.get('collect_type') || '';
   const objId = searchParams.get('id') || '';
+  const objectName = searchParams.get('name') || '';
   const collectType = COLLECT_TYPE_MAP[collectTypeId];
   const configTypes = CONFIG_TYPE_MAP[collectTypeId];
+  const instanceType = INSTANCE_TYPE_MAP[collectTypeId];
   const authPasswordRef = useRef<any>(null);
   const privPasswordRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
@@ -31,6 +34,7 @@ const AutomaticConfiguration: React.FC = () => {
     useState<boolean>(true);
   const [passwordDisabled, setPasswordDisabled] = useState<boolean>(true);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
+  const [configMsg, setConfigMsg] = useState<string>('');
 
   const handleEditAuthPassword = () => {
     if (authPasswordDisabled) {
@@ -60,7 +64,7 @@ const AutomaticConfiguration: React.FC = () => {
   };
 
   // 使用自定义 Hook
-  const { formItems } = useFormItems({
+  const { formItems, configText } = useFormItems({
     collectType,
     columns: [],
     authPasswordRef,
@@ -121,28 +125,66 @@ const AutomaticConfiguration: React.FC = () => {
     form.validateFields().then((values) => {
       // 处理表单提交逻辑
       const _values = deepClone(values);
+      _values.instance_id = getInstId(_values);
+      _values.instance_type = instanceType;
       getStep3Content(_values);
     });
   };
 
-  const getStep3Content = async (
-    params = { interval: '', monitor_url: '' }
-  ) => {
+  const getInstId = (row: any) => {
+    switch (collectType) {
+      case 'host':
+        return row.monitor_ip;
+      case 'trap':
+        return 'trap' + row.monitor_ip;
+      case 'web':
+        return row.monitor_url;
+      case 'ping':
+        return row.monitor_url;
+      default:
+        return objectName + '-' + (row.monitor_ip || '');
+    }
+  };
+
+  const getStep3Content = async (params: any) => {
     if (params) {
-      console.log(params);
+      let _configMsg = deepClone(configText);
+      if (collectType === 'snmp') {
+        _configMsg = _configMsg[`v${params.version}`];
+      }
+      if (collectType === 'host') {
+        _configMsg = params.metric_type.reduce((pre: string, cur: string) => {
+          return (pre += _configMsg[cur]);
+        }, '');
+      }
+      setConfigMsg(replaceTemplate(_configMsg as string, params));
       return;
     }
     try {
       setConfirmLoading(true);
-      const instnaceId = await post(
-        `/monitor/api/monitor_instance/${objId}/generate_instance_id/`,
-        params
+      await post(
+        `/monitor/api/monitor_instance/${objId}/create_monitor_instance/`,
+        {
+          instance_id: params.instance_id,
+          instance_name: params.instance_id,
+        }
       );
-      console.log(instnaceId);
       message.success(t('common.successfullyAdded'));
     } finally {
       setConfirmLoading(false);
     }
+  };
+
+  const replaceTemplate = (
+    template: string,
+    data: { [key: string]: string | number }
+  ): string => {
+    return Object.keys(data).reduce((acc, key) => {
+      // 使用正则表达式来匹配模板字符串中的 ${key} 或 $key
+      const regex = new RegExp(`\\$${key}`, 'g');
+      // 替换匹配到的内容为对象中的值
+      return acc.replace(regex, data[key].toString());
+    }, template);
   };
 
   return (
@@ -155,17 +197,21 @@ const AutomaticConfiguration: React.FC = () => {
         )}
         {formItems}
       </Form>
-      <ReactAce
-        className="mb-[10px]"
-        mode="python"
-        theme="monokai"
-        name="editor"
-        width="100%"
-        height="300px"
-      />
       <Button type="primary" loading={confirmLoading} onClick={handleSave}>
         {t('monitor.intergrations.generateConfiguration')}
       </Button>
+      {!!configMsg && (
+        <ReactAce
+          className="mt-[10px]"
+          mode="python"
+          theme="monokai"
+          name="editor"
+          width="100%"
+          height="300px"
+          readOnly
+          value={configMsg}
+        />
+      )}
     </div>
   );
 };

@@ -3,7 +3,6 @@ import { Form, Checkbox, Space, Select, Input, InputNumber } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
 import { TIMEOUT_UNITS } from '@/app/monitor/constants/monitor';
-
 const { Option } = Select;
 
 interface UseColumnsAndFormItemsParams {
@@ -598,6 +597,42 @@ const useFormItems = ({
               </Form.Item>
             </>
           ),
+          configText: {
+            cpu: `[[inputs.cpu]]
+    percpu = true
+    totalcpu = true
+    collect_cpu_time = false
+    report_active = false
+    core_tags = false
+    tags = { "instance_id"="$instance_id","instance_type"="os","collect_type"="host","config_type"="cpu" }
+    
+`,
+            disk: `[[inputs.disk]]
+    ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+    tags = { "instance_id"="$instance_id","instance_type"="os","collect_type"="host","config_type"="disk" }
+    
+`,
+            diskio: `[[inputs.diskio]]
+    tags = { "instance_id"="$instance_id","instance_type"="os","collect_type"="host","config_type"="diskio" }
+    
+`,
+            mem: `[[inputs.mem]]
+    tags = { "instance_id"="$instance_id","instance_type"="os","collect_type"="host","config_type"="mem" }
+    
+`,
+            net: `[[inputs.net]]
+    tags = { "instance_id"="$instance_id","instance_type"="os","collect_type"="host","config_type"="net" }
+
+`,
+            processes: `[[inputs.processes]]
+    tags = { "instance_id"="$instance_id","instance_type"="os","collect_type"="host","config_type"="processes" }
+    
+`,
+            system: `[[inputs.system]]
+    tags = { "instance_id"="$instance_id","instance_type"="os","collect_type"="host","config_type"="system" }
+    
+`,
+          },
         };
       case 'trap':
         return {
@@ -620,6 +655,8 @@ const useFormItems = ({
               </span>
             </Form.Item>
           ),
+          configText: `[[inputs.snmp_trap]]
+          tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="trap" }`,
         };
       case 'web':
         return {
@@ -642,6 +679,9 @@ const useFormItems = ({
               </span>
             </Form.Item>
           ),
+          configText: `[[inputs.http_response]]
+    urls = ["$monitor_url"]
+    tags = { "instance_id"="$instance_id","instance_type"="$instance_type","collect_type"="web" }`,
         };
       case 'ping':
         return {
@@ -664,6 +704,9 @@ const useFormItems = ({
               </span>
             </Form.Item>
           ),
+          configText: `[[inputs.ping]]
+          urls = ["$monitor_url"]
+          tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="ping" }`,
         };
       case 'snmp':
         return {
@@ -942,6 +985,64 @@ const useFormItems = ({
               </Form.Item>
             </>
           ),
+          configText: {
+            v2: `[[inputs.snmp]]
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="snmp" }
+    agents = ["udp://$monitor_ip:$port"]
+    version = $version
+    community= "$community"
+    timeout = "$timeouts" 
+
+    [[inputs.snmp.field]]
+        oid = "RFC1213-MIB::sysUpTime.0"
+        name = "uptime"
+
+    [[inputs.snmp.field]]
+        oid = "RFC1213-MIB::sysName.0"
+        name = "source"
+        is_tag = true
+
+    [[inputs.snmp.table]]
+        oid = "IF-MIB::ifTable"
+        name = "interface"
+        inherit_tags = ["source"]
+
+    [[inputs.snmp.table.field]]
+        oid = "IF-MIB::ifDescr"
+        name = "ifDescr"
+        is_tag = true`,
+            v3: `[[inputs.snmp]]
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="snmp" }
+    agents =["udp://$monitor_ip:$port"]
+    version = $version
+    timeout = "$timeouts" 
+
+    sec_name = "$sec_name"
+    sec_level = "$sec_level"
+    auth_protocol = "$auth_protocol"
+    auth_password = "$auth_password"
+    priv_protocol = "$priv_protocol"
+    priv_password = "$priv_password"
+
+    [[inputs.snmp.field]]
+        oid = "RFC1213-MIB::sysUpTime.0"
+        name = "uptime"
+
+    [[inputs.snmp.field]]
+        oid = "RFC1213-MIB::sysName.0"
+        name = "source"
+        is_tag = true
+
+    [[inputs.snmp.table]]
+        oid = "IF-MIB::ifTable"
+        name = "interface"
+        inherit_tags = ["source"]
+
+    [[inputs.snmp.table.field]]
+        oid = "IF-MIB::ifDescr"
+        name = "ifDescr"
+        is_tag = true`,
+          },
         };
       case 'ipmi':
         return {
@@ -1023,7 +1124,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input readOnly className="w-[300px] mr-[10px]" />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.protocolDes')}
@@ -1031,10 +1132,14 @@ const useFormItems = ({
               </Form.Item>
             </>
           ),
+          configText: `[[inputs.ipmi_sensor]]
+    servers = ["$username:$password@lanplus($monitor_ip)"]
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="ipmi" }`,
         };
       default:
         return {
           formItems: null,
+          configText: '',
         };
     }
   }, [
