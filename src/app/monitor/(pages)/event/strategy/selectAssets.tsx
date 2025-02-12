@@ -130,7 +130,7 @@ const SelectAssets = forwardRef<ModalRef, ModalConfig>(
         key: 'instance_name',
       },
       {
-        title: t('common.time'),
+        title: t('monitor.views.reportTime'),
         dataIndex: 'time',
         key: 'time',
         render: (_, { time }) => (

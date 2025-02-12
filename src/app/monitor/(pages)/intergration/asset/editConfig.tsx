@@ -111,7 +111,7 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
               theme="monokai"
               name="editor"
               width="100%"
-              height="500px"
+              height="300px"
             />
           </Form.Item>
         </Form>
