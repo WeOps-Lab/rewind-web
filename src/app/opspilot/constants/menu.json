@@ -201,6 +201,12 @@
           "name": "knowledge_document"
         },
         {
+          "title": "DocumentsModify",
+          "url": "/opspilot/knowledge/detail/documents/modify",
+          "name": "knowledge_document_modify",
+          "isNotMenuItem": true
+        },
+        {
           "title": "Testing",
           "url": "/opspilot/knowledge/detail/testing",
           "icon": "ceshi",
