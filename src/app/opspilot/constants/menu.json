@@ -207,6 +207,12 @@
           "isNotMenuItem": true
         },
         {
+          "title": "Result",
+          "url": "/opspilot/knowledge/detail/documents/result",
+          "name": "knowledge_document_result",
+          "isNotMenuItem": true
+        },
+        {
           "title": "Testing",
           "url": "/opspilot/knowledge/detail/testing",
           "icon": "ceshi",

@@ -37,7 +37,7 @@ const TaskProgress: React.FC = () => {
   }, [get]);
 
   return (
-    <div className="p-4 absolute bottom-10 left-0 w-full">
+    <div className="p-4 absolute bottom-10 left-0 w-full max-h-[300px] overflow-y-auto">
       {tasks.map((task) => (
         <div key={task.id} className="mb-2">
           <div className="flex justify-between items-center text-sm mb-1">
