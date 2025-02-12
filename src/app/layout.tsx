@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import { useRouter, usePathname } from 'next/navigation';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
@@ -18,8 +17,6 @@ import { ConfigProvider } from 'antd';
 import Spin from '@/components/spin';
 import '@/styles/globals.css';
 import { MenuItem } from '@/types/index'
-
-const inter = Inter({ subsets: ['latin'] });
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -102,7 +99,7 @@ export default function RootLayout({
         <link rel="icon" href="/logo-site.png" type="image/png"/>
         <Script src="/iconfont.js" strategy="afterInteractive"/>
       </head>
-      <body className={inter.className}>
+      <body>
         {/* 全局 Context Provider 配置 */}
         <SessionProvider refetchInterval={30 * 60}>
           <ConfigProvider>
