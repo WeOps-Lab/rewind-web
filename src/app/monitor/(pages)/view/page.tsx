@@ -311,7 +311,7 @@ const Intergration = () => {
     row.name = objects.find((item) => item.id === objectId)?.name;
     row.monitorObjId = objectId || '';
     const params = new URLSearchParams(row);
-    const targetUrl = `/monitor/view/detail/overview?${params.toString()}`;
+    const targetUrl = `/monitor/view/detail?${params.toString()}`;
     router.push(targetUrl);
   };
 

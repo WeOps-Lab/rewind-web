@@ -42,7 +42,7 @@ const Information: React.FC<TableDataItem> = ({
       instance_name: row.monitor_instance?.name,
     };
     const queryString = new URLSearchParams(params).toString();
-    const url = `/monitor/view/detail/overview?${queryString}`;
+    const url = `/monitor/view/detail?${queryString}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

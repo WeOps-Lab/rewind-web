@@ -13,7 +13,7 @@
       "name": "veiw_list",
       "children": [
         {
-          "url": "/monitor/view/detail/overview",
+          "url": "/monitor/view/detail",
           "name": "Detail",
           "isNotMenuItem": true
         }
@@ -95,7 +95,7 @@
       "name": "view_list",
       "children": [
         {
-          "url": "/monitor/view/detail/overview",
+          "url": "/monitor/view/detail",
           "name": "Detail",
           "isNotMenuItem": true
         }

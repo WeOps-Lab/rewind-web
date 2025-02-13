@@ -14,6 +14,7 @@ import {
   ChartDataItem,
   SearchParams,
   InterfaceTableItem,
+  ViewDetailProps,
 } from '@/app/monitor/types/monitor';
 import { ChartData, TimeSelectorDefaultValue } from '@/app/monitor/types';
 import { useTranslation } from '@/utils/i18n';
@@ -23,7 +24,6 @@ import {
   calculateMetrics,
   getEnumValueUnit,
 } from '@/app/monitor/utils/common';
-import { useSearchParams } from 'next/navigation';
 import dayjs, { Dayjs } from 'dayjs';
 import {
   INDEX_CONFIG,
@@ -31,14 +31,14 @@ import {
 } from '@/app/monitor/constants/monitor';
 import Icon from '@/components/icon';
 
-const Overview = () => {
+const Overview: React.FC<ViewDetailProps> = ({
+  monitorObjectId,
+  monitorObjectName,
+  instanceId,
+}) => {
   const { get, isLoading } = useApiClient();
   const { t } = useTranslation();
   const INTERFACE_LABEL_MAP = useInterfaceLabelMap();
-  const searchParams = useSearchParams();
-  const monitorObject: React.Key = searchParams.get('monitorObjId') || '';
-  const instId: React.Key = searchParams.get('instance_id') || '';
-  const groupName: string = searchParams.get('name') || '';
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const beginTime: number = dayjs().subtract(15, 'minute').valueOf();
@@ -69,21 +69,20 @@ const Overview = () => {
 
   useEffect(() => {
     if (isLoading) return;
-    getInitData(instId);
+    getInitData();
   }, [isLoading]);
 
-  const getInitData = async (id: string) => {
-    const getMetrics = get('/monitor/api/metrics/', {
-      params: {
-        monitor_object_id: +monitorObject,
-      },
-    });
-    const indexList =
-      INDEX_CONFIG.find((item) => item.name === groupName)?.dashboardDisplay ||
-      [];
+  const getInitData = async () => {
     setLoading(true);
+    const indexList =
+      INDEX_CONFIG.find((item) => item.name === monitorObjectName)
+        ?.dashboardDisplay || [];
     try {
-      getMetrics.then((res) => {
+      get('/monitor/api/metrics/', {
+        params: {
+          monitor_object_id: monitorObjectId,
+        },
+      }).then((res) => {
         const interfaceConfig = indexList.find(
           (item) => item.indexId === 'interfaces'
         );
@@ -109,22 +108,22 @@ const Overview = () => {
           });
         setMetricData(_metricData);
         setOriginMetricData(_metricData);
-        fetchViewData(_metricData, id);
+        fetchViewData(_metricData);
       });
     } catch {
       setLoading(false);
     }
   };
 
-  const getParams = (query: string, id: string) => {
+  const getParams = (query: string) => {
     const params: SearchParams = {
       query: query.replace(
         /__\$labels__/g,
-        groupName === 'Pod'
-          ? `uid="${id}"`
-          : groupName === 'Node'
-            ? `node="${id}"`
-            : `instance_id="${id}"`
+        monitorObjectName === 'Pod'
+          ? `uid="${instanceId}"`
+          : monitorObjectName === 'Node'
+            ? `node="${instanceId}"`
+            : `instance_id="${instanceId}"`
       ),
     };
     const startTime = timeRange.at(0);
@@ -189,11 +188,11 @@ const Overview = () => {
     return result;
   };
 
-  const fetchViewData = async (data: MetricItem[], id: string) => {
+  const fetchViewData = async (data: MetricItem[]) => {
     setLoading(true);
     const requestQueue = data.map((item: MetricItem) =>
       get(`/monitor/api/metrics_instance/query_range/`, {
-        params: getParams(item?.query || '', id),
+        params: getParams(item?.query || ''),
       }).then((response) => ({ id: item.id, data: response.data.result || [] }))
     );
     try {
@@ -274,7 +273,7 @@ const Overview = () => {
   const handleSearch = (type: string) => {
     console.log(type);
     const _metricData = deepClone(originMetricData);
-    fetchViewData(_metricData, instId);
+    fetchViewData(_metricData);
   };
 
   const onXRangeChange = (arr: [Dayjs, Dayjs]) => {
@@ -427,7 +426,7 @@ const Overview = () => {
           onRefresh={onRefresh}
         />
       </div>
-      <div className="h-[calc(100vh-170px)] overflow-y-auto">
+      <div className="h-[calc(100vh-176px)] overflow-y-auto">
         <Spin spinning={loading}>
           <div className="flex flex-wrap justify-evenly">
             {metricData

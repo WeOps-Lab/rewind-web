@@ -261,3 +261,9 @@ export interface ObjectIconMap {
 export interface ConfigTypeMap {
   [key: string]: string[];
 }
+
+export interface ViewDetailProps {
+  monitorObjectId: React.Key;
+  instanceId: React.Key;
+  monitorObjectName: string;
+}
