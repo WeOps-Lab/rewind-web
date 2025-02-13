@@ -1,11 +1,12 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
-import { Input, Button, Form, Transfer, message, Spin, Tree } from 'antd';
+import { Input, Button, Form, Transfer, message, Spin, Tree, Select } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import { useUserApi } from '@/app/system-manager/api/user/index';
 import type { DataNode as TreeDataNode } from 'antd/lib/tree';
 import { useClientData } from '@/context/client';
+import { ZONEINFO_OPTIONS, LOCALE_OPTIONS } from '@/app/system-manager/constants/userDropdowns';
 
 interface ModalProps {
   onSuccess: () => void;
@@ -31,7 +32,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [type, setType] = useState<'add' | 'edit'>('add');
-  const [roleOptions, setRoleOptions] = useState<{ label: string; value: string }[]>([]);
+  const [roleTreeData, setRoleTreeData] = useState<TreeDataNode[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
@@ -39,12 +40,17 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
 
   const fetchRoleInfo = async () => {
     try {
-      const ids = clientData.map(client => client.id);
-      const roleData = await getRoleList({ client_id: ids });
-      setRoleOptions(
-        roleData.map((role: { role_name: string; role_id: string }) => ({
-          label: role.role_name,
-          value: role.role_id,
+      const roleData = await getRoleList({ client_list: clientData });
+      setRoleTreeData(
+        roleData.map((item: any) => ({
+          key: String(item.id),
+          title: item.display_name,
+          selectable: false,
+          children: item.children.map((child: any) => ({
+            key: String(child.role_id),
+            title: child.role_name,
+            selectable: true,
+          })),
         })),
       );
     } catch {
@@ -63,9 +69,11 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
           ...userDetail,
           roles: userDetail.roles?.map((role: { role_id: string }) => role.role_id) || [],
           groups: userDetail.groups?.map((group: { id: string }) => group.id) || [],
+          zoneinfo: userDetail.attributes?.zoneinfo ? userDetail.attributes.zoneinfo[0] : undefined,
+          locale: userDetail.attributes?.locale ? userDetail.attributes.locale[0] : undefined,
         });
-        setSelectedGroups(userDetail.groups?.map((group: { id: string }) => group.id) || []);
         setSelectedRoles(userDetail.roles?.map((role: { role_id: string }) => role.role_id) || []);
+        setSelectedGroups(userDetail.groups?.map((group: { id: string }) => group.id) || []);
       }
     } catch {
       message.error(t('common.fetchFailed'));
@@ -86,7 +94,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
         setSelectedGroups(groupKeys);
         setSelectedRoles([]);
         setTimeout(() => {
-          formRef.current?.setFieldsValue({ groups: groupKeys });
+          formRef.current?.setFieldsValue({ groups: groupKeys, zoneinfo: "Asia/Shanghai", locale: "en" });
         }, 0);
       }
       fetchRoleInfo();
@@ -101,14 +109,27 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
     try {
       setIsSubmitting(true);
       const formData = await formRef.current?.validateFields();
-      const roles = roleOptions.filter((op) => formData.roles.includes(op.value))
-        .map((role) => ({ id: role.value, name: role.label }));
-
+      const { zoneinfo, locale, ...restData } = formData;
+      const roles: { id: string; name: string }[] = [];
+      roleTreeData.forEach(parent => {
+        if (parent.children) {
+          parent.children.forEach((child: any) => {
+            if (selectedRoles.includes(child.key)) {
+              roles.push({ id: child.key as string, name: child.title as string });
+            }
+          });
+        }
+      });
+      const payload = {
+        ...restData,
+        roles,
+        attributes: { zoneinfo: [zoneinfo], locale: [locale] }
+      };
       if (type === 'add') {
-        await addUser({ ...formData, roles });
+        await addUser(payload);
         message.success(t('common.addSuccess'));
       } else {
-        await editUser({ user_id: currentUserId, ...formData, roles });
+        await editUser({ user_id: currentUserId, ...payload });
         message.success(t('common.updateSuccess'));
       }
       onSuccess();
@@ -120,7 +141,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
     }
   };
 
-  // 这里通过检查 treeData 和默认值进行填充，确保组件不会因为 treeData 的问题崩溃
   const transformTreeData = (data: any) => {
     return data.map((node: any) => ({
       title: node.title || 'Unknown',
@@ -132,7 +152,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
 
   const filteredTreeData = treeData ? transformTreeData(treeData) : [];
 
-  // 新增：扁平化 treeData 成平面数据
   const flattenTree = (nodes: any[]): { key: string; title: string }[] => {
     return nodes.reduce((acc, node) => {
       acc.push({ key: node.value, title: node.title });
@@ -144,6 +163,20 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   };
 
   const groupDataSource = flattenTree(filteredTreeData);
+
+  // 新增：将 roleTreeData 扁平化用于 Transfer 的 dataSource
+  const flattenRoleData = (nodes: TreeDataNode[]): { key: string; title: string }[] => {
+    return nodes.reduce<{ key: string; title: string }[]>((acc, node) => {
+      if (node.selectable) {
+        acc.push({ key: node.key as string, title: node.title as string });
+      }
+      if (node.children) {
+        acc = acc.concat(flattenRoleData(node.children));
+      }
+      return acc;
+    }, []);
+  };
+  const flattenedRoleData = flattenRoleData(roleTreeData);
 
   return (
     <OperateModal
@@ -167,21 +200,47 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
             label={t('system.user.form.username')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={t('system.user.form.username')} disabled={type === 'edit'} />
+            <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.username')}`} disabled={type === 'edit'} />
           </Form.Item>
           <Form.Item
             name="email"
             label={t('system.user.form.email')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={t('system.user.form.email')} />
+            <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.email')}`} />
           </Form.Item>
           <Form.Item
             name="lastName"
             label={t('system.user.form.lastName')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={t('system.user.form.lastName')} />
+            <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.lastName')}`} />
+          </Form.Item>
+          <Form.Item
+            name="zoneinfo"
+            label={t('system.user.form.zoneinfo')}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
+          >
+            <Select showSearch placeholder={`${t('common.selectMsg')}${t('system.user.form.zoneinfo')}`}>
+              {ZONEINFO_OPTIONS.map(option => (
+                <Select.Option key={option.value} value={option.value}>
+                  {t(option.label)}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="locale"
+            label={t('system.user.form.locale')}
+            rules={[{ required: true, message: t('common.inputRequired') }]}
+          >
+            <Select placeholder={`${t('common.selectMsg')}${t('system.user.form.locale')}`}>
+              {LOCALE_OPTIONS.map(option => (
+                <Select.Option key={option.value} value={option.value}>
+                  {t(option.label)}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item
             name="groups"
@@ -200,10 +259,8 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
                 formRef.current?.setFieldsValue({ groups: nextTargetKeys });
               }}
             >
-              {({ direction, onItemSelect, selectedKeys }) => {
+              {({ direction }) => {
                 if (direction === 'left') {
-                  const targetKeys = selectedGroups;
-                  const checkedKeys = Array.from(new Set([...selectedKeys, ...targetKeys]));
                   return (
                     <div style={{ padding: '4px', maxHeight: 250, overflow: 'auto' }}>
                       <Tree
@@ -211,18 +268,18 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
                         checkable
                         checkStrictly
                         defaultExpandAll
-                        checkedKeys={checkedKeys}
+                        checkedKeys={selectedGroups}
                         treeData={filteredTreeData}
-                        onCheck={(_, { node: { key } }) => {
-                          onItemSelect(key as string, !checkedKeys.includes(key));
-                        }}
-                        onSelect={(_, { node: { key } }) => {
-                          onItemSelect(key as string, !checkedKeys.includes(key));
+                        onCheck={(checkedKeys, info) => {
+                          const newKeys = info.checkedNodes.map((node: any) => node.key);
+                          setSelectedGroups(newKeys);
+                          formRef.current?.setFieldsValue({ groups: newKeys });
                         }}
                       />
                     </div>
                   );
                 }
+                return null;
               }}
             </Transfer>
           </Form.Item>
@@ -233,15 +290,38 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
           >
             <Transfer
               oneWay
-              dataSource={roleOptions.map(role => ({ key: role.value, title: role.label }))}
+              dataSource={flattenedRoleData}
               targetKeys={selectedRoles}
-              listStyle={{ width: '100%' }}
-              render={item => item.title}
+              className="tree-transfer"
+              render={(item) => item.title}
+              showSelectAll={false}
               onChange={nextTargetKeys => {
                 setSelectedRoles(nextTargetKeys as string[]);
                 formRef.current?.setFieldsValue({ roles: nextTargetKeys });
               }}
-            />
+            >
+              {({ direction }) => {
+                if (direction === 'left') {
+                  return (
+                    <div style={{ padding: '4px', maxHeight: 250, overflow: 'auto' }}>
+                      <Tree
+                        blockNode
+                        checkable
+                        selectable={false}
+                        defaultExpandAll
+                        checkedKeys={selectedRoles}
+                        treeData={roleTreeData}
+                        onCheck={(checkedKeys, info) => {
+                          const newKeys = info.checkedNodes.map((node: any) => node.key);
+                          setSelectedRoles(newKeys);
+                          formRef.current?.setFieldsValue({ roles: newKeys });
+                        }}
+                      />
+                    </div>
+                  );
+                }
+              }}
+            </Transfer>
           </Form.Item>
         </Form>
       </Spin>

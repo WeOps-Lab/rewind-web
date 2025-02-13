@@ -5,6 +5,7 @@ import type { DataNode as TreeDataNode } from 'antd/lib/tree';
 import { ColumnsType } from 'antd/es/table';
 import TopSection from '@/components/top-section';
 import UserModal, { ModalRef } from './userModal';
+import PasswordModal, { PasswordModalRef } from './passwordModal';
 import { useTranslation } from '@/utils/i18n';
 import { getRandomColor } from '@/app/system-manager/utils';
 import CustomTable from '@/components/custom-table';
@@ -31,6 +32,7 @@ const User: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const userModalRef = useRef<ModalRef>(null);
+  const passwordModalRef = useRef<PasswordModalRef>(null);
 
   const { t } = useTranslation();
   const { confirm } = Modal;
@@ -58,11 +60,6 @@ const User: React.FC = () => {
       },
     },
     {
-      title: t('system.user.table.firstName'),
-      dataIndex: 'firstName',
-      width: 100,
-    },
-    {
       title: t('system.user.table.lastName'),
       dataIndex: 'name',
       width: 100,
@@ -79,8 +76,11 @@ const User: React.FC = () => {
       fixed: 'right',
       render: (key: string) => (
         <>
-          <Button onClick={() => handleEditUser(key)} color="primary" variant="link">
+          <Button type="link" className="mr-[8px]" onClick={() => handleEditUser(key)}>
             {t('common.edit')}
+          </Button>
+          <Button type="link" className="mr-[8px]" onClick={() => openPasswordModal(key)}>
+            {t('system.common.password')}
           </Button>
           <Popconfirm
             title={t('common.delConfirm')}
@@ -106,7 +106,6 @@ const User: React.FC = () => {
         key: item.id,
         username: item.username,
         name: item.lastName,
-        firstName: item.firstName,
         email: item.email,
         role: item.role,
       }));
@@ -154,6 +153,10 @@ const User: React.FC = () => {
 
   const handleEditUser = (userId: string) => {
     userModalRef.current?.showModal({ type: 'edit', userId });
+  };
+
+  const openPasswordModal = (userId: string) => {
+    passwordModalRef.current?.showModal({ userId });
   };
 
   const convertGroups = (groups: OriginalGroup[]): TreeDataNode[] => {
@@ -282,6 +285,7 @@ const User: React.FC = () => {
         <Button onClick={handleModifyDelete} disabled={isDeleteDisabled}>
           {t('common.batchDelete')}
         </Button>
+        <PasswordModal ref={passwordModalRef} onSuccess={() => fetchUsers({ search: searchValue, page: currentPage, page_size: pageSize })} />
       </div>
       <Spin spinning={loading}>
         <CustomTable

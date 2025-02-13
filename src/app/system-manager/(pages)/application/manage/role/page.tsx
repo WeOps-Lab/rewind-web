@@ -207,11 +207,6 @@ const RoleManagement: React.FC = () => {
       key: 'username',
     },
     {
-      title: t('system.user.table.firstName'),
-      dataIndex: 'firstName',
-      key: 'firstName',
-    },
-    {
       title: t('system.user.table.lastName'),
       dataIndex: 'lastName',
       key: 'lastName',

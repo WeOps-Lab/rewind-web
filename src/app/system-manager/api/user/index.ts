@@ -12,7 +12,7 @@ export const useUserApi = () => {
     return await get('/core/api/get_client_detail/', params);
   }
   async function getRoleList(params: any) {
-    return await post('/system_mgmt/role/search_role_list/', params);
+    return await post('/system_mgmt/role/get_role_tree/', params);
   }
   async function getUserDetail(params: any) {
     return await post('/system_mgmt/user/get_user_detail/', params);
@@ -26,6 +26,9 @@ export const useUserApi = () => {
   async function deleteUser(params: any) {
     return await post(`/system_mgmt/user/delete_user/`, params)
   }
+  async function setUserPassword(params: any) {
+    return await post(`/system_mgmt/user/reset_password/`, params)
+  }
   return {
     getUsersList,
     getOrgTree,
@@ -34,6 +37,7 @@ export const useUserApi = () => {
     getUserDetail,
     editUser,
     addUser,
-    deleteUser
+    deleteUser,
+    setUserPassword,
   }
 }
