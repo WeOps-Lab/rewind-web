@@ -168,7 +168,8 @@
       "table": {
         "time": "TIME",
         "clientIp": "CLIENT IP",
-        "state": "STATE"
+        "state": "STATE",
+        "userMessage": "USER MESSAGE"
       },
       "detail": "DETAIL",
       "apiDetail": "API Invocation Detail",

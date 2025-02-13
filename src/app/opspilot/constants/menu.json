@@ -51,6 +51,12 @@
           "name": "skill_rule"
         },
         {
+          "title": "调用日志",
+          "url": "/opspilot/skill/detail/invocationLogs",
+          "icon": "talk-line",
+          "name": "skill_invocation_logs"
+        },
+        {
           "title": "接口",
           "url": "/opspilot/skill/detail/api",
           "icon": "api",

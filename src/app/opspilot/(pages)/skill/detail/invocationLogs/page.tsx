@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
-import { Table, Input, Spin, Drawer, Button, Pagination, message } from 'antd';
+import { Table, Input, Spin, Drawer, Button, Pagination, message, Tooltip } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useSearchParams } from 'next/navigation';
@@ -49,6 +49,7 @@ const InvocationLogsPage: React.FC = () => {
         createdTime: item.created_at,
         clientIp: item.current_ip,
         state: item.state,
+        userMessage: item.user_message,
         id: item.id,
         requestDetail: item.request_detail,
         responseDetail: item.response_detail,
@@ -113,6 +114,19 @@ const InvocationLogsPage: React.FC = () => {
       dataIndex: 'state',
       key: 'state',
       render: (text) => (text ? t('skill.invocationLogs.success') : t('skill.invocationLogs.failure')),
+    },
+    {
+      title: t('skill.invocationLogs.table.userMessage'),
+      dataIndex: 'userMessage',
+      key: 'userMessage',
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (userMessage) => (
+        <Tooltip placement="topLeft" title={userMessage}>
+          {userMessage}
+        </Tooltip>
+      ),
     },
     {
       title: t('common.actions'),

@@ -168,7 +168,8 @@
       "table": {
         "time": "时间",
         "clientIp": "客户端IP",
-        "state": "状态"
+        "state": "状态",
+        "userMessage": "用户消息"
       },
       "detail": "详情",
       "apiDetail": "API调用详情",
