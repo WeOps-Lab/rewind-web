@@ -86,7 +86,10 @@
       "desc": "显示所有信息。您可以维护用户信息并分配角色。",
       "addSubGroups": "添加子分组",
       "rename": "重命名",
-      "renameSuccess": "重命名成功"
+      "renameSuccess": "重命名成功",
+      "form": {
+        "name": "团队名"
+      }
     },
     "role": {
       "title": "角色",

@@ -86,7 +86,10 @@
       "desc": "Display all information.You can maintain user information and assign roles.",
       "addSubGroups": "Add Sub-Groups",
       "rename": "Rename",
-      "renameSuccess": "Rename Success"
+      "renameSuccess": "Rename Success",
+      "form": {
+        "name": "Group Name"
+      }
     },
     "role": {
       "title": "Role",

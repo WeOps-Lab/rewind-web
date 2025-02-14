@@ -29,7 +29,7 @@ const Groups: React.FC = () => {
   const { getTeamData, addTeamData, updateGroup, deleteTeam } = useGroupApi();
 
   const columns: ColumnsType<ConvertedGroup> = [
-    { title: t('system.user.form.name'), dataIndex: 'name', width: 450 },
+    { title: t('system.group.form.name'), dataIndex: 'name', width: 450 },
     {
       title: t('common.actions'),
       dataIndex: 'actions',
@@ -210,32 +210,34 @@ const Groups: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col">
       <TopSection title={t('system.group.title')} content={t('system.group.desc')} />
-      <div className="w-full mt-4 mb-4 flex justify-end">
-        <Search
-          allowClear
-          enterButton
-          className="w-60 mr-[8px]"
-          onSearch={handleInputSearchChange}
-          placeholder={`${t('common.search')}...`}
-        />
-        <Button type="primary" onClick={addGroup}>
-          +{t('common.add')}
-        </Button>
-      </div>
+      <div className="mt-4 flex-1 h-full rounded-md overflow-hidden p-4 bg-[var(--color-bg)]">
+        <div className="w-full mt-4 mb-4 flex justify-end">
+          <Search
+            allowClear
+            enterButton
+            className="w-60 mr-[8px]"
+            onSearch={handleInputSearchChange}
+            placeholder={`${t('common.search')}...`}
+          />
+          <Button type="primary" onClick={addGroup}>
+            +{t('common.add')}
+          </Button>
+        </div>
 
-      <Spin spinning={loading}>
-        <CustomTable
-          rowKey="key"
-          pagination={false}
-          expandedRowKeys={expandedRowKeys}
-          onExpand={onExpand}
-          scroll={{ y: 'calc(100vh - 300px)' }}
-          columns={columns}
-          dataSource={dataSource}
-        />
-      </Spin>
+        <Spin spinning={loading}>
+          <CustomTable
+            rowKey="key"
+            pagination={false}
+            expandedRowKeys={expandedRowKeys}
+            onExpand={onExpand}
+            scroll={{ y: 'calc(100vh - 300px)' }}
+            columns={columns}
+            dataSource={dataSource}
+          />
+        </Spin>
+      </div>
 
       <OperateModal
         title={t('common.add')}
@@ -251,10 +253,10 @@ const Groups: React.FC = () => {
         <Form form={addForm}>
           <Form.Item
             name="teamName"
-            label={t('system.user.form.name')}
+            label={t('system.group.form.name')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Input placeholder={`${t('common.inputMsg')}${t('system.user.form.name')}`} />
+            <Input placeholder={`${t('common.inputMsg')}${t('system.group.form.name')}`} />
           </Form.Item>
         </Form>
       </OperateModal>
