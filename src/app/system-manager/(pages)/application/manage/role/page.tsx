@@ -351,7 +351,7 @@ const RoleManagement: React.FC = () => {
 
   return (
     <>
-      <div className="w-full flex justify-between bg-[var(--color-bg-1)] rounded-md h-full p-4">
+      <div className="w-full flex justify-between bg-[var(--color-bg)] rounded-md h-full p-4">
         <RoleList
           loadingRoles={loadingRoles}
           roleList={roleList}
@@ -361,7 +361,7 @@ const RoleManagement: React.FC = () => {
           onDeleteRole={onDeleteRole}
           t={t}
         />
-        <div className="flex-1 overflow-hidden bg-[var(--color-bg-1)] rounded-md">
+        <div className="flex-1 overflow-hidden rounded-md">
           <Tabs defaultActiveKey="1" activeKey={activeTab} onChange={handleTabChange}>
             <TabPane tab={t('system.role.users')} key="1">
               <div className="flex justify-end mb-4">

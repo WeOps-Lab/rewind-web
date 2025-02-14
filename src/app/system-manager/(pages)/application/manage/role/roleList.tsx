@@ -28,7 +28,7 @@ const RoleList: React.FC<RoleListProps> = ({
   const renderRoleItem = (role: Role) => (
     <div
       key={role.role_id}
-      className={`flex items-center justify-between p-2 mb-2 hover:bg-[var(--color-fill-1)] group ${selectedRole?.role_id === role.role_id ? 'bg-[var(--color-fill-2)] text-[var(--color-primary)]' : ''}`}
+      className={`flex items-center rounded-md justify-between p-2 mb-2 hover:bg-[var(--color-fill-1)] group ${selectedRole?.role_id === role.role_id ? 'bg-[var(--color-fill-2)] text-[var(--color-primary)]' : ''}`}
     >
       <div className="cursor-pointer text-sm" onClick={() => onSelectRole(role)}>
         {role.display_name || role.role_name}
@@ -52,7 +52,7 @@ const RoleList: React.FC<RoleListProps> = ({
   );
 
   return (
-    <div className="w-[180px] pr-4 mr-4 border-r border-gray-100">
+    <div className="w-[180px] pr-4 mr-4 border-r border-[var(--color-border-1)]">
       <div className="flex justify-between items-center">
         <h2 className="font-semibold">{t('system.role.title')}</h2>
         <div onClick={() => showRoleModal(null)}>
