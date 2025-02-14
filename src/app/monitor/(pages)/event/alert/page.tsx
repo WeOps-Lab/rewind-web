@@ -343,7 +343,7 @@ const Alert: React.FC = () => {
   const getParams = () => {
     const params = {
       status_in: filters.state,
-      level_in: filters.level,
+      level_in: filters.level.join(','),
       monitor_objects: filters.monitor_objects.join(','),
       content: searchText,
       page: pagination.current,
