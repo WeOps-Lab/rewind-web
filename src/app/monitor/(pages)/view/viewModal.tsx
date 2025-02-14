@@ -28,7 +28,11 @@ import {
   IntergrationItem,
 } from '@/app/monitor/types/monitor';
 import { useTranslation } from '@/utils/i18n';
-import { deepClone, findUnitNameById } from '@/app/monitor/utils/common';
+import {
+  deepClone,
+  findUnitNameById,
+  mergeViewQueryKeyValues,
+} from '@/app/monitor/utils/common';
 import dayjs, { Dayjs } from 'dayjs';
 import Icon from '@/components/icon';
 
@@ -61,6 +65,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
       []
     );
     const [instId, setInstId] = useState<string>('');
+    const [idValues, setIdValues] = useState<string[]>([]);
     const [expandId, setExpandId] = useState<number>(0);
     const [activeTab, setActiveTab] = useState<string>('');
 
@@ -71,9 +76,11 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         setTitle(title);
         const _instId = form.instance_id;
         const _activeTab = plugins[0]?.value || '';
+        const _idValues = form.instance_id_values || [];
         setInstId(_instId);
         setActiveTab(_activeTab);
-        getInitData(_instId, _activeTab);
+        setIdValues(_idValues);
+        getInitData(_idValues, _activeTab);
       },
     }));
 
@@ -94,7 +101,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
     const onTabChange = (val: string) => {
       setActiveTab(val);
       setMetricId(null);
-      getInitData(instId, val);
+      getInitData(idValues, val);
     };
 
     const handleCancel = () => {
@@ -102,7 +109,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
       clearTimer();
     };
 
-    const getInitData = async (id: string, tab: string) => {
+    const getInitData = async (ids: string[], tab: string) => {
       const params = {
         monitor_object_id: monitorObject,
         monitor_plugin_id: tab,
@@ -136,7 +143,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
             setExpandId(_groupData[0]?.id || 0);
             setMetricData(_groupData);
             setOriginMetricData(_groupData);
-            fetchViewData(_groupData, _groupData[0]?.id || 0, id);
+            fetchViewData(_groupData, _groupData[0]?.id || 0, ids);
           })
           .finally(() => {
             setLoading(false);
@@ -146,15 +153,13 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
       }
     };
 
-    const getParams = (query: string, id: string) => {
+    const getParams = (item: any, ids: string[]) => {
       const params: SearchParams = {
-        query: query.replace(
+        query: item.query.replace(
           /__\$labels__/g,
-          monitorName === 'Pod'
-            ? `uid="${id}"`
-            : monitorName === 'Node'
-              ? `node="${id}"`
-              : `instance_id="${id}"`
+          mergeViewQueryKeyValues([
+            { keys: item.instance_id_keys, values: ids },
+          ])
         ),
       };
       const startTime = timeRange.at(0);
@@ -222,12 +227,12 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
     const fetchViewData = async (
       data: IndexViewItem[],
       groupId: number,
-      id: string
+      ids: string[]
     ) => {
       const metricList = data.find((item) => item.id === groupId)?.child || [];
       const requestQueue = metricList.map((item) =>
         get(`/monitor/api/metrics_instance/query_range/`, {
-          params: getParams(item.query, id),
+          params: getParams(item, ids),
         }).then((response) => ({
           id: item.id,
           data: response.data.result || [],
@@ -278,7 +283,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         target.isLoading = true;
       }
       setMetricData(_metricData);
-      fetchViewData(_metricData, expandId, instId);
+      fetchViewData(_metricData, expandId, idValues);
     };
 
     const handleMetricIdChange = (val: number) => {
@@ -299,10 +304,10 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
           const _groupId = target?.id || 0;
           setExpandId(_groupId);
           setMetricData(filteredData);
-          fetchViewData(filteredData, _groupId, instId);
+          fetchViewData(filteredData, _groupId, idValues);
         }
       } else {
-        getInitData(instId, activeTab);
+        getInitData(idValues, activeTab);
       }
     };
 
@@ -320,7 +325,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         }
         setExpandId(groupId);
         setMetricData(_metricData);
-        fetchViewData(_metricData, groupId, instId);
+        fetchViewData(_metricData, groupId, idValues);
       }
     };
 

@@ -4,6 +4,7 @@ import {
   OriginSubGroupItem,
   SubGroupItem,
   ListItem,
+  ViewQueryKeyValuePairs,
 } from '@/app/monitor/types';
 import { Group } from '@/types';
 import { MetricItem } from '@/app/monitor/types/monitor';
@@ -326,4 +327,27 @@ export const transformTreeData = (nodes: Group[]): CascaderItem[] => {
     }
     return transformedNode;
   });
+};
+
+export const mergeViewQueryKeyValues = (
+  pairs: ViewQueryKeyValuePairs[]
+): string => {
+  const mergedObject: { [key: string]: Set<string> } = {};
+  pairs.forEach((pair) => {
+    (pair.keys || []).forEach((key, index) => {
+      const value = (pair.values || [])[index];
+      if (!mergedObject[key]) {
+        mergedObject[key] = new Set();
+      }
+      mergedObject[key].add(value);
+    });
+  });
+
+  const resultArray: string[] = [];
+  for (const key in mergedObject) {
+    const values = Array.from(mergedObject[key]).join('|');
+    resultArray.push(`${key}=~"${values}"`);
+  }
+
+  return resultArray.join(',');
 };

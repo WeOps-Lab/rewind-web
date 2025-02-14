@@ -29,7 +29,11 @@ import {
   IndexViewItem,
   GroupInfo,
 } from '@/app/monitor/types/monitor';
-import { deepClone, findUnitNameById } from '@/app/monitor/utils/common';
+import {
+  deepClone,
+  findUnitNameById,
+  mergeViewQueryKeyValues,
+} from '@/app/monitor/utils/common';
 import { useSearchParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import TreeSelector from '@/app/monitor/components/treeSelector';
@@ -53,7 +57,11 @@ const SearchView: React.FC = () => {
     url_instance_id ? [url_instance_id] : []
   );
   const [instances, setInstances] = useState<
-    { instance_id: string; instance_name: string }[]
+    {
+      instance_id: string;
+      instance_name: string;
+      instance_id_values: string[];
+    }[]
   >([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [object, setObject] = useState<string | undefined>(url_obj_name as any);
@@ -171,8 +179,19 @@ const SearchView: React.FC = () => {
   };
 
   const getParams = (_timeRange: number[]): SearchParams => {
-    const _query: string =
-      metrics.find((item) => item.name === metric)?.query || '';
+    const metricItem = metrics.find((item) => item.name === metric);
+    const _query: string = metricItem?.query || '';
+    const queryValues: any = instances
+      .filter((item) => instanceId.includes(item.instance_id))
+      .map((item) => item.instance_id_values);
+    const querykeys: any = metricItem?.instance_id_keys || [];
+    const queryList = [];
+    for (let i = 0; i < queryValues.length; i++) {
+      queryList.push({
+        keys: querykeys,
+        values: queryValues[i],
+      });
+    }
     const params: SearchParams = { query: '' };
     const startTime = _timeRange.at(0);
     const endTime = _timeRange.at(1);
@@ -190,17 +209,7 @@ const SearchView: React.FC = () => {
     }
     let query = '';
     if (instanceId?.length) {
-      switch (object) {
-        case 'Pod':
-          query += `uid=~"${instanceId.join('|')}"`;
-          break;
-        case 'Node':
-          query += `node=~"${instanceId.join('|')}"`;
-          break;
-        default:
-          query += `instance_id=~"${instanceId.join('|')}"`;
-          break;
-      }
+      query += mergeViewQueryKeyValues(queryList);
     }
     if (conditions?.length) {
       const conditionQueries = conditions

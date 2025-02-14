@@ -117,3 +117,8 @@ export interface TimeLineItem {
   color: string;
   children: JSX.Element;
 }
+
+export interface ViewQueryKeyValuePairs {
+  keys: string[];
+  values: string[];
+}

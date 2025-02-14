@@ -10,7 +10,7 @@
       "title": "视图",
       "icon": "zichan-quanbushebei",
       "url": "/monitor/view",
-      "name": "veiw_list",
+      "name": "view_list",
       "children": [
         {
           "url": "/monitor/view/detail",
@@ -23,7 +23,7 @@
       "title": "事件",
       "icon": "mulu",
       "url": "/monitor/event",
-      "name": "event",
+      "name": "Event",
       "children": [
         {
           "icon": "weiwangguanicon-defuben-",
@@ -32,7 +32,7 @@
           "name": "alert_list"
         },
         {
-          "icon": "策略",
+          "icon": "moxing2",
           "title": "Strategy",
           "url": "/monitor/event/strategy",
           "name": "strategy_list",
@@ -50,7 +50,7 @@
       "title": "集成",
       "icon": "moxing2",
       "url": "/monitor/intergration",
-      "name": "intergration",
+      "name": "Intergration",
       "children": [
         {
           "title": "资产",
