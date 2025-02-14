@@ -56,7 +56,7 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
         '/monitor/api/node_mgmt/update_instance_child_config/',
         params
       );
-      message.success('common.successfullyModified');
+      message.success(t('common.successfullyModified'));
       handleCancel();
       onSuccess();
     } catch (error) {

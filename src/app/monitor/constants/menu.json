@@ -33,7 +33,7 @@
         },
         {
           "icon": "moxing2",
-          "title": "Strategy",
+          "title": "策略",
           "url": "/monitor/event/strategy",
           "name": "strategy_list",
           "children": [
