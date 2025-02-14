@@ -134,6 +134,11 @@ const useMethodList = (): ListItem[] => {
         title: t('monitor.events.avgOverTimeTitle'),
       },
       { label: 'COUNT', value: 'count', title: t('monitor.events.countTitle') },
+      {
+        label: 'LAST_OVER_TIME',
+        value: 'last_over_time',
+        title: t('monitor.events.lastOverTimeTitle'),
+      },
     ],
     [t]
   );

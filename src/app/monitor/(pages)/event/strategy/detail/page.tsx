@@ -876,7 +876,6 @@ const StrategyOperation = () => {
                                 ]}
                               >
                                 <Select
-                                  allowClear
                                   style={{
                                     width: '300px',
                                   }}
