@@ -1,0 +1,112 @@
+{
+    "zh": [
+        {
+            "title": "搜索",
+            "icon": "search-f",
+            "url": "/cmdb/assetSearch",
+            "name": "cmdb_search"
+        },
+        {
+            "title": "视图",
+            "icon": "mulu",
+            "url": "/cmdb/assetOverview",
+            "name": "cmdb_overview"
+        },
+        {
+            "title": "资产",
+            "icon": "zichan-quanbushebei",
+            "url": "/cmdb/assetData",
+            "name": "cmdb_asset",
+            "children": [{
+                "title": "Basic Information",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail/baseInfo",
+                "name": "cmdb_model_detail_basic"
+            },
+            {
+                "title": "Relationships",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail/relationships",
+                "name": "cmdb_model_detail_associations"
+            },
+            {
+                "title": "Change Records",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail/changeRecords",
+                "name": "cmdb_model_detail_change_records"
+            }]
+        },
+        {
+            "title": "模型",
+            "icon": "shujumoxingguanli",
+            "url": "/cmdb/assetManage",
+            "name": "cmdb_model",
+            "children": [{
+                "title": "属性",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail/attributes",
+                "name": "cmdb_model_detail_attributes"
+            }, {
+                "title": "关系",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail/relationships",
+                "name": "cmdb_model_detail_relationships"
+            }]
+        }
+    ],
+    "en": [
+        {
+            "title": "Search",
+            "icon": "search-f",
+            "url": "/cmdb/assetSearch",
+            "name": "cmdb_search"
+        },
+        {
+            "title": "Overview",
+            "icon": "mulu",
+            "url": "/cmdb/assetOverview",
+            "name": "cmdb_overview"
+        },
+        {
+            "title": "Asset",
+            "icon": "zichan-quanbushebei",
+            "url": "/cmdb/assetData",
+            "name": "cmdb_asset",
+            "children": [{
+                "title": "Basic Information",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail/baseInfo",
+                "name": "cmdb_model_detail_basic"
+            },
+            {
+                "title": "Relationships",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail/relationships",
+                "name": "cmdb_model_detail_associations"
+            },
+            {
+                "title": "Change Records",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail/changeRecords",
+                "name": "cmdb_model_detail_change_records"
+            }]              
+        },
+        {
+            "title": "Model",
+            "icon": "shujumoxingguanli",
+            "url": "/cmdb/assetManage",
+            "name": "cmdb_model",
+            "children": [{
+                "title": "Attributes",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail//attributes",
+                "name": "cmdb_model_detail_attributes"
+            }, {
+                "title": "Relationships",
+                "icon": "shujumoxingguanli",
+                "url": "/cmdb/assetData/detail//associations",
+                "name": "cmdb_model_detail_associations"
+            }]
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+.attrLayout {
+  :global {
+    .ant-card-body {
+      padding: 15px !important;
+      min-height: 80px;
+    }
+
+    aside {
+      height: calc(100vh - 190px);
+    }
+
+    section {
+      width: calc(100vw - 250px);
+    }
+  }
+}
