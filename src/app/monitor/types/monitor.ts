@@ -88,6 +88,7 @@ export interface MetricItem {
   type: string;
   display_name?: string;
   display_description?: string;
+  instance_id_keys?: string[];
   dimensions: any[];
   query?: string;
   unit?: string;
@@ -266,4 +267,5 @@ export interface ViewDetailProps {
   monitorObjectId: React.Key;
   instanceId: React.Key;
   monitorObjectName: string;
+  idValues: string[];
 }

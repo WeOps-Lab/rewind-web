@@ -153,12 +153,12 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
       }
     };
 
-    const getParams = (item: any, ids: string[]) => {
+    const getParams = (item: MetricItem, ids: string[]) => {
       const params: SearchParams = {
-        query: item.query.replace(
+        query: (item.query || '').replace(
           /__\$labels__/g,
           mergeViewQueryKeyValues([
-            { keys: item.instance_id_keys, values: ids },
+            { keys: item.instance_id_keys || [], values: ids },
           ])
         ),
       };

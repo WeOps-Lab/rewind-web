@@ -19,6 +19,9 @@ const ViewDetail = () => {
   const icon = OBJECT_ICON_MAP[searchParams.get('name') || ''];
   const monitorObjectId: React.Key = searchParams.get('monitorObjId') || '';
   const instanceId: React.Key = searchParams.get('instance_id') || '';
+  const idValues: string[] = (
+    searchParams.get('instance_id_values') || ''
+  ).split(',');
   const monitorObjectName: string = searchParams.get('name') || '';
   const [activeMenu, setActiveMenu] = useState<string>('metrics');
 
@@ -67,12 +70,14 @@ const ViewDetail = () => {
       <div className={detailStyle.rightSide}>
         {activeMenu === 'metrics' ? (
           <Metric
+            idValues={idValues}
             monitorObjectId={monitorObjectId}
             monitorObjectName={monitorObjectName}
             instanceId={instanceId}
           />
         ) : (
           <Overview
+            idValues={idValues}
             monitorObjectId={monitorObjectId}
             monitorObjectName={monitorObjectName}
             instanceId={instanceId}

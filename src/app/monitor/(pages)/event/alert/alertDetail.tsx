@@ -23,13 +23,15 @@ import {
   ChartDataItem,
   SearchParams,
   MetricItem,
-  ObectItem,
 } from '@/app/monitor/types/monitor';
 import { AlertOutlined } from '@ant-design/icons';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import useApiClient from '@/utils/request';
 import Information from './information';
-import { getEnumValueUnit } from '@/app/monitor/utils/common';
+import {
+  getEnumValueUnit,
+  mergeViewQueryKeyValues,
+} from '@/app/monitor/utils/common';
 import {
   LEVEL_MAP,
   useLevelList,
@@ -107,26 +109,14 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
     }, [tableLoading]);
 
     const getParams = () => {
-      const target =
-        metrics.find(
-          (item: MetricItem) =>
-            item.id === formData.policy?.query_condition?.metric_id
-        )?.query || '';
-      const _query: string = target;
-      const instId = formData.monitor_instance_id;
-      const objName =
-        objects.find(
-          (item: ObectItem) =>
-            item.id === formData.monitor_instance?.monitor_object
-        )?.name || '';
+      const _query: string = formData.metric?.query || '';
+      const ids = formData.metric?.instance_id_keys || [];
       const params: SearchParams = {
         query: _query.replace(
           /__\$labels__/g,
-          objName === 'Pod'
-            ? `uid="${instId}"`
-            : objName === 'Node'
-              ? `node="${instId}"`
-              : `instance_id="${instId}"`
+          mergeViewQueryKeyValues([
+            { keys: ids || [], values: formData.instance_id_values },
+          ])
         ),
       };
       const startTime = new Date(formData.start_event_time).getTime();
@@ -217,11 +207,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
 
     const processData = (data: ChartDataItem[]): ChartData[] => {
       const result: any[] = [];
-      const target =
-        metrics.find(
-          (item: MetricItem) =>
-            item.id === formData.policy?.query_condition?.metric
-        )?.dimensions || [];
+      const target = formData.metric?.dimensions || [];
       data.forEach((item, index) => {
         item.values.forEach(([timestamp, value]) => {
           const existing = result.find((entry) => entry.time === timestamp);
@@ -252,11 +238,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
             };
             result.push({
               time: timestamp,
-              title:
-                metrics.find(
-                  (sec: MetricItem) =>
-                    sec.id === formData.policy?.query_condition?.metric
-                )?.display_name || '--',
+              title: formData.metric?.display_name || '--',
               [`value${index + 1}`]: parseFloat(value),
               details,
             });

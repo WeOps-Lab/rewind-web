@@ -19,7 +19,11 @@ import {
 } from '@/app/monitor/types/monitor';
 import { COLLECT_TYPE_MAP } from '@/app/monitor/constants/monitor';
 import { useTranslation } from '@/utils/i18n';
-import { deepClone, findUnitNameById } from '@/app/monitor/utils/common';
+import {
+  deepClone,
+  findUnitNameById,
+  mergeViewQueryKeyValues,
+} from '@/app/monitor/utils/common';
 import dayjs, { Dayjs } from 'dayjs';
 import Icon from '@/components/icon';
 
@@ -27,6 +31,7 @@ const MetricViews: React.FC<ViewDetailProps> = ({
   monitorObjectId,
   monitorObjectName,
   instanceId,
+  idValues,
 }) => {
   const { get, isLoading } = useApiClient();
   const { t } = useTranslation();
@@ -136,15 +141,13 @@ const MetricViews: React.FC<ViewDetailProps> = ({
     }
   };
 
-  const getParams = (query: string) => {
+  const getParams = (item: MetricItem) => {
     const params: SearchParams = {
-      query: query.replace(
+      query: (item.query || '').replace(
         /__\$labels__/g,
-        monitorObjectName === 'Pod'
-          ? `uid="${instanceId}"`
-          : monitorObjectName === 'Node'
-            ? `node="${instanceId}"`
-            : `instance_id="${instanceId}"`
+        mergeViewQueryKeyValues([
+          { keys: item.instance_id_keys || [], values: idValues },
+        ])
       ),
     };
     const startTime = timeRange.at(0);
@@ -213,7 +216,7 @@ const MetricViews: React.FC<ViewDetailProps> = ({
     const metricList = data.find((item) => item.id === groupId)?.child || [];
     const requestQueue = metricList.map((item) =>
       get(`/monitor/api/metrics_instance/query_range/`, {
-        params: getParams(item.query),
+        params: getParams(item),
       }).then((response) => ({
         id: item.id,
         data: response.data.result || [],

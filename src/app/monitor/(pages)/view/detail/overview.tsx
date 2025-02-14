@@ -23,6 +23,7 @@ import {
   findUnitNameById,
   calculateMetrics,
   getEnumValueUnit,
+  mergeViewQueryKeyValues,
 } from '@/app/monitor/utils/common';
 import dayjs, { Dayjs } from 'dayjs';
 import {
@@ -34,7 +35,7 @@ import Icon from '@/components/icon';
 const Overview: React.FC<ViewDetailProps> = ({
   monitorObjectId,
   monitorObjectName,
-  instanceId,
+  idValues,
 }) => {
   const { get, isLoading } = useApiClient();
   const { t } = useTranslation();
@@ -115,15 +116,13 @@ const Overview: React.FC<ViewDetailProps> = ({
     }
   };
 
-  const getParams = (query: string) => {
+  const getParams = (item: MetricItem) => {
     const params: SearchParams = {
-      query: query.replace(
+      query: (item.query || '').replace(
         /__\$labels__/g,
-        monitorObjectName === 'Pod'
-          ? `uid="${instanceId}"`
-          : monitorObjectName === 'Node'
-            ? `node="${instanceId}"`
-            : `instance_id="${instanceId}"`
+        mergeViewQueryKeyValues([
+          { keys: item.instance_id_keys || [], values: idValues },
+        ])
       ),
     };
     const startTime = timeRange.at(0);
@@ -188,11 +187,11 @@ const Overview: React.FC<ViewDetailProps> = ({
     return result;
   };
 
-  const fetchViewData = async (data: MetricItem[]) => {
-    setLoading(true);
+  const fetchViewData = async (data: MetricItem[], type?: string) => {
+    setLoading(type !== 'timer');
     const requestQueue = data.map((item: MetricItem) =>
       get(`/monitor/api/metrics_instance/query_range/`, {
-        params: getParams(item?.query || ''),
+        params: getParams(item),
       }).then((response) => ({ id: item.id, data: response.data.result || [] }))
     );
     try {
@@ -271,9 +270,8 @@ const Overview: React.FC<ViewDetailProps> = ({
   };
 
   const handleSearch = (type: string) => {
-    console.log(type);
     const _metricData = deepClone(originMetricData);
-    fetchViewData(_metricData);
+    fetchViewData(_metricData, type);
   };
 
   const onXRangeChange = (arr: [Dayjs, Dayjs]) => {
