@@ -36,18 +36,18 @@ const CommonForm: React.FC<CommonFormProps> = ({ form, modelOptions, initialValu
       <Form.Item
         name="name"
         label={t(`${formType}.form.name`)}
-        rules={[{ required: true, message: `${t('common.inputMsg')} ${t(`${formType}.form.name`)}!` }]}
+        rules={[{ required: true, message: `${t('common.inputMsg')}${t(`${formType}.form.name`)}!` }]}
       >
-        <Input placeholder={`Please ${t('common.input')} ${t(`${formType}.form.name`)}`} />
+        <Input placeholder={`${t('common.inputMsg')}${t(`${formType}.form.name`)}`} />
       </Form.Item>
       {formType === 'knowledge' && modelOptions && (
         <Form.Item
           name="embed_model"
           label={t('knowledge.form.embedModel')}
           tooltip={t('knowledge.form.embedModelTip')}
-          rules={[{ required: true, message: `${t('common.selectMsg')} ${t('knowledge.form.embedModel')}!` }]}
+          rules={[{ required: true, message: `${t('common.selectMsg')}${t('knowledge.form.embedModel')}!` }]}
         >
-          <Select placeholder={`Please ${t('common.select')} ${t('knowledge.form.embedModel')}`} disabled={isTraining}>
+          <Select placeholder={`${t('common.selectMsg')}${t('knowledge.form.embedModel')}`} disabled={isTraining}>
             {modelOptions.map((model) => (
               <Option key={model.id} value={model.id} disabled={!model.enabled}>
                 {model.name}
@@ -59,9 +59,9 @@ const CommonForm: React.FC<CommonFormProps> = ({ form, modelOptions, initialValu
       <Form.Item
         name="introduction"
         label={t(`${formType}.form.introduction`)}
-        rules={[{ required: true, message: `${t('common.inputMsg')} ${t(`${formType}.form.introduction`)}!` }]}
+        rules={[{ required: true, message: `${t('common.inputMsg')}${t(`${formType}.form.introduction`)}!` }]}
       >
-        <Input.TextArea rows={4} placeholder={`Please ${t('common.input')} ${t(`${formType}.form.introduction`)}`} />
+        <Input.TextArea rows={4} placeholder={`${t('common.inputMsg')}${t(`${formType}.form.introduction`)}`} />
       </Form.Item>
     </Form>
   );

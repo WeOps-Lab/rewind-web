@@ -276,14 +276,14 @@ const StudioSettingsPage: React.FC = () => {
                     <Form.Item
                       label={t('studio.form.name')}
                       name="name"
-                      rules={[{ required: true, message: `${t('common.input')} ${t('studio.form.name')}` }]}
+                      rules={[{ required: true, message: `${t('common.inputMsg')}${t('studio.form.name')}` }]}
                     >
                       <Input />
                     </Form.Item>
                     <Form.Item
                       label={t('studio.form.group')}
                       name="group"
-                      rules={[{ required: true, message: `${t('common.input')} ${t('studio.form.group')}` }]}
+                      rules={[{ required: true, message: `${t('common.inputMsg')}${t('studio.form.group')}` }]}
                     >
                       <Select mode="multiple">
                         {groups.map((group) => (
@@ -296,14 +296,14 @@ const StudioSettingsPage: React.FC = () => {
                     <Form.Item
                       label={t('studio.form.introduction')}
                       name="introduction"
-                      rules={[{ required: true, message: `${t('common.input')}{t('studio.form.introduction')}` }]}
+                      rules={[{ required: true, message: `${t('common.inputMsg')}{t('studio.form.introduction')}` }]}
                     >
                       <TextArea rows={4} />
                     </Form.Item>
                     <Form.Item
                       label={t('studio.form.model')}
                       name="rasa_model"
-                      rules={[{ required: true, message: `${t('common.input')} ${t('studio.form.model')}` }]}
+                      rules={[{ required: true, message: `${t('common.inputMsg')}${t('studio.form.model')}` }]}
                     >
                       <Select>
                         {rasaModels.map((model) => (
@@ -400,7 +400,7 @@ const StudioSettingsPage: React.FC = () => {
                               <div className='w-full flex items-center'>
                                 <Input
                                   className='flex-1 mr-3'
-                                  placeholder={`${t('common.inputMsg')} ${t('studio.settings.domain')}`}
+                                  placeholder={`${t('common.inputMsg')}${t('studio.settings.domain')}`}
                                   value={botDomain}
                                   onChange={(e) => setBotDomain(e.target.value)}
                                 />
@@ -415,7 +415,7 @@ const StudioSettingsPage: React.FC = () => {
                           </>
                         )}
                       </div>
-                      <div className="border-t py-4">
+                      <div className="border-t border-[var(--color-border-1)] py-4">
                         <div className="flex items-center justify-between">
                           <span className='text-sm'>{t('studio.settings.portMapping')}</span>
                           <Switch size="small" checked={isPortMappingEnabled} onChange={(checked) => {
@@ -428,7 +428,7 @@ const StudioSettingsPage: React.FC = () => {
                         {isPortMappingEnabled && (
                           <Form.Item className="mt-4 mb-0">
                             <Input
-                              placeholder={`${t('common.inputMsg')} ${t('studio.settings.portMapping')}`}
+                              placeholder={`${t('common.inputMsg')}${t('studio.settings.portMapping')}`}
                               value={nodePort}
                               onChange={(e) => {
                                 const value = Number(e.target.value);

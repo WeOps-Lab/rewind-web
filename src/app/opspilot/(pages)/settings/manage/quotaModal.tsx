@@ -116,9 +116,9 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
         <Form.Item
           label={t('settings.manageQuota.form.name')}
           name="name"
-          rules={[{ required: true, message: `${t('common.inputRequired')}` }]}
+          rules={[{ required: true, message: `${t('common.inputMsg')}${t('settings.manageQuota.form.name')}!` }]}
         >
-          <Input />
+          <Input placeholder={`${t('common.inputMsg')}${t('settings.manageQuota.form.name')}`} />
         </Form.Item>
         <Form.Item label={t('settings.manageQuota.form.target')} required>
           <Input.Group compact>
@@ -135,9 +135,10 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
             <Form.Item
               name="targetList"
               noStyle
-              rules={[{ required: true, message: `${t('common.selectMsg')}` }]}
+              rules={[{ required: true, message: `${t('common.selectMsg')}${t('settings.manageQuota.form.target')}` }]}
             >
               <Select
+                placeholder={`${t('common.selectMsg')}${t('settings.manageQuota.form.target')}`}
                 mode={targetType === 'user' ? 'multiple' : undefined}
                 className={styles.multipleSelect}
                 style={{ width: '70%' }}
@@ -172,21 +173,27 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
         <Form.Item
           label={t('settings.manageQuota.form.bot')}
           name="bots"
-          rules={[{ required: true, message: `${t('common.inputRequired')}` }]}
+          rules={[{ required: true, message: `${t('common.inputMsg')}${t('settings.manageQuota.form.bot')}` }]}
         >
-          <InputNumber min={0} style={{ width: '100%' }} />
+          <InputNumber
+            min={0}
+            style={{ width: '100%' }}
+            placeholder={`${t('common.inputMsg')}${t('settings.manageQuota.form.bot')}`} />
         </Form.Item>
         <Form.Item
           label={t('settings.manageQuota.form.skill')}
           name="skills"
-          rules={[{ required: true, message: `${t('common.inputRequired')}` }]}
+          rules={[{ required: true, message: `${t('common.inputMsg')}${t('settings.manageQuota.form.skill')}` }]}
         >
-          <InputNumber min={0} style={{ width: '100%' }} />
+          <InputNumber
+            min={0}
+            style={{ width: '100%' }}
+            placeholder={`${t('common.inputMsg')}${t('settings.manageQuota.form.skill')}`} />
         </Form.Item>
         <Form.Item
           label={t('settings.manageQuota.form.knowledgeBase')}
           name="file_size"
-          rules={[{ required: true, message: `${t('common.inputRequired')}` }]}
+          rules={[{ required: true, message: `${t('common.inputMsg')}${t('settings.manageQuota.form.knowledgeBase')}` }]}
         >
           <InputNumber
             min={0}
@@ -199,6 +206,7 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
               </Form.Item>
             }
             style={{ width: '100%' }}
+            placeholder={`${t('common.inputMsg')}${t('settings.manageQuota.form.knowledgeBase')}`}
           />
         </Form.Item>
       </Form>

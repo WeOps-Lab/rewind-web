@@ -176,7 +176,7 @@ const SkillRules: React.FC = () => {
     <div className='h-full flex flex-col'>
       <div className='mb-[20px] flex items-center justify-end'>
         <Search
-          placeholder={`${t('common.input')}...`}
+          placeholder={`${t('common.search')}...`}
           allowClear
           onSearch={handleSearch}
           enterButton
