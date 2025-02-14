@@ -463,13 +463,17 @@ const RoleManagement: React.FC = () => {
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
             <Select
+              showSearch
               mode="multiple"
               disabled={allUserLoading}
               loading={allUserLoading}
-              placeholder={`${t('common.select')} ${t('system.role.users')}`}
+              placeholder={`${t('common.select')}${t('system.role.users')}`}
+              filterOption={(input, option) =>
+                typeof option?.label === 'string' && option.label.toLowerCase().includes(input.toLowerCase())
+              }
             >
               {allUserList.map(user => (
-                <Option key={user.id} value={user.id}>{user.username}</Option>
+                <Option key={user.id} value={user.id} label={user.username}>{user.username}</Option>
               ))}
             </Select>
           </Form.Item>
