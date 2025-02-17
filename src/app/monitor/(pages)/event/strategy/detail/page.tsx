@@ -645,6 +645,7 @@ const StrategyOperation = () => {
                               ]}
                             >
                               <TextArea
+                                placeholder={t('monitor.events.promQLPlaceholder')}
                                 className="w-[800px]"
                                 allowClear
                                 rows={4}

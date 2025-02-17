@@ -242,12 +242,13 @@
       "minOverTimeTitle": "Represents the minimum value of multiple data points within the time range for each dimension separately within the selected time range (dimension filtering is required, otherwise the dimension with the smallest minimum value is selected as the final value by default).\n The min_over_time function is used to find the lowest value of each time series within the specified time range, suitable for identifying the lowest points or load conditions in each dimension.",
       "avgTitle": "Represents the average value of all dimension data within the selected time range.\n The avg function is used to calculate the average value of multiple time series at the same moment, suitable for summarizing and analyzing overall performance or load.",
       "avgOverTimeTitle": "Represents the average value of multiple data points within the time range for each dimension separately within the selected time range (dimension filtering is required, otherwise the dimension with the largest average value is selected as the final value by default).\n The avg_over_time function is used to calculate the average value of each time series within the specified time range, suitable for analyzing the average performance of each dimension over time.",
-      "lastOverTimeTitle": "Represents the newest value of all dimension data within the selected time range.",
+      "lastOverTimeTitle": "Represents the value of the last data point in each dimension within the selected time range.\n The last_over_time function is used to retrieve the last sampled value of each time series within a specified time range, and is suitable for obtaining indicator snapshots of state change monitoring or key time points. For example, it can be used to obtain the last state value of certain ports or instances in the recent query range.",
       "countTitle": "Represents the count of all dimensions within the selected time range.\n The count function is used to count the number of matching time series, suitable for statistics on how many dimensions meet the criteria, such as the number of active instances or ports.",
       "distributionMap": "Distribution Map",
       "message": "Message",
       "activeAlarmsMapTips": "Display the distribution map of all active alarms.",
-      "historicalAlarmsMapTips": "Display the distribution map of all historical alarms."
+      "historicalAlarmsMapTips": "Display the distribution map of all historical alarms.",
+      "promQLPlaceholder": "Please refer to the syntax of Prometheus to write PromQL, which can usually query and filter relevant metrics."
     },
     "intergrations": {
       "intergration": "Intergration",
