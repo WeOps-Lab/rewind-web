@@ -64,7 +64,7 @@ const ImportInst = forwardRef<FieldModalRef, FieldModalProps>(
       try {
         setExportDisabled(true);
         const response = await axios({
-          url: `/reqApi/api/instance/${modelId}/download_template/`, // 替换为你的导出数据的API端点
+          url: `/api/proxy/cmdb/api/instance/${modelId}/download_template/`, // 替换为你的导出数据的API端点
           method: 'GET',
           responseType: 'blob', // 确保响应类型为blob
           headers: {

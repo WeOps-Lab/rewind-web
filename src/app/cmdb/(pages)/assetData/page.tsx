@@ -115,7 +115,7 @@ const AssetData = () => {
     try {
       setExportLoading(true);
       const response = await axios({
-        url: `/reqApi/api/instance/${modelId}/inst_export/`, // 替换为你的导出数据的API端点
+        url: `/api/proxy/cmdb/api/instance/${modelId}/inst_export/`, // 替换为你的导出数据的API端点
         method: 'POST',
         responseType: 'blob', // 确保响应类型为blob
         data: keys,
