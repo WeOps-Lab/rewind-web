@@ -260,6 +260,7 @@
       "addMetric": "Add Metric",
       "editMetric": "Edit Metric",
       "dimension": "Dimension",
+      "instanceIdKeys": "Unique ID",
       "formula": "Formula",
       "dataType": "Data Type",
       "keyMetric": "Key Metric",

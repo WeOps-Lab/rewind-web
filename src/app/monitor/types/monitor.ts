@@ -10,6 +10,7 @@ export interface MetricInfo {
   display_name?: string;
   metric_group?: number;
   monitor_object?: number;
+  instance_id_keys?: string[];
   id?: number;
   query?: string;
   data_type?: string;
