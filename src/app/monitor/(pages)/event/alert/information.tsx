@@ -33,13 +33,14 @@ const Information: React.FC<TableDataItem> = ({
 
   const checkDetail = (row: TableDataItem) => {
     const params = {
-      monitorObjId: row.monitor_instance?.monitor_object,
+      monitorObjId: row.policy?.monitor_object,
       name:
         objects.find(
-          (item: ObectItem) => item.id === row.monitor_instance?.monitor_object
+          (item: ObectItem) => item.id === row.policy?.monitor_object
         )?.name || '',
-      instance_id: row.monitor_instance?.id,
-      instance_name: row.monitor_instance?.name,
+      instance_id: row.monitor_instance_id,
+      instance_name: row.monitor_instance_name,
+      instance_id_values: row.instance_id_values,
     };
     const queryString = new URLSearchParams(params).toString();
     const url = `/monitor/view/detail?${queryString}`;

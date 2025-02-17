@@ -306,10 +306,14 @@ const Intergration = () => {
     }
   };
 
-  const linkToDetial = (app: ObectItem) => {
-    const row = deepClone(app);
-    row.name = objects.find((item) => item.id === objectId)?.name;
-    row.monitorObjId = objectId || '';
+  const linkToDetial = (app: TableDataItem) => {
+    const row: any = {
+      monitorObjId: objectId || '',
+      name: objects.find((item) => item.id === objectId)?.name || '',
+      instance_id: app.instance_id,
+      instance_name: app.instance_name,
+      instance_id_values: app.instance_id_values,
+    };
     const params = new URLSearchParams(row);
     const targetUrl = `/monitor/view/detail?${params.toString()}`;
     router.push(targetUrl);

@@ -229,10 +229,14 @@ const Asset = () => {
   };
 
   const checkDetail = (row: ObjectInstItem) => {
-    const _row = deepClone(row);
-    _row.monitorObjId = objectId;
-    _row.name = objects.find((item) => item.id === objectId)?.name || '';
-    const queryString = new URLSearchParams(_row).toString();
+    const params: any = {
+      monitorObjId: objectId || '',
+      name: objects.find((item) => item.id === objectId)?.name || '',
+      instance_id: row.instance_id,
+      instance_name: row.instance_name,
+      instance_id_values: row.instance_id_values,
+    };
+    const queryString = new URLSearchParams(params).toString();
     const url = `/monitor/view/detail?${queryString}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
