@@ -14,6 +14,7 @@ import useApiClient from '@/utils/request';
 import { ClassificationItem } from '@/app/cmdb/types/assetManage';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
 
 const AboutLayout = ({ children }: { children: React.ReactNode }) => {
   const { get, del, isLoading } = useApiClient();
@@ -158,4 +159,4 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default AboutLayout;
+export default withCommon(AboutLayout);

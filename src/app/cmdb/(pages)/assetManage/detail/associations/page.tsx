@@ -14,6 +14,8 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 import { deepClone } from '@/app/cmdb/utils/common';
 import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
+
 const { confirm } = Modal;
 
 const Associations = () => {
@@ -283,4 +285,4 @@ const Associations = () => {
   );
 };
 
-export default Associations;
+export default withCommon(Associations);

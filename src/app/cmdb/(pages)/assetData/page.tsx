@@ -39,7 +39,8 @@ import {
 } from '@/app/cmdb/types/assetManage';
 import axios from 'axios';
 import { useAuth } from '@/context/auth';
-import CommonProvider, { useCommon } from '@/app/cmdb/context/common';
+import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
 import type { MenuProps } from 'antd';
 import { useRouter } from 'next/navigation';
 
@@ -529,108 +530,106 @@ const AssetData = () => {
   };
 
   return (
-    <CommonProvider>
-      <Spin spinning={loading} wrapperClassName={assetDataStyle.assetLoading}>
-        <div className={assetDataStyle.assetData}>
-          <div className={`mb-[20px] ${assetDataStyle.groupSelector}`}>
-            <Radio.Group
-              onChange={onGroupChange}
-              value={groupId}
-              buttonStyle="solid"
-            >
-              {modelGroup.map((item) => (
-                <Radio.Button
-                  key={item.classification_id}
-                  value={item.classification_id}
-                >
-                  {item.classification_name}
-                </Radio.Button>
-              ))}
-            </Radio.Group>
-          </div>
-          <div className={assetDataStyle.assetList}>
-            <Tabs
-              activeKey={modelId}
-              items={modelList}
-              onChange={onChangeModel}
-            />
-            <div className="flex justify-between mb-4">
-              <Space>
-                <Cascader
-                  placeholder={t('Model.selectOrganazationPlaceholder')}
-                  options={organizationList}
-                  value={organization}
-                  onChange={selectOrganization}
-                />
-                <SearchFilter
-                  userList={userList}
-                  attrList={propertyList.filter(
-                    (item) => item.attr_type !== 'organization'
-                  )}
-                  organizationList={organizationList}
-                  onSearch={handleSearch}
-                />
-              </Space>
-              <Space>
-                <Dropdown menu={{ items: addInstItems }} placement="bottom" arrow>
-                  <Button icon={<PlusOutlined />} type="primary">
-                    {t('add')}
-                  </Button>
-                </Dropdown>
-                <Dropdown
-                  menu={{ items: exportItems }}
-                  disabled={exportLoading}
-                  placement="bottom"
-                  arrow
-                >
-                  <Button>{t('export')}</Button>
-                </Dropdown>
-                <Dropdown
-                  menu={{ items: batchOperateItems }}
-                  disabled={!selectedRowKeys.length}
-                  placement="bottom"
-                  arrow
-                >
-                  <Button>{t('more')}</Button>
-                </Dropdown>
-              </Space>
-            </div>
-            <CustomTable
-              rowSelection={rowSelection}
-              dataSource={tableData}
-              columns={currentColumns}
-              pagination={pagination}
-              loading={tableLoading}
-              scroll={{ x: 'calc(100vw - 100px)', y: 'calc(100vh - 370px)' }}
-              fieldSetting={{
-                showSetting: true,
-                displayFieldKeys,
-                choosableFields: columns.filter((item) => item.key !== 'action'),
-              }}
-              onSelectFields={onSelectFields}
-              rowKey="_id"
-              onChange={handleTableChange}
-            />
-            <FieldModal
-              ref={fieldRef}
-              userList={userList}
-              organizationList={organizationList}
-              onSuccess={updateFieldList}
-            />
-            <ImportInst ref={importRef} onSuccess={updateFieldList} />
-            <SelectInstance
-              ref={instanceRef}
-              userList={userList}
-              models={originModels}
-              assoTypes={assoTypes}
-              organizationList={organizationList}
-              needFetchAssoInstIds
-            />
-          </div>
+    <Spin spinning={loading} wrapperClassName={assetDataStyle.assetLoading}>
+      <div className={assetDataStyle.assetData}>
+        <div className={`mb-[20px] ${assetDataStyle.groupSelector}`}>
+          <Radio.Group
+            onChange={onGroupChange}
+            value={groupId}
+            buttonStyle="solid"
+          >
+            {modelGroup.map((item) => (
+              <Radio.Button
+                key={item.classification_id}
+                value={item.classification_id}
+              >
+                {item.classification_name}
+              </Radio.Button>
+            ))}
+          </Radio.Group>
         </div>
-      </Spin>
-    </CommonProvider>
+        <div className={assetDataStyle.assetList}>
+          <Tabs
+            activeKey={modelId}
+            items={modelList}
+            onChange={onChangeModel}
+          />
+          <div className="flex justify-between mb-4">
+            <Space>
+              <Cascader
+                placeholder={t('Model.selectOrganazationPlaceholder')}
+                options={organizationList}
+                value={organization}
+                onChange={selectOrganization}
+              />
+              <SearchFilter
+                userList={userList}
+                attrList={propertyList.filter(
+                  (item) => item.attr_type !== 'organization'
+                )}
+                organizationList={organizationList}
+                onSearch={handleSearch}
+              />
+            </Space>
+            <Space>
+              <Dropdown menu={{ items: addInstItems }} placement="bottom" arrow>
+                <Button icon={<PlusOutlined />} type="primary">
+                  {t('add')}
+                </Button>
+              </Dropdown>
+              <Dropdown
+                menu={{ items: exportItems }}
+                disabled={exportLoading}
+                placement="bottom"
+                arrow
+              >
+                <Button>{t('export')}</Button>
+              </Dropdown>
+              <Dropdown
+                menu={{ items: batchOperateItems }}
+                disabled={!selectedRowKeys.length}
+                placement="bottom"
+                arrow
+              >
+                <Button>{t('more')}</Button>
+              </Dropdown>
+            </Space>
+          </div>
+          <CustomTable
+            rowSelection={rowSelection}
+            dataSource={tableData}
+            columns={currentColumns}
+            pagination={pagination}
+            loading={tableLoading}
+            scroll={{ x: 'calc(100vw - 100px)', y: 'calc(100vh - 370px)' }}
+            fieldSetting={{
+              showSetting: true,
+              displayFieldKeys,
+              choosableFields: columns.filter((item) => item.key !== 'action'),
+            }}
+            onSelectFields={onSelectFields}
+            rowKey="_id"
+            onChange={handleTableChange}
+          />
+          <FieldModal
+            ref={fieldRef}
+            userList={userList}
+            organizationList={organizationList}
+            onSuccess={updateFieldList}
+          />
+          <ImportInst ref={importRef} onSuccess={updateFieldList} />
+          <SelectInstance
+            ref={instanceRef}
+            userList={userList}
+            models={originModels}
+            assoTypes={assoTypes}
+            organizationList={organizationList}
+            needFetchAssoInstIds
+          />
+        </div>
+      </div>
+    </Spin>
   );
 };
 
-export default AssetData;
+export default withCommon(AssetData);

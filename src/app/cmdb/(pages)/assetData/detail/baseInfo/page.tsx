@@ -11,6 +11,7 @@ import {
 import { Spin } from 'antd';
 import useApiClient from '@/utils/request';
 import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
 
 const BaseInfo = () => {
   const { get, isLoading } = useApiClient();
@@ -73,4 +74,4 @@ const BaseInfo = () => {
     </Spin>
   );
 };
-export default BaseInfo;
+export default withCommon(BaseInfo);

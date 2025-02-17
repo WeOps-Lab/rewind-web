@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
 
 const AssetManage = () => {
   const { get, del, isLoading } = useApiClient();
@@ -112,7 +113,7 @@ const AssetManage = () => {
       classification_id: model.classification_id,
       is_pre: model.is_pre,
     }).toString();
-    router.push(`/cmdb/assetManage/detail?${params}`);
+    router.push(`/cmdb/assetManage/detail/attributes?${params}`);
   };
 
   const handleDragStart = (item: any) => {
@@ -322,4 +323,4 @@ const AssetManage = () => {
   );
 };
 
-export default AssetManage;
+export default withCommon(AssetManage);

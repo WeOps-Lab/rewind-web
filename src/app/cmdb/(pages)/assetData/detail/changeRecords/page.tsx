@@ -8,6 +8,7 @@ import RecordDetail from './recordDetail';
 import { useTranslation } from '@/utils/i18n';
 import { useSearchParams } from 'next/navigation';
 import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
 import {
   AttrFieldType,
   ModelItem,
@@ -234,4 +235,4 @@ const ChangeRecords: React.FC = () => {
   );
 };
 
-export default ChangeRecords;
+export default withCommon(ChangeRecords);

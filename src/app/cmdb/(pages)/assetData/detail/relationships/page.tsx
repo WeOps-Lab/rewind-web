@@ -16,6 +16,7 @@ import { useTranslation } from '@/utils/i18n';
 import AssoList from './list';
 // import Topo from './topo';
 import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
 // import { useSearchParams } from 'next/navigation';
 
 const Ralationships = () => {
@@ -134,4 +135,4 @@ const Ralationships = () => {
   );
 };
 
-export default Ralationships;
+export default withCommon(Ralationships);

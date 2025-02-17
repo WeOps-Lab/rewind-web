@@ -12,6 +12,7 @@ import { ATTR_TYPE_LIST } from '@/app/cmdb/constants/asset';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
 
 const Attributes = () => {
   const { get, del } = useApiClient();
@@ -243,4 +244,4 @@ const Attributes = () => {
   );
 };
 
-export default Attributes;
+export default withCommon(Attributes);
