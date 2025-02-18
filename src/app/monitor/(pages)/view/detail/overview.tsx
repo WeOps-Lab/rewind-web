@@ -270,7 +270,7 @@ const Overview: React.FC<ViewDetailProps> = ({
       details
         .filter((item) => item.name !== 'instance_name')
         .map((detail) => `${detail.label}${detail.value}`)
-        .join('-') || '--';
+        .join('-') || instanceName;
     const tableData = [];
     for (const key in latestData) {
       if (key.startsWith('value')) {
