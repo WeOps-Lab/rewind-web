@@ -56,7 +56,7 @@ const ViewDetail = () => {
             className="custom-tabs"
             options={[
               { value: 'metrics', label: t('monitor.metric') },
-              { value: 'overview', label: t('monitor.views.overview') },
+              //   { value: 'overview', label: t('monitor.views.overview') },
             ]}
             onChange={onTabChange}
           />
