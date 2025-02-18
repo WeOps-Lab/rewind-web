@@ -16,7 +16,7 @@ import {
   InterfaceTableItem,
   ViewDetailProps,
 } from '@/app/monitor/types/monitor';
-import { TimeSelectorDefaultValue } from '@/app/monitor/types';
+import { TableDataItem, TimeSelectorDefaultValue } from '@/app/monitor/types';
 import { useTranslation } from '@/utils/i18n';
 import {
   deepClone,
@@ -32,6 +32,7 @@ import {
   useInterfaceLabelMap,
 } from '@/app/monitor/constants/monitor';
 import Icon from '@/components/icon';
+import { ColumnItem } from '@/types';
 
 const Overview: React.FC<ViewDetailProps> = ({
   monitorObjectId,
@@ -300,13 +301,13 @@ const Overview: React.FC<ViewDetailProps> = ({
   };
 
   const getMultipleColumns = (displayDimension: string[]) => {
-    return ['interface', ...displayDimension].map((item: any) => {
+    return ['interface', ...displayDimension].map((item: string) => {
       const target = originMetricData.find((tex) => tex.name === item);
       return {
         title: INTERFACE_LABEL_MAP[item],
         dataIndex: item,
         key: item,
-        render: (_: unknown, record: any) => (
+        render: (_: unknown, record: TableDataItem) => (
           <>{getEnumValueUnit(target as MetricItem, record[item])}</>
         ),
       };
@@ -350,7 +351,7 @@ const Overview: React.FC<ViewDetailProps> = ({
           <CustomTable
             pagination={false}
             dataSource={getTableData(metricItem.viewData || [])}
-            columns={metricItem.displayDimension.map((item: any) => ({
+            columns={metricItem.displayDimension.map((item: ColumnItem) => ({
               title: item,
               dataIndex: item,
               key: item,
@@ -396,7 +397,10 @@ const Overview: React.FC<ViewDetailProps> = ({
         <Spin spinning={loading}>
           <div className="flex flex-wrap justify-evenly">
             {metricData
-              .sort((a: any, b: any) => a.sortIndex - b.sortIndex)
+              .sort(
+                (a: TableDataItem, b: TableDataItem) =>
+                  a.sortIndex - b.sortIndex
+              )
               .map((metricItem: MetricItem) => (
                 <div
                   key={metricItem.id}
