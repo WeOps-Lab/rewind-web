@@ -43,7 +43,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
   const { t } = useTranslation();
 
   const menu = (
-    <Menu className={`${entityStyles.menuContainer}`}>
+    <Menu className={`${styles.menuContainer}`}>
       <Menu.Item key={`edit-${id}`}>
         <PermissionWrapper requiredPermissions={['Edit']}>
           <span className="block" onClick={() => onMenuClick('edit', { id, name, introduction, created_by, team_name, team, online })}>{t('common.edit')}</span>

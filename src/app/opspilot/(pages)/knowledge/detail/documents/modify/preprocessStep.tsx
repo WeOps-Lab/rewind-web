@@ -119,12 +119,10 @@ const PreprocessStep: React.FC<PreprocessStepProps> = ({ onConfigChange, knowled
     const initConfigLen = initialConfigRef.current ? Object.keys(initialConfigRef.current).length : 0;
     if (isInitialConfigApplied && initialConfig && initConfigLen) {
       const config = generateConfigRef.current(false);
-      console.log('Config changed:', config);
       onConfigChangeRef.current(config);
     }
     if (initialConfig && initConfigLen === 0) {
       const config = generateConfigRef.current(false);
-      console.log('Config changed:+++', config);
       onConfigChangeRef.current(config);
     }
   }, [formData, isInitialConfigApplied]);

@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import type { ColumnType } from 'antd/es/table';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import CollapsibleSection from './collapsibleSection';
+import TimeSelector from '@/components/time-selector';
 
 const { Search } = Input;
 
@@ -37,12 +38,23 @@ const InvocationLogsPage: React.FC = () => {
     pageSize: 10,
   });
 
-  const fetchLogs = useCallback(async (searchText = '', page = 1, pageSize = 10) => {
+  const getLast7Days = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 7);
+    return [start.getTime(), end.getTime()];
+  };
+  const [dates, setDates] = useState<number[]>(getLast7Days());
+
+  const fetchLogs = useCallback(async (searchText = '', page = 1, pageSize = 10, dates: number[] = []) => {
     setLoading(true);
     try {
       const params: any = { page, page_size: pageSize, skill_id: skillId };
       if (searchText) params.current_ip = searchText;
-
+      if (dates && dates[0] && dates[1]) {
+        params.start_time = new Date(dates[0]).toISOString();
+        params.end_time = new Date(dates[1]).toISOString();
+      }
       const data = await get('/model_provider_mgmt/skill_log/', { params });
       const items: LogDetail[] = data.items.map((item: any) => ({
         key: item.id,
@@ -63,13 +75,13 @@ const InvocationLogsPage: React.FC = () => {
   }, [get, skillId]);
 
   useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+    fetchLogs(searchText, 1, pagination.pageSize, dates);
+  }, []);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
     setPagination({ ...pagination, current: 1 });
-    fetchLogs(value, 1, pagination.pageSize);
+    fetchLogs(value, 1, pagination.pageSize, dates);
   };
 
   const handleDetailClick = (record: LogDetail) => {
@@ -83,7 +95,13 @@ const InvocationLogsPage: React.FC = () => {
       pageSize: pageSize || pagination.pageSize,
     };
     setPagination(newPagination);
-    fetchLogs(searchText, newPagination.current, newPagination.pageSize);
+    fetchLogs(searchText, newPagination.current, newPagination.pageSize, dates);
+  };
+
+  const handleDateChange = (value: number[]) => {
+    setDates(value);
+    setPagination({ ...pagination, current: 1 });
+    fetchLogs(searchText, 1, pagination.pageSize, value);
   };
 
   const handleCopy = (content: object) => {
@@ -119,14 +137,11 @@ const InvocationLogsPage: React.FC = () => {
       title: t('skill.invocationLogs.table.userMessage'),
       dataIndex: 'userMessage',
       key: 'userMessage',
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (userMessage) => (
-        <Tooltip placement="topLeft" title={userMessage}>
-          {userMessage}
+      render: (text) => (
+        <Tooltip title={text}>
+          <div className="line-clamp-3">{text}</div>
         </Tooltip>
-      ),
+      )
     },
     {
       title: t('common.actions'),
@@ -149,6 +164,14 @@ const InvocationLogsPage: React.FC = () => {
             onSearch={handleSearch}
             enterButton
             className="w-60"
+          />
+          <TimeSelector
+            onlyTimeSelect
+            defaultValue={{
+              selectValue: 10080,
+              rangePickerVaule: null
+            }}
+            onChange={handleDateChange}
           />
         </div>
       </div>

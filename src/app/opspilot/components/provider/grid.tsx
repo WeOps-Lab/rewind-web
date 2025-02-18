@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Input, Spin, Form, Input as AntdInput, Switch, message } from 'antd';
+import { Spin, message, Dropdown, Menu, Modal } from 'antd';
 import Icon from '@/components/icon';
 import { useTranslation } from '@/utils/i18n';
-import OperateModal from '@/components/operate-modal';
 import styles from './index.module.scss';
+import comStyles from '@/app/opspilot/styles/common.module.scss';
 import { Model, ModelConfig } from '@/app/opspilot/types/provider';
 import useApiClient from '@/utils/request';
 import PermissionWrapper from '@/components/permission';
+import ConfigModal from '@/app/opspilot/components/provider/configModal';
 
 interface ProviderGridProps {
   models: Model[];
@@ -17,116 +18,136 @@ interface ProviderGridProps {
 
 const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading, setModels }) => {
   const { t } = useTranslation();
-  const { put } = useApiClient();
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const { put, del } = useApiClient();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [modalLoading, setModalLoading] = useState<boolean>(false);
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
-  const [form] = Form.useForm();
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const llmIconMap: Record<string, string> = {
+    'deep-seek': 'deepseek',
+    'chat-gpt': 'chatgpticon',
+    'hugging_face': 'huggingface',
+    'zhipu': 'a-zhipuAI',
+    'default': 'chatgpticon'
   };
 
-  const filteredModels = models.filter((model) =>
-    model.name?.toLowerCase().includes(searchTerm?.toLowerCase())
-  );
+  const iconMap: Record<string, string> = {
+    embed_provider: 'Embeddings',
+    rerank_provider: 'jigoushuzhongxinpaixu',
+    ocr_provider: 'ocr',
+    default: 'chatgpticon'
+  };
 
-  const getModelIcon = () => {
-    const iconMap: Record<string, string> = {
-      llm_model: 'chatgpticon',
-      embed_provider: 'Embeddings',
-      rerank_provider: 'jigoushuzhongxinpaixu',
-      ocr_provider: 'ocr'
-    };
+  const getModelIcon = (model: Model) => {
+    if (filterType === 'llm_model') {
+      return llmIconMap[model.llm_model_type || 'default'];
+    }
     return iconMap[filterType] || 'chatgpticon';
   };
 
-  const handleSettingsClick = (model: Model) => {
-    const configField = getConfigField(filterType);
-    setSelectedModel(model);
-    const config = model[configField] as ModelConfig | undefined;
-    form.setFieldsValue({
-      apiKey: model.llm_config?.openai_api_key || '',
-      url: filterType === 'llm_model' ? model.llm_config?.openai_base_url || '' : config?.base_url || '',
-      enabled: model.enabled || false,
-    });
-    setIsModalVisible(true);
+  const handleMenuClick = (action: string, model: Model) => {
+    if (action === 'edit') {
+      setSelectedModel(model);
+      setIsModalVisible(true);
+    } else if (action === 'delete') {
+      handleDelete(model);
+    }
   };
 
-  const getConfigField = (type: string): keyof Model => {
-    const configMap: Record<string, keyof Model> = {
+  const menu = (model: Model) => (
+    <Menu className={`${comStyles.menuContainer}`}>
+      <Menu.Item key="edit">
+        <PermissionWrapper className='w-full' requiredPermissions={['Setting']}>
+          <span className='block w-full' onClick={() => handleMenuClick('edit', model)}>{t('common.edit')}</span>
+        </PermissionWrapper>
+      </Menu.Item>
+      {model.is_build_in === false && (<Menu.Item key="delete">
+        <PermissionWrapper className='w-full' requiredPermissions={['Setting']}>
+          <span className='block w-full' onClick={() => handleMenuClick('delete', model)}>{t('common.delete')}</span>
+        </PermissionWrapper>
+      </Menu.Item>)}
+    </Menu>
+  );
+
+  const getConfigField = (type: string): keyof Model | undefined => {
+    const configMap: Partial<Record<string, keyof Model>> = {
       llm_model: 'llm_config',
       embed_provider: 'embed_config',
       rerank_provider: 'rerank_config',
-      ocr_provider: 'ocr_config'
+      ocr_provider: 'ocr_config',
     };
-    return configMap[type];
+    return configMap[type]; // 返回可能为 undefined
   };
 
-  const handleOk = () => {
-    form.validateFields().then(async (values) => {
-      const configField = getConfigField(filterType);
-      if (!selectedModel) return;
+  const handleEditOk = async (values: any) => {
+    if (!selectedModel) return;
 
-      const updatedModel: Model = {
-        ...selectedModel,
-        enabled: values.enabled,
+    const configField = getConfigField(filterType);
+    const updatedModel: Model = {
+      ...selectedModel,
+      name: values.name,
+      llm_model_type: values.type,
+      enabled: values.enabled,
+    };
+
+    if (filterType === 'llm_model') {
+      updatedModel.llm_config = {
+        ...selectedModel.llm_config,
+        model: values.modelName,
+        openai_api_key: values.apiKey,
+        openai_base_url: values.url,
       };
-
-      if (filterType === 'llm_model') {
-        updatedModel.llm_config = {
-          ...selectedModel.llm_config,
-          openai_api_key: values.apiKey,
-          openai_base_url: values.url,
-        };
-      } else {
-        (updatedModel[configField] as ModelConfig) = {
-          ...(selectedModel[configField] as ModelConfig),
-          base_url: values.url,
-        };
+    } else {
+      if (!configField) {
+        throw new Error(`Invalid filterType: ${filterType}`);
       }
+      (updatedModel[configField] as ModelConfig) = {
+        ...(selectedModel[configField] as ModelConfig),
+        base_url: values.url,
+      };
+    }
 
-      setModalLoading(true);
-      try {
-        await put(`/model_provider_mgmt/${filterType}/${selectedModel.id}/`, updatedModel);
+    setModalLoading(true);
+    try {
+      const result = await put(`/model_provider_mgmt/${filterType}/${selectedModel.id}/`, updatedModel);
+      if (result && result.id) {
         message.success(t('common.updateSuccess'));
+        setModels(prevModels => prevModels.map(model => (model.id === updatedModel.id ? updatedModel : model)));
         setIsModalVisible(false);
-        const updatedModels = models.map(model =>
-          model.id === updatedModel.id ? updatedModel : model
-        );
-        setModels(updatedModels);
-      } catch {
+      } else {
         message.error(t('common.updateFailed'));
-      } finally {
-        setModalLoading(false);
       }
-    }).catch(info => {
-      console.log(t('common.valFailed'), info);
-    });
+    } catch {
+      message.error(t('common.updateFailed'));
+    } finally {
+      setModalLoading(false);
+    }
   };
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
+  const handleDelete = async (model: Model) => {
+    Modal.confirm({
+      title: `${t('provider.deleteConfirm')}`,
+      onOk: async () => {
+        try {
+          await del(`/model_provider_mgmt/${filterType}/${model.id}/`);
+          message.success(t('common.delSuccess'));
+          setModels(prevModels => prevModels.filter(item => item.id !== model.id));
+        } catch {
+          message.error(t('common.delFailed'));
+        }
+      },
+    });
   };
 
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <Input
-          size="large"
-          placeholder={`${t('common.search')}...`}
-          style={{ width: '350px' }}
-          onChange={handleSearch}
-        />
-      </div>
       <Spin spinning={loading}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredModels.map((model) => (
+          {models.map((model) => (
             <div className={`rounded-lg shadow px-4 py-6 relative ${styles.gridContainer}`} key={model.id}>
               <div className="flex justify-between items-start">
-                <div style={{ flex: '0 0 auto' }}>
-                  <Icon type={getModelIcon()} className="text-5xl" />
+                <div style={{flex: '0 0 auto'}}>
+                  <Icon type={getModelIcon(model)} className="text-5xl"/>
                 </div>
                 <div className={`flex-1 ml-2 ${styles.nameContainer}`}>
                   <h3 className={`text-base font-semibold break-words mb-1 ${styles.name}`}>{model.name}</h3>
@@ -134,16 +155,11 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
                     {filterType}
                   </span>
                 </div>
-
-                <PermissionWrapper
-                  requiredPermissions={['Setting']}
-                  className="absolute top-2 right-2"
-                >
-                  <button onClick={() => handleSettingsClick(model)}>
-                    <Icon type="shezhi" className="text-base" />
-                  </button>
-                </PermissionWrapper>
-
+                <Dropdown overlay={menu(model)} trigger={['click']} placement="bottomRight">
+                  <div className="cursor-pointer">
+                    <Icon type="sangedian-copy" className="text-xl" />
+                  </div>
+                </Dropdown>
               </div>
               <div className="absolute bottom-0 right-0 rounded-lg z-20">
                 <span className={`${styles.iconTriangle} ${model.enabled ? styles.enabled : styles.disabled}`}>
@@ -154,45 +170,15 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
           ))}
         </div>
       </Spin>
-      <OperateModal
-        title={t('provider.setting')}
+      <ConfigModal
         visible={isModalVisible}
-        okText={t('common.confirm')}
-        cancelText={t('common.cancel')}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        mode="edit"
+        filterType={filterType}
+        model={selectedModel}
         confirmLoading={modalLoading}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="url"
-            label={t('provider.form.url')}
-            rules={[{ required: true, message: `${t('common.input')} ${t('provider.form.url')}` }]}
-          >
-            <AntdInput />
-          </Form.Item>
-          {filterType === 'llm_model' && (
-            <Form.Item
-              name="apiKey"
-              label={t('provider.form.key')}
-              rules={[{ required: true, message: `${t('common.input')} ${t('provider.form.key')}` }]}
-            >
-              <AntdInput.Password
-                visibilityToggle={false}
-                onCopy={(e) => e.preventDefault()}
-                onCut={(e) => e.preventDefault()}
-              />
-            </Form.Item>
-          )}
-          <Form.Item
-            name="enabled"
-            label={t('provider.form.enabled')}
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
-        </Form>
-      </OperateModal>
+        onOk={handleEditOk}
+        onCancel={() => setIsModalVisible(false)}
+      />
     </>
   );
 };

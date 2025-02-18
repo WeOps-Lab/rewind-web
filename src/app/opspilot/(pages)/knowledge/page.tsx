@@ -9,6 +9,7 @@ import { KnowledgeValues, Card } from '@/app/opspilot/types/knowledge';
 import ModifyKnowledgeModal from './modifyKnowledge';
 import PermissionWrapper from '@/components/permission';
 import knowledgeStyle from './index.module.scss';
+import styles from '@/app/opspilot/styles/common.module.scss';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { getIconTypeByIndex } from '@/app/opspilot/utils/knowledgeBaseUtils';
@@ -68,7 +69,7 @@ const KnowledgePage = () => {
 
   const handleDelete = (cardId: number) => {
     Modal.confirm({
-      title: 'Are you sure you want to delete this knowledge?',
+      title: `${t('knowledge.deleteConfirm')}`,
       onOk: async () => {
         try {
           await del(`/knowledge_mgmt/knowledge_base/${cardId}/`);
@@ -91,7 +92,7 @@ const KnowledgePage = () => {
   };
 
   const menu = (card: Card) => (
-    <Menu>
+    <Menu className={`${styles.menuContainer}`}>
       <Menu.Item key="edit">
         <PermissionWrapper requiredPermissions={['Edit']}>
           <span className='block' onClick={() => handleMenuClick('edit', card)}>{t('common.edit')}</span>

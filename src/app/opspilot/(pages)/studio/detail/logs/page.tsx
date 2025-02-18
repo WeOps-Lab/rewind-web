@@ -137,6 +137,11 @@ const StudioLogsPage: React.FC = () => {
       title: t('studio.logs.table.title'),
       dataIndex: 'title',
       key: 'title',
+      render: (text) => (
+        <Tooltip title={text}>
+          <div className="line-clamp-3">{text}</div>
+        </Tooltip>
+      ),
     },
     {
       title: t('studio.logs.table.createdTime'),

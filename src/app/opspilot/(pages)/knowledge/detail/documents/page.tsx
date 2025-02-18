@@ -263,9 +263,6 @@ const DocumentsPage: React.FC = () => {
 
   useEffect(() => {
     fetchData(searchText);
-    return () => {
-      console.log('Component unmounted');
-    };
   }, [fetchData, id]);
 
   const rowSelection = {

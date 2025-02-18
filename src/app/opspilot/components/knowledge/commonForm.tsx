@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Form, Input, Select } from 'antd';
 import { useTranslation } from '@/utils/i18n';
+import { useUserInfoContext } from '@/context/userInfo';
 
 const { Option } = Select;
 
@@ -15,6 +16,7 @@ interface CommonFormProps {
 
 const CommonForm: React.FC<CommonFormProps> = ({ form, modelOptions, initialValues, isTraining, formType, visible }) => {
   const { t } = useTranslation();
+  const { groups, selectedGroup } = useUserInfoContext();
 
   useEffect(() => {
     if (!visible) return;
@@ -56,6 +58,23 @@ const CommonForm: React.FC<CommonFormProps> = ({ form, modelOptions, initialValu
           </Select>
         </Form.Item>
       )}
+      <Form.Item
+        name="team"
+        label={t(`${formType}.form.group`)}
+        rules={[{ required: true, message: `${t('common.selectMsg')}${t(`${formType}.form.group`)}` }]}
+        initialValue={selectedGroup ? [selectedGroup?.id] : []}
+      >
+        <Select
+          mode="multiple"
+          placeholder={`${t('common.selectMsg')}${t(`${formType}.form.group`)}`}
+        >
+          {groups.map(group => (
+            <Select.Option key={group.id} value={group.id}>
+              {group.name}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
       <Form.Item
         name="introduction"
         label={t(`${formType}.form.introduction`)}

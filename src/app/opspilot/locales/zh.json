@@ -21,6 +21,7 @@
       "content": "内容",
       "owner": "所有者"
     },
+    "deleteConfirm": "确定要删除这个知识库吗?",
     "localFile": "本地文件",
     "fileSubTitle": "上传本地文件（如PDF、DOCX、TXT）作为知识来源。",
     "webLink": "网页链接",
@@ -187,8 +188,13 @@
     "form": {
       "key": "API密钥",
       "url": "网址",
-      "enabled": "启用"
-    }
+      "enabled": "启用",
+      "name": "名称",
+      "modelName": "模型名称",
+      "type": "类型",
+      "group": "团队"
+    },
+    "deleteConfirm": "你确定要删除此模型吗？"
   },
   "studio": {
     "menu": "Studio",
