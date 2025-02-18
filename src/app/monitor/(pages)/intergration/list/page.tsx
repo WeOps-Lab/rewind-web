@@ -18,6 +18,7 @@ import ImportModal from './importModal';
 import axios from 'axios';
 import { useAuth } from '@/context/auth';
 import TreeSelector from '@/app/monitor/components/treeSelector';
+import { useSearchParams } from 'next/navigation';
 
 const Intergration = () => {
   const { get, isLoading } = useApiClient();
@@ -27,6 +28,8 @@ const Intergration = () => {
   const authContext = useAuth();
   const token = authContext?.token || null;
   const tokenRef = useRef(token);
+  const searchParams = useSearchParams();
+  const objId = searchParams.get('objId') || '';
   const [pageLoading, setPageLoading] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>('');
   const [exportDisabled, setExportDisabled] = useState<boolean>(true);
@@ -77,7 +80,8 @@ const Intergration = () => {
       const _treeData = getTreeData(deepClone(data));
       setTreeData(_treeData);
       setObjects(data);
-      setDefaultSelectObj(data[0]?.id);
+      const defaultId = +objId || data[0]?.id;
+      setDefaultSelectObj(defaultId);
     } finally {
       setTreeLoading(false);
     }

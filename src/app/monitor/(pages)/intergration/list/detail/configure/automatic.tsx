@@ -402,7 +402,11 @@ const AutomaticConfiguration: React.FC = () => {
         params
       );
       message.success(t('common.addSuccess'));
-      router.push('/monitor/intergration');
+      const searchParams = new URLSearchParams({
+        objId: objectId,
+      });
+      const targetUrl = `/monitor/intergration/list?${searchParams.toString()}`;
+      router.push(targetUrl);
     } finally {
       setConfirmLoading(false);
     }

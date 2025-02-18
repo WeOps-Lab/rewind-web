@@ -16,12 +16,15 @@ const IntergrationDetailLayout = ({
   const router = useRouter();
   const groupId = searchParams.get('plugin_name');
   const desc = searchParams.get('plugin_description');
+  const objId = searchParams.get('id') || '';
   const icon = OBJECT_ICON_MAP[searchParams.get('name') as string] || 'Host';
   const pathname = usePathname();
   const isDetail = pathname.includes('/detail/');
 
   const handleBackButtonClick = () => {
-    router.push(`/monitor/intergration/list`);
+    const params = new URLSearchParams({ objId });
+    const targetUrl = `/monitor/intergration/list?${params.toString()}`;
+    router.push(targetUrl);
   };
 
   const TopSection = () => (

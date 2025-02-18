@@ -8,7 +8,7 @@
     },
     {
       "title": "视图",
-      "icon": "zichan-quanbushebei",
+      "icon": "daohang-yunyingfenxishi",
       "url": "/monitor/view",
       "name": "view_list",
       "children": [
@@ -21,7 +21,7 @@
     },
     {
       "title": "事件",
-      "icon": "mulu",
+      "icon": "shujumoxingguanli",
       "url": "/monitor/event",
       "name": "Event",
       "children": [
@@ -32,7 +32,7 @@
           "name": "alert_list"
         },
         {
-          "icon": "moxing2",
+          "icon": "mulu",
           "title": "策略",
           "url": "/monitor/event/strategy",
           "name": "strategy_list",
@@ -54,7 +54,7 @@
       "children": [
         {
           "title": "资产",
-          "icon": "shujumoxingguanli",
+          "icon": "_quota_management",
           "url": "/monitor/intergration/asset",
           "name": "asset"
         },
@@ -66,13 +66,13 @@
           "children": [
             {
               "title": "配置",
-              "icon": "shujumoxingguanli",
+              "icon": "settings-fill",
               "url": "/monitor/intergration/list/detail/configure",
               "name": "integration_configure"
             },
             {
               "title": "指标",
-              "icon": "zichan-quanbushebei",
+              "icon": "guanli",
               "url": "/monitor/intergration/list/detail/metric",
               "name": "integration_metric"
             }
@@ -90,7 +90,7 @@
     },
     {
       "title": "View",
-      "icon": "zichan-quanbushebei",
+      "icon": "daohang-yunyingfenxishi",
       "url": "/monitor/view",
       "name": "view_list",
       "children": [
@@ -103,7 +103,7 @@
     },
     {
       "title": "Event",
-      "icon": "mulu",
+      "icon": "shujumoxingguanli",
       "url": "/monitor/event",
       "name": "Event",
       "children": [
@@ -114,7 +114,7 @@
           "name": "alert_list"
         },
         {
-          "icon": "moxing2",
+          "icon": "mulu",
           "title": "Strategy",
           "url": "/monitor/event/strategy",
           "name": "strategy_list",
@@ -136,7 +136,7 @@
       "children": [
         {
           "title": "Asset",
-          "icon": "shujumoxingguanli",
+          "icon": "_quota_management",
           "url": "/monitor/intergration/asset",
           "name": "asset"
         },
@@ -148,13 +148,13 @@
           "children": [
             {
               "title": "Configure",
-              "icon": "shujumoxingguanli",
+              "icon": "settings-fill",
               "url": "/monitor/intergration/list/detail/configure",
               "name": "integration_configure"
             },
             {
               "title": "Metric",
-              "icon": "zichan-quanbushebei",
+              "icon": "guanli",
               "url": "/monitor/intergration/list/detail/metric",
               "name": "integration_metric"
             }
