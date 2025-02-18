@@ -2,22 +2,9 @@ import { useGraphStore, useGraphInstance } from '@antv/xflow';
 import { useEffect, useCallback } from 'react';
 import { Graph } from '@antv/x6';
 import { getIconUrl } from '@/app/cmdb/utils/common';
-import {
-  ModelItem,
-  TopoData,
-  NodeData,
-  AssoTypeItem,
-} from '@/app/cmdb/types/assetManage';
+import { TopoDataProps, NodeData } from '@/app/cmdb/types/assetData';
 
-interface TopoProps {
-  modelId: string;
-  instId: string;
-  topoData: TopoData;
-  modelList: ModelItem[];
-  assoTypeList: AssoTypeItem[];
-}
-
-export const InitNode: React.FC<TopoProps> = ({
+export const InitNode: React.FC<TopoDataProps> = ({
   topoData,
   modelList,
   modelId,

@@ -66,6 +66,7 @@
     "batchDelete": "Batch Delete",
     "batchEdit": "Batch Edit",
     "searchTxt": "Search",
+    "searchTitle": "Asset Search",
     "menu": {
       "log": "Log",
       "assetManage": "Model",

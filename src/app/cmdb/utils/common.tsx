@@ -374,7 +374,7 @@ export const findNodeWithParents: any = (
       }
     }
   }
-  return null;
+  return [];
 };
 
 // 过滤出所有给定ID的节点及其所有父级节点

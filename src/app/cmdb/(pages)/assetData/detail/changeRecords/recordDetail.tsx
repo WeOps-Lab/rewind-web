@@ -10,40 +10,12 @@ import { Button, Spin } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
-import {
-  AttrFieldType,
-  ModelItem,
-  Organization,
-  AssoTypeItem,
-} from '@/app/cmdb/types/assetManage';
 import { deepClone, getFieldItem } from '@/app/cmdb/utils/common';
 import CustomTable from '@/components/custom-table';
 import recordDetailStyle from './recordDetail.module.scss';
+import { RecordDetailProps, FieldModalRef, RecordsEnum } from '@/app/cmdb/types/assetData';
 
-interface FieldModalProps {
-  userList: Array<any>;
-  propertyList: AttrFieldType[];
-  modelList: ModelItem[];
-  groupList: Organization[];
-  enumList: RecordsEnum;
-  connectTypeList: Array<AssoTypeItem>;
-}
-
-interface FieldConfig {
-  subTitle: string;
-  title: string;
-  recordRow: any;
-}
-
-interface RecordsEnum {
-  [key: string]: string;
-}
-
-export interface FieldModalRef {
-  showModal: (info: FieldConfig) => void;
-}
-
-const RecordDetail = forwardRef<FieldModalRef, FieldModalProps>(
+const RecordDetail = forwardRef<FieldModalRef, RecordDetailProps>(
   (
     { userList, propertyList, modelList, groupList, enumList, connectTypeList },
     ref

@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { XFlow, XFlowGraph, Grid, Snapline, Minimap } from '@antv/xflow';
-import { ModelItem, AssoTypeItem, TopoData } from '@/app/cmdb/types/assetManage';
 import useApiClient from '@/utils/request';
 import { InitNode } from './topoData';
 import { Spin } from 'antd';
 import topoStyle from './index.module.scss';
-
-interface AssoTopoProps {
-  modelList: ModelItem[];
-  assoTypeList: AssoTypeItem[];
-  modelId: string;
-  instId: string;
-}
+import { AssoTopoProps, TopoData } from '@/app/cmdb/types/assetData';
 
 const Topo: React.FC<AssoTopoProps> = ({
   assoTypeList,

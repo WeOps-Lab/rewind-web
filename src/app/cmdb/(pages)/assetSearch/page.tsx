@@ -336,8 +336,8 @@ const AssetSearch = () => {
         {showSearch ? (
           <div className={assetSearchStyle.searchInput}>
             <h1 className={assetSearchStyle.searchTitle}>{`${t(
-              'menu.asset'
-            )} ${t('searchTxt')}`}</h1>
+              'searchTitle'
+            )}`}</h1>
             <Search
               className={assetSearchStyle.inputBtn}
               value={searchText}

@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import useApiClient from '@/utils/request';
 import { UserItem, Organization } from '@/app/cmdb/types/assetManage';
 import { convertArray, filterNodesWithAllParents } from '@/app/cmdb/utils/common';
+import Spin from '@/components/spin';
 
 interface CommonContextType {
   permissionGroupsInfo: PermissionGroupsInfo;
@@ -69,7 +70,7 @@ const CommonContextProvider = ({ children }: { children: React.ReactNode }) => {
       setPageLoading(false);
     }
   };
-  return pageLoading ? null : (
+  return pageLoading ? <Spin></Spin> : (
     <CommonContext.Provider
       value={{
         permissionGroupsInfo,

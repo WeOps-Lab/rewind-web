@@ -10,8 +10,6 @@ import { useSearchParams } from 'next/navigation';
 import {
   CrentialsAssoInstItem,
   CrentialsAssoDetailItem,
-  UserItem,
-  Organization,
   ModelItem,
   AssoTypeItem,
   AssoListRef,
@@ -26,14 +24,9 @@ import { CaretRightOutlined } from '@ant-design/icons';
 import assoListStyle from './index.module.scss';
 import { useTranslation } from '@/utils/i18n';
 import SelectInstance from './selectInstance';
-const { confirm } = Modal;
+import { AssoListProps } from '@/app/cmdb/types/assetData';
 
-interface AssoListProps {
-  userList: UserItem[];
-  organizationList: Organization[];
-  modelList: ModelItem[];
-  assoTypeList: AssoTypeItem[];
-}
+const { confirm } = Modal;
 
 const AssoList = forwardRef<AssoListRef, AssoListProps>(
   ({ modelList, userList, organizationList, assoTypeList }, ref) => {

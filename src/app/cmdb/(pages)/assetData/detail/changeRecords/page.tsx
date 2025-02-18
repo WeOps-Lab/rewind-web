@@ -9,6 +9,7 @@ import { useTranslation } from '@/utils/i18n';
 import { useSearchParams } from 'next/navigation';
 import { useCommon } from '@/app/cmdb/context/common';
 import { withCommon } from '@/app/cmdb/context/withCommon';
+import { RecordsEnum, RecordItemList, RecordItem, detailRef } from '@/app/cmdb/types/assetData';
 import {
   AttrFieldType,
   ModelItem,
@@ -18,31 +19,6 @@ import {
 } from '@/app/cmdb/types/assetManage';
 
 const { RangePicker } = DatePicker;
-
-interface RecordsEnum {
-  [key: string]: string;
-}
-
-interface RecordItemList {
-  type: string;
-  created_at: string;
-  operator: string;
-  id: number;
-  [key: string]: unknown;
-}
-
-interface RecordItem {
-  date: string;
-  list: RecordItemList[];
-}
-
-interface detailRef {
-  showModal: (config: {
-    subTitle: string;
-    title: string;
-    recordRow: any;
-  }) => void;
-}
 
 const ChangeRecords: React.FC = () => {
   const { get, isLoading } = useApiClient();

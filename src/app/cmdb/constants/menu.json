@@ -18,19 +18,19 @@
             "url": "/cmdb/assetData",
             "name": "asset_list",
             "children": [{
-                "title": "Basic Information",
+                "title": "基础信息",
                 "icon": "shujumoxingguanli",
                 "url": "/cmdb/assetData/detail/baseInfo",
                 "name": "asset_basic_information"
             },
             {
-                "title": "Relationships",
+                "title": "关联关系",
                 "icon": "shujumoxingguanli",
                 "url": "/cmdb/assetData/detail/relationships",
                 "name": "asset_relationships"
             },
             {
-                "title": "Change Records",
+                "title": "变更记录",
                 "icon": "shujumoxingguanli",
                 "url": "/cmdb/assetData/detail/changeRecords",
                 "name": "asset_change_records"

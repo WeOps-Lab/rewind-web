@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Select, Input, Cascader, Checkbox, DatePicker } from 'antd';
-import { Organization, AttrFieldType, UserItem } from '@/app/cmdb/types/assetManage';
+import { UserItem } from '@/app/cmdb/types/assetManage';
 import searchFilterStyle from './searchFilter.module.scss';
 import { useTranslation } from '@/utils/i18n';
 import type { CheckboxProps } from 'antd';
-
-interface SearchFilterProps {
-  attrList: AttrFieldType[];
-  organizationList: Organization[];
-  userList: UserItem[];
-  onSearch: (condition: unknown, value: any) => void;
-}
+import { SearchFilterProps } from '@/app/cmdb/types/assetData';
 
 const SearchFilter: React.FC<SearchFilterProps> = ({
   attrList,

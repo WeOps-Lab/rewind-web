@@ -18,11 +18,7 @@ import OperateModal from '@/components/operate-modal';
 import { useTranslation } from '@/utils/i18n';
 import {
   AttrFieldType,
-  UserItem,
-  Organization,
-  ModelItem,
   ColumnItem,
-  AssoTypeItem,
   AssoFieldType,
   ListItem,
   RelationListInstItem,
@@ -33,19 +29,12 @@ import { getAssetColumns } from '@/app/cmdb/utils/common';
 import useApiClient from '@/utils/request';
 import SearchFilter from '../../list/searchFilter';
 import CustomTable from '@/components/custom-table';
+import { SelectInstanceProps } from '@/app/cmdb/types/assetData';
+
 const { Option } = Select;
 const { confirm } = Modal;
 
-interface FieldModalProps {
-  onSuccess?: () => void;
-  userList: UserItem[];
-  organizationList: Organization[];
-  models: ModelItem[];
-  assoTypes: AssoTypeItem[];
-  needFetchAssoInstIds?: boolean;
-}
-
-const SelectInstance = forwardRef<RelationInstanceRef, FieldModalProps>(
+const SelectInstance = forwardRef<RelationInstanceRef, SelectInstanceProps>(
   (
     {
       onSuccess,
