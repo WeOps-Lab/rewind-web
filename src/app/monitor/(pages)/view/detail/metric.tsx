@@ -7,13 +7,12 @@ import TimeSelector from '@/components/time-selector';
 import LineChart from '@/app/monitor/components/charts/lineChart';
 import Collapse from '@/components/collapse';
 import useApiClient from '@/utils/request';
-import { ChartData, TimeSelectorDefaultValue } from '@/app/monitor/types';
+import { TableDataItem, TimeSelectorDefaultValue } from '@/app/monitor/types';
 import {
   MetricItem,
   GroupInfo,
   IndexViewItem,
   SearchParams,
-  ChartDataItem,
   IntergrationItem,
   ViewDetailProps,
 } from '@/app/monitor/types/monitor';
@@ -23,6 +22,7 @@ import {
   deepClone,
   findUnitNameById,
   mergeViewQueryKeyValues,
+  renderChart,
 } from '@/app/monitor/utils/common';
 import dayjs, { Dayjs } from 'dayjs';
 import Icon from '@/components/icon';
@@ -31,6 +31,7 @@ const MetricViews: React.FC<ViewDetailProps> = ({
   monitorObjectId,
   monitorObjectName,
   instanceId,
+  instanceName,
   idValues,
 }) => {
   const { get, isLoading } = useApiClient();
@@ -126,7 +127,7 @@ const MetricViews: React.FC<ViewDetailProps> = ({
             }
           });
           const _groupData = groupData.filter(
-            (item: any) => !!item.child?.length
+            (item: IndexViewItem) => !!item.child?.length
           );
           setExpandId(_groupData[0]?.id || 0);
           setMetricData(_groupData);
@@ -167,51 +168,6 @@ const MetricViews: React.FC<ViewDetailProps> = ({
     return params;
   };
 
-  const processData = (
-    data: ChartDataItem[],
-    metricItem: MetricItem
-  ): ChartData[] => {
-    const result: any[] = [];
-    const target = metricItem?.dimensions || [];
-    data.forEach((item, index: number) => {
-      item.values.forEach(([timestamp, value]: [number, string]) => {
-        const existing = result.find((entry) => entry.time === timestamp);
-        const detailValue = Object.entries(item.metric)
-          .map(([key, dimenValue]) => ({
-            name: key,
-            label:
-              key === 'instance_name'
-                ? 'Instance Name'
-                : target.find((sec) => sec.name === key)?.description || key,
-            value: dimenValue,
-          }))
-          .filter(
-            (item) =>
-              item.name === 'instance_name' ||
-              target.find((tex) => tex.name === item.name)
-          );
-        if (existing) {
-          existing[`value${index + 1}`] = parseFloat(value);
-          if (!existing.details[`value${index + 1}`]) {
-            existing.details[`value${index + 1}`] = [];
-          }
-          existing.details[`value${index + 1}`].push(...detailValue);
-        } else {
-          const details = {
-            [`value${index + 1}`]: detailValue,
-          };
-          result.push({
-            time: timestamp,
-            title: metricItem.display_name,
-            [`value${index + 1}`]: parseFloat(value),
-            details,
-          });
-        }
-      });
-    });
-    return result;
-  };
-
   const fetchViewData = async (data: IndexViewItem[], groupId: number) => {
     const metricList = data.find((item) => item.id === groupId)?.child || [];
     const requestQueue = metricList.map((item) =>
@@ -227,7 +183,17 @@ const MetricViews: React.FC<ViewDetailProps> = ({
       results.forEach((result) => {
         const metricItem = metricList.find((item) => item.id === result.id);
         if (metricItem) {
-          metricItem.viewData = processData(result.data || [], metricItem);
+          const config = [
+            {
+              instance_id_values: idValues,
+              instance_name: instanceName,
+              instance_id: instanceId || '',
+              instance_id_keys: metricItem?.instance_id_keys || [],
+              dimensions: metricItem.dimensions || [],
+              title: metricItem.display_name || '--',
+            },
+          ];
+          metricItem.viewData = renderChart(result.data || [], config);
         }
       });
     } catch (error) {
@@ -323,7 +289,7 @@ const MetricViews: React.FC<ViewDetailProps> = ({
     setTimeRange(_times);
   };
 
-  const linkToSearch = (row: any) => {
+  const linkToSearch = (row: TableDataItem) => {
     const _row = {
       monitor_object: monitorObjectName,
       instance_id: instanceId as string,
@@ -334,7 +300,7 @@ const MetricViews: React.FC<ViewDetailProps> = ({
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const linkToPolicy = (row: any) => {
+  const linkToPolicy = (row: TableDataItem) => {
     const _row = {
       monitorName: monitorObjectName,
       monitorObjId: monitorObjectId + '',

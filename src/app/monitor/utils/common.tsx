@@ -5,9 +5,14 @@ import {
   SubGroupItem,
   ListItem,
   ViewQueryKeyValuePairs,
+  ChartData,
 } from '@/app/monitor/types';
 import { Group } from '@/types';
-import { MetricItem } from '@/app/monitor/types/monitor';
+import {
+  MetricItem,
+  ChartDataItem,
+  ChartProps,
+} from '@/app/monitor/types/monitor';
 import { UNIT_LIST, APPOINT_METRIC_IDS } from '@/app/monitor/constants/monitor';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 
@@ -350,4 +355,60 @@ export const mergeViewQueryKeyValues = (
   }
 
   return resultArray.join(',');
+};
+
+export const renderChart = (
+  data: ChartDataItem[],
+  config: ChartProps[]
+): ChartData[] => {
+  const result: any[] = [];
+  const target = config[0]?.dimensions || [];
+  data.forEach((item, index) => {
+    item.values.forEach(([timestamp, value]) => {
+      const existing = result.find((entry) => entry.time === timestamp);
+      let detailValue = Object.entries(item.metric)
+        .map(([key, dimenValue]) => ({
+          name: key,
+          label: target.find((sec) => sec.name === key)?.description || key,
+          value: dimenValue,
+        }))
+        .filter((item) => target.find((tex) => tex.name === item.name));
+      if (!target.length || !detailValue.length) {
+        detailValue = [
+          {
+            name: 'instance_name',
+            label: 'Instance',
+            value:
+              config.find(
+                (detail) =>
+                  JSON.stringify(detail.instance_id_values) ===
+                  JSON.stringify(
+                    detail.instance_id_keys.reduce((pre, cur) => {
+                      return pre.concat(item.metric[cur] as any);
+                    }, [])
+                  )
+              )?.instance_name || '',
+          },
+        ];
+      }
+      if (existing) {
+        existing[`value${index + 1}`] = parseFloat(value);
+        if (!existing.details[`value${index + 1}`]) {
+          existing.details[`value${index + 1}`] = [];
+        }
+        existing.details[`value${index + 1}`].push(...detailValue);
+      } else {
+        const details = {
+          [`value${index + 1}`]: detailValue,
+        };
+        result.push({
+          time: timestamp,
+          title: config[0]?.title || '--',
+          [`value${index + 1}`]: parseFloat(value),
+          details,
+        });
+      }
+    });
+  });
+  return result;
 };

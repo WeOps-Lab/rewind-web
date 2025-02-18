@@ -266,7 +266,24 @@ export interface ConfigTypeMap {
 
 export interface ViewDetailProps {
   monitorObjectId: React.Key;
-  instanceId: React.Key;
+  instanceId: string;
   monitorObjectName: string;
   idValues: string[];
+  instanceName: string;
+}
+
+export interface ChartProps {
+  instance_id?: string;
+  instance_id_keys: string[];
+  instance_id_values: string[];
+  instance_name: string;
+  title: string;
+  dimensions: any[];
+  [key: string]: unknown;
+}
+
+export interface ViewModalProps {
+  monitorObject: React.Key;
+  monitorName: string;
+  plugins: IntergrationItem[];
 }

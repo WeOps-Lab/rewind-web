@@ -19,11 +19,7 @@ import {
   Pagination,
   TimeLineItem,
 } from '@/app/monitor/types';
-import {
-  ChartDataItem,
-  SearchParams,
-  MetricItem,
-} from '@/app/monitor/types/monitor';
+import { SearchParams } from '@/app/monitor/types/monitor';
 import { AlertOutlined } from '@ant-design/icons';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import useApiClient from '@/utils/request';
@@ -31,6 +27,7 @@ import Information from './information';
 import {
   getEnumValueUnit,
   mergeViewQueryKeyValues,
+  renderChart,
 } from '@/app/monitor/utils/common';
 import {
   LEVEL_MAP,
@@ -48,7 +45,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
     const [groupVisible, setGroupVisible] = useState<boolean>(false);
     const [formData, setFormData] = useState<TableDataItem>({});
     const [title, setTitle] = useState<string>('');
-    const [chartData, setChartData] = useState<ChartDataItem[]>([]);
+    const [chartData, setChartData] = useState<ChartData[]>([]);
     const [trapData, setTrapData] = useState<TableDataItem>({});
     const [activeTab, setActiveTab] = useState<string>('information');
     const [loading, setLoading] = useState<boolean>(false);
@@ -187,7 +184,18 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
           }
         );
         const data = responseData.data?.result || [];
-        setChartData(data);
+        const config = [
+          {
+            instance_id_values: formData.instance_id_values,
+            instance_name: formData.monitor_instance_name,
+            instance_id: formData.monitor_instance_id,
+            instance_id_keys: formData.metric?.instance_id_keys || [],
+            dimensions: formData.metric?.dimensions || [],
+            title: formData.metric?.display_name || '--',
+          },
+        ];
+        const _chartData = renderChart(data, config);
+        setChartData(_chartData);
       } finally {
         setLoading(false);
       }
@@ -203,49 +211,6 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
       } finally {
         setLoading(false);
       }
-    };
-
-    const processData = (data: ChartDataItem[]): ChartData[] => {
-      const result: any[] = [];
-      const target = formData.metric?.dimensions || [];
-      data.forEach((item, index) => {
-        item.values.forEach(([timestamp, value]) => {
-          const existing = result.find((entry) => entry.time === timestamp);
-          const detailValue = Object.entries(item.metric)
-            .map(([key, dimenValue]) => ({
-              name: key,
-              label:
-                key === 'instance_name'
-                  ? 'Instance Name'
-                  : target.find((sec: MetricItem) => sec.name === key)
-                    ?.description || key,
-              value: dimenValue,
-            }))
-            .filter(
-              (item) =>
-                item.name === 'instance_name' ||
-                target.find((tex: MetricItem) => tex.name === item.name)
-            );
-          if (existing) {
-            existing[`value${index + 1}`] = parseFloat(value);
-            if (!existing.details[`value${index + 1}`]) {
-              existing.details[`value${index + 1}`] = [];
-            }
-            existing.details[`value${index + 1}`].push(...detailValue);
-          } else {
-            const details = {
-              [`value${index + 1}`]: detailValue,
-            };
-            result.push({
-              time: timestamp,
-              title: formData.metric?.display_name || '--',
-              [`value${index + 1}`]: parseFloat(value),
-              details,
-            });
-          }
-        });
-      });
-      return result;
     };
 
     const loadMore = () => {
@@ -352,7 +317,7 @@ const AlertDetail = forwardRef<ModalRef, ModalConfig>(
                   userList={userList}
                   onClose={closeModal}
                   trapData={trapData}
-                  chartData={processData(chartData || [])}
+                  chartData={chartData}
                 />
               ) : (
                 <div

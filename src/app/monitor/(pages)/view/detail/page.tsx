@@ -19,6 +19,7 @@ const ViewDetail = () => {
   const icon = OBJECT_ICON_MAP[searchParams.get('name') || ''];
   const monitorObjectId: React.Key = searchParams.get('monitorObjId') || '';
   const instanceId: React.Key = searchParams.get('instance_id') || '';
+  const instanceName: string = searchParams.get('instance_name') || '';
   const idValues: string[] = (
     searchParams.get('instance_id_values') || ''
   ).split(',');
@@ -55,7 +56,7 @@ const ViewDetail = () => {
             className="custom-tabs"
             options={[
               { value: 'metrics', label: t('monitor.metric') },
-              //   { value: 'overview', label: t('monitor.views.overview') },
+              { value: 'overview', label: t('monitor.views.overview') },
             ]}
             onChange={onTabChange}
           />
@@ -74,6 +75,7 @@ const ViewDetail = () => {
             monitorObjectId={monitorObjectId}
             monitorObjectName={monitorObjectName}
             instanceId={instanceId}
+            instanceName={instanceName}
           />
         ) : (
           <Overview
@@ -81,6 +83,7 @@ const ViewDetail = () => {
             monitorObjectId={monitorObjectId}
             monitorObjectName={monitorObjectName}
             instanceId={instanceId}
+            instanceName={instanceName}
           />
         )}
       </div>

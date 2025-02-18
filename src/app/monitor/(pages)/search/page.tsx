@@ -22,7 +22,6 @@ import { Dayjs } from 'dayjs';
 import {
   ObectItem,
   MetricItem,
-  ChartDataItem,
   TableDataItem,
   ConditionItem,
   SearchParams,
@@ -33,6 +32,7 @@ import {
   deepClone,
   findUnitNameById,
   mergeViewQueryKeyValues,
+  renderChart,
 } from '@/app/monitor/utils/common';
 import { useSearchParams } from 'next/navigation';
 import dayjs from 'dayjs';
@@ -64,7 +64,9 @@ const SearchView: React.FC = () => {
     }[]
   >([]);
   const [labels, setLabels] = useState<string[]>([]);
-  const [object, setObject] = useState<string | undefined>(url_obj_name as any);
+  const [object, setObject] = useState<string | undefined>(
+    url_obj_name as string
+  );
   const [objects, setObjects] = useState<ObectItem[]>([]);
   const [activeTab, setActiveTab] = useState<string>('area');
   const [conditions, setConditions] = useState<ConditionItem[]>([]);
@@ -78,7 +80,7 @@ const SearchView: React.FC = () => {
     });
   const [columns, setColumns] = useState<ColumnItem[]>([]);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
-  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [frequence, setFrequence] = useState<number>(0);
   const [unit, setUnit] = useState<string>('');
   const isArea: boolean = activeTab === 'area';
@@ -148,7 +150,7 @@ const SearchView: React.FC = () => {
             }
           });
           const _groupData = groupData.filter(
-            (item: any) => !!item.child?.length
+            (item: IndexViewItem) => !!item.child?.length
           );
           setOriginMetricData(_groupData);
         })
@@ -181,10 +183,10 @@ const SearchView: React.FC = () => {
   const getParams = (_timeRange: number[]): SearchParams => {
     const metricItem = metrics.find((item) => item.name === metric);
     const _query: string = metricItem?.query || '';
-    const queryValues: any = instances
+    const queryValues: string[][] = instances
       .filter((item) => instanceId.includes(item.instance_id))
       .map((item) => item.instance_id_values);
-    const querykeys: any = metricItem?.instance_id_keys || [];
+    const querykeys: string[] = metricItem?.instance_id_keys || [];
     const queryList = [];
     for (let i = 0; i < queryValues.length; i++) {
       queryList.push({
@@ -341,50 +343,6 @@ const SearchView: React.FC = () => {
     handleSearch('refresh', val);
   };
 
-  const processData = (data: ChartDataItem[]): ChartData[] => {
-    const result: any[] = [];
-    const target =
-      metrics.find((item) => item.name === metric)?.dimensions || [];
-    data.forEach((item, index) => {
-      item.values.forEach(([timestamp, value]) => {
-        const existing = result.find((entry) => entry.time === timestamp);
-        const detailValue = Object.entries(item.metric)
-          .map(([key, dimenValue]) => ({
-            name: key,
-            label:
-              key === 'instance_name'
-                ? 'Instance Name'
-                : target.find((sec) => sec.name === key)?.description || key,
-            value: dimenValue,
-          }))
-          .filter(
-            (item) =>
-              item.name === 'instance_name' ||
-              target.find((tex) => tex.name === item.name)
-          );
-        if (existing) {
-          existing[`value${index + 1}`] = parseFloat(value);
-          if (!existing.details[`value${index + 1}`]) {
-            existing.details[`value${index + 1}`] = [];
-          }
-          existing.details[`value${index + 1}`].push(...detailValue);
-        } else {
-          const details = {
-            [`value${index + 1}`]: detailValue,
-          };
-          result.push({
-            time: timestamp,
-            title:
-              metrics.find((sec) => sec.name === metric)?.display_name || '--',
-            [`value${index + 1}`]: parseFloat(value),
-            details,
-          });
-        }
-      });
-    });
-    return result;
-  };
-
   const handleSearch = async (
     type: string,
     tab: string,
@@ -415,9 +373,23 @@ const SearchView: React.FC = () => {
       });
       const data = responseData.data?.result || [];
       if (areaCurrent) {
-        setChartData(data);
+        const list = instances
+          .filter((item) => instanceId.includes(item.instance_id))
+          .map((item) => {
+            const targetMetric = metrics.find((item) => item.name === metric);
+            return {
+              instance_id_values: item.instance_id_values,
+              instance_name: item.instance_name,
+              instance_id: item.instance_id,
+              instance_id_keys: targetMetric?.instance_id_keys || [],
+              dimensions: targetMetric?.dimensions || [],
+              title: targetMetric?.display_name || '--',
+            };
+          });
+        const _chartData = renderChart(data, list);
+        setChartData(_chartData);
       } else {
-        const _tableData = data.map((item: any, index: number) => ({
+        const _tableData = data.map((item: TableDataItem, index: number) => ({
           ...item.metric,
           value: item.value[1] ?? '--',
           index,
@@ -431,7 +403,6 @@ const SearchView: React.FC = () => {
               .concat(['instance_name', 'instance_id', 'value'])
           )
         );
-
         const tableColumns = Object.keys(_tableData[0] || {})
           .filter((item) => colKeys.includes(item))
           .map((item) => ({
@@ -697,7 +668,7 @@ const SearchView: React.FC = () => {
                   )}
                   <LineChart
                     metric={metrics.find((item) => item.name === metric)}
-                    data={processData(chartData)}
+                    data={chartData}
                     unit={unit}
                     onXRangeChange={onXRangeChange}
                   />

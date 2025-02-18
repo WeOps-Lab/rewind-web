@@ -16,7 +16,7 @@ import {
   InterfaceTableItem,
   ViewDetailProps,
 } from '@/app/monitor/types/monitor';
-import { ChartData, TimeSelectorDefaultValue } from '@/app/monitor/types';
+import { TimeSelectorDefaultValue } from '@/app/monitor/types';
 import { useTranslation } from '@/utils/i18n';
 import {
   deepClone,
@@ -24,6 +24,7 @@ import {
   calculateMetrics,
   getEnumValueUnit,
   mergeViewQueryKeyValues,
+  renderChart,
 } from '@/app/monitor/utils/common';
 import dayjs, { Dayjs } from 'dayjs';
 import {
@@ -35,7 +36,9 @@ import Icon from '@/components/icon';
 const Overview: React.FC<ViewDetailProps> = ({
   monitorObjectId,
   monitorObjectName,
+  instanceName,
   idValues,
+  instanceId,
 }) => {
   const { get, isLoading } = useApiClient();
   const { t } = useTranslation();
@@ -142,51 +145,6 @@ const Overview: React.FC<ViewDetailProps> = ({
     return params;
   };
 
-  const processData = (
-    data: ChartDataItem[],
-    metricItem: MetricItem
-  ): ChartData[] => {
-    const result: any[] = [];
-    const target = metricItem?.dimensions || [];
-    data.forEach((item, index: number) => {
-      item.values.forEach(([timestamp, value]: [number, string]) => {
-        const existing = result.find((entry) => entry.time === timestamp);
-        const detailValue = Object.entries(item.metric)
-          .map(([key, dimenValue]) => ({
-            name: key,
-            label:
-              key === 'instance_name'
-                ? 'Instance Name'
-                : target.find((sec) => sec.name === key)?.description || key,
-            value: dimenValue,
-          }))
-          .filter(
-            (item) =>
-              item.name === 'instance_name' ||
-              target.find((tex) => tex.name === item.name)
-          );
-        if (existing) {
-          existing[`value${index + 1}`] = parseFloat(value);
-          if (!existing.details[`value${index + 1}`]) {
-            existing.details[`value${index + 1}`] = [];
-          }
-          existing.details[`value${index + 1}`].push(...detailValue);
-        } else {
-          const details = {
-            [`value${index + 1}`]: detailValue,
-          };
-          result.push({
-            time: timestamp,
-            title: metricItem.display_name,
-            [`value${index + 1}`]: parseFloat(value),
-            details,
-          });
-        }
-      });
-    });
-    return result;
-  };
-
   const fetchViewData = async (data: MetricItem[], type?: string) => {
     setLoading(type !== 'timer');
     const requestQueue = data.map((item: MetricItem) =>
@@ -199,7 +157,17 @@ const Overview: React.FC<ViewDetailProps> = ({
       results.forEach((result) => {
         const metricItem = data.find((item) => item.id === result.id);
         if (metricItem) {
-          metricItem.viewData = processData(result.data || [], metricItem);
+          const config = [
+            {
+              instance_id_values: idValues,
+              instance_name: instanceName,
+              instance_id: instanceId || '',
+              instance_id_keys: metricItem?.instance_id_keys || [],
+              dimensions: metricItem.dimensions || [],
+              title: metricItem.display_name || '--',
+            },
+          ];
+          metricItem.viewData = renderChart(result.data || [], config);
         }
       });
     } catch (error) {
@@ -345,7 +313,7 @@ const Overview: React.FC<ViewDetailProps> = ({
     });
   };
 
-  const renderChart = (metricItem: any) => {
+  const renderView = (metricItem: any) => {
     switch (metricItem.displayType) {
       case 'barChart':
         return (
@@ -479,7 +447,7 @@ const Overview: React.FC<ViewDetailProps> = ({
                       height: 'calc(100% - 30px)',
                     }}
                   >
-                    {renderChart(metricItem)}
+                    {renderView(metricItem)}
                   </div>
                 </div>
               ))}

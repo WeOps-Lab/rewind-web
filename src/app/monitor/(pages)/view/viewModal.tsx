@@ -16,7 +16,7 @@ import Collapse from '@/components/collapse';
 import useApiClient from '@/utils/request';
 import {
   ModalRef,
-  ChartData,
+  TableDataItem,
   TimeSelectorDefaultValue,
 } from '@/app/monitor/types';
 import {
@@ -24,25 +24,20 @@ import {
   GroupInfo,
   IndexViewItem,
   SearchParams,
-  ChartDataItem,
-  IntergrationItem,
+  ChartProps,
+  ViewModalProps,
 } from '@/app/monitor/types/monitor';
 import { useTranslation } from '@/utils/i18n';
 import {
   deepClone,
   findUnitNameById,
   mergeViewQueryKeyValues,
+  renderChart,
 } from '@/app/monitor/utils/common';
 import dayjs, { Dayjs } from 'dayjs';
 import Icon from '@/components/icon';
 
-interface ModalProps {
-  monitorObject: React.Key;
-  monitorName: string;
-  plugins: IntergrationItem[];
-}
-
-const ViewModal = forwardRef<ModalRef, ModalProps>(
+const ViewModal = forwardRef<ModalRef, ViewModalProps>(
   ({ monitorObject, monitorName, plugins }, ref) => {
     const { get } = useApiClient();
     const { t } = useTranslation();
@@ -64,23 +59,25 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
     const [originMetricData, setOriginMetricData] = useState<IndexViewItem[]>(
       []
     );
-    const [instId, setInstId] = useState<string>('');
-    const [idValues, setIdValues] = useState<string[]>([]);
     const [expandId, setExpandId] = useState<number>(0);
     const [activeTab, setActiveTab] = useState<string>('');
+    const [viewConfig, setViewConfig] = useState<ChartProps>({
+      instance_id_values: [],
+      instance_name: '',
+      instance_id_keys: [],
+      dimensions: [],
+      title: '',
+    });
 
     useImperativeHandle(ref, () => ({
       showModal: ({ title, form }) => {
         // 开启弹窗的交互
         setGroupVisible(true);
         setTitle(title);
-        const _instId = form.instance_id;
         const _activeTab = plugins[0]?.value || '';
-        const _idValues = form.instance_id_values || [];
-        setInstId(_instId);
+        setViewConfig(form);
         setActiveTab(_activeTab);
-        setIdValues(_idValues);
-        getInitData(_idValues, _activeTab);
+        getInitData(form, _activeTab);
       },
     }));
 
@@ -101,7 +98,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
     const onTabChange = (val: string) => {
       setActiveTab(val);
       setMetricId(null);
-      getInitData(idValues, val);
+      getInitData(viewConfig, val);
     };
 
     const handleCancel = () => {
@@ -109,7 +106,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
       clearTimer();
     };
 
-    const getInitData = async (ids: string[], tab: string) => {
+    const getInitData = async (ids: ChartProps, tab: string) => {
       const params = {
         monitor_object_id: monitorObject,
         monitor_plugin_id: tab,
@@ -138,7 +135,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
               }
             });
             const _groupData = groupData.filter(
-              (item: any) => !!item.child?.length
+              (item: IndexViewItem) => !!item.child?.length
             );
             setExpandId(_groupData[0]?.id || 0);
             setMetricData(_groupData);
@@ -179,60 +176,15 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
       return params;
     };
 
-    const processData = (
-      data: ChartDataItem[],
-      metricItem: MetricItem
-    ): ChartData[] => {
-      const result: any[] = [];
-      const target = metricItem?.dimensions || [];
-      data.forEach((item, index: number) => {
-        item.values.forEach(([timestamp, value]: [number, string]) => {
-          const existing = result.find((entry) => entry.time === timestamp);
-          const detailValue = Object.entries(item.metric)
-            .map(([key, dimenValue]) => ({
-              name: key,
-              label:
-                key === 'instance_name'
-                  ? 'Instance Name'
-                  : target.find((sec) => sec.name === key)?.description || key,
-              value: dimenValue,
-            }))
-            .filter(
-              (item) =>
-                item.name === 'instance_name' ||
-                target.find((tex) => tex.name === item.name)
-            );
-          if (existing) {
-            existing[`value${index + 1}`] = parseFloat(value);
-            if (!existing.details[`value${index + 1}`]) {
-              existing.details[`value${index + 1}`] = [];
-            }
-            existing.details[`value${index + 1}`].push(...detailValue);
-          } else {
-            const details = {
-              [`value${index + 1}`]: detailValue,
-            };
-            result.push({
-              time: timestamp,
-              title: metricItem.display_name,
-              [`value${index + 1}`]: parseFloat(value),
-              details,
-            });
-          }
-        });
-      });
-      return result;
-    };
-
     const fetchViewData = async (
       data: IndexViewItem[],
       groupId: number,
-      ids: string[]
+      config: ChartProps
     ) => {
       const metricList = data.find((item) => item.id === groupId)?.child || [];
       const requestQueue = metricList.map((item) =>
         get(`/monitor/api/metrics_instance/query_range/`, {
-          params: getParams(item, ids),
+          params: getParams(item, config.instance_id_values),
         }).then((response) => ({
           id: item.id,
           data: response.data.result || [],
@@ -243,7 +195,16 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         results.forEach((result) => {
           const metricItem = metricList.find((item) => item.id === result.id);
           if (metricItem) {
-            metricItem.viewData = processData(result.data || [], metricItem);
+            const instanceRow = [
+              {
+                instance_id_values: config.instance_id_values,
+                instance_name: config.instance_name,
+                instance_id_keys: metricItem?.instance_id_keys || [],
+                dimensions: metricItem?.dimensions || [],
+                title: metricItem?.display_name || '--',
+              },
+            ];
+            metricItem.viewData = renderChart(result.data || [], instanceRow);
           }
         });
       } catch (error) {
@@ -283,7 +244,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         target.isLoading = true;
       }
       setMetricData(_metricData);
-      fetchViewData(_metricData, expandId, idValues);
+      fetchViewData(_metricData, expandId, viewConfig);
     };
 
     const handleMetricIdChange = (val: number) => {
@@ -304,10 +265,10 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
           const _groupId = target?.id || 0;
           setExpandId(_groupId);
           setMetricData(filteredData);
-          fetchViewData(filteredData, _groupId, idValues);
+          fetchViewData(filteredData, _groupId, viewConfig);
         }
       } else {
-        getInitData(idValues, activeTab);
+        getInitData(viewConfig, activeTab);
       }
     };
 
@@ -325,7 +286,7 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
         }
         setExpandId(groupId);
         setMetricData(_metricData);
-        fetchViewData(_metricData, groupId, idValues);
+        fetchViewData(_metricData, groupId, viewConfig);
       }
     };
 
@@ -339,10 +300,10 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
       setTimeRange(_times);
     };
 
-    const linkToSearch = (row: any) => {
+    const linkToSearch = (row: TableDataItem) => {
       const _row = {
         monitor_object: monitorName,
-        instance_id: instId,
+        instance_id: viewConfig.instance_id || '',
         metric_id: row.name,
       };
       const queryString = new URLSearchParams(_row).toString();
@@ -350,11 +311,11 @@ const ViewModal = forwardRef<ModalRef, ModalProps>(
       window.open(url, '_blank', 'noopener,noreferrer');
     };
 
-    const linkToPolicy = (row: any) => {
+    const linkToPolicy = (row: TableDataItem) => {
       const _row = {
         monitorName: monitorName,
         monitorObjId: monitorObject + '',
-        instanceId: instId,
+        instanceId: viewConfig.instance_id || '',
         metricId: row.name,
         type: 'add',
       };
