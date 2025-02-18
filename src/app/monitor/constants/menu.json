@@ -50,7 +50,7 @@
       "title": "集成",
       "icon": "moxing2",
       "url": "/monitor/intergration",
-      "name": "Intergration",
+      "name": "Integration",
       "children": [
         {
           "title": "资产",
@@ -62,19 +62,19 @@
           "title": "集成",
           "icon": "zichan-quanbushebei",
           "url": "/monitor/intergration/list",
-          "name": "intergration_list",
+          "name": "integration_list",
           "children": [
             {
               "title": "配置",
               "icon": "shujumoxingguanli",
               "url": "/monitor/intergration/list/detail/configure",
-              "name": "intergration_configure"
+              "name": "integration_configure"
             },
             {
               "title": "指标",
               "icon": "zichan-quanbushebei",
               "url": "/monitor/intergration/list/detail/metric",
-              "name": "intergration_metric"
+              "name": "integration_metric"
             }
           ]
         }
@@ -132,7 +132,7 @@
       "title": "Intergration",
       "icon": "moxing2",
       "url": "/monitor/intergration",
-      "name": "Intergration",
+      "name": "Integration",
       "children": [
         {
           "title": "Asset",
@@ -144,19 +144,19 @@
           "title": "Intergration",
           "icon": "zichan-quanbushebei",
           "url": "/monitor/intergration/list",
-          "name": "intergration_list",
+          "name": "integration_list",
           "children": [
             {
               "title": "Configure",
               "icon": "shujumoxingguanli",
               "url": "/monitor/intergration/list/detail/configure",
-              "name": "intergration_configure"
+              "name": "integration_configure"
             },
             {
               "title": "Metric",
               "icon": "zichan-quanbushebei",
               "url": "/monitor/intergration/list/detail/metric",
-              "name": "intergration_metric"
+              "name": "integration_metric"
             }
           ]
         }
