@@ -373,7 +373,7 @@ export const renderChart = (
           value: dimenValue,
         }))
         .filter((item) => target.find((tex) => tex.name === item.name));
-      if (!target.length || !detailValue.length) {
+      if ((!target.length || !detailValue.length) && config[0]?.showInstName) {
         detailValue = [
           {
             name: 'instance_name',

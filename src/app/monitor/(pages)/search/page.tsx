@@ -384,6 +384,7 @@ const SearchView: React.FC = () => {
               instance_id_keys: targetMetric?.instance_id_keys || [],
               dimensions: targetMetric?.dimensions || [],
               title: targetMetric?.display_name || '--',
+              showInstName: true,
             };
           });
         const _chartData = renderChart(data, list);

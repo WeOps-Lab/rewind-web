@@ -274,6 +274,7 @@ export interface ViewDetailProps {
 
 export interface ChartProps {
   instance_id?: string;
+  showInstName?: boolean;
   instance_id_keys: string[];
   instance_id_values: string[];
   instance_name: string;
