@@ -307,9 +307,11 @@ const Intergration = () => {
   };
 
   const linkToDetial = (app: TableDataItem) => {
+    const monitorItem = objects.find((item: ObectItem) => item.id === objectId);
     const row: any = {
       monitorObjId: objectId || '',
-      name: objects.find((item) => item.id === objectId)?.name || '',
+      name: monitorItem?.name || '',
+      monitorObjDisplayName: monitorItem?.display_name || '',
       instance_id: app.instance_id,
       instance_name: app.instance_name,
       instance_id_values: app.instance_id_values,

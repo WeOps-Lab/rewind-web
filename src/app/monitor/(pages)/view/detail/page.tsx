@@ -17,13 +17,15 @@ const ViewDetail = () => {
   const searchParams = useSearchParams();
   const desc = searchParams.get('instance_name');
   const icon = OBJECT_ICON_MAP[searchParams.get('name') || ''];
+  const monitorObjDisplayName: string =
+    searchParams.get('monitorObjDisplayName') || '';
   const monitorObjectId: React.Key = searchParams.get('monitorObjId') || '';
+  const monitorObjectName: string = searchParams.get('name') || '';
   const instanceId: React.Key = searchParams.get('instance_id') || '';
   const instanceName: string = searchParams.get('instance_name') || '';
   const idValues: string[] = (
     searchParams.get('instance_id_values') || ''
   ).split(',');
-  const monitorObjectName: string = searchParams.get('name') || '';
   const [activeMenu, setActiveMenu] = useState<string>('metrics');
 
   const onTabChange = (val: string) => {
@@ -39,10 +41,16 @@ const ViewDetail = () => {
     <div className={detailStyle.detail}>
       <div className={detailStyle.leftSide}>
         <div className={detailStyle.topIntro}>
-          <Icon type={icon} className="mr-[10px] text-[30px] min-w-[30px]" />
+          <Icon
+            type={icon || 'Host'}
+            className="mr-[10px] text-[30px] min-w-[30px]"
+          />
           <span className="flex items-center">
-            <span className="w-[140px] hide-text" title={`${icon} - ${desc}`}>
-              {icon} -
+            <span
+              className="w-[140px] hide-text"
+              title={`${monitorObjDisplayName} - ${desc}`}
+            >
+              {monitorObjDisplayName} -
               <span className="text-[12px] text-[var(--color-text-3)] ml-[4px]">
                 {desc}
               </span>

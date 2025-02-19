@@ -32,12 +32,13 @@ const Information: React.FC<TableDataItem> = ({
   const organizationList: Organization[] = authList.current;
 
   const checkDetail = (row: TableDataItem) => {
+    const monitorItem = objects.find(
+      (item: ObectItem) => item.id === row.policy?.monitor_object
+    );
     const params = {
       monitorObjId: row.policy?.monitor_object,
-      name:
-        objects.find(
-          (item: ObectItem) => item.id === row.policy?.monitor_object
-        )?.name || '',
+      name: monitorItem?.name || '',
+      monitorObjDisplayName: monitorItem?.display_name || '',
       instance_id: row.monitor_instance_id,
       instance_name: row.monitor_instance_name,
       instance_id_values: row.instance_id_values,

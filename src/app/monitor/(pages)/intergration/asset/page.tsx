@@ -229,9 +229,11 @@ const Asset = () => {
   };
 
   const checkDetail = (row: ObjectInstItem) => {
+    const monitorItem = objects.find((item: ObectItem) => item.id === objectId);
     const params: any = {
       monitorObjId: objectId || '',
-      name: objects.find((item) => item.id === objectId)?.name || '',
+      name: monitorItem?.name || '',
+      monitorObjDisplayName: monitorItem?.display_name || '',
       instance_id: row.instance_id,
       instance_name: row.instance_name,
       instance_id_values: row.instance_id_values,
