@@ -9,13 +9,16 @@ dayjs.extend(timezone);
 export const useLocalizedTime = () => {
   const { data: session } = useSession();
 
-  const convertToLocalizedTime = (isoString: string): string => {
+  const convertToLocalizedTime = (
+    isoString: string,
+    format: string = 'YYYY-MM-DD HH:mm:ss'
+  ): string => {
     if (!session || !session.user || !session.zoneinfo) {
-      return dayjs(isoString).format('YYYY-MM-DD HH:mm:ss');
+      return dayjs(isoString).format(format);
     }
 
     const date = dayjs(isoString).tz(session.zoneinfo);
-    return date.format('YYYY-MM-DD HH:mm:ss');
+    return date.format(format);
   };
 
   return {

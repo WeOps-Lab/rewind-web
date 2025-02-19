@@ -4,9 +4,10 @@ interface CustomLayoutProps {
   topSection?: React.ReactNode;
   leftSection?: React.ReactNode;
   rightSection: React.ReactNode;
+  height?: string;
 }
 
-const CustomLayout: React.FC<CustomLayoutProps> = ({ topSection, leftSection, rightSection }) => {
+const CustomLayout: React.FC<CustomLayoutProps> = ({ topSection, leftSection, rightSection, height }) => {
   return (
     <div className="w-full">
       {topSection && <div>{topSection}</div>}
@@ -14,7 +15,7 @@ const CustomLayout: React.FC<CustomLayoutProps> = ({ topSection, leftSection, ri
       <div
         className={`flex w-full overflow-hidden ${topSection ? 'mt-4' : ''}`}
         style={{
-          height: topSection ? 'calc(100vh - 195px)' : 'calc(100vh - 105px)',
+          height: height || (topSection ? 'calc(100vh - 195px)' : 'calc(100vh - 105px)'),
         }}
       >
         {leftSection && (

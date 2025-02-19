@@ -1,17 +1,17 @@
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMenus } from '@/context/menus';
+import { usePermissions } from '@/context/permissions';
 
 export default function Home() {
   const router = useRouter();
-  const menuItems = useMenus();
+  const { menus, loading } = usePermissions();
 
   useEffect(() => {
-    if (menuItems.length > 0) {
-      router.replace(menuItems[0].path);
+    if (!loading && menus?.length > 0 && menus[0]?.url) {
+      router.replace(menus[0].url);
     }
-  }, [menuItems, router]);
+  }, [loading, menus, router]);
 
   return null;
 }

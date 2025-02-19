@@ -1,36 +1,20 @@
-import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Popover, Spin } from 'antd';
 import { CaretDownFilled } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
-import { useMenus } from '@/context/menus';
+import { usePermissions } from '@/context/permissions';
 import { useClientData } from '@/context/client';
 import UserInfo from '../user-info';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
-import { ClientData } from '@/types/index'
 
 const TopMenu = () => {
   const { t } = useTranslation();
-  const menuItems = useMenus();
+  const { menus: menuItems } = usePermissions();
   const pathname = usePathname();
-  const { getAll, loading } = useClientData();
-  const [apps, setApps] = useState<ClientData[]>([]);
-
-  useEffect(() => {
-    const fetchApps = async () => {
-      try {
-        const data: ClientData[] = await getAll();
-        setApps(data);
-      } catch (error) {
-        console.error('Failed to fetch apps:', error);
-      }
-    };
-
-    fetchApps();
-  }, [getAll]);
+  const { clientData, loading } = useClientData();
 
   const renderContent = loading ? (
     <div className="flex justify-center items-center h-32">
@@ -38,7 +22,7 @@ const TopMenu = () => {
     </div>
   ) : (
     <div className="grid grid-cols-3 gap-4 max-h-[350px] overflow-auto">
-      {apps.map((app) => (
+      {clientData.map((app) => (
         <div
           key={app.name}
           className={`group flex flex-col items-center p-4 rounded-sm cursor-pointer ${styles.navApp}`}
@@ -46,7 +30,7 @@ const TopMenu = () => {
         >
           <Icon
             type={app.icon || 'yingyongxitongguanli'}
-            className="mr-2 text-2xl mb-1 transition-transform duration-300 transform group-hover:scale-125"
+            className="text-2xl mb-1 transition-transform duration-300 transform group-hover:scale-125"
           />
           {app.name}
         </div>
@@ -73,17 +57,19 @@ const TopMenu = () => {
       </div>
       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="flex items-center space-x-4">
-          {menuItems.map((item) => {
-            const isActive = item.path === '/' ? pathname === '/' : pathname.startsWith(item.path);
-            return (
-              <Link key={item.path} href={item.path} prefetch={false} legacyBehavior>
-                <a className={`px-3 py-2 rounded-[10px] flex items-center ${styles.menuCol} ${isActive ? styles.active : ''}`}>
-                  <Icon type={item.icon} className="mr-2 w-4 h-4" />
-                  {item.label}
-                </a>
-              </Link>
-            );
-          })}
+          {menuItems
+            .filter((item) => item.url)
+            .map((item) => {
+              const isActive = item.url === '/' ? pathname === '/' : pathname.startsWith(item.url);
+              return (
+                <Link key={item.url} href={item.url} prefetch={false} legacyBehavior>
+                  <a className={`px-3 py-2 rounded-[10px] flex items-center ${styles.menuCol} ${isActive ? styles.active : ''}`}>
+                    <Icon type={item.icon} className="mr-2 w-4 h-4" />
+                    {item.title}
+                  </a>
+                </Link>
+              );
+            })}
         </div>
       </div>
     </div>
