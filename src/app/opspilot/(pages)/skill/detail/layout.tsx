@@ -3,6 +3,7 @@
 import React from 'react';
 import { Tooltip } from 'antd';
 import WithSideMenuLayout from '@/components/sub-layout';
+import OnelineEllipsisIntro from '@/app/opspilot/components/oneline-ellipsis-intro';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 
@@ -31,10 +32,7 @@ const SkillSettingsLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   const intro = (
-    <div>
-      <h2 className="text-lg font-semibold mb-2">{name}</h2>
-      <p className="text-sm">{desc}</p>
-    </div>
+    <OnelineEllipsisIntro name={name} desc={desc}></OnelineEllipsisIntro>
   );
 
   const TopSection = () => (
