@@ -1,6 +1,0 @@
-{
-  "/about": {
-    "admin": ["read", "write"]
-  }
-}
-  

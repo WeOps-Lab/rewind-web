@@ -17,14 +17,14 @@ import {
   RelationInstanceRef,
 } from '@/app/cmdb/types/assetManage';
 import { getAssetColumns } from '@/app/cmdb/utils/common';
-import CustomTable from '@/components/custom-table';
 import { Spin, Collapse, Button, Modal, message, Empty } from 'antd';
-import useApiClient from '@/utils/request';
 import { CaretRightOutlined } from '@ant-design/icons';
-import assoListStyle from './index.module.scss';
 import { useTranslation } from '@/utils/i18n';
-import SelectInstance from './selectInstance';
 import { AssoListProps } from '@/app/cmdb/types/assetData';
+import CustomTable from '@/components/custom-table';
+import useApiClient from '@/utils/request';
+import assoListStyle from './index.module.scss';
+import SelectInstance from './selectInstance';
 
 const { confirm } = Modal;
 

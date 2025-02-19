@@ -242,7 +242,7 @@ const RecordDetail = forwardRef<FieldModalRef, RecordDetailProps>(
           width={600}
           title={title}
           subTitle={subTitle}
-          visible={groupVisible}
+          open={groupVisible}
           onCancel={handleCancel}
           footer={
             <div>

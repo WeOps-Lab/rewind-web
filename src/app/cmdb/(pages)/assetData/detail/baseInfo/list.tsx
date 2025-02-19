@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import informationList from './list.module.scss';
+import useApiClient from '@/utils/request';
 import { Form, Button, Collapse, Descriptions, message } from 'antd';
-import type { DescriptionsProps } from 'antd';
-import { AssetDataFieldProps, AttrFieldType } from '@/app/cmdb/types/assetManage';
 import { deepClone, getFieldItem } from '@/app/cmdb/utils/common';
 import { useSearchParams } from 'next/navigation';
+import { useTranslation } from '@/utils/i18n';
+import type { DescriptionsProps } from 'antd';
+import {
+  AssetDataFieldProps,
+  AttrFieldType,
+} from '@/app/cmdb/types/assetManage';
 import {
   EditOutlined,
   CopyOutlined,
@@ -11,9 +17,6 @@ import {
   CloseOutlined,
   CaretRightOutlined,
 } from '@ant-design/icons';
-import informationList from './list.module.scss';
-import { useTranslation } from '@/utils/i18n';
-import useApiClient from '@/utils/request';
 
 const { Panel } = Collapse;
 
@@ -54,11 +57,11 @@ const InfoList: React.FC<AssetDataFieldProps> = ({
     await patch(`/cmdb/api/instance/${instId}/`, params);
     message.success(t('successfullyModified'));
     const list = deepClone(attrList);
-    const index = list.findIndex(
-      (item: AttrFieldType) => item.attr_id === fieldKey
-    );
-    const target = list.find(
-      (item: AttrFieldType) => item.attr_id === fieldKey
+    const [target, index] = list.reduce(
+      (acc: any, item: AttrFieldType, idx: number) => {
+        return item.attr_id === fieldKey ? [item, idx] : acc;
+      },
+      [undefined, -1]
     );
     if (
       config.type === 'success' ||

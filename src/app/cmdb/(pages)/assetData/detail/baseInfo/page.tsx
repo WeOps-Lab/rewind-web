@@ -1,18 +1,18 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
 import List from './list';
+import useApiClient from '@/utils/request';
+import { useSearchParams } from 'next/navigation';
+import { Spin } from 'antd';
+import { useCommon } from '@/app/cmdb/context/common';
+import { withCommon } from '@/app/cmdb/context/withCommon';
 import {
   AttrFieldType,
   UserItem,
   Organization,
   InstDetail,
 } from '@/app/cmdb/types/assetManage';
-import { Spin } from 'antd';
-import useApiClient from '@/utils/request';
-import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
-
+  
 const BaseInfo = () => {
   const { get, isLoading } = useApiClient();
   const searchParams = useSearchParams();
