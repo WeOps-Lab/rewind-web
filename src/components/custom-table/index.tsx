@@ -7,10 +7,7 @@ import { ColumnItem } from '@/types/index';
 import { TableCurrentDataSource } from 'antd/es/table/interface';
 
 interface CustomTableProps<T>
-  extends Omit<
-    TableProps<T>,
-    'bordered' | 'size' | 'fieldSetting' | 'onSelectFields'
-  > {
+  extends Omit<TableProps<T>, 'bordered' | 'fieldSetting' | 'onSelectFields'> {
   bordered?: boolean;
   fieldSetting?: {
     showSetting: boolean;
