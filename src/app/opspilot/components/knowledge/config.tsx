@@ -211,7 +211,7 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
               className='flex-1'
               min={0}
               value={configData.resultCount}
-              onChange={(value) => setConfigData(prevData => ({...prevData, resultCount: value ?? 0}))}
+              onChange={(value) => setConfigData(prevData => ({...prevData, resultCount: value}))}
               style={{width: '100%'}}
             />
           </div>

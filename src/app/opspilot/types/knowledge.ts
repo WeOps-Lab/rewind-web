@@ -54,5 +54,5 @@ export interface ConfigDataProps {
   quantity: number;
   candidate: number;
   selectedEmbedModel: string | null;
-  resultCount: number;
+  resultCount: number | null;
 }
