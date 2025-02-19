@@ -41,7 +41,7 @@ const SideMenu: React.FC<SideMenuProps> = ({
   return (
     <aside className={`w-[216px] pr-4 flex flex-shrink-0 flex-col h-full ${sideMenuStyle.sideMenu}`}>
       {children && (
-        <div className={`p-4 rounded-md mb-3 ${sideMenuStyle.introduction}`}>
+        <div className={`p-4 rounded-md mb-3 h-[95px] ${sideMenuStyle.introduction}`}>
           {children}
         </div>
       )}
