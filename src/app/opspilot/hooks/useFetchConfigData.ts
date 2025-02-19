@@ -1,18 +1,7 @@
 import { useEffect, useState } from 'react';
 import { message } from 'antd';
 import useApiClient from '@/utils/request';
-
-interface ConfigData {
-  selectedSearchTypes: string[];
-  rerankModel: boolean;
-  selectedRerankModel: string | null;
-  textSearchWeight: number;
-  vectorSearchWeight: number;
-  textSearchMode: string,
-  quantity: number;
-  candidate: number;
-  selectedEmbedModel: string | null;
-}
+import { ConfigDataProps } from '@/app/opspilot/types/knowledge';
 
 interface FormData {
   name?: string;
@@ -23,7 +12,7 @@ interface FormData {
 const useFetchConfigData = (id: string | null) => {
   const { get } = useApiClient();
   const [formData, setFormData] = useState<FormData>({});
-  const [configData, setConfigData] = useState<ConfigData>({
+  const [configData, setConfigData] = useState<ConfigDataProps>({
     selectedSearchTypes: [],
     rerankModel: false,
     selectedRerankModel: null,
@@ -33,6 +22,7 @@ const useFetchConfigData = (id: string | null) => {
     candidate: 10,
     textSearchMode: 'match',
     selectedEmbedModel: null,
+    resultCount: 100,
   });
   const [loading, setLoading] = useState(true);
 
@@ -60,6 +50,7 @@ const useFetchConfigData = (id: string | null) => {
           candidate: data.rag_num_candidates || 10,
           textSearchMode: data.text_search_mode,
           selectedEmbedModel: data.embed_model || null,
+          resultCount: data.result_count || 100,
         });
       } catch (error) {
         message.error('Failed to fetch config data.');

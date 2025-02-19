@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Select, Button, Switch, Dropdown, Menu, Tag, Checkbox, message, Spin } from 'antd';
+import { Form, Input, Select, Button, Switch, Dropdown, Menu, Tag, Checkbox, message, Spin, InputNumber } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import { DeleteOutlined, DownOutlined, CheckOutlined, StopOutlined } from '@ant-design/icons';
 import useGroups from '@/app/opspilot/hooks/useGroups';
@@ -75,7 +75,8 @@ const StudioSettingsPage: React.FC = () => {
           name: botData.name,
           introduction: botData.introduction,
           group: botData.team,
-          rasa_model: initialRasaModel
+          rasa_model: initialRasaModel,
+          replica_count: botData.replica_count
         });
 
         setOnline(botData.online);
@@ -110,6 +111,7 @@ const StudioSettingsPage: React.FC = () => {
         name: values.name,
         introduction: values.introduction,
         team: values.group,
+        replica_count: values.replica_count,
         enable_bot_domain: isDomainEnabled,
         bot_domain: isDomainEnabled ? botDomain : null,
         enable_ssl: isDomainEnabled ? enableSsl : false,
@@ -312,6 +314,16 @@ const StudioSettingsPage: React.FC = () => {
                           </Option>
                         ))}
                       </Select>
+                    </Form.Item>
+                    <Form.Item
+                      label={t('studio.form.replicaCount')}
+                      name="replica_count"
+                      rules={[{ required: true, message: `${t('common.inputMsg')}${t('studio.form.replicaCount')}` }]}
+                    >
+                      <InputNumber
+                        min={1}
+                        style={{width: '100%'}}
+                      />
                     </Form.Item>
                   </Form>
                 </div>

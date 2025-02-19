@@ -44,7 +44,7 @@ export interface PreprocessStepProps {
   initialConfig: any;
 }
 
-export interface TestConfigData {
+export interface ConfigDataProps {
   selectedSearchTypes: string[];
   rerankModel: boolean;
   selectedRerankModel: string | null;
@@ -54,4 +54,5 @@ export interface TestConfigData {
   quantity: number;
   candidate: number;
   selectedEmbedModel: string | null;
+  resultCount: number;
 }

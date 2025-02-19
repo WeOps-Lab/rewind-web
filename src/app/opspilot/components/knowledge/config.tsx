@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Select, Switch, Slider, InputNumber, Input, Radio, message } from 'antd';
-import { ModelOption, TestConfigData } from '@/app/opspilot/types/knowledge';
+import { Select, Switch, Slider, InputNumber, Input, Radio, message, Tooltip } from 'antd';
+import { ModelOption, ConfigDataProps } from '@/app/opspilot/types/knowledge';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
-import styles from './index.module.scss';
 
 const { Option } = Select;
 
 interface ConfigProps {
-  configData: TestConfigData;
-  setConfigData: React.Dispatch<React.SetStateAction<TestConfigData>>;
+  configData: ConfigDataProps;
+  setConfigData: React.Dispatch<React.SetStateAction<ConfigDataProps>>;
 }
 
 const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) => {
@@ -73,7 +73,7 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
           ))}
         </Select>
       </div>
-      <div className={`mb-4 flex ${styles.configTxt}`}>
+      <div className="mb-4 flex">
         <label className="block text-sm font-medium mb-1 w-32">{t('knowledge.retrievalSetting')}</label>
         <div className="flex-1">
           <div className="p-4 pb-0 border rounded-md mb-4">
@@ -199,6 +199,21 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
                 </div>
               </div>
             )}
+          </div>
+          <div className="flex items-center justify-between mb-4">
+            <label className="text-sm w-[100px] relative mr-4">
+              {t('knowledge.chunkCount')}
+              <Tooltip title={`${t('knowledge.chunkCountTip')}`}>
+                <QuestionCircleOutlined className="absolute top-0 right-0 -mt-1 -mr-1 cursor-pointer"/>
+              </Tooltip>
+            </label>
+            <InputNumber
+              className='flex-1'
+              min={0}
+              value={configData.resultCount}
+              onChange={(value) => setConfigData(prevData => ({...prevData, resultCount: value ?? 0}))}
+              style={{width: '100%'}}
+            />
           </div>
         </div>
       </div>

@@ -51,6 +51,8 @@
     "candidateQuantity": "候选数量",
     "rerankModel": "重排模型",
     "rerankModelDesc": "在搜索结果初步生成后，通过特定的算法对结果进行再次排序，以提升结果的相关性。",
+    "chunkCount": "分块数量",
+    "chunkCountTip": "检索返回块的数量，表示每次搜索后返回的块的数量的上限",
     "documents": {
       "title": "文档",
       "description": "文档管理用于添加新知识，包括本地文件、网页链接或自定义文本。新添加的知识可以分块，以便机器人使用。",
@@ -115,6 +117,7 @@
       "introduction":"简介",
       "owner": "所有者",
       "llmModel": "LLM模型",
+      "showThought": "展示思考",
       "temperature": "温度",
       "temperatureTip": "用于控制文本生成的随机性和创造性；低温度会生成更确定的结果，而高温度则会增加文本的多样性和随机性。",
       "prompt": "提示",
@@ -209,7 +212,8 @@
       "group": "分组",
       "introduction": "简介",
       "owner": "所有者",
-      "model": "模型"
+      "model": "模型",
+      "replicaCount": "副本数量"
     },
     "off": "下线",
     "on": "上线",

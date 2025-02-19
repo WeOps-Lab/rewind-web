@@ -32,7 +32,7 @@ const SkillSettingsPage: React.FC = () => {
   const [showRagSource, setRagSourceStatus] = useState(false);
   const [ragSources, setRagSources] = useState<KnowledgeBaseRagSource[]>([]);
   const [selectedKnowledgeBases, setSelectedKnowledgeBases] = useState<number[]>([]);
-  const [llmModels, setLlmModels] = useState<{ id: number, name: string, enabled: boolean }[]>([]);
+  const [llmModels, setLlmModels] = useState<{ id: number, name: string, enabled: boolean, llm_model_type: string }[]>([]);
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const [pageLoading, setPageLoading] = useState({
     llmModelsLoading: true,
@@ -73,6 +73,7 @@ const SkillSettingsPage: React.FC = () => {
             llmModel: data.llm_model,
             temperature: data.temperature || 0.7,
             prompt: data.skill_prompt,
+            show_think: data.show_think,
           });
           setChatHistoryEnabled(data.enable_conversation_history);
           setRagEnabled(data.enable_rag);
@@ -120,7 +121,8 @@ const SkillSettingsPage: React.FC = () => {
         enable_rag_knowledge_source: showRagSource,
         rag_score_threshold: ragScoreThreshold,
         conversation_window_size: chatHistoryEnabled ? quantity : undefined,
-        temperature: temperature
+        temperature: temperature,
+        show_think: values.show_think,
       };
       setSaveLoading(true);
       await put(`/model_provider_mgmt/llm/${id}/`, payload);
@@ -155,6 +157,7 @@ const SkillSettingsPage: React.FC = () => {
           chat_history: quantity ? newMessage.slice(0, quantity).map(msg => ({ text: msg.content, event: msg.role })) : [],
           conversation_window_size: chatHistoryEnabled ? quantity : undefined,
           temperature: temperature,
+          show_think: values.show_think,
         };
         const reply = await post('/model_provider_mgmt/llm/execute/', payload);
         const botMessage: CustomChatMessage = {
@@ -197,7 +200,7 @@ const SkillSettingsPage: React.FC = () => {
                     form={form}
                     labelCol={{ flex: '0 0 128px' }}
                     wrapperCol={{ flex: '1' }}
-                    initialValues={{ temperature: 0.7 }}
+                    initialValues={{ temperature: 0.7, show_think: true }}
                   >
                     <Form.Item label={t('skill.form.name')} name="name" rules={[{ required: true, message: `${t('common.input')} ${t('skill.form.name')}` }]}>
                       <Input />
@@ -212,12 +215,28 @@ const SkillSettingsPage: React.FC = () => {
                     <Form.Item label={t('skill.form.introduction')} name="introduction" rules={[{ required: true, message: `${t('common.input')} ${t('skill.form.introduction')}` }]}>
                       <TextArea rows={4} />
                     </Form.Item>
-                    <Form.Item label={t('skill.form.llmModel')} name="llmModel" rules={[{ required: true, message: `${t('common.input')} ${t('skill.form.llmModel')}` }]}>
-                      <Select>
-                        {llmModels.map((model) => (
+                    <Form.Item
+                      label={t('skill.form.llmModel')}
+                      name="llmModel"
+                      rules={[{ required: true, message: `${t('common.input')} ${t('skill.form.llmModel')}` }]}
+                    >
+                      <Select
+                        onChange={(value: number) => {
+                          const selected = llmModels.find(model => model.id === value);
+                          // 当选择的模型名称为 deep-seek，则 show_think 默认变为 false，否则默认 true
+                          form.setFieldsValue({ show_think: selected && selected.llm_model_type === 'deep-seek' ? false : true });
+                        }}
+                      >
+                        {llmModels.map(model => (
                           <Option key={model.id} value={model.id} disabled={!model.enabled}>{model.name}</Option>
                         ))}
                       </Select>
+                    </Form.Item>
+                    <Form.Item
+                      label={t('skill.form.showThought')}
+                      name="show_think"
+                      valuePropName="checked">
+                      <Switch size="small" />
                     </Form.Item>
                     <Form.Item
                       label={t('skill.form.temperature')}
