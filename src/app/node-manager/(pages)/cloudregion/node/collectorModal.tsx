@@ -26,7 +26,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const { t } = useTranslation();
     const cloudid = useCloudId();
     const { getnodelist, batchbindcollector, batchoperationcollector, getconfiglist } = useApiCloudRegion();
-    const [type, setType] = useState<string>("");
+    const [type, setType] = useState<string>("start");
     const [nodeids, setNodeids] = useState<string[]>([""]);
     //设置弹窗状态
     const [collectorVisible, setCollectorVisible] =

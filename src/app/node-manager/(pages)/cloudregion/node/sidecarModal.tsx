@@ -29,7 +29,7 @@ const SidecarModal = forwardRef<ModalRef, ModalSuccess>(
     //设置表当的数据
     const [sidecarFormData, setSidecarFormData] =
       useState<TableDataItem>();
-    const [type, setType] = useState<string>("");
+    const [type, setType] = useState<string>("install");
     const [selectgroup, setSelectgroup] = useState<OptionItem[]>()
 
     useImperativeHandle(ref, () => ({

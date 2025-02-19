@@ -7,6 +7,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@monaco-editor/react": "^4.6.0"
+    "react-ace": "^14.0.1"
   }
 }

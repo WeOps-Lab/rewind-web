@@ -1,19 +1,19 @@
-"use client";
-import React, { useEffect, useRef, useState } from "react";
-import { Button, Input, message } from "antd";
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, Input, message } from 'antd';
 import CustomTable from '@/components/custom-table/index';
-import { useTranslation } from "@/utils/i18n";
-import VariableModal from "./variableModal";
-import { ModalRef } from "@/app/node-manager/types/index";
-import { useVarColumns } from "./useVarColumns";
+import { useTranslation } from '@/utils/i18n';
+import VariableModal from './variableModal';
+import { ModalRef } from '@/app/node-manager/types/index';
+import { useVarColumns } from './useVarColumns';
 import type { GetProps } from 'antd';
-import type { TableDataItem } from "@/app/node-manager/types/index";
-import Mainlayout from '../mainlayout/layout'
-import { PlusOutlined } from "@ant-design/icons";
-import useApiCloudRegion from "@/app/node-manager/api/cloudregion";
-import useApiClient from "@/utils/request";
-import useCloudId from "@/app/node-manager/hooks/useCloudid";
-import variableStyle from "./index.module.scss"
+import type { TableDataItem } from '@/app/node-manager/types/index';
+import Mainlayout from '../mainlayout/layout';
+import { PlusOutlined } from '@ant-design/icons';
+import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
+import useApiClient from '@/utils/request';
+import useCloudId from '@/app/node-manager/hooks/useCloudid';
+import variableStyle from './index.module.scss';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
@@ -24,13 +24,13 @@ const Variable = () => {
   const { t } = useTranslation();
   const cloudid = useCloudId();
   const [data, setData] = useState<TableDataItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true)
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!isLoading) {
       getVariablelist();
     }
-  }, [isLoading])
+  }, [isLoading]);
 
   //根据传入的值打开对应的用户弹窗（添加用户弹窗和编辑用户的弹窗）
   const openUerModal = (type: string, form: TableDataItem) => {
@@ -49,18 +49,20 @@ const Variable = () => {
   };
   //删除的确定的弹窗
   const delconfirm = (key: string) => {
-    deletevariable(key).then(() => {
-      message.success(t('common.delSuccess'));
-    }).finally(() => {
-      getVariablelist();
-    });
+    deletevariable(key)
+      .then(() => {
+        message.success(t('common.delSuccess'));
+      })
+      .finally(() => {
+        getVariablelist();
+      });
   };
 
   const columns = useVarColumns({
     openUerModal,
     getFormDataById,
-    delconfirm
-  })
+    delconfirm,
+  });
 
   //添加和编辑成功后，重新获取表格数据
   const onsuccessvariablemodal = () => {
@@ -76,53 +78,60 @@ const Variable = () => {
           name: item.key,
           value: item.value,
           description: item.description,
-        }
-      })
+        };
+      });
       setData(tempdata);
-    })
+    });
   };
 
   //获取表格数据
   const getVariablelist = () => {
-    getvariablelist(Number(cloudid)).then((res) => {
-      setLoading(true)
-      const tempdata = res.map((item: any) => {
-        return {
-          key: item.id,
-          name: item.key,
-          value: item.value,
-          description: item.description,
-        }
+    getvariablelist(Number(cloudid))
+      .then((res) => {
+        setLoading(true);
+        const tempdata = res.map((item: any) => {
+          return {
+            key: item.id,
+            name: item.key,
+            value: item.value,
+            description: item.description,
+          };
+        });
+        setData(tempdata);
       })
-      setData(tempdata);
-    }).finally(() => {
-      setLoading(false)
-    });
-  }
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
     <Mainlayout>
       <div className={`${variableStyle.variable} w-full h-full`}>
         <div className="flex justify-end mb-4">
-          <Search className="w-64 mr-[8px]" placeholder="input search text" enterButton onSearch={onSearch} />
+          <Search
+            className="w-64 mr-[8px]"
+            placeholder={t('common.search')}
+            enterButton
+            onSearch={onSearch}
+          />
           <Button
             type="primary"
             onClick={() => {
-              openUerModal("add", {
-                name: "",
-                key: "",
-                value: "",
-                description: "",
+              openUerModal('add', {
+                name: '',
+                key: '',
+                value: '',
+                description: '',
               });
             }}
           >
-            <PlusOutlined />{t("common.add")}
+            <PlusOutlined />
+            {t('common.add')}
           </Button>
-
         </div>
         <div className="tablewidth">
           <CustomTable
-            scroll={{ y: "calc(100vh - 400px)", x: "calc(100vw - 300px)" }}
+            scroll={{ y: 'calc(100vh - 400px)', x: 'calc(100vw - 300px)' }}
             loading={loading}
             columns={columns}
             dataSource={data}
@@ -135,5 +144,5 @@ const Variable = () => {
       </div>
     </Mainlayout>
   );
-}
+};
 export default Variable;

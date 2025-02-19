@@ -14,7 +14,8 @@
     "success": "Successfully",
     "quesuccess": "Query successful!",
     "applysuccess": "Apply success!",
-    "unapply": "Unapply"
+    "unapply": "Unapply",
+    "search": "Search..."
   },
   "node-manager": {
     "cloudregion": {

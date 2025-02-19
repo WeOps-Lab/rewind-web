@@ -5,7 +5,7 @@
     "Actions": "操作",
     "modifydelete": "批量删除",
     "variable": "变量",
-    "config": "配置",
+    "configuration": "配置",
     "node": "节点",
     "topdes": "节点管理主要用于在每个节点上安装探针,并通过探针管理各种类型的收集器。",
     "batchbindSuccess": "绑定成功",
@@ -14,7 +14,8 @@
     "success": "成功",
     "quesuccess": "查询成功",
     "applysuccess": "应用成功!",
-    "unapply": "解绑"
+    "unapply": "解绑",
+    "search": "搜索..."
   },
   "node-manager": {
     "cloudregion": {
