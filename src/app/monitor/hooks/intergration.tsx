@@ -463,9 +463,70 @@ const useColumnsAndFormItems = ({
             </>
           ),
         };
+      case 'middleware':
+        return {
+          displaycolumns: [columns[0], ...columns.slice(3, 7)],
+          formItems: (
+            <>
+              <Form.Item label={t('monitor.intergrations.username')} required>
+                <Form.Item
+                  noStyle
+                  name="username"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input className="w-[300px] mr-[10px]" />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.usernameDes')}
+                </span>
+              </Form.Item>
+              <Form.Item label={t('monitor.intergrations.password')} required>
+                <Form.Item
+                  noStyle
+                  name="password"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input
+                    ref={passwordRef}
+                    disabled={passwordDisabled}
+                    className="w-[300px] mr-[10px]"
+                    type="password"
+                    suffix={
+                      <EditOutlined
+                        className="text-[var(--color-text-2)]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPassword();
+                        }}
+                      />
+                    }
+                  />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.passwordDes')}
+                </span>
+              </Form.Item>
+            </>
+          ),
+        };
+      case 'docker':
+        return {
+          displaycolumns: [columns[0], columns[7], ...columns.slice(4, 7)],
+          formItems: null,
+        };
       default:
         return {
-          displaycolumns: [columns[0], ...columns.slice(4, 7)],
+          displaycolumns: [columns[0], ...columns.slice(3, 7)],
           formItems: null,
         };
     }
@@ -655,13 +716,13 @@ const useFormItems = ({
               </span>
             </Form.Item>
           ),
-          configText: `[[inputs.snmp_trap]]
-          tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="trap" }`,
+          configText: `[[inputs.$config_type]]
+          tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
         };
       case 'web':
         return {
           formItems: (
-            <Form.Item required label="Url">
+            <Form.Item required label="URL">
               <Form.Item
                 noStyle
                 name="monitor_url"
@@ -679,14 +740,14 @@ const useFormItems = ({
               </span>
             </Form.Item>
           ),
-          configText: `[[inputs.http_response]]
+          configText: `[[inputs.$config_type]]
     urls = ["$monitor_url"]
-    tags = { "instance_id"="$instance_id","instance_type"="$instance_type","collect_type"="web" }`,
+    tags = { "instance_id"="$instance_id","instance_type"="$instance_type","collect_type"="$collect_type" }`,
         };
       case 'ping':
         return {
           formItems: (
-            <Form.Item required label="Url">
+            <Form.Item required label="URL">
               <Form.Item
                 noStyle
                 name="monitor_url"
@@ -704,9 +765,9 @@ const useFormItems = ({
               </span>
             </Form.Item>
           ),
-          configText: `[[inputs.ping]]
+          configText: `[[inputs.$config_type]]
           urls = ["$monitor_url"]
-          tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="ping" }`,
+          tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
         };
       case 'snmp':
         return {
@@ -987,7 +1048,7 @@ const useFormItems = ({
           ),
           configText: {
             v2: `[[inputs.snmp]]
-    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="snmp" }
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }
     agents = ["udp://$monitor_ip:$port"]
     version = $version
     community= "$community"
@@ -1134,12 +1195,136 @@ const useFormItems = ({
           ),
           configText: `[[inputs.ipmi_sensor]]
     servers = ["$username:$password@lanplus($monitor_ip)"]
-    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="ipmi" }`,
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+        };
+      case 'middleware':
+        return {
+          formItems: (
+            <>
+              <Form.Item required label="URL">
+                <Form.Item
+                  noStyle
+                  name="monitor_url"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input className="w-[300px] mr-[10px]" />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.urlDes')}
+                </span>
+              </Form.Item>
+              <Form.Item label={t('monitor.intergrations.username')} required>
+                <Form.Item
+                  noStyle
+                  name="username"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input className="w-[300px] mr-[10px]" />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.usernameDes')}
+                </span>
+              </Form.Item>
+              <Form.Item label={t('monitor.intergrations.password')} required>
+                <Form.Item
+                  noStyle
+                  name="password"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input
+                    ref={passwordRef}
+                    disabled={passwordDisabled}
+                    className="w-[300px] mr-[10px]"
+                    type="password"
+                    suffix={
+                      <EditOutlined
+                        className="text-[var(--color-text-2)]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPassword();
+                        }}
+                      />
+                    }
+                  />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.passwordDes')}
+                </span>
+              </Form.Item>
+            </>
+          ),
+          configText: `[[inputs.$config_type]]
+    url = "$monitor_url"
+    username = "$username"
+    password = "$password"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+        };
+      case 'docker':
+        return {
+          formItems: (
+            <>
+              <Form.Item required label={t('monitor.intergrations.endpoint')}>
+                <Form.Item
+                  noStyle
+                  name="endpoint"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input className="w-[300px] mr-[10px]" />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.endpointDes')}
+                </span>
+              </Form.Item>
+            </>
+          ),
+          configText: `[[inputs.$config_type]]
+    endpoint = "$endpoint"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
         };
       default:
         return {
-          formItems: null,
-          configText: '',
+          formItems: (
+            <Form.Item required label="URL">
+              <Form.Item
+                noStyle
+                name="monitor_url"
+                rules={[
+                  {
+                    required: true,
+                    message: t('common.required'),
+                  },
+                ]}
+              >
+                <Input className="w-[300px] mr-[10px]" />
+              </Form.Item>
+              <span className="text-[12px] text-[var(--color-text-3)]">
+                {t('monitor.intergrations.urlDes')}
+              </span>
+            </Form.Item>
+          ),
+          configText: `[[inputs.$config_type]]
+    urls = ["$monitor_url"]
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
         };
     }
   }, [

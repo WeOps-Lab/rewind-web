@@ -13,7 +13,7 @@ import {
   OBJECT_ICON_MAP,
   COLLECT_TYPE_MAP,
 } from '@/app/monitor/constants/monitor';
-import { ModalRef, TreeItem } from '@/app/monitor/types';
+import { ModalRef, TableDataItem, TreeItem } from '@/app/monitor/types';
 import ImportModal from './importModal';
 import axios from 'axios';
 import { useAuth } from '@/context/auth';
@@ -97,12 +97,14 @@ const Intergration = () => {
             children: [],
           };
         }
-        acc[item.type].children.push({
-          title: item.display_name || '--',
-          label: item.name || '--',
-          key: item.id,
-          children: [],
-        });
+        if (!['Pod', 'Node', 'Docker Container'].includes(item.name)) {
+          acc[item.type].children.push({
+            title: item.display_name || '--',
+            label: item.name || '--',
+            key: item.id,
+            children: [],
+          });
+        }
         return acc;
       },
       {} as Record<string, TreeItem>
@@ -172,7 +174,7 @@ const Intergration = () => {
   };
 
   const linkToDetial = (app: ObectItem) => {
-    const row: any = {
+    const row: TableDataItem = {
       ...getObjectInfo(),
       plugin_name: app?.display_name,
       plugin_id: app?.id,

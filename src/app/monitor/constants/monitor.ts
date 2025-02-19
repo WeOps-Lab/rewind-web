@@ -1300,6 +1300,8 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   'Storage IPMI': 'ipmi',
   K8S: 'k8s',
   'SNMP Trap': 'trap',
+  RabbitMQ: 'middleware',
+  Docker: 'docker',
 };
 
 const OBJECT_COLLECT_TYPE_MAP: ObjectIconMap = {
@@ -1319,6 +1321,8 @@ const OBJECT_COLLECT_TYPE_MAP: ObjectIconMap = {
   Pod: 'k8s',
   Node: 'k8s',
   'SNMP Trap': 'trap',
+  RabbitMQ: 'middleware',
+  Docker: 'docker',
 };
 
 const INSTANCE_TYPE_MAP: ObjectIconMap = {
@@ -1338,6 +1342,8 @@ const INSTANCE_TYPE_MAP: ObjectIconMap = {
   'Storage IPMI': 'storage',
   K8S: 'k8s',
   'SNMP Trap': 'snmp_trap',
+  RabbitMQ: 'rabbitmq',
+  Docker: 'docker',
 };
 
 const CONFIG_TYPE_MAP: ConfigTypeMap = {
@@ -1357,6 +1363,8 @@ const CONFIG_TYPE_MAP: ConfigTypeMap = {
   'Storage IPMI': ['storage'],
   K8S: ['k8s'],
   'SNMP Trap': ['snmp_trap'],
+  RabbitMQ: ['rabbitmq'],
+  Docker: ['docker'],
 };
 
 const NODE_STATUS_MAP: ObjectIconMap = {

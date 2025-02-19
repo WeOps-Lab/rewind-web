@@ -12,22 +12,12 @@ import {
 import { useSearchParams, useRouter } from 'next/navigation';
 import useApiClient from '@/utils/request';
 import { useCommon } from '@/app/monitor/context/common';
-import { Organization, ListItem } from '@/app/monitor/types';
+import { Organization, ListItem, TableDataItem } from '@/app/monitor/types';
+import { IntergrationMonitoredObject } from '@/app/monitor/types/monitor';
 import { useUserInfoContext } from '@/context/userInfo';
 import { useColumnsAndFormItems } from '@/app/monitor/hooks/intergration';
 
 const { Option } = Select;
-
-interface MonitoredObject {
-  key: string;
-  node_ids: string | string[] | null;
-  instance_name?: string | null;
-  group_ids: string[];
-  url?: string | null;
-  ip?: string | null;
-  instance_id?: string;
-  instance_type?: string;
-}
 
 const AutomaticConfiguration: React.FC = () => {
   const [form] = Form.useForm();
@@ -60,12 +50,15 @@ const AutomaticConfiguration: React.FC = () => {
     if (['snmp', 'ipmi'].includes(collectType)) {
       return { ...initItem, ip: null };
     }
-    return initItem as MonitoredObject;
+    if (collectType === 'docker') {
+      return { ...initItem, endpoint: null };
+    }
+    return initItem as IntergrationMonitoredObject;
   };
   const authPasswordRef = useRef<any>(null);
   const privPasswordRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
-  const [dataSource, setDataSource] = useState<MonitoredObject[]>([
+  const [dataSource, setDataSource] = useState<IntergrationMonitoredObject[]>([
     getInitMonitoredObjectItem(),
   ]);
   const [authPasswordDisabled, setAuthPasswordDisabled] =
@@ -83,7 +76,7 @@ const AutomaticConfiguration: React.FC = () => {
       dataIndex: 'node_ids',
       key: 'node_ids',
       width: 200,
-      render: (_: unknown, record: any, index: number) => (
+      render: (_: unknown, record: TableDataItem, index: number) => (
         <Select
           loading={nodesLoading}
           value={record.node_ids}
@@ -102,7 +95,7 @@ const AutomaticConfiguration: React.FC = () => {
       dataIndex: 'node_ids',
       key: 'node_ids',
       width: 200,
-      render: (_: unknown, record: any, index: number) => (
+      render: (_: unknown, record: TableDataItem, index: number) => (
         <Select
           mode="tags"
           maxTagCount="responsive"
@@ -123,8 +116,16 @@ const AutomaticConfiguration: React.FC = () => {
       dataIndex: 'ip',
       key: 'ip',
       width: 200,
-      render: (_: unknown, record: any, index: number) => (
-        <Input value={record.ip} onChange={(e) => handleIpChange(e, index)} />
+      render: (_: unknown, record: TableDataItem, index: number) => (
+        <Input
+          value={record.ip}
+          onChange={(e) =>
+            handleFieldAndInstNameChange(e, {
+              index,
+              field: 'ip',
+            })
+          }
+        />
       ),
     },
     {
@@ -132,8 +133,16 @@ const AutomaticConfiguration: React.FC = () => {
       dataIndex: 'url',
       key: 'url',
       width: 200,
-      render: (_: unknown, record: any, index: number) => (
-        <Input value={record.url} onChange={(e) => handleUrlChange(e, index)} />
+      render: (_: unknown, record: TableDataItem, index: number) => (
+        <Input
+          value={record.url}
+          onChange={(e) =>
+            handleFieldAndInstNameChange(e, {
+              index,
+              field: 'url',
+            })
+          }
+        />
       ),
     },
     {
@@ -141,7 +150,7 @@ const AutomaticConfiguration: React.FC = () => {
       dataIndex: 'instance_name',
       key: 'instance_name',
       width: 200,
-      render: (_: unknown, record: any, index: number) => (
+      render: (_: unknown, record: TableDataItem, index: number) => (
         <Input
           value={record.instance_name}
           onChange={(e) => handleInstNameChange(e, index)}
@@ -153,7 +162,7 @@ const AutomaticConfiguration: React.FC = () => {
       dataIndex: 'group_ids',
       key: 'group_ids',
       width: 200,
-      render: (_: unknown, record: any, index: number) => (
+      render: (_: unknown, record: TableDataItem, index: number) => (
         <Select
           mode="tags"
           maxTagCount="responsive"
@@ -174,7 +183,7 @@ const AutomaticConfiguration: React.FC = () => {
       dataIndex: 'action',
       width: 160,
       fixed: 'right',
-      render: (_: unknown, record: any, index: number) => (
+      render: (_: unknown, record: TableDataItem, index: number) => (
         <>
           <Button
             type="link"
@@ -187,7 +196,7 @@ const AutomaticConfiguration: React.FC = () => {
             <Button
               type="link"
               className="mr-[10px]"
-              onClick={() => handleCopy(record)}
+              onClick={() => handleCopy(record as IntergrationMonitoredObject)}
             >
               {t('common.copy')}
             </Button>
@@ -198,6 +207,23 @@ const AutomaticConfiguration: React.FC = () => {
             </Button>
           )}
         </>
+      ),
+    },
+    {
+      title: t('monitor.intergrations.endpoint'),
+      dataIndex: 'endpoint',
+      key: 'endpoint',
+      width: 200,
+      render: (_: unknown, record: TableDataItem, index: number) => (
+        <Input
+          value={record.endpoint}
+          onChange={(e) =>
+            handleFieldAndInstNameChange(e, {
+              index,
+              field: 'endpoint',
+            })
+          }
+        />
       ),
     },
   ];
@@ -310,22 +336,22 @@ const AutomaticConfiguration: React.FC = () => {
       .map((item) => item.node_ids)
       .filter((item) => item !== id);
     const _nodeList = nodeList.filter(
-      (item) => !nodeIds.includes(item.id as any)
+      (item) => !nodeIds.includes(item.id as string)
     );
     return _nodeList;
   };
 
   const handleAdd = (key: string) => {
     const index = dataSource.findIndex((item) => item.key === key);
-    const newData: MonitoredObject = getInitMonitoredObjectItem();
+    const newData: IntergrationMonitoredObject = getInitMonitoredObjectItem();
     const updatedData = [...dataSource];
     updatedData.splice(index + 1, 0, newData); // 在当前行下方插入新数据
     setDataSource(updatedData);
   };
 
-  const handleCopy = (row: any) => {
+  const handleCopy = (row: IntergrationMonitoredObject) => {
     const index = dataSource.findIndex((item) => item.key === row.key);
-    const newData: MonitoredObject = { ...row, key: uuidv4() };
+    const newData: IntergrationMonitoredObject = { ...row, key: uuidv4() };
     const updatedData = [...dataSource];
     updatedData.splice(index + 1, 0, newData);
     setDataSource(updatedData);
@@ -360,7 +386,7 @@ const AutomaticConfiguration: React.FC = () => {
     });
   };
 
-  const getConfigs = (row: any) => {
+  const getConfigs = (row: TableDataItem) => {
     switch (collectType) {
       case 'host':
         return form.getFieldValue('metric_type').map((item: string) => ({
@@ -375,7 +401,7 @@ const AutomaticConfiguration: React.FC = () => {
     }
   };
 
-  const getInstId = (row: MonitoredObject) => {
+  const getInstId = (row: IntergrationMonitoredObject) => {
     switch (collectType) {
       case 'host':
         const hostTarget: any = nodeList.find(
@@ -389,6 +415,10 @@ const AutomaticConfiguration: React.FC = () => {
         return row.url;
       case 'ping':
         return row.url;
+      case 'middleware':
+        return row.url;
+      case 'docker':
+        return row.endpoint;
       default:
         return objectName + '-' + (row.ip || '');
     }
@@ -443,21 +473,17 @@ const AutomaticConfiguration: React.FC = () => {
     setDataSource(_dataSource);
   };
 
-  const handleUrlChange = (
+  const handleFieldAndInstNameChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    index: number
+    config: {
+      index: number;
+      field: string;
+    }
   ) => {
     const _dataSource = deepClone(dataSource);
-    _dataSource[index].url = _dataSource[index].instance_name = e.target.value;
-    setDataSource(_dataSource);
-  };
-
-  const handleIpChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const _dataSource = deepClone(dataSource);
-    _dataSource[index].ip = _dataSource[index].instance_name = e.target.value;
+    _dataSource[config.index][config.field] = _dataSource[
+      config.index
+    ].instance_name = e.target.value;
     setDataSource(_dataSource);
   };
 

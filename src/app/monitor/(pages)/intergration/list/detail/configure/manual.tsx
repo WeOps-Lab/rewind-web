@@ -11,6 +11,7 @@ import { useSearchParams } from 'next/navigation';
 import useApiClient from '@/utils/request';
 import { useFormItems } from '@/app/monitor/hooks/intergration';
 import CodeEditor from '@/app/monitor/components/codeEditor';
+import { TableDataItem } from '@/app/monitor/types';
 
 const AutomaticConfiguration: React.FC = () => {
   const [form] = Form.useForm();
@@ -125,11 +126,13 @@ const AutomaticConfiguration: React.FC = () => {
       const _values = deepClone(values);
       _values.instance_id = getInstId(_values);
       _values.instance_type = instanceType;
-      getStep3Content(_values);
+      _values.collect_type = collectType;
+      _values.config_type = configTypes[0] || '';
+      getConfigText(_values);
     });
   };
 
-  const getInstId = (row: any) => {
+  const getInstId = (row: TableDataItem) => {
     switch (collectType) {
       case 'host':
         return row.monitor_ip;
@@ -139,12 +142,16 @@ const AutomaticConfiguration: React.FC = () => {
         return row.monitor_url;
       case 'ping':
         return row.monitor_url;
+      case 'middleware':
+        return row.monitor_url;
+      case 'docker':
+        return row.endpoint;
       default:
         return objectName + '-' + (row.monitor_ip || '');
     }
   };
 
-  const getStep3Content = async (params: any) => {
+  const getConfigText = async (params: TableDataItem) => {
     try {
       setConfirmLoading(true);
       await post(

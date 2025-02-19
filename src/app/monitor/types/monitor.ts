@@ -288,3 +288,23 @@ export interface ViewModalProps {
   monitorName: string;
   plugins: IntergrationItem[];
 }
+
+export interface IntergrationMonitoredObject {
+  key: string;
+  node_ids: string | string[] | null;
+  instance_name?: string | null;
+  group_ids: string[];
+  url?: string | null;
+  ip?: string | null;
+  instance_id?: string;
+  instance_type?: string;
+  endpoint?: string | null;
+}
+
+export interface MetricListItem {
+  id: string;
+  name: string;
+  child: MetricItem[];
+  display_name?: string;
+  is_pre: boolean;
+}

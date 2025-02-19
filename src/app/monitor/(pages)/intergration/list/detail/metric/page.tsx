@@ -13,6 +13,7 @@ import {
   GroupInfo,
   IntergrationItem,
   ObectItem,
+  MetricListItem,
 } from '@/app/monitor/types/monitor';
 import Collapse from '@/components/collapse';
 import GroupModal from './groupModal';
@@ -22,30 +23,22 @@ import { deepClone } from '@/app/monitor/utils/common';
 import { useUserInfoContext } from '@/context/userInfo';
 const { confirm } = Modal;
 
-interface ListItem {
-  id: string;
-  name: string;
-  child: MetricItem[];
-  display_name?: string;
-  is_pre: boolean;
-}
-
 const Configure = () => {
   const { get, del, isLoading, post } = useApiClient();
   const { t } = useTranslation();
   const commonContext = useUserInfoContext();
   const superRef = useRef(commonContext?.isSuperUser || false);
   const searchParams = useSearchParams();
-  const groupName = searchParams.get('name');
+  const groupName = searchParams.get('name') || '';
   const groupId = searchParams.get('id');
   const pluginID = searchParams.get('plugin_id') || '';
   const groupRef = useRef<ModalRef>(null);
   const metricRef = useRef<ModalRef>(null);
   const isSuperUser = superRef?.current;
   const [searchText, setSearchText] = useState<string>('');
-  const [metricData, setMetricData] = useState<ListItem[]>([]);
+  const [metricData, setMetricData] = useState<MetricListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [groupList, setGroupList] = useState<ListItem[]>([]);
+  const [groupList, setGroupList] = useState<MetricListItem[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
   const [items, setItems] = useState<IntergrationItem[]>([]);
   const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
@@ -73,8 +66,8 @@ const Configure = () => {
         <>
           {record.dimensions?.length
             ? record.dimensions
-              .map((item: DimensionItem) => item.name)
-              .join(',')
+                .map((item: DimensionItem) => item.name)
+                .join(',')
             : '--'}
         </>
       ),
@@ -137,10 +130,14 @@ const Configure = () => {
     setLoading(true);
     let _objId = '';
     try {
-      if (groupName === 'Cluster') {
+      if (['Docker', 'Cluster'].includes(groupName)) {
+        const typeMaps: Record<string, string> = {
+          Docker: 'Container Management',
+          Cluster: 'K8S',
+        };
         const data = await get(`/monitor/api/monitor_object/`);
         const _items = data
-          .filter((item: ObectItem) => item.type === 'K8S')
+          .filter((item: ObectItem) => item.type === typeMaps[groupName])
           .sort((a: ObectItem, b: ObectItem) => a.id - b.id)
           .map((item: ObectItem) => ({
             label: item.display_name,
@@ -177,7 +174,7 @@ const Configure = () => {
     });
   };
 
-  const showGroupDeleteConfirm = (row: ListItem) => {
+  const showGroupDeleteConfirm = (row: MetricListItem) => {
     confirm({
       title: t('common.deleteTitle'),
       content: t('common.deleteContent'),
@@ -343,7 +340,7 @@ const Configure = () => {
 
   return (
     <div className={metricStyle.metric}>
-      {groupName === 'Cluster' && (
+      {['Docker', 'Cluster'].includes(groupName) && (
         <Segmented
           className="mb-[20px] custom-tabs"
           value={activeTab}
@@ -378,7 +375,14 @@ const Configure = () => {
         </div>
       </div>
       <Spin spinning={loading}>
-        <div className={metricStyle.metricTable}>
+        <div
+          className={metricStyle.metricTable}
+          style={{
+            height: ['Docker', 'Cluster'].includes(groupName)
+              ? 'calc(100vh - 366px)'
+              : 'calc(100vh - 316px)',
+          }}
+        >
           {!!metricData.length ? (
             metricData.map((metricItem, index) => (
               <Collapse
