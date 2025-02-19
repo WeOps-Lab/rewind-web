@@ -193,8 +193,7 @@
       "modelName": "Model Name",
       "type": "Type",
       "group": "Group"
-    }
-  },
+    },
     "deleteConfirm": "Are you sure you want to delete this model?"
   },
   "studio": {
