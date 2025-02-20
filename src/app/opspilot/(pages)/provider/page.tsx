@@ -11,6 +11,8 @@ import styles from '@/app/opspilot/styles/common.module.scss';
 import { MODEL_TYPE_OPTIONS } from '@/app/opspilot/constants/provider';
 import { useTranslation } from '@/utils/i18n';
 
+const { Search } = Input;
+
 const tabConfig: TabConfig[] = [
   { key: '1', label: 'LLM Model', type: 'llm_model' },
   { key: '2', label: 'Embed Model', type: 'embed_provider' },
@@ -27,7 +29,6 @@ const ProviderPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [modalLoading, setModalLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('1');
-  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const fetchModels = async (type: string) => {
     setLoading(true);
@@ -59,9 +60,8 @@ const ProviderPage: React.FC = () => {
     }
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
+  const handleSearch = (value: string) => {
+    const term = value.toLowerCase();
     if (term === '') {
       setFilteredModels(models);
     } else {
@@ -120,12 +120,13 @@ const ProviderPage: React.FC = () => {
         className="mb-4"
       />
       <div className="flex justify-end mb-4">
-        <Input
+        <Search
           size="large"
+          allowClear
+          enterButton
           placeholder={`${t('common.search')}...`}
           style={{width: '350px'}}
-          value={searchTerm}
-          onChange={handleSearch}
+          onSearch={handleSearch}
         />
         {activeTab === '1' && (<Button type="primary" size="large" className="ml-2" icon={<PlusOutlined />} onClick={() => setIsAddModalVisible(true)}>
           {t('common.add')}

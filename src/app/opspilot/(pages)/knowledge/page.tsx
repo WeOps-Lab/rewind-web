@@ -14,6 +14,8 @@ import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { getIconTypeByIndex } from '@/app/opspilot/utils/knowledgeBaseUtils';
 
+const { Search } = Input;
+
 const KnowledgePage = () => {
   const router = useRouter();
   const { t } = useTranslation();
@@ -113,11 +115,13 @@ const KnowledgePage = () => {
   return (
     <div className="w-full">
       <div className="flex justify-end mb-4">
-        <Input
+        <Search
           size="large"
+          allowClear
+          enterButton
           placeholder={`${t('common.search')}...`}
           style={{ width: '350px' }}
-          onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+          onSearch={handleSearch}
         />
       </div>
       <Spin spinning={loading}>

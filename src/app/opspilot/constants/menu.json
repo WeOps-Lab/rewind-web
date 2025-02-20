@@ -109,6 +109,12 @@
       ]
     },
     {
+      "title": "工具",
+      "icon": "gongju-",
+      "url": "/opspilot/tool",
+      "name": "tool_list"
+    },
+    {
       "title": "提供",
       "icon": "moxing2",
       "url": "/opspilot/provider",
@@ -255,6 +261,12 @@
           "name": "knowledge_invocation_logs"
         }
       ]
+    },
+    {
+      "title": "Tool",
+      "icon": "gongju-",
+      "url": "/opspilot/tool",
+      "name": "tool_list"
     },
     {
       "title": "Provider",

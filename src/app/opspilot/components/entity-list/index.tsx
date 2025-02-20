@@ -8,6 +8,8 @@ import styles from '@/app/opspilot/styles/common.module.scss';
 import Cookies from 'js-cookie';
 import PermissionWrapper from '@/components/permission';
 
+const { Search } = Input;
+
 interface EntityListProps<T> {
   endpoint: string;
   CardComponent: React.FC<any>;
@@ -109,11 +111,13 @@ const EntityList = <T,>({ endpoint, CardComponent, ModifyModalComponent, itemTyp
   return (
     <div className="w-full h-full">
       <div className="flex justify-end mb-4">
-        <Input
+        <Search
           size="large"
+          allowClear
+          enterButton
           placeholder={`${t('common.search')}...`}
           style={{ width: '350px' }}
-          onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+          onSearch={handleSearch}
         />
       </div>
       <Spin spinning={loading}>
