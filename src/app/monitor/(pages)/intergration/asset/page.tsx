@@ -27,6 +27,7 @@ import {
   ObjectInstItem,
 } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
+import TimeSelector from '@/components/time-selector';
 import { PlusOutlined } from '@ant-design/icons';
 import Icon from '@/components/icon';
 import RuleModal from './ruleModal';
@@ -48,6 +49,7 @@ const Asset = () => {
   const { convertToLocalizedTime } = useLocalizedTime();
   const authList = useRef(commonContext?.authOrganizations || []);
   const organizationList: Organization[] = authList.current;
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const ruleRef = useRef<ModalRef>(null);
   const configRef = useRef<ModalRef>(null);
   const [pagination, setPagination] = useState<Pagination>({
@@ -66,6 +68,7 @@ const Asset = () => {
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
   const [defaultSelectObj, setDefaultSelectObj] = useState<React.Key>('');
   const [objectId, setObjectId] = useState<React.Key>('');
+  const [frequence, setFrequence] = useState<number>(0);
 
   const columns: ColumnItem[] = [
     {
@@ -196,6 +199,42 @@ const Asset = () => {
     }
   }, [pagination.current, pagination.pageSize]);
 
+  useEffect(() => {
+    if (!frequence) {
+      clearTimer();
+      return;
+    }
+    timerRef.current = setInterval(() => {
+      getObjects('timer');
+      getAssetInsts(objectId, 'timer');
+      getRuleList(objectId, 'timer');
+    }, frequence);
+    return () => {
+      clearTimer();
+    };
+  }, [
+    frequence,
+    objectId,
+    pagination.current,
+    pagination.pageSize,
+    searchText,
+  ]);
+
+  const onRefresh = () => {
+    getObjects();
+    getAssetInsts(objectId);
+    getRuleList(objectId);
+  };
+
+  const clearTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+  };
+
+  const onFrequenceChange = (val: number) => {
+    setFrequence(val);
+  };
+
   const handleObjectChange = async (id: string) => {
     setObjectId(id);
   };
@@ -249,7 +288,7 @@ const Asset = () => {
 
   const getAssetInsts = async (objectId: React.Key, type?: string) => {
     try {
-      setTableLoading(true);
+      setTableLoading(type !== 'timer');
       setExpandedRowKeys([]);
       const data = await get(
         `/monitor/api/monitor_instance/${objectId}/list/`,
@@ -271,9 +310,9 @@ const Asset = () => {
     }
   };
 
-  const getRuleList = async (objectId: React.Key) => {
+  const getRuleList = async (objectId: React.Key, type?: string) => {
     try {
-      setRuleLoading(true);
+      setRuleLoading(type !== 'timer');
       const data = await get(`/monitor/api/monitor_instance_group_rule/`, {
         params: {
           monitor_object_id: objectId,
@@ -285,12 +324,12 @@ const Asset = () => {
     }
   };
 
-  const getObjects = async (text?: string) => {
+  const getObjects = async (type?: string) => {
     try {
-      setPageLoading(true);
+      setPageLoading(type !== 'timer');
       const data = await get(`/monitor/api/monitor_object/`, {
         params: {
-          name: text || '',
+          name: '',
           add_instance_count: true,
         },
       });
@@ -437,6 +476,11 @@ const Asset = () => {
                 onPressEnter={() => getAssetInsts(objectId)}
                 onClear={clearText}
               ></Input>
+              <TimeSelector
+                onlyRefresh
+                onFrequenceChange={onFrequenceChange}
+                onRefresh={onRefresh}
+              />
             </div>
             <CustomTable
               scroll={{ y: 'calc(100vh - 320px)', x: 'calc(100vh - 480px)' }}

@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { Spin, Select, Button, Segmented, Input } from 'antd';
+import { Spin, Select, Button, Segmented, Input, Tooltip } from 'antd';
 import { BellOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import { useConditionList } from '@/app/monitor/constants/monitor';
 import useApiClient from '@/utils/request';
@@ -646,24 +646,46 @@ const SearchView: React.FC = () => {
               {isArea ? (
                 <div className={searchStyle.chartArea}>
                   {!!metric && (
-                    <div className="text-[14px] mb-[10px]">
-                      <span className="font-[600]">
-                        {metrics.find((item) => item.name === metric)
-                          ?.display_name || '--'}
-                      </span>
-                      <span className="text-[var(--color-text-3)] text-[12px]">
-                        {`${
-                          findUnitNameById(
-                            metrics.find((item) => item.name === metric)?.unit
-                          )
-                            ? '（' +
-                              findUnitNameById(
-                                metrics.find((item) => item.name === metric)
-                                  ?.unit
-                              ) +
-                              '）'
-                            : ''
-                        }`}
+                    <div className="flex justify-between items-center">
+                      <span className="text-[14px] relative mb-[10px]">
+                        <span className="font-[600] mr-[2px]">
+                          {metrics.find((item) => item.name === metric)
+                            ?.display_name || '--'}
+                        </span>
+                        <span className="text-[var(--color-text-3)] text-[12px]">
+                          {`${
+                            findUnitNameById(
+                              metrics.find((item) => item.name === metric)?.unit
+                            )
+                              ? '（' +
+                                findUnitNameById(
+                                  metrics.find((item) => item.name === metric)
+                                    ?.unit
+                                ) +
+                                '）'
+                              : ''
+                          }`}
+                        </span>
+                        <Tooltip
+                          placement="topLeft"
+                          title={
+                            metrics.find((item) => item.name === metric)
+                              ?.display_description || ''
+                          }
+                        >
+                          <div
+                            className="absolute cursor-pointer inline-block"
+                            style={{
+                              top: '-3px',
+                              right: '-14px',
+                            }}
+                          >
+                            <Icon
+                              type="a-shuoming2"
+                              className="text-[14px] text-[var(--color-text-3)]"
+                            />
+                          </div>
+                        </Tooltip>
                       </span>
                     </div>
                   )}

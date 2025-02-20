@@ -156,7 +156,8 @@
       "ifOutUcastPkts": "Out Ucast",
       "ifInOctets": "In traffic",
       "ifOutOctets": "Out traffic",
-      "reportTime": "Report Time"
+      "reportTime": "Report Time",
+      "metrics": "Metrics"
     },
     "events": {
       "event": "Event",
@@ -234,6 +235,7 @@
       "historicalAlarms": "Historical Alarms",
       "strategyName": "Policy Name",
       "alertName": "Alert Name",
+      "alertNameTitle": "The alarm name can reference the indicator name or dimension name as a variable, with a reference format of ${metric_name}.",
       "sumTitle": "Represents the sum of all dimension data within the selected time range.\n The sum function is used to calculate the total value of multiple time series within the same time range, suitable for merging and aggregating data from all dimensions, such as calculating total traffic.",
       "sumOverTimeTitle": "Represents the sum of multiple data points within the time range for each dimension separately within the selected time range (dimension filtering is required, otherwise the dimension with the largest sum is selected as the final value by default).\n The sum_over_time function is used to calculate the total value of each time series within the specified time range, suitable for analyzing the cumulative value of each dimension over time.",
       "maxTitle": "Represents the maximum value among all dimension data within the selected time range.\n The max function is used to select the maximum value from multiple time series at the same moment, often used to find peaks or highest readings in monitoring metrics.",

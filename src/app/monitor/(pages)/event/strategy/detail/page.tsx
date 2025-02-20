@@ -565,20 +565,31 @@ const StrategyOperation = () => {
                         />
                       </Form.Item>
                       <Form.Item<StrategyFields>
+                        required
                         label={
                           <span className="w-[100px]">
                             {t('monitor.events.alertName')}
                           </span>
                         }
-                        name="alert_name"
-                        rules={[
-                          { required: true, message: t('common.required') },
-                        ]}
                       >
-                        <Input
-                          placeholder={t('monitor.events.alertName')}
-                          className="w-[300px]"
-                        />
+                        <Form.Item
+                          name="alert_name"
+                          noStyle
+                          rules={[
+                            {
+                              required: true,
+                              message: t('common.required'),
+                            },
+                          ]}
+                        >
+                          <Input
+                            placeholder={t('monitor.events.alertName')}
+                            className="w-[300px]"
+                          />
+                        </Form.Item>
+                        <div className="text-[var(--color-text-3)] mt-[10px]">
+                          {t('monitor.events.alertNameTitle')}
+                        </div>
                       </Form.Item>
                       <Form.Item<StrategyFields>
                         label={
@@ -645,7 +656,9 @@ const StrategyOperation = () => {
                               ]}
                             >
                               <TextArea
-                                placeholder={t('monitor.events.promQLPlaceholder')}
+                                placeholder={t(
+                                  'monitor.events.promQLPlaceholder'
+                                )}
                                 className="w-[800px]"
                                 allowClear
                                 rows={4}

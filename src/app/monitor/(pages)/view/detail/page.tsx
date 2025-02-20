@@ -63,7 +63,7 @@ const ViewDetail = () => {
             value={activeMenu}
             className="custom-tabs"
             options={[
-              { value: 'metrics', label: t('monitor.metric') },
+              { value: 'metrics', label: t('monitor.views.metrics') },
               //   { value: 'overview', label: t('monitor.views.overview') },
             ]}
             onChange={onTabChange}
