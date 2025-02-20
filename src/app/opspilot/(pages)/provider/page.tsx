@@ -112,7 +112,7 @@ const ProviderPage: React.FC = () => {
   };
 
   return (
-    <div className={`px-12 w-full min-h-screen ${styles.segmented}`}>
+    <div className={`w-full h-full ${styles.segmented}`}>
       <Segmented
         options={tabConfig.map((tab) => ({label: tab.label, value: tab.key}))}
         value={activeTab}

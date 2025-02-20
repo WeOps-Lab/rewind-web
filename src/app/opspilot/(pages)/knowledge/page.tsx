@@ -111,7 +111,7 @@ const KnowledgePage = () => {
   );
 
   return (
-    <div className="px-12 w-full">
+    <div className="w-full">
       <div className="flex justify-end mb-4">
         <Input
           size="large"
@@ -127,7 +127,7 @@ const KnowledgePage = () => {
             className={`p-4 rounded-xl flex items-center justify-center shadow-md cursor-pointer ${knowledgeStyle.add}`}
           >
             <div
-              className="h-full flex items-center justify-center"
+              className="w-full h-full flex items-center justify-center"
               onClick={() => { setIsModalVisible(true); setEditingCard(null); }}
             >
               <Icon type="tianjia" className="text-2xl" />

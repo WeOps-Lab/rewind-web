@@ -107,7 +107,7 @@ const EntityList = <T,>({ endpoint, CardComponent, ModifyModalComponent, itemTyp
   );
 
   return (
-    <div className="px-12 w-full min-h-screen">
+    <div className="w-full h-full">
       <div className="flex justify-end mb-4">
         <Input
           size="large"
@@ -123,7 +123,7 @@ const EntityList = <T,>({ endpoint, CardComponent, ModifyModalComponent, itemTyp
             className={`shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer ${styles.addNew}`}
           >
             <div
-              className="h-full flex items-center justify-center"
+              className="w-full h-full flex items-center justify-center"
               onClick={() => { setIsModalVisible(true); setEditingItem(null); }}
             >
               <div className="text-center">
