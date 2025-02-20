@@ -46,23 +46,6 @@ const CollectorLayout = ({
   return (
     <div>
       <SubLayout
-        menuItems={[
-          {
-            label: t('common.node'),
-            path: '/node-manager/cloudregion/node',
-            icon: 'shezhi',
-          },
-          {
-            label: t('common.configuration'),
-            path: '/node-manager/cloudregion/configuration',
-            icon: 'shezhi',
-          },
-          {
-            label: t('common.variable'),
-            path: '/node-manager/cloudregion/variable',
-            icon: 'shezhi',
-          },
-        ]}
         topSection={<Topsection></Topsection>}
         showBackButton={true}
         intro={<Collectorintro></Collectorintro>}

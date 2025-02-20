@@ -65,13 +65,6 @@ const Collectordetail = () => {
   return (
     <div className="w-full h-full">
       <SubLayout
-        menuItems={[
-          {
-            label: t('node-manager.collector.title'),
-            path: '/',
-            icon: 'shezhi',
-          },
-        ]}
         topSection={<Topsection></Topsection>}
         showBackButton={true}
         intro={<Collectorintro></Collectorintro>}

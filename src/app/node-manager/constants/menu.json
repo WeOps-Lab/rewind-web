@@ -1,26 +1,86 @@
 {
   "zh": [
     {
-      "label": "云区域",
+      "title": "云区域",
       "icon": "yunchang-yunquyu",
-      "path": "/node-manager/cloudregion"
+      "url": "/node-manager/cloudregion",
+      "name": "cloud_region_list",
+      "children": [
+        {
+          "title": "节点",
+          "url": "/node-manager/cloudregion/node",
+          "icon": "shezhi",
+          "name": "cloud_region_node"
+        },
+        {
+          "title": "配置",
+          "url": "/node-manager/cloudregion/configuration",
+          "icon": "shezhi",
+          "name": "cloud_region_configuration"
+        },
+        {
+          "title": "变量",
+          "url": "/node-manager/cloudregion/variable",
+          "icon": "shezhi",
+          "name": "cloud_region_variable"
+        }
+      ]
     },
     {
-      "label": "采集器",
+      "title": "采集器",
       "icon": "xiaocaijiqi",
-      "path": "/node-manager/collector"
+      "url": "/node-manager/collector",
+      "name": "collector_list",
+      "children": [
+        {
+          "title": "概述",
+          "url": "/node-manager/collector/detail",
+          "icon": "shezhi",
+          "name": "collector_overview"
+        }
+      ]
     }
   ],
   "en": [
     {
-      "label": "Cloud Region",
+      "title": "Cloud Region",
       "icon": "yunchang-yunquyu",
-      "path": "/node-manager/cloudregion"
+      "url": "/node-manager/cloudregion",
+      "name": "cloud_region_list",
+      "children": [
+        {
+          "title": "Node",
+          "url": "/node-manager/cloudregion/node",
+          "icon": "shezhi",
+          "name": "cloud_region_node"
+        },
+        {
+          "title": "Configuration",
+          "url": "/node-manager/cloudregion/configuration",
+          "icon": "shezhi",
+          "name": "cloud_region_configuration"
+        },
+        {
+          "title": "Variable",
+          "url": "/node-manager/cloudregion/variable",
+          "icon": "shezhi",
+          "name": "cloud_region_variable"
+        }
+      ]
     },
     {
-      "label": "Collector",
+      "title": "Collector",
       "icon": "xiaocaijiqi",
-      "path": "/node-manager/collector"
+      "url": "/node-manager/collector",
+      "name": "collector_list",
+      "children": [
+        {
+          "title": "Overview",
+          "url": "/node-manager/collector/detail",
+          "icon": "shezhi",
+          "name": "collector_overview"
+        }
+      ]
     }
   ]
 }
