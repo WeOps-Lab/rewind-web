@@ -60,3 +60,14 @@ export interface MenuItem {
   isNotMenuItem?: boolean;
   children?: MenuItem[];
 }
+
+export interface EntityListProps<T> {
+  data: T[];
+  loading: boolean;
+  menuActions?: (item: T) => React.ReactNode;
+  singleAction?: (item: T) => { text: string, onClick: (item: T) => void };
+  openModal?: (item?: T) => void;
+  onSearch?: (value: string) => void;
+  onCardClick?: (item: T) => void;
+  displayTagBelowName?: boolean;
+}
