@@ -37,7 +37,7 @@ import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import TreeSelector from '@/app/monitor/components/treeSelector';
 import EditConfig from './editConfig';
 import {
-  OBJECT_COLLECT_TYPE_MAP,
+  OBJECT_INSTANCE_TYPE_MAP,
   NODE_STATUS_MAP,
 } from '@/app/monitor/constants/monitor';
 const { confirm } = Modal;
@@ -435,7 +435,7 @@ const Asset = () => {
           {
             instance_id: row.instance_id,
             instance_type:
-              OBJECT_COLLECT_TYPE_MAP[
+              OBJECT_INSTANCE_TYPE_MAP[
                 objects.find((item) => item.id === objectId)?.name || ''
               ],
           }

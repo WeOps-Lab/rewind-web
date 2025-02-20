@@ -337,7 +337,9 @@
       "updateConfigration": "Update",
       "normal": "Normal",
       "inactive": "Inactive",
-      "unavailable": "Unavailable"
+      "unavailable": "Unavailable",
+      "servers": "Server",
+      "serversDes": "Servers of the monitored object"
     }
   }
 }

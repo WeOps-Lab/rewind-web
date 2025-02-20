@@ -29,7 +29,7 @@ const CommonContextProvider = ({ children }: { children: React.ReactNode }) => {
     setPageLoading(true);
     try {
       const responseData = await get('/monitor/api/system_mgmt/user_all/');
-      const userData: UserItem[] = responseData?.data || [];
+      const userData: UserItem[] = responseData || [];
       setUserList(userData);
     } finally {
       setPageLoading(false);

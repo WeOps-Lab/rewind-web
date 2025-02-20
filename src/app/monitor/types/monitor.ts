@@ -299,6 +299,7 @@ export interface IntergrationMonitoredObject {
   instance_id?: string;
   instance_type?: string;
   endpoint?: string | null;
+  server?: string | null;
 }
 
 export interface MetricListItem {

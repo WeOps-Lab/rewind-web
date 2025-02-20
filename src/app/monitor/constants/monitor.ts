@@ -1302,9 +1302,10 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   'SNMP Trap': 'trap',
   RabbitMQ: 'middleware',
   Docker: 'docker',
+  ElasticSearch: 'database',
 };
 
-const OBJECT_COLLECT_TYPE_MAP: ObjectIconMap = {
+const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
   Host: 'os',
   Website: 'web',
   Ping: 'ping',
@@ -1320,9 +1321,10 @@ const OBJECT_COLLECT_TYPE_MAP: ObjectIconMap = {
   Cluster: 'k8s',
   Pod: 'k8s',
   Node: 'k8s',
-  'SNMP Trap': 'trap',
-  RabbitMQ: 'middleware',
+  'SNMP Trap': 'snmp_trap',
+  RabbitMQ: 'rabbitmq',
   Docker: 'docker',
+  ElasticSearch: 'elasticsearch',
 };
 
 const INSTANCE_TYPE_MAP: ObjectIconMap = {
@@ -1344,6 +1346,7 @@ const INSTANCE_TYPE_MAP: ObjectIconMap = {
   'SNMP Trap': 'snmp_trap',
   RabbitMQ: 'rabbitmq',
   Docker: 'docker',
+  ElasticSearch: 'elasticsearch',
 };
 
 const CONFIG_TYPE_MAP: ConfigTypeMap = {
@@ -1365,6 +1368,7 @@ const CONFIG_TYPE_MAP: ConfigTypeMap = {
   'SNMP Trap': ['snmp_trap'],
   RabbitMQ: ['rabbitmq'],
   Docker: ['docker'],
+  ElasticSearch: ['elasticsearch'],
 };
 
 const NODE_STATUS_MAP: ObjectIconMap = {
@@ -1387,7 +1391,7 @@ export {
   COLLECT_TYPE_MAP,
   INSTANCE_TYPE_MAP,
   CONFIG_TYPE_MAP,
-  OBJECT_COLLECT_TYPE_MAP,
+  OBJECT_INSTANCE_TYPE_MAP,
   NODE_STATUS_MAP,
   useInterfaceLabelMap,
   useScheduleList,

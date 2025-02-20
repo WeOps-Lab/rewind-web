@@ -337,7 +337,9 @@
       "updateConfigration": "更新配置",
       "normal": "正常",
       "inactive": "不活跃",
-      "unavailable": "失联"
+      "unavailable": "失联",
+      "servers": "服务器地址",
+      "serversDes": "监控对象的服务器地址"
     }
   }
 }

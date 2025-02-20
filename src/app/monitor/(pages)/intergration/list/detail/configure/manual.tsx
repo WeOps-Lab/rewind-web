@@ -146,6 +146,8 @@ const AutomaticConfiguration: React.FC = () => {
         return row.monitor_url;
       case 'docker':
         return row.endpoint;
+      case 'database':
+        return row.server;
       default:
         return objectName + '-' + (row.monitor_ip || '');
     }

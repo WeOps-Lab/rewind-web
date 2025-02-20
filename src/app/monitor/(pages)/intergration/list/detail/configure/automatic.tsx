@@ -53,6 +53,9 @@ const AutomaticConfiguration: React.FC = () => {
     if (collectType === 'docker') {
       return { ...initItem, endpoint: null };
     }
+    if (collectType === 'database') {
+      return { ...initItem, server: null };
+    }
     return initItem as IntergrationMonitoredObject;
   };
   const authPasswordRef = useRef<any>(null);
@@ -221,6 +224,23 @@ const AutomaticConfiguration: React.FC = () => {
             handleFieldAndInstNameChange(e, {
               index,
               field: 'endpoint',
+            })
+          }
+        />
+      ),
+    },
+    {
+      title: t('monitor.intergrations.servers'),
+      dataIndex: 'server',
+      key: 'server',
+      width: 200,
+      render: (_: unknown, record: TableDataItem, index: number) => (
+        <Input
+          value={record.server}
+          onChange={(e) =>
+            handleFieldAndInstNameChange(e, {
+              index,
+              field: 'server',
             })
           }
         />
@@ -419,6 +439,8 @@ const AutomaticConfiguration: React.FC = () => {
         return row.url;
       case 'docker':
         return row.endpoint;
+      case 'database':
+        return row.server;
       default:
         return objectName + '-' + (row.ip || '');
     }
