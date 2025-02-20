@@ -349,7 +349,7 @@ const Node = () => {
             operatingsystem:
               item.operating_system.charAt(0).toUpperCase() +
               item.operating_system.slice(1),
-            sidecar: item.status.status === '1' ? 'Running' : 'Error',
+            sidecar: !item.status.status ? 'Running' : 'Error',
             message: item.status.message,
           };
         });

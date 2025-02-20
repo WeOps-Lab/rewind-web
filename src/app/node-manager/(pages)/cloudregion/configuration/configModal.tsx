@@ -103,7 +103,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
         tempdata.push({
           key: item.id,
           name: item.key,
-          description: item.description,
+          description: item.description || '--',
         });
       });
       setVardataSource(tempdata);
@@ -267,7 +267,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
           onChange={handleEditorChange}
           className="mr-4"
           width="400px"
-          height="240px"
+          height="250px"
           mode="python"
           theme="monokai"
           name="editor"
@@ -285,7 +285,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
           <CustomTable
             size="small"
             className="w-full"
-            scroll={{ y: '170px' }}
+            scroll={{ y: '160px' }}
             dataSource={vardataSource}
             columns={columns}
           />
