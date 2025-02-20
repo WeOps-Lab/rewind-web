@@ -76,6 +76,8 @@ const SkillSettingsPage: React.FC = () => {
             prompt: data.skill_prompt,
             show_think: data.show_think,
           });
+          const selected = llmModels.find(model => model.id === data.llm_model);
+          setIsDeepSeek(selected?.llm_model_type === 'deep-seek');
           setChatHistoryEnabled(data.enable_conversation_history);
           setRagEnabled(data.enable_rag);
           setRagSourceStatus(data.enable_rag_knowledge_source);
