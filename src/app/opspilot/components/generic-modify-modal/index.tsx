@@ -22,11 +22,13 @@ const GenericModifyModal: React.FC<GenericModifyModalProps> = ({ visible, onCanc
   useEffect(() => {
     if (!visible) return;
 
-    if (initialValues) {
-      form.setFieldsValue(initialValues);
-    } else {
-      form.resetFields();
-    }
+    Promise.resolve().then(() => {
+      if (initialValues) {
+        form.setFieldsValue(initialValues);
+      } else {
+        form.resetFields();
+      }
+    });
   }, [initialValues, form, visible]);
 
   const handleConfirm = async () => {

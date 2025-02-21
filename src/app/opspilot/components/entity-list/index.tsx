@@ -5,7 +5,6 @@ import { Input, message, Spin, Modal } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import styles from '@/app/opspilot/styles/common.module.scss';
-import Cookies from 'js-cookie';
 import PermissionWrapper from '@/components/permission';
 
 const { Search } = Input;
@@ -48,10 +47,8 @@ const EntityList = <T,>({ endpoint, CardComponent, ModifyModalComponent, itemTyp
   };
 
   const handleAddItem = async (values: T) => {
-    const team = Cookies.get('current_team') || null;
     const params = {
-      ...values,
-      team: [team]
+      ...values
     }
     try {
       if (editingItem) {

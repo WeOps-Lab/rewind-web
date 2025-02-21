@@ -88,6 +88,7 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
       name: values.name,
       llm_model_type: values.type,
       enabled: values.enabled,
+      team: values.team
     };
 
     if (filterType === 'llm_model') {

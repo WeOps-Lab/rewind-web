@@ -33,17 +33,19 @@ const ModifyKnowledgeModal: React.FC<ModifyKnowledgeModalProps> = ({ visible, on
   useEffect(() => {
     if (!visible) return;
 
-    if (initialValues) {
-      form.setFieldsValue(initialValues);
-      setOriginalEmbedModel(initialValues.embed_model);
-    } else {
-      form.resetFields();
-      const defaultValues: any = {};
-      if (modelOptions.length > 0) {
-        defaultValues.embed_model = modelOptions.filter(option => option.enabled)?.[0]?.id;
+    Promise.resolve().then(() => {
+      if (initialValues) {
+        form.setFieldsValue(initialValues);
+        setOriginalEmbedModel(initialValues.embed_model);
+      } else {
+        form.resetFields();
+        const defaultValues: any = {};
+        if (modelOptions.length > 0) {
+          defaultValues.embed_model = modelOptions.filter(option => option.enabled)?.[0]?.id;
+        }
+        form.setFieldsValue(defaultValues);
       }
-      form.setFieldsValue(defaultValues);
-    }
+    });
   }, [initialValues, form, modelOptions, visible]);
 
   const handleConfirm = async () => {

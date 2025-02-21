@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 import { Input, Dropdown, Menu, Modal, message, Spin } from 'antd';
 import Icon from '@/components/icon';
 import { KnowledgeValues, Card } from '@/app/opspilot/types/knowledge';
@@ -47,10 +46,8 @@ const KnowledgePage = () => {
   };
 
   const handleAddKnowledge = async (values: KnowledgeValues) => {
-    const team = Cookies.get('current_team') || null;
     const params = {
-      ...values,
-      team: [team]
+      ...values
     }
     try {
       if (editingCard) {
