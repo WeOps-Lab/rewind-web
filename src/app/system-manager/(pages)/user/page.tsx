@@ -5,7 +5,7 @@ import type { DataNode as TreeDataNode } from 'antd/lib/tree';
 import { ColumnsType } from 'antd/es/table';
 import TopSection from '@/components/top-section';
 import UserModal, { ModalRef } from './userModal';
-import PasswordModal, { PasswordModalRef } from './passwordModal';
+import PasswordModal, { PasswordModalRef } from '@/app/system-manager/components/user/passwordModal';
 import { useTranslation } from '@/utils/i18n';
 import { getRandomColor } from '@/app/system-manager/utils';
 import CustomTable from '@/components/custom-table';

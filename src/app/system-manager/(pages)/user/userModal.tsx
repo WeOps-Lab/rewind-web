@@ -7,6 +7,7 @@ import { useUserApi } from '@/app/system-manager/api/user/index';
 import type { DataNode as TreeDataNode } from 'antd/lib/tree';
 import { useClientData } from '@/context/client';
 import { ZONEINFO_OPTIONS, LOCALE_OPTIONS } from '@/app/system-manager/constants/userDropdowns';
+import RoleTransfer from '@/app/system-manager/components/user/roleTransfer';
 
 interface ModalProps {
   onSuccess: () => void;
@@ -35,12 +36,20 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   const [roleTreeData, setRoleTreeData] = useState<TreeDataNode[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [roleMaps, setRoleMaps] = useState<{ [key: string]: string }>({});
 
   const { addUser, editUser, getUserDetail, getRoleList } = useUserApi();
 
   const fetchRoleInfo = async () => {
     try {
       const roleData = await getRoleList({ client_list: clientData });
+      const mapping: { [key: string]: string } = {};
+      roleData.forEach((item: any) => {
+        item.children && item.children.forEach((child: any) => {
+          mapping[String(child.role_id)] = child.role_name;
+        });
+      });
+      setRoleMaps(mapping);
       setRoleTreeData(
         roleData.map((item: any) => ({
           key: String(item.id),
@@ -48,10 +57,10 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
           selectable: false,
           children: item.children.map((child: any) => ({
             key: String(child.role_id),
-            title: child.role_name,
+            title: child.display_name,
             selectable: true,
           })),
-        })),
+        }))
       );
     } catch {
       message.error(t('common.fetchFailed'));
@@ -87,7 +96,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
       setVisible(true);
       setType(type);
       formRef.current?.resetFields();
-
       if (type === 'edit' && userId) {
         fetchUserDetail(userId);
       } else if (type === 'add') {
@@ -115,7 +123,7 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
         if (parent.children) {
           parent.children.forEach((child: any) => {
             if (selectedRoles.includes(child.key)) {
-              roles.push({ id: child.key as string, name: child.title as string });
+              roles.push({ id: child.key as string, name: roleMaps[child.key] });
             }
           });
         }
@@ -151,32 +159,15 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   };
 
   const filteredTreeData = treeData ? transformTreeData(treeData) : [];
-
-  const flattenTree = (nodes: any[]): { key: string; title: string }[] => {
-    return nodes.reduce((acc, node) => {
+  const flattenTree = (nodes: any[]): { key: string; title: string }[] =>
+    nodes.reduce((acc, node) => {
       acc.push({ key: node.value, title: node.title });
       if (node.children && node.children.length) {
         acc = acc.concat(flattenTree(node.children));
       }
       return acc;
     }, [] as { key: string; title: string }[]);
-  };
-
   const groupDataSource = flattenTree(filteredTreeData);
-
-  // 新增：将 roleTreeData 扁平化用于 Transfer 的 dataSource
-  const flattenRoleData = (nodes: TreeDataNode[]): { key: string; title: string }[] => {
-    return nodes.reduce<{ key: string; title: string }[]>((acc, node) => {
-      if (node.selectable) {
-        acc.push({ key: node.key as string, title: node.title as string });
-      }
-      if (node.children) {
-        acc = acc.concat(flattenRoleData(node.children));
-      }
-      return acc;
-    }, []);
-  };
-  const flattenedRoleData = flattenRoleData(roleTreeData);
 
   return (
     <OperateModal
@@ -288,40 +279,14 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
             label={t('system.user.form.role')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Transfer
-              oneWay
-              dataSource={flattenedRoleData}
-              targetKeys={selectedRoles}
-              className="tree-transfer"
-              render={(item) => item.title}
-              showSelectAll={false}
-              onChange={nextTargetKeys => {
-                setSelectedRoles(nextTargetKeys as string[]);
-                formRef.current?.setFieldsValue({ roles: nextTargetKeys });
+            <RoleTransfer
+              roleTreeData={roleTreeData}
+              selectedRoles={selectedRoles}
+              onChange={newRoles => {
+                setSelectedRoles(newRoles);
+                formRef.current?.setFieldsValue({ roles: newRoles });
               }}
-            >
-              {({ direction }) => {
-                if (direction === 'left') {
-                  return (
-                    <div style={{ padding: '4px', maxHeight: 250, overflow: 'auto' }}>
-                      <Tree
-                        blockNode
-                        checkable
-                        selectable={false}
-                        defaultExpandAll
-                        checkedKeys={selectedRoles}
-                        treeData={roleTreeData}
-                        onCheck={(checkedKeys, info) => {
-                          const newKeys = info.checkedNodes.map((node: any) => node.key);
-                          setSelectedRoles(newKeys);
-                          formRef.current?.setFieldsValue({ roles: newKeys });
-                        }}
-                      />
-                    </div>
-                  );
-                }
-              }}
-            </Transfer>
+            />
           </Form.Item>
         </Form>
       </Spin>
