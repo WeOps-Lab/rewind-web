@@ -1,19 +1,12 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Input, Spin, Dropdown, Tag, Button, Empty } from 'antd'; // 引入 Empty 组件
+import { Input, Spin, Dropdown, Tag, Button, Empty } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
+import { EntityListProps } from '@/types';
 import PermissionWrapper from '@/components/permission';
 
-interface EntityListProps<T> {
-  data: T[];
-  loading: boolean;
-  menuActions?: (item: T) => React.ReactNode;
-  singleAction?: (item: T) => { text: string, onClick: (item: T) => void };
-  openModal?: (item?: T) => void;
-  onSearch?: (value: string) => void;
-  onCardClick?: (item: T) => void;
-}
+const { Search } = Input;
 
 const EntityList = <T,>({
   data,
@@ -23,7 +16,8 @@ const EntityList = <T,>({
   openModal,
   onSearch,
   onCardClick,
-}: EntityListProps<T>) => {
+  displayTagBelowName,
+}: EntityListProps<T> & { displayTagBelowName?: boolean }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -59,8 +53,8 @@ const EntityList = <T,>({
         key={id}
         className={`p-4 rounded-xl relative shadow-md ${onCardClick ? 'cursor-pointer' : ''} ${styles.commonCard}`}
         onClick={() => (onCardClick ? onCardClick(item) : undefined)}
-        onMouseEnter={() => setHoveredCard(id)}
-        onMouseLeave={() => setHoveredCard(null)}
+        onMouseEnter={() => setHoveredCard((current) => (current !== id ? id : current))}
+        onMouseLeave={() => setHoveredCard((current) => (current === id ? null : current))}
       >
         {menuActions && (
           <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -71,16 +65,30 @@ const EntityList = <T,>({
             </Dropdown>
           </div>
         )}
-        <div className="flex items-center mb-2">
-          <div className="rounded-full">
-            <Icon type={icon} className="text-4xl" />
+        <div className="flex items-center">
+          <div
+            className={displayTagBelowName ? 'flex items-center justify-center' : 'rounded-full'}
+            style={displayTagBelowName ? { height: 'auto' } : {}}
+          >
+            <Icon type={icon} className={displayTagBelowName ? `text-6xl` : 'text-4xl'} />
           </div>
-          <h3 className="ml-2 text-base font-semibold truncate" title={name}>
-            {name}
-          </h3>
+          <div className="ml-2">
+            <h3 className="text-base font-semibold truncate" title={name}>
+              {name}
+            </h3>
+            {displayTagBelowName && tag && tag.length > 0 && (
+              <div>
+                {tag.map((t: any, idx: number) => (
+                  <Tag key={idx} color={getColorForTag(t)} className="mr-1">
+                    {t}
+                  </Tag>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-        {tag && tag.length > 0 && (
-          <div className="mb-2">
+        {!displayTagBelowName && tag && tag.length > 0 && (
+          <div className="mt-2">
             {tag.map((t: any, idx: number) => (
               <Tag key={idx} color={getColorForTag(t)} className="mr-1">
                 {t}
@@ -88,7 +96,7 @@ const EntityList = <T,>({
             ))}
           </div>
         )}
-        <p className={`my-5 text-sm ${hoveredCard === id ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
+        <p className={`mt-3 text-sm h-[66px] ${hoveredCard === id ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
         {singleButtonAction && (
           <Button
             type="primary"
@@ -103,16 +111,18 @@ const EntityList = <T,>({
         )}
       </div>
     );
-  }, []);
+  }, [displayTagBelowName, hoveredCard]);
 
   return (
     <div className="w-full min-h-screen">
       <div className="flex justify-end mb-4">
-        <Input
+        <Search
           size="large"
+          allowClear
+          enterButton
           placeholder={`${t('common.search')}...`}
-          style={{ width: '350px' }}
-          onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+          style={{width: '350px'}}
+          onSearch={handleSearch}
         />
       </div>
       <Spin spinning={loading}>
