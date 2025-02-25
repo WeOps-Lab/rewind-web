@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, Input, Select, Button, message } from 'antd';
+import { Form, Input, Select, Button, message, InputNumber } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import CustomTable from '@/components/custom-table';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,6 +8,8 @@ import {
   COLLECT_TYPE_MAP,
   INSTANCE_TYPE_MAP,
   CONFIG_TYPE_MAP,
+  useMiddleWareFields,
+  TIMEOUT_UNITS,
 } from '@/app/monitor/constants/monitor';
 import { useSearchParams, useRouter } from 'next/navigation';
 import useApiClient from '@/utils/request';
@@ -31,10 +33,10 @@ const AutomaticConfiguration: React.FC = () => {
   const groupId = [currentGroup?.current?.id || ''];
   const authList = useRef(commonContext?.authOrganizations || []);
   const organizationList: Organization[] = authList.current;
-  const collectTypeId = searchParams.get('collect_type') || '';
-  const collectType = COLLECT_TYPE_MAP[collectTypeId];
-  const instType = INSTANCE_TYPE_MAP[collectTypeId];
-  const configTypes = CONFIG_TYPE_MAP[collectTypeId];
+  const pluginName = searchParams.get('collect_type') || '';
+  const collectType = COLLECT_TYPE_MAP[pluginName];
+  const instType = INSTANCE_TYPE_MAP[pluginName];
+  const configTypes = CONFIG_TYPE_MAP[pluginName];
   const objectName = searchParams.get('name') || '';
   const objectId = searchParams.get('id') || '';
   const getInitMonitoredObjectItem = () => {
@@ -44,7 +46,7 @@ const AutomaticConfiguration: React.FC = () => {
       instance_name: null,
       group_ids: groupId,
     };
-    if (['web', 'ping'].includes(collectType)) {
+    if (['web', 'ping', 'middleware'].includes(collectType)) {
       return { ...initItem, url: null };
     }
     if (['snmp', 'ipmi'].includes(collectType)) {
@@ -54,7 +56,9 @@ const AutomaticConfiguration: React.FC = () => {
       return { ...initItem, endpoint: null };
     }
     if (collectType === 'database') {
-      return { ...initItem, server: null };
+      return pluginName === 'ElasticSearch'
+        ? { ...initItem, server: null }
+        : { ...initItem, host: null, port: null };
     }
     return initItem as IntergrationMonitoredObject;
   };
@@ -72,6 +76,7 @@ const AutomaticConfiguration: React.FC = () => {
   const [nodeList, setNodeList] = useState<ListItem[]>([]);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [nodesLoading, setNodesLoading] = useState<boolean>(false);
+  const middleWareFieldsMap = useMiddleWareFields();
 
   const columns: any[] = [
     {
@@ -132,7 +137,7 @@ const AutomaticConfiguration: React.FC = () => {
       ),
     },
     {
-      title: t('monitor.intergrations.url'),
+      title: middleWareFieldsMap[pluginName] || middleWareFieldsMap.default,
       dataIndex: 'url',
       key: 'url',
       width: 200,
@@ -246,6 +251,44 @@ const AutomaticConfiguration: React.FC = () => {
         />
       ),
     },
+    {
+      title: t('monitor.intergrations.host'),
+      dataIndex: 'host',
+      key: 'host',
+      width: 200,
+      render: (_: unknown, record: TableDataItem, index: number) => (
+        <Input
+          value={record.host}
+          onChange={(e) =>
+            handleFieldAndInstNameChange(e, {
+              index,
+              field: 'host',
+              dataIndex: 'host',
+            })
+          }
+        />
+      ),
+    },
+    {
+      title: t('monitor.intergrations.port'),
+      dataIndex: 'port',
+      key: 'port',
+      width: 200,
+      render: (_: unknown, record: TableDataItem, index: number) => (
+        <InputNumber
+          value={record.port}
+          className="w-full"
+          min={1}
+          precision={0}
+          onChange={(val) =>
+            handlePortAndInstNameChange(val, {
+              index,
+              field: 'port',
+            })
+          }
+        />
+      ),
+    },
   ];
 
   const handleEditAuthPassword = () => {
@@ -288,6 +331,7 @@ const AutomaticConfiguration: React.FC = () => {
     handleEditAuthPassword,
     handleEditPrivPassword,
     handleEditPassword,
+    pluginName,
   });
 
   useEffect(() => {
@@ -315,22 +359,30 @@ const AutomaticConfiguration: React.FC = () => {
   }, [isLoading]);
 
   const initData = () => {
-    if (collectType === 'host') {
-      form.setFieldsValue({
-        metric_type: configTypes,
-      });
-    }
-    if (collectType === 'ipmi') {
-      form.setFieldsValue({
-        protocol: 'lanplus',
-      });
-    }
-    if (collectType === 'snmp') {
-      form.setFieldsValue({
-        port: 161,
-        version: 2,
-        timeout: 10,
-      });
+    form.setFieldsValue({
+      interval: 10,
+    });
+    switch (collectType) {
+      case 'host':
+        form.setFieldsValue({
+          metric_type: configTypes,
+        });
+        break;
+      case 'ipmi':
+        form.setFieldsValue({
+          protocol: 'lanplus',
+        });
+        break;
+      case 'snmp':
+        form.setFieldsValue({
+          port: 161,
+          version: 2,
+          timeout: 10,
+        });
+      case 'middleware':
+        form.setFieldsValue({
+          timeout: 10,
+        });
     }
   };
 
@@ -440,7 +492,7 @@ const AutomaticConfiguration: React.FC = () => {
       case 'docker':
         return row.endpoint;
       case 'database':
-        return row.server;
+        return row.server || `${row.host}:${row.port}`;
       default:
         return objectName + '-' + (row.ip || '');
     }
@@ -495,14 +547,36 @@ const AutomaticConfiguration: React.FC = () => {
     setDataSource(_dataSource);
   };
 
-  const handleFieldAndInstNameChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+  const handlePortAndInstNameChange = (
+    val: number,
     config: {
       index: number;
       field: string;
     }
   ) => {
     const _dataSource = deepClone(dataSource);
+    const host = _dataSource[config.index].host || '';
+    _dataSource[config.index][config.field] = val;
+    _dataSource[config.index].instance_name = `${host}:${val || ''}`;
+    setDataSource(_dataSource);
+  };
+
+  const handleFieldAndInstNameChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    config: {
+      index: number;
+      field: string;
+      dataIndex?: string;
+    }
+  ) => {
+    const _dataSource = deepClone(dataSource);
+    if (config.dataIndex === 'host') {
+      const port = _dataSource[config.index].port || '';
+      _dataSource[config.index][config.field] = e.target.value;
+      _dataSource[config.index].instance_name = `${e.target.value}:${port}`;
+      setDataSource(_dataSource);
+      return;
+    }
     _dataSource[config.index][config.field] = _dataSource[
       config.index
     ].instance_name = e.target.value;
@@ -518,6 +592,36 @@ const AutomaticConfiguration: React.FC = () => {
           </b>
         )}
         {formItems}
+        <Form.Item required label={t('monitor.intergrations.interval')}>
+          <Form.Item
+            noStyle
+            name="interval"
+            rules={[
+              {
+                required: true,
+                message: t('common.required'),
+              },
+            ]}
+          >
+            <InputNumber
+              className="mr-[10px]"
+              min={1}
+              precision={0}
+              addonAfter={
+                <Select style={{ width: 116 }} defaultValue="s">
+                  {TIMEOUT_UNITS.map((item: string) => (
+                    <Option key={item} value={item}>
+                      {item}
+                    </Option>
+                  ))}
+                </Select>
+              }
+            />
+          </Form.Item>
+          <span className="text-[12px] text-[var(--color-text-3)]">
+            {t('monitor.intergrations.intervalDes')}
+          </span>
+        </Form.Item>
         <b className="text-[14px] flex mb-[10px] ml-[-10px]">
           {t('monitor.intergrations.basicInformation')}
         </b>

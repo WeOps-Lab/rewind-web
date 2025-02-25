@@ -277,6 +277,7 @@
       "collectionNode": "采集节点",
       "url": "URL",
       "interval": "间隔",
+      "intervalDes": "监控对象的采集频率",
       "instanceName": "实例名称",
       "number": "数字",
       "enum": "枚举",
@@ -310,6 +311,7 @@
       "endpointDes": "监控对象的端点",
       "endpoint": "端点",
       "port": "端口",
+      "host": "主机",
       "version": "版本",
       "community": "团体名",
       "timeout": "超时时间",
@@ -323,7 +325,7 @@
       "portDes": "配置SNMP端口号，通常使用161端口与设备进行通信。",
       "versionDes": "指定要使用的 SNMP 协议版本，例如 v2c 或 v3，定义通信机制和安全级别。",
       "communityDes": "用于 SNMPv2c 的认证字符串，类似于密码，允许访问设备的 SNMP 数据。",
-      "timeoutDes": "从设备请求 SNMP 数据的超时时间，超过配置时间（例如 10 秒）的请求将被视为失败。",
+      "timeoutDes": "从设备请求数据的超时时间，超过配置时间（例如 10 秒）的请求将被视为失败。",
       "nameDes": "用于 SNMPv3 认证的用户名。",
       "levelDes": "安全级别设置，例如 authPriv 表示同时使用认证和隐私（加密）。",
       "authProtocolDes": "用于保护认证过程的认证协议。",
@@ -339,7 +341,11 @@
       "inactive": "不活跃",
       "unavailable": "失联",
       "servers": "服务器地址",
-      "serversDes": "监控对象的服务器地址"
+      "serversDes": "监控对象的服务器地址",
+      "address": "地址",
+      "addressDes": "接入地址",
+      "commonPortDes": "与设备进行通信的端口",
+      "commonHostDes": "与设备进行通信的主机"
     }
   }
 }

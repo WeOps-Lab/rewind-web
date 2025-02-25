@@ -300,6 +300,8 @@ export interface IntergrationMonitoredObject {
   instance_type?: string;
   endpoint?: string | null;
   server?: string | null;
+  host?: string | null;
+  port?: string | null;
 }
 
 export interface MetricListItem {

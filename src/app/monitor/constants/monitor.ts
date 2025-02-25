@@ -281,6 +281,23 @@ const UNIT_LIST = [
   },
 ];
 
+const useMiddleWareFields = (): ObjectIconMap => {
+  const { t } = useTranslation();
+  return useMemo(
+    () => ({
+      ClickHouse: t('monitor.intergrations.servers'),
+      Consul: t('monitor.intergrations.address'),
+      Zookeeper: t('monitor.intergrations.servers'),
+      default: t('monitor.intergrations.url'),
+      defaultDes: t('monitor.intergrations.urlDes'),
+      ClickHouseDes: t('monitor.intergrations.serversDes'),
+      ConsulDes: t('monitor.intergrations.addressDes'),
+      ZookeeperDes: t('monitor.intergrations.serversDes'),
+    }),
+    [t]
+  );
+};
+
 const INDEX_CONFIG = [
   {
     name: 'Host',
@@ -1300,9 +1317,20 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   'Storage IPMI': 'ipmi',
   K8S: 'k8s',
   'SNMP Trap': 'trap',
-  RabbitMQ: 'middleware',
   Docker: 'docker',
-  ElasticSearch: 'database',
+  RabbitMQ: 'middleware',
+  Nginx: 'middleware',
+  ActiveMQ: 'middleware',
+  Apache: 'middleware',
+  ClickHouse: 'middleware',
+  Consul: 'middleware',
+  Zookeeper: 'middleware',
+  Tomcat: 'middleware',
+  //   MongoDB: 'database',
+  //   Mysql: 'database',
+  //   Redis: 'database',
+  //   Postgres: 'database',
+  //   ElasticSearch: 'database',
 };
 
 const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
@@ -1322,8 +1350,19 @@ const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
   Pod: 'k8s',
   Node: 'k8s',
   'SNMP Trap': 'snmp_trap',
-  RabbitMQ: 'rabbitmq',
   Docker: 'docker',
+  RabbitMQ: 'rabbitmq',
+  Nginx: 'nginx',
+  ActiveMQ: 'activemq',
+  Apache: 'apache',
+  ClickHouse: 'clickhouse',
+  Consul: 'consul',
+  Zookeeper: 'zookeeper',
+  Tomcat: 'tomcat',
+  MongoDB: 'mongodb',
+  Mysql: 'mysql',
+  Redis: 'redis',
+  Postgres: 'postgres',
   ElasticSearch: 'elasticsearch',
 };
 
@@ -1344,8 +1383,19 @@ const INSTANCE_TYPE_MAP: ObjectIconMap = {
   'Storage IPMI': 'storage',
   K8S: 'k8s',
   'SNMP Trap': 'snmp_trap',
-  RabbitMQ: 'rabbitmq',
   Docker: 'docker',
+  RabbitMQ: 'rabbitmq',
+  Nginx: 'nginx',
+  ActiveMQ: 'activemq',
+  Apache: 'apache',
+  ClickHouse: 'clickhouse',
+  Consul: 'consul',
+  Zookeeper: 'zookeeper',
+  Tomcat: 'tomcat',
+  MongoDB: 'mongodb',
+  Mysql: 'mysql',
+  Redis: 'redis',
+  Postgres: 'postgres',
   ElasticSearch: 'elasticsearch',
 };
 
@@ -1366,9 +1416,95 @@ const CONFIG_TYPE_MAP: ConfigTypeMap = {
   'Storage IPMI': ['storage'],
   K8S: ['k8s'],
   'SNMP Trap': ['snmp_trap'],
-  RabbitMQ: ['rabbitmq'],
   Docker: ['docker'],
+  RabbitMQ: ['rabbitmq'],
+  Nginx: ['nginx'],
+  ActiveMQ: ['activemq'],
+  Apache: ['apache'],
+  ClickHouse: ['clickhouse'],
+  Consul: ['consul'],
+  Zookeeper: ['zookeeper'],
+  Tomcat: ['tomcat'],
+  MongoDB: ['mongodb'],
+  Mysql: ['mysql'],
+  Redis: ['redis'],
+  Postgres: ['postgres'],
   ElasticSearch: ['elasticsearch'],
+};
+
+const MANUAL_CONFIG_TEXT_MAP: ObjectIconMap = {
+  Apache: `[[inputs.$config_type]]
+    urls = ["$monitor_url"]
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  ClickHouse: `[[inputs.$config_type]]
+    servers = ["$monitor_url"]
+    username = "default"
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  Consul: `[[inputs.$config_type]]
+    address = "$monitor_url"
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  RabbitMQ: `[[inputs.$config_type]]
+    url = "$monitor_url"
+    username = "$username"
+    password = "$password"
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  Tomcat: `[[inputs.$config_type]]
+    url = "$monitor_url"
+    username = "$username"
+    password = "$password"
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  ActiveMQ: `[[inputs.$config_type]]
+    url = "$monitor_url"
+    username = "$username"
+    password = "$password"
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  Nginx: `[[inputs.$config_type]]
+    urls = ["$monitor_url"]
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  Zookeeper: `[[inputs.$config_type]]
+    servers = ["$monitor_url"]
+    timeout = "$timeouts"
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  ElasticSearch: `[[inputs.$config_type]]
+    servers = ["$server"]
+    username = "$username"
+    password = "$password"
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  MongoDB: `[[inputs.$config_type]]
+    servers = ["mongodb://$host:$port/?connect=direct"]
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  Mysql: `[[inputs.$config_type]]
+    servers = ["$username:$password@tcp($host:$port)/?tls=false"]
+    metric_version = 2
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  Redis: `[[inputs.$config_type]]
+    servers = ["tcp://$host:$port"]
+    username = ""
+    password = "$password" 
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  Postgres: `[[inputs.$config_type]]
+    address = "host=$host port=$port user=$username password=$password sslmode=disable"
+    ignored_databases = ["template0", "template1"]
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
+  default: `[[inputs.$config_type]]
+    url = "$monitor_url"
+    username = "$username"
+    password = "$password"
+    interval = "$intervals"
+    tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="$collect_type" }`,
 };
 
 const NODE_STATUS_MAP: ObjectIconMap = {
@@ -1393,6 +1529,8 @@ export {
   CONFIG_TYPE_MAP,
   OBJECT_INSTANCE_TYPE_MAP,
   NODE_STATUS_MAP,
+  MANUAL_CONFIG_TEXT_MAP,
+  useMiddleWareFields,
   useInterfaceLabelMap,
   useScheduleList,
   useMethodList,

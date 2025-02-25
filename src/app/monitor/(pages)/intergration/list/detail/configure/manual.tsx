@@ -1,29 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, Button, message } from 'antd';
+import { Form, Button, message, InputNumber, Select } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import { deepClone } from '@/app/monitor/utils/common';
 import {
   COLLECT_TYPE_MAP,
   CONFIG_TYPE_MAP,
   INSTANCE_TYPE_MAP,
+  TIMEOUT_UNITS,
 } from '@/app/monitor/constants/monitor';
 import { useSearchParams } from 'next/navigation';
 import useApiClient from '@/utils/request';
 import { useFormItems } from '@/app/monitor/hooks/intergration';
 import CodeEditor from '@/app/monitor/components/codeEditor';
 import { TableDataItem } from '@/app/monitor/types';
+const { Option } = Select;
 
 const AutomaticConfiguration: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const { post, isLoading } = useApiClient();
-  const collectTypeId = searchParams.get('collect_type') || '';
+  const pluginName = searchParams.get('collect_type') || '';
   const objId = searchParams.get('id') || '';
   const objectName = searchParams.get('name') || '';
-  const collectType = COLLECT_TYPE_MAP[collectTypeId];
-  const configTypes = CONFIG_TYPE_MAP[collectTypeId];
-  const instanceType = INSTANCE_TYPE_MAP[collectTypeId];
+  const collectType = COLLECT_TYPE_MAP[pluginName];
+  const configTypes = CONFIG_TYPE_MAP[pluginName];
+  const instanceType = INSTANCE_TYPE_MAP[pluginName];
   const authPasswordRef = useRef<any>(null);
   const privPasswordRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
@@ -75,6 +77,7 @@ const AutomaticConfiguration: React.FC = () => {
     handleEditAuthPassword,
     handleEditPrivPassword,
     handleEditPassword,
+    pluginName,
   });
 
   useEffect(() => {
@@ -101,22 +104,30 @@ const AutomaticConfiguration: React.FC = () => {
   }, [isLoading]);
 
   const initData = () => {
-    if (collectType === 'host') {
-      form.setFieldsValue({
-        metric_type: configTypes,
-      });
-    }
-    if (collectType === 'ipmi') {
-      form.setFieldsValue({
-        protocol: 'lanplus',
-      });
-    }
-    if (collectType === 'snmp') {
-      form.setFieldsValue({
-        port: 161,
-        version: 2,
-        timeout: 10,
-      });
+    form.setFieldsValue({
+      interval: 10,
+    });
+    switch (collectType) {
+      case 'host':
+        form.setFieldsValue({
+          metric_type: configTypes,
+        });
+        break;
+      case 'ipmi':
+        form.setFieldsValue({
+          protocol: 'lanplus',
+        });
+        break;
+      case 'snmp':
+        form.setFieldsValue({
+          port: 161,
+          version: 2,
+          timeout: 10,
+        });
+      case 'middleware':
+        form.setFieldsValue({
+          timeout: 10,
+        });
     }
   };
 
@@ -147,7 +158,7 @@ const AutomaticConfiguration: React.FC = () => {
       case 'docker':
         return row.endpoint;
       case 'database':
-        return row.server;
+        return row.server || `${row.host}:${row.port}`;
       default:
         return objectName + '-' + (row.monitor_ip || '');
     }
@@ -200,6 +211,36 @@ const AutomaticConfiguration: React.FC = () => {
           </p>
         )}
         {formItems}
+        <Form.Item required label={t('monitor.intergrations.interval')}>
+          <Form.Item
+            noStyle
+            name="interval"
+            rules={[
+              {
+                required: true,
+                message: t('common.required'),
+              },
+            ]}
+          >
+            <InputNumber
+              className="mr-[10px]"
+              min={1}
+              precision={0}
+              addonAfter={
+                <Select style={{ width: 116 }} defaultValue="s">
+                  {TIMEOUT_UNITS.map((item: string) => (
+                    <Option key={item} value={item}>
+                      {item}
+                    </Option>
+                  ))}
+                </Select>
+              }
+            />
+          </Form.Item>
+          <span className="text-[12px] text-[var(--color-text-3)]">
+            {t('monitor.intergrations.intervalDes')}
+          </span>
+        </Form.Item>
       </Form>
       <Button type="primary" loading={confirmLoading} onClick={handleSave}>
         {t('monitor.intergrations.generateConfiguration')}

@@ -23,10 +23,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   // 复制内容的方法
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(value);
+      navigator.clipboard?.writeText(value);
       message.success(t('common.successfulCopied'));
     } catch (error: any) {
-      message.error(error);
+      message.error(error + '');
     }
   };
 
