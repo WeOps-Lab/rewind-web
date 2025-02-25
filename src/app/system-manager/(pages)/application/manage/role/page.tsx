@@ -89,7 +89,7 @@ const RoleManagement: React.FC = () => {
     try {
       const users = await getUsersByRole({
         params: {
-          role_name: role.role_name,
+          role_id: role.role_id,
           client_id: id,
           search,
         },
