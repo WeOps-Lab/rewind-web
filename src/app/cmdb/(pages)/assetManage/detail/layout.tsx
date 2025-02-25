@@ -15,6 +15,7 @@ import { ClassificationItem } from '@/app/cmdb/types/assetManage';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
 import { withCommon } from '@/app/cmdb/context/withCommon';
+import PermissionWrapper from '@/components/permission';
 
 const AboutLayout = ({ children }: { children: React.ReactNode }) => {
   const { get, del, isLoading } = useApiClient();
@@ -120,25 +121,29 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
             {(isAdmin || !isPre) && (
               <div className="self-start">
-                <EditTwoTone
-                  className="edit mr-[6px] cursor-pointer"
-                  onClick={() =>
-                    shoModelModal('edit', {
-                      model_name: modelName,
-                      model_id: modelId,
-                      classification_id: classificationId,
-                      icn: objIcon,
-                    })
-                  }
-                />
-                <DeleteTwoTone
-                  className="delete cursor-pointer"
-                  onClick={() =>
-                    showDeleteConfirm({
-                      model_id: modelId,
-                    })
-                  }
-                />
+                <PermissionWrapper requiredPermissions={['Edit']}>
+                  <EditTwoTone
+                    className="edit mr-[10px] cursor-pointer"
+                    onClick={() =>
+                      shoModelModal('edit', {
+                        model_name: modelName,
+                        model_id: modelId,
+                        classification_id: classificationId,
+                        icn: objIcon,
+                      })
+                    }
+                  />
+                </PermissionWrapper>
+                <PermissionWrapper requiredPermissions={['Delete']}>
+                  <DeleteTwoTone
+                    className="delete cursor-pointer"
+                    onClick={() =>
+                      showDeleteConfirm({
+                        model_id: modelId,
+                      })
+                    }
+                  />
+                </PermissionWrapper>
               </div>
             )}
           </header>

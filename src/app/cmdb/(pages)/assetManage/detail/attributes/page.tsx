@@ -13,6 +13,7 @@ import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
 import { withCommon } from '@/app/cmdb/context/withCommon';
+import PermissionWrapper from '@/components/permission';
 
 const Attributes = () => {
   const { get, del } = useApiClient();
@@ -97,26 +98,30 @@ const Attributes = () => {
       key: 'action',
       render: (_, record) => (
         <>
-          <Button
-            type="link"
-            className="mr-[10px]"
-            disabled={!isAdmin && record.is_pre}
-            onClick={() => showAttrModal('edit', record)}
-          >
-            {t('edit')}
-          </Button>
-          <Button
-            type="link"
-            disabled={!isAdmin && record.is_pre}
-            onClick={() =>
-              showDeleteConfirm({
-                model_id: record.model_id,
-                attr_id: record.attr_id,
-              })
-            }
-          >
-            {t('delete')}
-          </Button>
+          <PermissionWrapper requiredPermissions={['Edit']}>
+            <Button
+              type="link"
+              className="mr-[10px]"
+              disabled={!isAdmin && record.is_pre}
+              onClick={() => showAttrModal('edit', record)}
+            >
+              {t('edit')}
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper requiredPermissions={['Delete']}>
+            <Button
+              type="link"
+              disabled={!isAdmin && record.is_pre}
+              onClick={() =>
+                showDeleteConfirm({
+                  model_id: record.model_id,
+                  attr_id: record.attr_id,
+                })
+              }
+            >
+              {t('delete')}
+            </Button>
+          </PermissionWrapper>
         </>
       ),
     },
@@ -180,7 +185,6 @@ const Attributes = () => {
     setPagination(pagination);
   };
 
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -215,14 +219,16 @@ const Attributes = () => {
             />
           </div>
           <div className="right-side">
-            <Button
-              type="primary"
-              className="mr-[8px]"
-              icon={<PlusOutlined />}
-              onClick={() => showAttrModal('add')}
-            >
-              {t('add')}
-            </Button>
+            <PermissionWrapper requiredPermissions={['Add']}>
+              <Button
+                type="primary"
+                className="mr-[8px]"
+                icon={<PlusOutlined />}
+                onClick={() => showAttrModal('add')}
+              >
+                {t('add')}
+              </Button>
+            </PermissionWrapper>
           </div>
         </div>
         <CustomTable

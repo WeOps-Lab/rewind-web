@@ -25,6 +25,7 @@ import CustomTable from '@/components/custom-table';
 import useApiClient from '@/utils/request';
 import assoListStyle from './index.module.scss';
 import SelectInstance from './selectInstance';
+import PermissionWrapper from '@/components/permission';
 
 const { confirm } = Modal;
 
@@ -143,12 +144,14 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
           fixed: 'right',
           width: 120,
           render: (_: unknown, record: any) => (
-            <Button
-              type="link"
-              onClick={() => cancelRelate(record.inst_asst_id)}
-            >
-              {t('Model.disassociation')}
-            </Button>
+            <PermissionWrapper requiredPermissions={['Add']}>
+              <Button
+                type="link"
+                onClick={() => cancelRelate(record.inst_asst_id)}
+              >
+                {t('Model.disassociation')}
+              </Button>
+            </PermissionWrapper>
           ),
         },
       ];

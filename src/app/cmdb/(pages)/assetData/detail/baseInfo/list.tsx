@@ -6,6 +6,7 @@ import { deepClone, getFieldItem } from '@/app/cmdb/utils/common';
 import { useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 import type { DescriptionsProps } from 'antd';
+import PermissionWrapper from '@/components/permission';
 import {
   AssetDataFieldProps,
   AttrFieldType,
@@ -147,13 +148,15 @@ const InfoList: React.FC<AssetDataFieldProps> = ({
               ) : (
                 <>
                   {item.editable && (
-                    <Button
-                      type="link"
-                      size="small"
-                      className="ml-[4px]"
-                      icon={<EditOutlined />}
-                      onClick={() => enableEdit(item.key)}
-                    />
+                    <PermissionWrapper requiredPermissions={['Edit']}>
+                      <Button
+                        type="link"
+                        size="small"
+                        className="ml-[4px]"
+                        icon={<EditOutlined />}
+                        onClick={() => enableEdit(item.key)}
+                      />
+                    </PermissionWrapper>
                   )}
                   <Button
                     type="link"

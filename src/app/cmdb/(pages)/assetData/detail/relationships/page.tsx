@@ -18,6 +18,7 @@ import AssoList from './list';
 import { useCommon } from '@/app/cmdb/context/common';
 import { withCommon } from '@/app/cmdb/context/withCommon';
 // import { useSearchParams } from 'next/navigation';
+import PermissionWrapper from '@/components/permission';
 
 const Ralationships = () => {
   const { t } = useTranslation();
@@ -94,13 +95,15 @@ const Ralationships = () => {
         />
         {activeTab === 'list' && (
           <div className={relationshipsStyle.operation}>
-            <Button
-              type="link"
-              icon={<GatewayOutlined />}
-              onClick={handleRelate}
-            >
-              {t('Model.association')}
-            </Button>
+            <PermissionWrapper requiredPermissions={['Add']}>
+              <Button
+                type="link"
+                icon={<GatewayOutlined />}
+                onClick={handleRelate}
+              >
+                {t('Model.association')}
+              </Button>
+            </PermissionWrapper>
             <div className={relationshipsStyle.expand} onClick={handleExpand}>
               <Icon
                 type={isExpand ? 'a-yijianshouqi1' : 'a-yijianzhankai1'}
@@ -120,17 +123,15 @@ const Ralationships = () => {
           modelList={modelList}
           assoTypeList={assoTypes}
         />
-      ) :
-        (
+      ) : (
         //   <Topo
         //     assoTypeList={assoTypes}
         //     modelList={modelList}
         //     modelId={modelId}
         //     instId={instId}
         //   />
-          <div>Topo</div>
-        )
-      }
+        <div>Topo</div>
+      )}
     </Spin>
   );
 };

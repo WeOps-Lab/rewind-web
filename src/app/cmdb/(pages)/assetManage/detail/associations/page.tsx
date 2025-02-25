@@ -15,6 +15,7 @@ import { useTranslation } from '@/utils/i18n';
 import { deepClone } from '@/app/cmdb/utils/common';
 import { useCommon } from '@/app/cmdb/context/common';
 import { withCommon } from '@/app/cmdb/context/withCommon';
+import PermissionWrapper from '@/components/permission';
 
 const { confirm } = Modal;
 
@@ -253,14 +254,16 @@ const Associations = () => {
             />
           </div>
           <div className="right-side">
-            <Button
-              type="primary"
-              className="mr-[8px]"
-              icon={<PlusOutlined />}
-              onClick={() => showAssoModal('add')}
-            >
-              {t('add')}
-            </Button>
+            <PermissionWrapper requiredPermissions={['Add']}>
+              <Button
+                type="primary"
+                className="mr-[8px]"
+                icon={<PlusOutlined />}
+                onClick={() => showAssoModal('add')}
+              >
+                {t('add')}
+              </Button>
+            </PermissionWrapper>
           </div>
         </div>
         <CustomTable

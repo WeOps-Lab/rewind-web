@@ -21,6 +21,7 @@ import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
 import { withCommon } from '@/app/cmdb/context/withCommon';
+import PermissionWrapper from '@/components/permission';
 
 const AssetManage = () => {
   const { get, del, isLoading } = useApiClient();
@@ -155,7 +156,8 @@ const AssetManage = () => {
       }));
       modeldata.forEach((modelItem: ModelItem) => {
         const target = groups.find(
-          (item: GroupItem) => item.classification_id === modelItem.classification_id
+          (item: GroupItem) =>
+            item.classification_id === modelItem.classification_id
         );
         if (target) {
           modelItem.count = instCount[modelItem.model_id] || 0;
@@ -196,16 +198,20 @@ const AssetManage = () => {
             />
           </div>
           <div className="right-side">
-            <Button
-              type="primary"
-              className="mr-[8px]"
-              onClick={() => showModelModal('add')}
-            >
-              {t('Model.addModel')}
-            </Button>
-            <Button onClick={() => showGroupModal('add')}>
-              {t('Model.addGroup')}
-            </Button>
+            <PermissionWrapper requiredPermissions={['Add Model']}>
+              <Button
+                type="primary"
+                className="mr-[8px]"
+                onClick={() => showModelModal('add')}
+              >
+                {t('Model.addModel')}
+              </Button>
+            </PermissionWrapper>
+            <PermissionWrapper requiredPermissions={['Add Group']}>
+              <Button onClick={() => showGroupModal('add')}>
+                {t('Model.addGroup')}
+              </Button>
+            </PermissionWrapper>
           </div>
         </div>
         <Spin spinning={loading}>
@@ -222,15 +228,24 @@ const AssetManage = () => {
                     {isAdmin ||
                       (!item.is_pre && (
                         <div className={assetManageStyle.groupOperate}>
-                          <EditTwoTone
-                            className="edit mr-[6px] cursor-pointer"
-                            onClick={() => showGroupModal('edit', item)}
-                          />
-                          {!item.list.length && (
-                            <DeleteTwoTone
-                              className="delete cursor-pointer"
-                              onClick={() => showDeleteConfirm(item)}
+                          <PermissionWrapper
+                            requiredPermissions={['Edit Group']}
+                          >
+                            <EditTwoTone
+                              className="edit mr-[6px] cursor-pointer"
+                              onClick={() => showGroupModal('edit', item)}
                             />
+                          </PermissionWrapper>
+
+                          {!item.list.length && (
+                            <PermissionWrapper
+                              requiredPermissions={['Delete Group']}
+                            >
+                              <DeleteTwoTone
+                                className="delete cursor-pointer"
+                                onClick={() => showDeleteConfirm(item)}
+                              />
+                            </PermissionWrapper>
                           )}
                         </div>
                       ))}

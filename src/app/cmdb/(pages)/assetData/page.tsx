@@ -43,6 +43,7 @@ import { useCommon } from '@/app/cmdb/context/common';
 import { withCommon } from '@/app/cmdb/context/withCommon';
 import type { MenuProps } from 'antd';
 import { useRouter } from 'next/navigation';
+import PermissionWrapper from '@/components/permission';
 
 interface ModelTabs {
   key: string;
@@ -197,23 +198,29 @@ const AssetData = () => {
               >
                 {t('detail')}
               </Button>
-              <Button
-                type="link"
-                className="mr-[10px]"
-                onClick={() => showInstanceModal(record)}
-              >
-                {t('Model.association')}
-              </Button>
-              <Button
-                type="link"
-                className="mr-[10px]"
-                onClick={() => showAttrModal('edit', record)}
-              >
-                {t('edit')}
-              </Button>
-              <Button type="link" onClick={() => showDeleteConfirm(record)}>
-                {t('delete')}
-              </Button>
+              <PermissionWrapper requiredPermissions={['Associate']}>
+                <Button
+                  type="link"
+                  className="mr-[10px]"
+                  onClick={() => showInstanceModal(record)}
+                >
+                  {t('Model.association')}
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper requiredPermissions={['Edit']}>
+                <Button
+                  type="link"
+                  className="mr-[10px]"
+                  onClick={() => showAttrModal('edit', record)}
+                >
+                  {t('edit')}
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper requiredPermissions={['Delete']}>
+                <Button type="link" onClick={() => showDeleteConfirm(record)}>
+                  {t('delete')}
+                </Button>
+              </PermissionWrapper>
             </>
           ),
         },
@@ -434,19 +441,25 @@ const AssetData = () => {
     {
       key: 'batchEdit',
       label: (
-        <a
-          onClick={() => {
-            showAttrModal('batchEdit');
-          }}
-        >
-          {t('batchEdit')}
-        </a>
+        <PermissionWrapper requiredPermissions={['Edit']}>
+          <a
+            onClick={() => {
+              showAttrModal('batchEdit');
+            }}
+          >
+            {t('batchEdit')}
+          </a>
+        </PermissionWrapper>
       ),
       disabled: !selectedRowKeys.length,
     },
     {
       key: 'batchDelete',
-      label: <a onClick={batchDeleteConfirm}>{t('batchDelete')}</a>,
+      label: (
+        <PermissionWrapper requiredPermissions={['Delete']}>
+          <a onClick={batchDeleteConfirm}>{t('batchDelete')}</a>
+        </PermissionWrapper>
+      ),
       disabled: !selectedRowKeys.length,
     },
   ];
@@ -572,11 +585,17 @@ const AssetData = () => {
               />
             </Space>
             <Space>
-              <Dropdown menu={{ items: addInstItems }} placement="bottom" arrow>
-                <Button icon={<PlusOutlined />} type="primary">
-                  {t('add')}
-                </Button>
-              </Dropdown>
+              <PermissionWrapper requiredPermissions={['Add']}>
+                <Dropdown
+                  menu={{ items: addInstItems }}
+                  placement="bottom"
+                  arrow
+                >
+                  <Button icon={<PlusOutlined />} type="primary">
+                    {t('add')}
+                  </Button>
+                </Dropdown>
+              </PermissionWrapper>
               <Dropdown
                 menu={{ items: exportItems }}
                 disabled={exportLoading}

@@ -30,6 +30,7 @@ import useApiClient from '@/utils/request';
 import SearchFilter from '../../list/searchFilter';
 import CustomTable from '@/components/custom-table';
 import { SelectInstanceProps } from '@/app/cmdb/types/assetData';
+import PermissionWrapper from '@/components/permission';
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -95,12 +96,16 @@ const SelectInstance = forwardRef<RelationInstanceRef, SelectInstanceProps>(
                 (item) => item.id === record._id
               );
               return (
-                <Button
-                  type="link"
-                  onClick={() => handleRelate(record, isRelated)}
-                >
-                  {t(isRelated ? 'Model.disassociation' : 'Model.association')}
-                </Button>
+                <PermissionWrapper requiredPermissions={['Associate']}>
+                  <Button
+                    type="link"
+                    onClick={() => handleRelate(record, isRelated)}
+                  >
+                    {t(
+                      isRelated ? 'Model.disassociation' : 'Model.association'
+                    )}
+                  </Button>
+                </PermissionWrapper>
               );
             },
           },
@@ -120,7 +125,9 @@ const SelectInstance = forwardRef<RelationInstanceRef, SelectInstanceProps>(
         setAssoInstIds(list);
         setLoading(true);
         try {
-          const getAssoModelList = get(`/cmdb/api/model/${model_id}/association/`);
+          const getAssoModelList = get(
+            `/cmdb/api/model/${model_id}/association/`
+          );
           Promise.all([
             getAssoModelList,
             needFetchAssoInstIds &&
@@ -165,7 +172,7 @@ const SelectInstance = forwardRef<RelationInstanceRef, SelectInstanceProps>(
             .catch(() => {
               setLoading(false);
             });
-        } catch{
+        } catch {
           setLoading(false);
         }
       },
