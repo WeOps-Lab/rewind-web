@@ -117,7 +117,7 @@ const Intergration = () => {
     try {
       setExportLoading(true);
       const response = await axios({
-        url: `/reqApi/monitor/api/monitor_plugin/export/${selectedApp.id}/`, // 替换为你的导出数据的API端点
+        url: `/api/proxy/monitor/api/monitor_plugin/export/${selectedApp.id}/`, // 替换为你的导出数据的API端点
         method: 'GET',
         responseType: 'blob', // 确保响应类型为blob
         headers: {
