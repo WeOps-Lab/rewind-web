@@ -95,8 +95,26 @@ const transformRightTree = (
   }));
 };
 
+// 新增：辅助函数递归获取所有节点的 key
+const getAllKeys = (nodes: TreeDataNode[]): string[] => {
+  return nodes.reduce<string[]>((acc, node) => {
+    acc.push(String(node.key));
+    if (node.children) {
+      acc.push(...getAllKeys(node.children));
+    }
+    return acc;
+  }, []);
+};
+
 const RoleTransfer: React.FC<RoleTransferProps> = ({ roleTreeData, selectedRoles, onChange }) => {
   const flattenedRoleData = flattenRoleData(roleTreeData);
+  const leftExpandedKeys = getAllKeys(roleTreeData);
+
+  // 获取右侧过滤后的 tree 数据
+  const filteredRightData = filterTreeData(roleTreeData, selectedRoles);
+  const rightTransformedData = transformRightTree(filteredRightData, roleTreeData, selectedRoles, onChange);
+  const rightExpandedKeys = getAllKeys(rightTransformedData);
+
   return (
     <Transfer
       oneWay
@@ -117,7 +135,7 @@ const RoleTransfer: React.FC<RoleTransferProps> = ({ roleTreeData, selectedRoles
                 blockNode
                 checkable
                 selectable={false}
-                defaultExpandAll
+                expandedKeys={leftExpandedKeys}
                 checkedKeys={selectedRoles}
                 treeData={roleTreeData}
                 onCheck={(checkedKeys, info) => {
@@ -132,9 +150,9 @@ const RoleTransfer: React.FC<RoleTransferProps> = ({ roleTreeData, selectedRoles
             <div className="w-full p-1 max-h-[250px] overflow-auto">
               <Tree
                 blockNode
-                defaultExpandAll
                 selectable={false}
-                treeData={transformRightTree(filterTreeData(roleTreeData, selectedRoles), roleTreeData, selectedRoles, onChange)}
+                expandedKeys={rightExpandedKeys}
+                treeData={rightTransformedData}
               />
             </div>
           );
