@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactAce from 'react-ace';
-import { Button, Tooltip, message } from 'antd';
+import { Button, Tooltip } from 'antd';
 import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-monokai';
 import { CopyOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
-
+import { useHandleCopy } from '@/app/node-manager/hooks';
 interface CodeEditorProps {
   value?: string; // 编辑器的内容
   className?: string;
@@ -20,15 +20,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   ...restProps
 }) => {
   const { t } = useTranslation();
-  // 复制内容的方法
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-      message.success(t('common.successfulCopied'));
-    } catch (error: any) {
-      message.error(error);
-    }
-  };
+  const { handleCopy } = useHandleCopy(value);
 
   return (
     <div className={className}>
