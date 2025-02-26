@@ -192,6 +192,11 @@ const SkillSettingsPage: React.FC = () => {
     form.setFieldsValue({ temperature: newValue });
   };
 
+  const changeToolEnable = (checked: boolean) => {
+    setToolEnabled(checked);
+    !checked && setSelectedTools([])
+  }
+
   return (
     <div className="relative">
       {allLoading && (
@@ -338,7 +343,7 @@ const SkillSettingsPage: React.FC = () => {
                   <Form labelCol={{flex: '0 0 135px'}} wrapperCol={{flex: '1'}}>
                     <div className="flex justify-between">
                       <h3 className="text-base mb-4">{t('skill.tool')}</h3>
-                      <Switch size="small" className="ml-2" checked={showToolEnabled} onChange={setToolEnabled} />
+                      <Switch size="small" className="ml-2" checked={showToolEnabled} onChange={changeToolEnable} />
                     </div>
                     <p className="pb-4 text-[var(--color-text-4)">{t('skill.toolTip')}</p>
                     {showToolEnabled && (<ToolSelector selectedToolIds={selectedTools} onChange={setSelectedTools} />)}

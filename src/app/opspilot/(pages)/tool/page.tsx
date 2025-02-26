@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from'react';
-import { Form } from 'antd';
+import { Form, message } from 'antd';
 const { useForm } = Form;
 import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
@@ -16,6 +16,7 @@ const ToolListPage: React.FC = () => {
   const { get, patch } = useApiClient();
   const { groups } = useUserInfoContext();
   const [loading, setLoading] = useState<boolean>(false);
+  const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [toolData, setToolData] = useState<Tool[]>([]);
@@ -47,11 +48,19 @@ const ToolListPage: React.FC = () => {
   const handleOk = () => {
     form.validateFields().then(async (values: FormValues) => {
       if (!selectedTool?.id) return;
-      await patch(`/model_provider_mgmt/skill_tools/${selectedTool.id}/`, values);
-      form.resetFields();
-      setIsModalVisible(false);
-      setToolData([]);
-      fetchData();
+      try {
+        setConfirmLoading(true);
+        await patch(`/model_provider_mgmt/skill_tools/${selectedTool.id}/`, values);
+        form.resetFields();
+        setIsModalVisible(false);
+        setToolData([]);
+        fetchData();
+        message.success(t('common.updateSuccess'));
+      } catch {
+        message.error(t('common.updateFailed'));
+      } finally {
+        setConfirmLoading(false);
+      }
     }).catch((error) => {
       console.log('common.valFailed:', error);
     });
@@ -103,6 +112,7 @@ const ToolListPage: React.FC = () => {
       <OperateModal
         title={selectedTool ? selectedTool.name : `${t('common.edit')}`}
         visible={isModalVisible}
+        confirmLoading={confirmLoading}
         onOk={handleOk}
         onCancel={handleCancel}
       >

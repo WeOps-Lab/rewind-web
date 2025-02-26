@@ -61,7 +61,7 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ selectedToolIds, onChange }
   return (
     <div>
       <Button onClick={openModal}>+ {t('common.add')}</Button>
-      <div className="grid grid-cols-2 gap-4 mt-2">
+      <div className="grid grid-cols-2 gap-4 mt-2 pb-2">
         {selectedToolIds.map((id) => {
           const tool = tools.find((t) => t.id === id);
           if (!tool) return null;
