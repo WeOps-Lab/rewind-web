@@ -683,23 +683,6 @@ const useFormItems = ({
         return {
           formItems: (
             <>
-              <Form.Item required label="IP">
-                <Form.Item
-                  noStyle
-                  name="monitor_ip"
-                  rules={[
-                    {
-                      required: true,
-                      message: t('common.required'),
-                    },
-                  ]}
-                >
-                  <Input className="w-[300px] mr-[10px]" />
-                </Form.Item>
-                <span className="text-[12px] text-[var(--color-text-3)]">
-                  {t('monitor.intergrations.ipDes')}
-                </span>
-              </Form.Item>
               <Form.Item
                 label={t('monitor.intergrations.metricType')}
                 name="metric_type"
@@ -770,6 +753,23 @@ const useFormItems = ({
                     </Checkbox>
                   </Space>
                 </Checkbox.Group>
+              </Form.Item>
+              <Form.Item required label="IP">
+                <Form.Item
+                  noStyle
+                  name="monitor_ip"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input className="w-[300px] mr-[10px]" />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.ipDes')}
+                </span>
               </Form.Item>
             </>
           ),
