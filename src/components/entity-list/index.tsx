@@ -99,7 +99,7 @@ const EntityList = <T,>({
         )}
         <div className="h-[66px]">
           <p
-            className={`mt-3 text-sm max-h-[66px] ${hoveredCard === id ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
+            className={`mt-3 text-sm max-h-[66px] ${(singleAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
         </div>
         {singleButtonAction && (
           <Button
