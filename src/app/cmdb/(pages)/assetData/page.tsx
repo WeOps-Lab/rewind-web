@@ -5,21 +5,19 @@ import {
   Button,
   Space,
   Modal,
-  Radio,
-  Tabs,
   message,
   Spin,
   Dropdown,
   Cascader,
   TablePaginationConfig,
   CascaderProps,
+  Tree,
 } from 'antd';
 import CustomTable from '@/components/custom-table';
 import SearchFilter from './list/searchFilter';
 import ImportInst from './list/importInst';
 import SelectInstance from './detail/relationships/selectInstance';
 import { PlusOutlined } from '@ant-design/icons';
-import type { RadioChangeEvent } from 'antd';
 import { useSearchParams } from 'next/navigation';
 import assetDataStyle from './index.module.scss';
 import FieldModal from './list/fieldModal';
@@ -111,6 +109,8 @@ const AssetData = () => {
     total: 0,
     pageSize: 20,
   });
+  const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
+  const [expandedTreeKeys, setExpandedTreeKeys] = useState<string[]>([]);
 
   const handleExport = async (keys: string[]) => {
     try {
@@ -187,7 +187,7 @@ const AssetData = () => {
           title: t('action'),
           key: 'action',
           dataIndex: 'action',
-          width: 240,
+          width: 120,
           fixed: 'right',
           render: (_: unknown, record: any) => (
             <>
@@ -234,6 +234,12 @@ const AssetData = () => {
     }
   }, [propertyList, displayFieldKeys]);
 
+  useEffect(() => {
+    setExpandedTreeKeys(
+      modelGroup.map((item) => `group:${item.classification_id}`)
+    );
+  }, [modelGroup]);
+
   const fetchData = async () => {
     setTableLoading(true);
     const params = getTableParams();
@@ -249,52 +255,45 @@ const AssetData = () => {
     }
   };
 
-  const getModelGroup = () => {
-    const getCroupList = get('/cmdb/api/classification/');
-    const getModelList = get('/cmdb/api/model/');
-    const getAssoType = get('/cmdb/api/model/model_association_type/');
-    setLoading(true);
+  const getModelGroup = async () => {
     try {
-      Promise.all([getModelList, getCroupList, getAssoType])
-        .then((res) => {
-          const modeldata: ModelItem[] = res[0];
-          const groupData: GroupItem[] = res[1];
-          const groups = deepClone(groupData).map((item: GroupItem) => ({
-            ...item,
-            list: [],
-            count: 0,
-          }));
-          modeldata.forEach((modelItem: ModelItem) => {
-            const target = groups.find(
-              (item: GroupItem) =>
-                item.classification_id === modelItem.classification_id
-            );
-            if (target) {
-              target.list.push(modelItem);
-              target.count++;
-            }
-          });
-          const defaultGroupId =
-            assetClassificationId || groupData[0].classification_id;
-          setGroupId(defaultGroupId);
-          setModelGroup(groups);
-          const _modelList = modeldata
-            .filter((item) => item.classification_id === defaultGroupId)
-            .map((item) => ({
-              key: item.model_id,
-              label: item.model_name,
-              icn: item.icn,
-            }));
-          const defaultModelId = assetModelId || _modelList[0].key;
-          setOriginModels(res[0]);
-          setAssoTypes(res[2]);
-          setModelList(_modelList);
-          setModelId(defaultModelId);
-          getInitData(defaultModelId);
-        })
-        .catch(() => {
-          setLoading(false);
-        });
+      const [modeldata, groupData, assoType] = await Promise.all([
+        get('/cmdb/api/model/'),
+        get('/cmdb/api/classification/'),
+        get('/cmdb/api/model/model_association_type/'),
+      ]);
+      const groups = deepClone(groupData).map((item: GroupItem) => ({
+        ...item,
+        list: [],
+        count: 0,
+      }));
+      modeldata.forEach((modelItem: ModelItem) => {
+        const target = groups.find(
+          (item: GroupItem) =>
+            item.classification_id === modelItem.classification_id
+        );
+        if (target) {
+          target.list.push(modelItem);
+          target.count++;
+        }
+      });
+      const defaultGroupId =
+        assetClassificationId || groupData[0].classification_id;
+      setGroupId(defaultGroupId);
+      setModelGroup(groups);
+      const _modelList = modeldata
+        .filter((item: any) => item.classification_id === defaultGroupId)
+        .map((item: any) => ({
+          key: item.model_id,
+          label: item.model_name,
+          icn: item.icn,
+        }));
+      const defaultModelId = assetModelId || _modelList[0].key;
+      setOriginModels(modeldata);
+      setAssoTypes(assoType);
+      setModelList(_modelList);
+      setModelId(defaultModelId);
+      getInitData(defaultModelId);
     } catch {
       setLoading(false);
     }
@@ -348,11 +347,6 @@ const AssetData = () => {
     setSelectedRowKeys(selectedKeys);
   };
 
-  const onChangeModel = (key: string) => {
-    setModelId(key);
-    getInitData(key);
-  };
-
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
@@ -367,23 +361,6 @@ const AssetData = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const onGroupChange = (e: RadioChangeEvent) => {
-    const currentGroupId = e.target.value;
-    setGroupId(currentGroupId);
-    const currentModelList = (
-      modelGroup.find((item) => item.classification_id === currentGroupId)
-        ?.list || []
-    ).map((item) => ({
-      key: item.model_id,
-      label: item.model_name,
-      icn: item.icn,
-    }));
-    const currentModelId = currentModelList[0].key;
-    setModelList(currentModelList);
-    setModelId(currentModelId);
-    getInitData(currentModelId);
   };
 
   const showDeleteConfirm = (row = { _id: '' }) => {
@@ -542,31 +519,68 @@ const AssetData = () => {
     });
   };
 
+  const treeData = modelGroup.map((group) => ({
+    title: group.classification_name,
+    key: `group:${group.classification_id}`,
+    children: group.list.map((item) => ({
+      title: item.model_name,
+      key: item.model_id,
+    })),
+  }));
+
+  const onSelectUnified = (selectedKeys: React.Key[]) => {
+    if (!selectedKeys.length) return;
+    const key = selectedKeys[0] as string;
+    if (key.startsWith('group:')) {
+      const groupIdSelected = key.split(':')[1];
+      setGroupId(groupIdSelected);
+      const group = modelGroup.find(
+        (item) => item.classification_id === groupIdSelected
+      );
+      if (group && group.list.length) {
+        const firstModelKey = group.list[0].model_id;
+        setSelectedTreeKeys([firstModelKey]);
+        setModelId(firstModelKey);
+        const newModelList = group.list.map((item) => ({
+          key: item.model_id,
+          label: item.model_name,
+          icn: item.icn,
+        }));
+        setModelList(newModelList);
+        getInitData(firstModelKey);
+      }
+    } else {
+      setSelectedTreeKeys([key]);
+      setModelId(key);
+      modelGroup.forEach((group) => {
+        if (group.list.some((item) => item.model_id === key)) {
+          setGroupId(group.classification_id);
+          const newModelList = group.list.map((item) => ({
+            key: item.model_id,
+            label: item.model_name,
+            icn: item.icn,
+          }));
+          setModelList(newModelList);
+        }
+      });
+      getInitData(key);
+    }
+  };
+
   return (
     <Spin spinning={loading} wrapperClassName={assetDataStyle.assetLoading}>
       <div className={assetDataStyle.assetData}>
-        <div className={`mb-[20px] ${assetDataStyle.groupSelector}`}>
-          <Radio.Group
-            onChange={onGroupChange}
-            value={groupId}
-            buttonStyle="solid"
-          >
-            {modelGroup.map((item) => (
-              <Radio.Button
-                key={item.classification_id}
-                value={item.classification_id}
-              >
-                {item.classification_name}
-              </Radio.Button>
-            ))}
-          </Radio.Group>
+        <div className={`${assetDataStyle.groupSelector}`}>
+          <Tree
+            showLine
+            selectedKeys={selectedTreeKeys}
+            expandedKeys={expandedTreeKeys}
+            onExpand={(keys) => setExpandedTreeKeys(keys as string[])}
+            onSelect={onSelectUnified}
+            treeData={treeData}
+          />
         </div>
         <div className={assetDataStyle.assetList}>
-          <Tabs
-            activeKey={modelId}
-            items={modelList}
-            onChange={onChangeModel}
-          />
           <div className="flex justify-between mb-4">
             <Space>
               <Cascader
@@ -620,7 +634,7 @@ const AssetData = () => {
             columns={currentColumns}
             pagination={pagination}
             loading={tableLoading}
-            scroll={{ x: 'calc(100vw - 100px)', y: 'calc(100vh - 370px)' }}
+            scroll={{ x: 'calc(100vw - 100px)', y: 'calc(100vh - 296px)' }}
             fieldSetting={{
               showSetting: true,
               displayFieldKeys,
