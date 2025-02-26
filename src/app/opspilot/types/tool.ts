@@ -13,7 +13,7 @@ export interface FormValues {
 }
 
 export interface SelectTool {
-  id: number | string;
+  id: number;
   name: string;
   icon: string;
 }
