@@ -21,8 +21,6 @@ const Template: React.FC = () => {
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const [defaultSelectObj, setDefaultSelectObj] = useState<React.Key>('');
   const [objectId, setObjectId] = useState<React.Key>('');
-  const [linkDetailParams, setLinkDetailParams] =
-    useState<TableDataItem | null>(null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -34,23 +32,6 @@ const Template: React.FC = () => {
       getAssetInsts(objectId);
     }
   }, [objectId]);
-
-  useEffect(() => {
-    if (linkDetailParams && objectId) {
-      const { type, row } = linkDetailParams;
-      const monitorObjId = objectId as string;
-      const monitorName = findLabelById(treeData, monitorObjId) as string;
-      const params = new URLSearchParams({
-        monitorObjId,
-        monitorName,
-        type,
-        name: row?.name || '',
-      });
-      sessionStorage.setItem('strategyInfo', JSON.stringify(row));
-      const targetUrl = `/monitor/event/strategy/detail?${params.toString()}`;
-      router.push(targetUrl);
-    }
-  }, [linkDetailParams, objectId]);
 
   const handleObjectChange = async (id: string) => {
     setObjectId(id);
@@ -112,7 +93,17 @@ const Template: React.FC = () => {
   };
 
   const handleCardClick = (type: string, row: TableDataItem) => {
-    setLinkDetailParams({ type, row });
+    const monitorObjId = objectId as string;
+    const monitorName = findLabelById(treeData, monitorObjId) as string;
+    const params = new URLSearchParams({
+      monitorObjId,
+      monitorName,
+      type,
+      name: row?.name || '',
+    });
+    sessionStorage.setItem('strategyInfo', JSON.stringify(row));
+    const targetUrl = `/monitor/event/strategy/detail?${params.toString()}`;
+    router.push(targetUrl);
   };
 
   return (
