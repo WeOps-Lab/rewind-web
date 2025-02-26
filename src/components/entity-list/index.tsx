@@ -11,6 +11,7 @@ const { Search } = Input;
 const EntityList = <T,>({
   data,
   loading,
+  searchSize = 'large',
   menuActions,
   singleAction,
   openModal,
@@ -30,7 +31,7 @@ const EntityList = <T,>({
   };
 
   const filteredItems = useMemo(() => {
-    return data.filter((item) => (item as any).name.toLowerCase().includes(searchTerm.toLowerCase()));
+    return data.filter((item) => (item as any).name?.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [data, searchTerm]);
 
   const tagColors = ['red', 'orange', 'blue', 'purple'];
@@ -96,7 +97,10 @@ const EntityList = <T,>({
             ))}
           </div>
         )}
-        <p className={`mt-3 text-sm h-[66px] ${hoveredCard === id ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
+        <div className="h-[66px]">
+          <p
+            className={`mt-3 text-sm max-h-[66px] ${(singleAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
+        </div>
         {singleButtonAction && (
           <Button
             type="primary"
@@ -114,10 +118,10 @@ const EntityList = <T,>({
   }, [displayTagBelowName, hoveredCard]);
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full h-full">
       <div className="flex justify-end mb-4">
         <Search
-          size="large"
+          size={searchSize}
           allowClear
           enterButton
           placeholder={`${t('common.search')}...`}
@@ -125,31 +129,37 @@ const EntityList = <T,>({
           onSearch={handleSearch}
         />
       </div>
-      <Spin spinning={loading}>
-        {filteredItems.length === 0 ? (
-          <Empty description={t('common.noData')} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {openModal && (
-              <PermissionWrapper
-                requiredPermissions={['Add']}
-                className={`shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer ${styles.addNew}`}
-              >
-                <div
-                  className="w-full h-full flex items-center justify-center"
-                  onClick={() => openModal()}
+      {loading ? (
+        <div className="min-h-[300px] flex items-center justify-center">
+          <Spin spinning={loading}></Spin>
+        </div>
+      ) : (
+        <>
+          {filteredItems.length === 0 ? (
+            <Empty description={t('common.noData')} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {openModal && (
+                <PermissionWrapper
+                  requiredPermissions={['Add']}
+                  className={`shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer ${styles.addNew}`}
                 >
-                  <div className="text-center">
-                    <div className="text-2xl">+</div>
-                    <div className="mt-2">{t('common.addNew')}</div>
+                  <div
+                    className="w-full h-full flex items-center justify-center"
+                    onClick={() => openModal()}
+                  >
+                    <div className="text-center">
+                      <div className="text-2xl">+</div>
+                      <div className="mt-2">{t('common.addNew')}</div>
+                    </div>
                   </div>
-                </div>
-              </PermissionWrapper>
-            )}
-            {filteredItems.map((item) => renderCard(item))}
-          </div>
-        )}
-      </Spin>
+                </PermissionWrapper>
+              )}
+              {filteredItems.map((item) => renderCard(item))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
