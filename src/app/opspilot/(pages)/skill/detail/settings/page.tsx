@@ -13,6 +13,7 @@ import CustomChat from '@/app/opspilot/components/custom-chat';
 import PermissionWrapper from '@/components/permission';
 import KnowledgeBaseSelector from '@/app/opspilot/components/skill/knowledgeBaseSelector';
 import { KnowledgeBase, RagScoreThresholdItem, KnowledgeBaseRagSource } from '@/app/opspilot/types/skill';
+import ToolSelector from '@/app/opspilot/components/skill/toolSelector';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -31,6 +32,7 @@ const SkillSettingsPage: React.FC = () => {
   const [chatHistoryEnabled, setChatHistoryEnabled] = useState(true);
   const [ragEnabled, setRagEnabled] = useState(true);
   const [showRagSource, setRagSourceStatus] = useState(false);
+  const [showToolEnabled, setToolEnabled] = useState(false);
   const [ragSources, setRagSources] = useState<KnowledgeBaseRagSource[]>([]);
   const [selectedKnowledgeBases, setSelectedKnowledgeBases] = useState<number[]>([]);
   const [llmModels, setLlmModels] = useState<{ id: number, name: string, enabled: boolean, llm_model_type: string }[]>([]);
@@ -42,6 +44,7 @@ const SkillSettingsPage: React.FC = () => {
   });
   const [saveLoading, setSaveLoading] = useState(false);
   const [quantity, setQuantity] = useState<number>(10);
+  const [selectedTools, setSelectedTools] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -93,6 +96,8 @@ const SkillSettingsPage: React.FC = () => {
 
           const initialSelectedKnowledgeBases = data.rag_score_threshold.map((item: RagScoreThresholdItem) => Number(item.knowledge_base));
           setSelectedKnowledgeBases(initialSelectedKnowledgeBases);
+          setSelectedTools(data.tools);
+          setToolEnabled(!!data.tools.length);
         } catch (error) {
           console.error(t('common.fetchFailed'), error);
         } finally {
@@ -126,6 +131,7 @@ const SkillSettingsPage: React.FC = () => {
         conversation_window_size: chatHistoryEnabled ? quantity : undefined,
         temperature: temperature,
         show_think: values.show_think,
+        tools: selectedTools
       };
       setSaveLoading(true);
       await put(`/model_provider_mgmt/llm/${id}/`, payload);
@@ -161,6 +167,7 @@ const SkillSettingsPage: React.FC = () => {
           conversation_window_size: chatHistoryEnabled ? quantity : undefined,
           temperature: temperature,
           show_think: values.show_think,
+          tools: selectedTools
         };
         const reply = await post('/model_provider_mgmt/llm/execute/', payload);
         const botMessage: CustomChatMessage = {
@@ -279,32 +286,40 @@ const SkillSettingsPage: React.FC = () => {
               <div className={`border rounded-md ${styles.llmContainer}`}>
                 <h2 className="text-lg font-semibold mb-3">{t('skill.chatEnhancement')}</h2>
                 <div className={`p-4 rounded-md pb-0 ${styles.contentWrapper}`}>
-                  <Form labelCol={{ flex: '0 0 80px' }} wrapperCol={{ flex: '1' }}>
+                  <Form labelCol={{flex: '0 0 80px'}} wrapperCol={{flex: '1'}}>
                     <div className="flex justify-between">
                       <h3 className="text-base mb-4">{t('skill.chatHistory')}</h3>
-                      <Switch size="small" className="ml-2" checked={chatHistoryEnabled} onChange={setChatHistoryEnabled} />
+                      <Switch
+                        size="small"
+                        className="ml-2"
+                        checked={chatHistoryEnabled}
+                        onChange={setChatHistoryEnabled}/>
                     </div>
-                    <p className="pb-4" style={{ 'color': 'var(--color-text-4)' }}>{t('skill.chatHistoryTip')}</p>
+                    <p className="pb-4 text-[var(--color-text-4)">{t('skill.chatHistoryTip')}</p>
                     {chatHistoryEnabled && (
                       <div className="pb-4">
                         <Form.Item label={t('skill.quantity')}>
-                          <InputNumber min={1} max={100} className="w-full" value={quantity} onChange={(value) => setQuantity(value ?? 1)} />
+                          <InputNumber
+                            min={1}
+                            max={100}
+                            className="w-full" value={quantity}
+                            onChange={(value) => setQuantity(value ?? 1)} />
                         </Form.Item>
                       </div>
                     )}
                   </Form>
                 </div>
                 <div className={`p-4 rounded-md pb-0 ${styles.contentWrapper}`}>
-                  <Form labelCol={{ flex: '0 0 135px' }} wrapperCol={{ flex: '1' }}>
+                  <Form labelCol={{flex: '0 0 135px'}} wrapperCol={{flex: '1'}}>
                     <div className="flex justify-between">
                       <h3 className="text-base mb-4">{t('skill.rag')}</h3>
-                      <Switch size="small" className="ml-2" checked={ragEnabled} onChange={setRagEnabled} />
+                      <Switch size="small" className="ml-2" checked={ragEnabled} onChange={setRagEnabled}/>
                     </div>
-                    <p className="pb-4" style={{ 'color': 'var(--color-text-4)' }}>{t('skill.ragTip')}</p>
+                    <p className="pb-4 text-[var(--color-text-4)">{t('skill.ragTip')}</p>
                     {ragEnabled && (
                       <div className="pb-2">
                         <Form.Item label={t('skill.ragSource')}>
-                          <Switch size="small" className="ml-2" checked={showRagSource} onChange={setRagSourceStatus} />
+                          <Switch size="small" className="ml-2" checked={showRagSource} onChange={setRagSourceStatus}/>
                         </Form.Item>
                         <Form.Item label={t('skill.knowledgeBase')} tooltip={t('skill.knowledgeBaseTip')}>
                           <KnowledgeBaseSelector
@@ -317,6 +332,16 @@ const SkillSettingsPage: React.FC = () => {
                         </Form.Item>
                       </div>
                     )}
+                  </Form>
+                </div>
+                <div className={`p-4 rounded-md pb-0 ${styles.contentWrapper}`}>
+                  <Form labelCol={{flex: '0 0 135px'}} wrapperCol={{flex: '1'}}>
+                    <div className="flex justify-between">
+                      <h3 className="text-base mb-4">{t('skill.tool')}</h3>
+                      <Switch size="small" className="ml-2" checked={showToolEnabled} onChange={setToolEnabled} />
+                    </div>
+                    <p className="pb-4 text-[var(--color-text-4)">{t('skill.toolTip')}</p>
+                    {showToolEnabled && (<ToolSelector selectedToolIds={selectedTools} onChange={setSelectedTools} />)}
                   </Form>
                 </div>
               </div>

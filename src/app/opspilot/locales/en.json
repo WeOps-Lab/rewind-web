@@ -136,6 +136,9 @@
     "selectKnowledgeBase": "Select KnowledgeBase",
     "selectedCount": "Selected Count",
     "deleteConfirm": "Are you sure you want to delete this skill?",
+    "tool": "Tool",
+    "toolTip": "The tool is used to provide the skill with the ability to obtain external data or perform operations. The specific tool to be called is determined autonomously by the large model.",
+    "selecteTool": "Selecte Tool",
     "settings": {
       "menu": "Setting",
       "title": "LLM Skill",

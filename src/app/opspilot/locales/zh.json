@@ -136,7 +136,10 @@
     "selectKnowledgeBase": "选择知识库",
     "selectedCount": "已选择数量",
     "deleteConfirm": "你确定要删除选中的技能吗？",
-    "settings": {
+    "tool": "工具",
+    "toolTip": "给技能获取外部数据或者执行操作的能力，具体调用哪个工具，由大模型自主决定。",
+    "selecteTool": "选择工具",
+    "settings",: {
       "menu": "设置",
       "title": "LLM技能",
       "description": "LLM技能包括选择LLM模型和知识库以优化语言理解和生成过程。用户还可以启用RAG（检索增强生成）和对话增强功能，以提高对话质量和准确性。",

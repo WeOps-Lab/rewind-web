@@ -120,8 +120,8 @@ const KnowledgeBaseSelector: React.FC<KnowledgeBaseSelectorProps> = ({
         cancelText={t('common.cancel')}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        knowledgeBases={knowledgeBases}
-        selectedKnowledgeBases={selectedKnowledgeBases}
+        options={knowledgeBases}
+        selectedOptions={selectedKnowledgeBases}
       />
     </div >
   );

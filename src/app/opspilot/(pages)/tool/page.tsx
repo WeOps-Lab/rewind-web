@@ -1,56 +1,59 @@
 'use client';
-import React, { useState } from'react';
-import { Input, Modal, Form } from 'antd';
+import React, { useState, useEffect } from'react';
+import { Form } from 'antd';
+const { useForm } = Form;
 import { useTranslation } from '@/utils/i18n';
+import useApiClient from '@/utils/request';
 import EntityList from '@/components/entity-list';
-
-interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  tag: string[];
-}
-
-interface FormValues {
-  name: string;
-  description: string;
-}
+import DynamicForm from '@/components/dynamic-form';
+import OperateModal from '@/components/operate-modal';
+import { useUserInfoContext } from '@/context/userInfo';
+import { TOOL_ICON_MAP } from '@/app/opspilot/constants/tool';
+import { Tool, FormValues } from '@/app/opspilot/types/tool';
 
 const ToolListPage: React.FC = () => {
   const { t } = useTranslation();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [form] = Form.useForm();
+  const { get, patch } = useApiClient();
+  const { groups } = useUserInfoContext();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
+  const [toolData, setToolData] = useState<Tool[]>([]);
 
-  const toolData: Tool[] = [
-    {
-      id: '1',
-      name: 'Tool 1',
-      description: '这是中文的描述,中文的描述,中文的描述,中文的描述,中文的描述,还是不够,再来一点描述描述天呐还是不够,再来一点描述....',
-      icon: 'duckduckgo1',
-      tag: ['tag1', 'tag2']
-    },
-    {
-      id: '2',
-      name: 'Tool 2',
-      description: 'This is a description for Tool 2, This is a description for Tool 2, This is a description for Tool 2',
-      icon: 'duckduckgo1',
-      tag: ['tag3', 'tag4']
+  const [form] = useForm();
+
+  useEffect(() => {
+    fetchData();
+  }, [get]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const data = await get('/model_provider_mgmt/skill_tools/');
+      setToolData(data.map((tool: { display_name: string; id: string; description: string; name: keyof typeof TOOL_ICON_MAP, team: string[] }) => ({
+        name: tool.display_name,
+        id: tool.id,
+        description: tool.description,
+        icon: TOOL_ICON_MAP[tool.name] || 'duckduckgo1',
+        team: tool.team || []
+      })));
+    } catch (error) {
+      console.error(t('common.fetchFailed'), error);
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  const showModal = () => {
-    setIsModalVisible(true);
   };
 
   const handleOk = () => {
-    form.validateFields().then((values: FormValues) => {
-      // 处理表单提交逻辑，例如保存到数据库
-      console.log('表单提交的值:', values);
+    form.validateFields().then(async (values: FormValues) => {
+      if (!selectedTool?.id) return;
+      await patch(`/model_provider_mgmt/skill_tools/${selectedTool.id}/`, values);
       form.resetFields();
       setIsModalVisible(false);
+      setToolData([]);
+      fetchData();
     }).catch((error) => {
-      console.log('表单验证错误:', error);
+      console.log('common.valFailed:', error);
     });
   };
 
@@ -59,53 +62,56 @@ const ToolListPage: React.FC = () => {
     setIsModalVisible(false);
   };
 
-  const singleAction = () => {
+  const singleAction = (tool: Tool) => {
     return {
       text: t('common.settings'),
-      onClick: () => showModal()
+      onClick: () => showModal(tool)
     };
   };
 
-  const handleCardClick = (card: any) => {
-    console.log('cardClick', card);
-  }
+  const showModal = (tool: Tool) => {
+    setSelectedTool(tool);
+    setIsModalVisible(true);
+    Promise.resolve().then(() => {
+      console.log('selectedTool', selectedTool);
+      form.setFieldsValue({
+        team: tool.team
+      });
+    })
+  };
+
+  const formFields = [
+    {
+      name: 'team',
+      type: 'select',
+      label: t('common.group'),
+      placeholder: `${t('common.selectMsg')}${t('common.group')}`,
+      options: groups.map(group => ({ value: group.id, label: group.name })),
+      mode: 'multiple',
+      rules: [{ required: true, message: `${t('common.selectMsg')}${t('common.group')}` }]
+    }
+  ];
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full h-full">
       <EntityList<Tool>
         data={toolData}
-        loading={false}
+        loading={loading}
+        displayTagBelowName={false}
         singleAction={singleAction}
-        displayTagBelowName={true}
-        onCardClick={handleCardClick}
       />
-      <Modal
-        title={t('common.settings')}
+      <OperateModal
+        title={selectedTool ? selectedTool.name : `${t('common.edit')}`}
         visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <Form
+        <DynamicForm
           form={form}
-          layout="vertical"
-          initialValues={{ name: '', description: '' }}
-        >
-          <Form.Item
-            name="name"
-            label={t('common.name')}
-            rules={[{ required: true, message: t('common.pleaseEnterName') }]}
-          >
-            <Input placeholder={t('common.enterName')} />
-          </Form.Item>
-          <Form.Item
-            name="description"
-            label={t('common.description')}
-            rules={[{ required: true, message: t('common.pleaseEnterDescription') }]}
-          >
-            <Input.TextArea placeholder={t('common.enterDescription')} />
-          </Form.Item>
-        </Form>
-      </Modal>
+          fields={formFields}
+          initialValues={{ team: selectedTool?.team || [] }}
+        />
+      </OperateModal>
     </div>
   );
 };

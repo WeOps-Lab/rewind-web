@@ -22,7 +22,13 @@ export interface RagScoreThresholdItem {
 export interface KnowledgeBase {
   id: number;
   name: string;
-  introduction: string;
+  introduction?: string;
+}
+
+export interface SelectorOption {
+  id: number;
+  name: string;
+  icon?: string;
 }
 
 export interface KnowledgeBaseRagSource {
