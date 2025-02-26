@@ -119,6 +119,7 @@ const Template: React.FC = () => {
 
       <div className={templateStyle.table}>
         <EntityList
+          searchSize="middle"
           loading={tableLoading}
           data={tableData}
           onCardClick={(item) => {
