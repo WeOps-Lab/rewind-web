@@ -43,6 +43,12 @@
               "isNotMenuItem": true
             }
           ]
+        },
+        {
+          "icon": "zichan-quanbushebei",
+          "title": "模板",
+          "url": "/monitor/event/template",
+          "name": "template_list"
         }
       ]
     },
@@ -125,6 +131,12 @@
               "isNotMenuItem": true
             }
           ]
+        },
+        {
+          "icon": "zichan-quanbushebei",
+          "title": "Template",
+          "url": "/monitor/event/template",
+          "name": "template_list"
         }
       ]
     },

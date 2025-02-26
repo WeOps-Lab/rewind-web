@@ -22,6 +22,7 @@ import {
   ListItem,
   UserItem,
   SegmentedItem,
+  TableDataItem,
 } from '@/app/monitor/types';
 import CustomCascader from '@/components/custom-cascader';
 import {
@@ -83,7 +84,7 @@ const StrategyOperation = () => {
   const groupId = [currentGroup?.current?.id || ''];
   const monitorObjId = searchParams.get('monitorObjId');
   const monitorName = searchParams.get('monitorName');
-  const type = searchParams.get('type');
+  const type = searchParams.get('type') || '';
   const detailId = searchParams.get('id');
   const detailName = searchParams.get('name') || '--';
   const [pageLoading, setPageLoading] = useState<boolean>(false);
@@ -142,8 +143,11 @@ const StrategyOperation = () => {
 
   useEffect(() => {
     form.resetFields();
-    if (type === 'add') {
-      form.setFieldsValue({
+    if (['builtIn', 'add'].includes(type)) {
+      const strategyInfo = JSON.parse(
+        sessionStorage.getItem('strategyInfo') || '{}'
+      );
+      const initForm: TableDataItem = {
         organizations: groupId,
         notice_type: 'email',
         notice: false,
@@ -151,8 +155,17 @@ const StrategyOperation = () => {
         schedule: 5,
         recovery_condition: 5,
         collect_type: pluginList[0]?.value,
-      });
-      setMetric(searchParams.get('metricId') || null);
+      };
+      let _metricId = searchParams.get('metricId') || null;
+      if (type === 'builtIn') {
+        ['name', 'alert_name', 'algorithm'].forEach((item) => {
+          initForm[item] = strategyInfo[item] || null;
+        });
+        feedbackThreshold(strategyInfo.threshold || []);
+        _metricId = strategyInfo.metric_name || null;
+      }
+      form.setFieldsValue(initForm);
+      setMetric(_metricId);
       setSource({
         type: 'instance',
         values: searchParams.get('instanceId')
@@ -223,15 +236,7 @@ const StrategyOperation = () => {
       setConditions(query_condition?.filter || []);
     }
     setGroupBy(group_by || []);
-    const _threshold = deepClone(threshold);
-    _threshold.forEach((item: ThresholdField) => {
-      const target = thresholdList.find((tex) => tex.level === item.level);
-      if (target) {
-        item.value = target.value;
-        item.method = target.method;
-      }
-    });
-    setThreshold(_threshold || []);
+    feedbackThreshold(thresholdList);
     if (source?.type) {
       setSource(source);
     } else {
@@ -246,6 +251,20 @@ const StrategyOperation = () => {
     setOpenNoData(!!no_data_period?.value);
     setUnit(schedule?.type || '');
     setPeriodUnit(period?.type || '');
+  };
+
+  const feedbackThreshold = (data: TableDataItem) => {
+    const _threshold = deepClone(threshold);
+    _threshold.forEach((item: ThresholdField) => {
+      const target = data.find(
+        (tex: TableDataItem) => tex.level === item.level
+      );
+      if (target) {
+        item.value = target.value;
+        item.method = target.method;
+      }
+    });
+    setThreshold(_threshold || []);
   };
 
   const openInstModal = () => {
@@ -437,7 +456,8 @@ const StrategyOperation = () => {
   };
 
   const goBack = () => {
-    router.push(`/monitor/event/strategy?objId=${monitorObjId}`);
+    const targetUrl = `/monitor/event/${type === 'builtIn' ? 'template' : 'strategy'}?objId=${monitorObjId}`;
+    router.push(targetUrl);
   };
 
   const createStrategy = () => {
@@ -494,15 +514,14 @@ const StrategyOperation = () => {
     try {
       setConfirmLoading(true);
       const msg: string = t(
-        type === 'add'
+        ['builtIn', 'add'].includes(type)
           ? 'common.successfullyAdded'
           : 'common.successfullyModified'
       );
-      const url: string =
-        type === 'add'
-          ? '/monitor/api/monitor_policy/'
-          : `/monitor/api/monitor_policy/${detailId}/`;
-      const requestType = type === 'add' ? post : put;
+      const url: string = ['builtIn', 'add'].includes(type)
+        ? '/monitor/api/monitor_policy/'
+        : `/monitor/api/monitor_policy/${detailId}/`;
+      const requestType = ['builtIn', 'add'].includes(type) ? post : put;
       await requestType(url, params);
       message.success(msg);
       goBack();
@@ -528,7 +547,7 @@ const StrategyOperation = () => {
             className="text-[var(--color-primary)] text-[20px] cursor-pointer mr-[10px]"
             onClick={goBack}
           />
-          {type === 'add' ? (
+          {['builtIn', 'add'].includes(type) ? (
             t('monitor.events.createPolicy')
           ) : (
             <span>
