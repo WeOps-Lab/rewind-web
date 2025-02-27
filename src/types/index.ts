@@ -71,4 +71,5 @@ export interface EntityListProps<T> {
   onCardClick?: (item: T) => void;
   displayTagBelowName?: boolean;
   searchSize?: 'large' | 'middle' | 'small';
+  singleActionType?: 'button' | 'icon';
 }
