@@ -18,6 +18,7 @@ const EntityList = <T,>({
   onSearch,
   onCardClick,
   displayTagBelowName,
+  singleActionType = 'icon',
 }: EntityListProps<T> & { displayTagBelowName?: boolean }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,6 +49,8 @@ const EntityList = <T,>({
   const renderCard = useCallback((item: T) => {
     const { id, name, description, icon, tag } = item as any;
     const singleButtonAction = singleAction ? singleAction(item) : null;
+    const isSingleButtonAction = singleButtonAction && singleActionType === 'button';
+    const isSingleIconAction = singleActionType === 'icon' && singleButtonAction;
 
     return (
       <div
@@ -66,6 +69,16 @@ const EntityList = <T,>({
             </Dropdown>
           </div>
         )}
+        {
+          isSingleIconAction && (
+            <div className="absolute top-2 right-2 z-10" onClick={(e) => {
+              e.stopPropagation();
+              singleButtonAction.onClick(item);
+            }}>
+              <Icon type="shezhi" className="text-base cursor-pointer" />
+            </div>
+          )
+        }
         <div className="flex items-center">
           <div
             className={displayTagBelowName ? 'flex items-center justify-center' : 'rounded-full'}
@@ -99,9 +112,9 @@ const EntityList = <T,>({
         )}
         <div className="h-[66px]">
           <p
-            className={`mt-3 text-sm max-h-[66px] ${(singleAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
+            className={`mt-3 text-sm max-h-[66px] ${(isSingleButtonAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
         </div>
-        {singleButtonAction && (
+        {isSingleButtonAction && (
           <Button
             type="primary"
             className={`w-[92%] absolute bottom-2 left-1/2 transform -translate-x-1/2 ${hoveredCard === id ? '' : 'hidden'}`}
