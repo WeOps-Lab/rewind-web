@@ -37,21 +37,64 @@
             }]
         },
         {
-            "title": "模型",
+            "title": "管理",
             "icon": "shujumoxingguanli",
             "url": "/cmdb/assetManage",
-            "name": "model_list",
-            "children": [{
-                "title": "属性",
-                "icon": "shujumoxingguanli",
-                "url": "/cmdb/assetManage/detail/attributes",
-                "name": "model_attributes"
-            }, {
-                "title": "关系",
-                "icon": "shujumoxingguanli",
-                "url": "/cmdb/assetManage/detail/associations",
-                "name": "model_relationships"
-            }]
+            "name": "asset_management",
+            "children": [
+                {
+                    "title": "模型管理",
+                    "icon": "shujumoxingguanli",
+                    "url": "/cmdb/assetManage/management",
+                    "name": "management",
+                    "children": [
+                        {
+                            "title": "扫描",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/detail/attributes",
+                            "name": "management_scan"
+                        },
+                        {
+                            "title": "采集",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/detail/associations",
+                            "name": "management_collections"
+                        },
+                        {
+                            "title": "特征库",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/detail/associations",
+                            "name": "management_feature_library"
+                        }
+                    ]
+                },
+                {
+                    "title": "自动发现",
+                    "icon": "shujumoxingguanli",
+                    "url": "/cmdb/assetManage/autoDiscovery",
+                    "name": "auto_discovery",
+                    "children": [
+                        {
+                            "title": "扫描",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/autoDiscovery/scan",
+                            "name": "discovery_scan"
+                        },
+                        {
+                            "title": "采集",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/autoDiscovery/collection",
+                            "name": "discovery_collection"
+                        },
+                        {
+                            "title": "特征库",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/autoDiscovery/featureLibrary",
+                            "name": "discovery_feature_library"
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "en": [
@@ -92,21 +135,64 @@
             }]
         },
         {
-            "title": "Model",
+            "title": "Management",
             "icon": "shujumoxingguanli",
             "url": "/cmdb/assetManage",
-            "name": "model_list",
-            "children": [{
-                "title": "Attributes",
-                "icon": "shujumoxingguanli",
-                "url": "/cmdb/assetManage/detail/attributes",
-                "name": "model_attributes"
-            }, {
-                "title": "Relationships",
-                "icon": "shujumoxingguanli",
-                "url": "/cmdb/assetManage/detail/associations",
-                "name": "model_relationships"
-            }]
+            "name": "asset_management",
+            "children": [
+                {
+                    "title": "Model Management",
+                    "icon": "shujumoxingguanli",
+                    "url": "/cmdb/assetManage/management",
+                    "name": "management",
+                    "children": [
+                        {
+                            "title": "扫描",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/detail/attributes",
+                            "name": "management_scan"
+                        },
+                        {
+                            "title": "采集",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/detail/associations",
+                            "name": "management_collections"
+                        },
+                        {
+                            "title": "特征库",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/detail/associations",
+                            "name": "management_feature_library"
+                        }
+                    ]
+                },
+                {
+                    "title": "Auto discover",
+                    "icon": "shujumoxingguanli",
+                    "url": "/cmdb/assetManage/autoDiscovery",
+                    "name": "auto_discovery",
+                    "children": [
+                        {
+                            "title": "Scan",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/autoDiscovery/scan",
+                            "name": "discovery_scan"
+                        },
+                        {
+                            "title": "Collection",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/autoDiscovery/collection",
+                            "name": "discovery_collection"
+                        },
+                        {
+                            "title": "Feature library",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/autoDiscovery/featureLibrary",
+                            "name": "discovery_feature_library"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

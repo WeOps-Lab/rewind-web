@@ -104,37 +104,34 @@ const AssetData = () => {
   const [queryList, setQueryList] = useState<unknown>(null);
   const [tableData, setTableData] = useState<any[]>([]);
   const [organization, setOrganization] = useState<string[]>([]);
+  const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
+  const [expandedTreeKeys, setExpandedTreeKeys] = useState<string[]>([]);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     total: 0,
     pageSize: 20,
   });
-  const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
-  const [expandedTreeKeys, setExpandedTreeKeys] = useState<string[]>([]);
 
   const handleExport = async (keys: string[]) => {
     try {
       setExportLoading(true);
       const response = await axios({
-        url: `/api/proxy/cmdb/api/instance/${modelId}/inst_export/`, // 替换为你的导出数据的API端点
+        url: `/api/proxy/cmdb/api/instance/${modelId}/inst_export/`,
         method: 'POST',
-        responseType: 'blob', // 确保响应类型为blob
+        responseType: 'blob',
         data: keys,
         headers: {
           Authorization: `Bearer ${tokenRef.current}`,
         },
       });
-      // 创建一个Blob对象
       const blob = new Blob([response.data], {
         type: response.headers['content-type'],
       });
-      // 创建一个下载链接
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `${modelId}资产列表.xlsx`; // 设置下载文件的名称
+      link.download = `${modelId}资产列表.xlsx`;
       document.body.appendChild(link);
       link.click();
-      // 移除下载链接
       document.body.removeChild(link);
     } catch (error: any) {
       message.error(error.message);
@@ -172,67 +169,6 @@ const AssetData = () => {
       fetchData();
     }
   }, [pagination?.current, pagination?.pageSize, queryList, organization]);
-
-  useEffect(() => {
-    if (propertyList.length) {
-      const attrList = getAssetColumns({
-        attrList: propertyList,
-        userList,
-        groupList: organizationList,
-        t,
-      });
-      const tableColumns = [
-        ...attrList,
-        {
-          title: t('action'),
-          key: 'action',
-          dataIndex: 'action',
-          width: 120,
-          fixed: 'right',
-          render: (_: unknown, record: any) => (
-            <>
-              <Button
-                type="link"
-                className="mr-[10px]"
-                onClick={() => checkDetail(record)}
-              >
-                {t('detail')}
-              </Button>
-              <PermissionWrapper requiredPermissions={['Associate']}>
-                <Button
-                  type="link"
-                  className="mr-[10px]"
-                  onClick={() => showInstanceModal(record)}
-                >
-                  {t('Model.association')}
-                </Button>
-              </PermissionWrapper>
-              <PermissionWrapper requiredPermissions={['Edit']}>
-                <Button
-                  type="link"
-                  className="mr-[10px]"
-                  onClick={() => showAttrModal('edit', record)}
-                >
-                  {t('edit')}
-                </Button>
-              </PermissionWrapper>
-              <PermissionWrapper requiredPermissions={['Delete']}>
-                <Button type="link" onClick={() => showDeleteConfirm(record)}>
-                  {t('delete')}
-                </Button>
-              </PermissionWrapper>
-            </>
-          ),
-        },
-      ];
-      setColumns(tableColumns);
-      setCurrentColumns(
-        tableColumns.filter(
-          (item) => displayFieldKeys.includes(item.key) || item.key === 'action'
-        )
-      );
-    }
-  }, [propertyList, displayFieldKeys]);
 
   useEffect(() => {
     setExpandedTreeKeys(
@@ -414,33 +350,6 @@ const AssetData = () => {
     });
   };
 
-  const batchOperateItems: MenuProps['items'] = [
-    {
-      key: 'batchEdit',
-      label: (
-        <PermissionWrapper requiredPermissions={['Edit']}>
-          <a
-            onClick={() => {
-              showAttrModal('batchEdit');
-            }}
-          >
-            {t('batchEdit')}
-          </a>
-        </PermissionWrapper>
-      ),
-      disabled: !selectedRowKeys.length,
-    },
-    {
-      key: 'batchDelete',
-      label: (
-        <PermissionWrapper requiredPermissions={['Delete']}>
-          <a onClick={batchDeleteConfirm}>{t('batchDelete')}</a>
-        </PermissionWrapper>
-      ),
-      disabled: !selectedRowKeys.length,
-    },
-  ];
-
   const exportItems: MenuProps['items'] = [
     {
       key: 'batchExport',
@@ -566,6 +475,94 @@ const AssetData = () => {
       getInitData(key);
     }
   };
+
+  useEffect(() => {
+    if (propertyList.length) {
+      const attrList = getAssetColumns({
+        attrList: propertyList,
+        userList,
+        groupList: organizationList,
+        t,
+      });
+      const tableColumns = [
+        ...attrList,
+        {
+          title: t('action'),
+          key: 'action',
+          dataIndex: 'action',
+          width: 120,
+          fixed: 'right',
+          render: (_: unknown, record: any) => (
+            <>
+              <Button
+                type="link"
+                className="mr-[10px]"
+                onClick={() => checkDetail(record)}
+              >
+                {t('detail')}
+              </Button>
+              <PermissionWrapper requiredPermissions={['Associate']}>
+                <Button
+                  type="link"
+                  className="mr-[10px]"
+                  onClick={() => showInstanceModal(record)}
+                >
+                  {t('Model.association')}
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper requiredPermissions={['Edit']}>
+                <Button
+                  type="link"
+                  className="mr-[10px]"
+                  onClick={() => showAttrModal('edit', record)}
+                >
+                  {t('edit')}
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper requiredPermissions={['Delete']}>
+                <Button type="link" onClick={() => showDeleteConfirm(record)}>
+                  {t('delete')}
+                </Button>
+              </PermissionWrapper>
+            </>
+          ),
+        },
+      ];
+      setColumns(tableColumns);
+      setCurrentColumns(
+        tableColumns.filter(
+          (item) => displayFieldKeys.includes(item.key) || item.key === 'action'
+        )
+      );
+    }
+  }, [propertyList, displayFieldKeys]);
+
+  const batchOperateItems: MenuProps['items'] = [
+    {
+      key: 'batchEdit',
+      label: (
+        <PermissionWrapper requiredPermissions={['Edit']}>
+          <a
+            onClick={() => {
+              showAttrModal('batchEdit');
+            }}
+          >
+            {t('batchEdit')}
+          </a>
+        </PermissionWrapper>
+      ),
+      disabled: !selectedRowKeys.length,
+    },
+    {
+      key: 'batchDelete',
+      label: (
+        <PermissionWrapper requiredPermissions={['Delete']}>
+          <a onClick={batchDeleteConfirm}>{t('batchDelete')}</a>
+        </PermissionWrapper>
+      ),
+      disabled: !selectedRowKeys.length,
+    },
+  ];
 
   return (
     <Spin spinning={loading} wrapperClassName={assetDataStyle.assetLoading}>
