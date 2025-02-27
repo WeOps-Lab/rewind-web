@@ -586,11 +586,9 @@ const AutomaticConfiguration: React.FC = () => {
   return (
     <div className="px-[10px]">
       <Form form={form} name="basic" layout="vertical">
-        {formItems && (
-          <b className="text-[14px] flex mb-[10px] ml-[-10px]">
-            {t('monitor.intergrations.configuration')}
-          </b>
-        )}
+        <b className="text-[14px] flex mb-[10px] ml-[-10px]">
+          {t('monitor.intergrations.configuration')}
+        </b>
         {formItems}
         <Form.Item required label={t('monitor.intergrations.interval')}>
           <Form.Item
