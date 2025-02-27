@@ -13,6 +13,7 @@ import { Modal, message, Button } from 'antd';
 import useApiClient from '@/utils/request';
 import { LEVEL_MAP, useLevelList } from '@/app/monitor/constants/monitor';
 import CodeEditor from '@/app/monitor/components/codeEditor';
+import Permission from '@/components/permission';
 
 const Information: React.FC<TableDataItem> = ({
   formData,
@@ -162,13 +163,15 @@ const Information: React.FC<TableDataItem> = ({
         </Descriptions.Item>
       </Descriptions>
       <div className="mt-4">
-        <Button
-          type="link"
-          disabled={formData.status !== 'new'}
-          onClick={() => showAlertCloseConfirm(formData)}
-        >
-          {t('monitor.events.closeAlert')}
-        </Button>
+        <Permission requiredPermissions={['Operate']}>
+          <Button
+            type="link"
+            disabled={formData.status !== 'new'}
+            onClick={() => showAlertCloseConfirm(formData)}
+          >
+            {t('monitor.events.closeAlert')}
+          </Button>
+        </Permission>
       </div>
       <div className="mt-4">
         {formData.policy?.query_condition?.type === 'pmq' ? (

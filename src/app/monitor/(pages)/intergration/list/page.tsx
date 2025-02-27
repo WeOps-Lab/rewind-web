@@ -19,6 +19,7 @@ import axios from 'axios';
 import { useAuth } from '@/context/auth';
 import TreeSelector from '@/app/monitor/components/treeSelector';
 import { useSearchParams } from 'next/navigation';
+import Permission from '@/components/permission';
 
 const Intergration = () => {
   const { get, isLoading } = useApiClient();
@@ -276,17 +277,22 @@ const Intergration = () => {
                     {app.display_description || '--'}
                   </p>
                   <div className="w-full h-[32px] flex justify-center items-end">
-                    <Button
-                      icon={<SettingOutlined />}
-                      type="primary"
-                      className="w-full rounded-md transition-opacity duration-300"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        linkToDetial(app);
-                      }}
+                    <Permission
+                      requiredPermissions={['Setting']}
+                      className="w-full"
                     >
-                      {t('common.setting')}
-                    </Button>
+                      <Button
+                        icon={<SettingOutlined />}
+                        type="primary"
+                        className="w-full rounded-md transition-opacity duration-300"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          linkToDetial(app);
+                        }}
+                      >
+                        {t('common.setting')}
+                      </Button>
+                    </Permission>
                   </div>
                 </div>
               </div>

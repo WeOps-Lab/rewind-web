@@ -41,6 +41,7 @@ import {
   NODE_STATUS_MAP,
 } from '@/app/monitor/constants/monitor';
 const { confirm } = Modal;
+import Permission from '@/components/permission';
 
 const Asset = () => {
   const { get, post, del, isLoading } = useApiClient();
@@ -97,13 +98,15 @@ const Asset = () => {
           <Button type="link" onClick={() => checkDetail(record)}>
             {t('common.detail')}
           </Button>
-          <Button
-            type="link"
-            onClick={() => showDeleteInstConfirm(record)}
-            className="ml-[10px]"
-          >
-            {t('common.remove')}
-          </Button>
+          <Permission requiredPermissions={['Delete']}>
+            <Button
+              type="link"
+              onClick={() => showDeleteInstConfirm(record)}
+              className="ml-[10px]"
+            >
+              {t('common.remove')}
+            </Button>
+          </Permission>
         </>
       ),
     },
@@ -168,13 +171,15 @@ const Asset = () => {
       width: 100,
       render: (_, record) => (
         <>
-          <Button
-            type="link"
-            disabled={!record.config_id}
-            onClick={() => openConfigModal(record)}
-          >
-            {t('monitor.intergrations.updateConfigration')}
-          </Button>
+          <Permission requiredPermissions={['Edit']}>
+            <Button
+              type="link"
+              disabled={!record.config_id}
+              onClick={() => openConfigModal(record)}
+            >
+              {t('monitor.intergrations.updateConfigration')}
+            </Button>
+          </Permission>
         </>
       ),
     },
@@ -532,12 +537,14 @@ const Asset = () => {
               </Tooltip>
             </div>
             <ul className={assetStyle.ruleList}>
-              <li
+              <Permission
+                requiredPermissions={['Edit']}
                 className={`${assetStyle.ruleItem} ${assetStyle.add} shadow-sm rounded-sm`}
-                onClick={() => openRuleModal('add')}
               >
-                <PlusOutlined />
-              </li>
+                <li onClick={() => openRuleModal('add')}>
+                  <PlusOutlined />
+                </li>
+              </Permission>
               {ruleList.map((item) => (
                 <li
                   key={item.id}
@@ -560,27 +567,31 @@ const Asset = () => {
                             {
                               key: 'edit',
                               label: (
-                                <a
-                                  className="text-[12px]"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={() => openRuleModal('edit', item)}
-                                >
-                                  {t('common.edit')}
-                                </a>
+                                <Permission requiredPermissions={['Edit']}>
+                                  <a
+                                    className="text-[12px]"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => openRuleModal('edit', item)}
+                                  >
+                                    {t('common.edit')}
+                                  </a>
+                                </Permission>
                               ),
                             },
                             {
                               key: 'delete',
                               label: (
-                                <a
-                                  className="text-[12px]"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={() => showDeleteConfirm(item)}
-                                >
-                                  {t('common.delete')}
-                                </a>
+                                <Permission requiredPermissions={['Delete']}>
+                                  <a
+                                    className="text-[12px]"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => showDeleteConfirm(item)}
+                                  >
+                                    {t('common.delete')}
+                                  </a>
+                                </Permission>
                               ),
                             },
                           ],

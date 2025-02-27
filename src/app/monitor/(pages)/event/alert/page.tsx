@@ -34,6 +34,7 @@ import { AlertOutlined } from '@ant-design/icons';
 import { FiltersConfig } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
 import TimeSelector from '@/components/time-selector';
+import Permission from '@/components/permission';
 import StackedBarChart from '@/app/monitor/components/charts/stackedBarChart';
 import AlertDetail from './alertDetail';
 import Collapse from '@/components/collapse';
@@ -205,13 +206,15 @@ const Alert: React.FC = () => {
           >
             {t('common.detail')}
           </Button>
-          <Button
-            type="link"
-            disabled={record.status !== 'new'}
-            onClick={() => showAlertCloseConfirm(record)}
-          >
-            {t('common.close')}
-          </Button>
+          <Permission requiredPermissions={['Operate']}>
+            <Button
+              type="link"
+              disabled={record.status !== 'new'}
+              onClick={() => showAlertCloseConfirm(record)}
+            >
+              {t('common.close')}
+            </Button>
+          </Permission>
         </>
       ),
     },

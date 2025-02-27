@@ -18,6 +18,7 @@ import { Organization, ListItem, TableDataItem } from '@/app/monitor/types';
 import { IntergrationMonitoredObject } from '@/app/monitor/types/monitor';
 import { useUserInfoContext } from '@/context/userInfo';
 import { useColumnsAndFormItems } from '@/app/monitor/hooks/intergration';
+import Permission from '@/components/permission';
 
 const { Option } = Select;
 
@@ -654,9 +655,15 @@ const AutomaticConfiguration: React.FC = () => {
           />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" loading={confirmLoading} onClick={handleSave}>
-            {t('common.confirm')}
-          </Button>
+          <Permission requiredPermissions={['Add']}>
+            <Button
+              type="primary"
+              loading={confirmLoading}
+              onClick={handleSave}
+            >
+              {t('common.confirm')}
+            </Button>
+          </Permission>
         </Form.Item>
       </Form>
     </div>

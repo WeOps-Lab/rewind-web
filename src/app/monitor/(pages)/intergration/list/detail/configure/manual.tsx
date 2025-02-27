@@ -14,6 +14,7 @@ import { useFormItems } from '@/app/monitor/hooks/intergration';
 import CodeEditor from '@/app/monitor/components/codeEditor';
 import { TableDataItem } from '@/app/monitor/types';
 const { Option } = Select;
+import Permission from '@/components/permission';
 
 const AutomaticConfiguration: React.FC = () => {
   const [form] = Form.useForm();
@@ -242,9 +243,11 @@ const AutomaticConfiguration: React.FC = () => {
           </span>
         </Form.Item>
       </Form>
-      <Button type="primary" loading={confirmLoading} onClick={handleSave}>
-        {t('monitor.intergrations.generateConfiguration')}
-      </Button>
+      <Permission requiredPermissions={['Add']}>
+        <Button type="primary" loading={confirmLoading} onClick={handleSave}>
+          {t('monitor.intergrations.generateConfiguration')}
+        </Button>
+      </Permission>
       {!!configMsg && (
         <CodeEditor
           className="mt-[10px]"

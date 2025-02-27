@@ -28,6 +28,7 @@ import { INDEX_CONFIG } from '@/app/monitor/constants/monitor';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import viewStyle from './index.module.scss';
 import TreeSelector from '@/app/monitor/components/treeSelector';
+import Permission from '@/components/permission';
 
 const Intergration = () => {
   const { get, isLoading } = useApiClient();
@@ -83,9 +84,11 @@ const Intergration = () => {
           >
             {t('monitor.view')}
           </Button>
-          <Button type="link" onClick={() => linkToDetial(record)}>
-            {t('common.detail')}
-          </Button>
+          <Permission requiredPermissions={['Detail']}>
+            <Button type="link" onClick={() => linkToDetial(record)}>
+              {t('common.detail')}
+            </Button>
+          </Permission>
         </>
       ),
     },

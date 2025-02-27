@@ -22,6 +22,7 @@ import { useSearchParams } from 'next/navigation';
 import { deepClone } from '@/app/monitor/utils/common';
 import { useUserInfoContext } from '@/context/userInfo';
 const { confirm } = Modal;
+import Permission from '@/components/permission';
 
 const Configure = () => {
   const { get, del, isLoading, post } = useApiClient();
@@ -101,21 +102,27 @@ const Configure = () => {
       width: 130,
       render: (_, record) => (
         <>
-          <Button
-            type="link"
+          <Permission
+            requiredPermissions={['Edit Metric']}
             className="mr-[10px]"
-            disabled={record.is_pre && !isSuperUser}
-            onClick={() => openMetricModal('edit', record)}
           >
-            {t('common.edit')}
-          </Button>
-          <Button
-            type="link"
-            disabled={record.is_pre && !isSuperUser}
-            onClick={() => showDeleteConfirm(record)}
-          >
-            {t('common.delete')}
-          </Button>
+            <Button
+              type="link"
+              disabled={record.is_pre && !isSuperUser}
+              onClick={() => openMetricModal('edit', record)}
+            >
+              {t('common.edit')}
+            </Button>
+          </Permission>
+          <Permission requiredPermissions={['Delete Metric']}>
+            <Button
+              type="link"
+              disabled={record.is_pre && !isSuperUser}
+              onClick={() => showDeleteConfirm(record)}
+            >
+              {t('common.delete')}
+            </Button>
+          </Permission>
         </>
       ),
     },
@@ -362,16 +369,16 @@ const Configure = () => {
           onClear={onTxtClear}
         />
         <div>
-          <Button
-            type="primary"
-            className="mr-[8px]"
-            onClick={() => openGroupModal('add')}
-          >
-            {t('monitor.intergrations.addGroup')}
-          </Button>
-          <Button onClick={() => openMetricModal('add')}>
-            {t('monitor.intergrations.addMetric')}
-          </Button>
+          <Permission requiredPermissions={['Add Group']} className="mr-[8px]">
+            <Button type="primary" onClick={() => openGroupModal('add')}>
+              {t('monitor.intergrations.addGroup')}
+            </Button>
+          </Permission>
+          <Permission requiredPermissions={['Add Metric']}>
+            <Button onClick={() => openMetricModal('Add Metric')}>
+              {t('monitor.intergrations.addMetric')}
+            </Button>
+          </Permission>
         </div>
       </div>
       <Spin spinning={loading}>
@@ -401,20 +408,26 @@ const Configure = () => {
                 isOpen={!index}
                 icon={
                   <div>
-                    <Button
-                      type="link"
-                      size="small"
-                      disabled={metricItem.is_pre}
-                      icon={<EditOutlined />}
-                      onClick={() => openGroupModal('edit', metricItem)}
-                    ></Button>
-                    <Button
-                      type="link"
-                      size="small"
-                      disabled={!!metricItem.child?.length || metricItem.is_pre}
-                      icon={<DeleteOutlined />}
-                      onClick={() => showGroupDeleteConfirm(metricItem)}
-                    ></Button>
+                    <Permission requiredPermissions={['Edit Group']}>
+                      <Button
+                        type="link"
+                        size="small"
+                        disabled={metricItem.is_pre}
+                        icon={<EditOutlined />}
+                        onClick={() => openGroupModal('edit', metricItem)}
+                      ></Button>
+                    </Permission>
+                    <Permission requiredPermissions={['Edit Group']}>
+                      <Button
+                        type="link"
+                        size="small"
+                        disabled={
+                          !!metricItem.child?.length || metricItem.is_pre
+                        }
+                        icon={<DeleteOutlined />}
+                        onClick={() => showGroupDeleteConfirm(metricItem)}
+                      ></Button>
+                    </Permission>
                   </div>
                 }
               >

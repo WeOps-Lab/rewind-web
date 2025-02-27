@@ -21,6 +21,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useRouter, useSearchParams } from 'next/navigation';
 const { confirm } = Modal;
 import TreeSelector from '@/app/monitor/components/treeSelector';
+import Permission from '@/components/permission';
 
 const Strategy: React.FC = () => {
   const { t } = useTranslation();
@@ -89,12 +90,14 @@ const Strategy: React.FC = () => {
       dataIndex: 'effective',
       key: 'effective',
       render: (_, record) => (
-        <Switch
-          size="small"
-          loading={enableLoading}
-          onChange={(val) => handleEffectiveChange(val, record.id)}
-          checked={record.enable}
-        />
+        <Permission requiredPermissions={['Edit']}>
+          <Switch
+            size="small"
+            loading={enableLoading}
+            onChange={(val) => handleEffectiveChange(val, record.id)}
+            checked={record.enable}
+          />
+        </Permission>
       ),
     },
     {
@@ -104,16 +107,19 @@ const Strategy: React.FC = () => {
       fixed: 'right',
       render: (_, record) => (
         <>
-          <Button
-            className="mr-[10px]"
-            type="link"
-            onClick={() => linkToStrategyDetail('edit', record)}
-          >
-            {t('common.edit')}
-          </Button>
-          <Button type="link" onClick={() => showDeleteConfirm(record)}>
-            {t('common.delete')}
-          </Button>
+          <Permission className="mr-[10px]" requiredPermissions={['Edit']}>
+            <Button
+              type="link"
+              onClick={() => linkToStrategyDetail('edit', record)}
+            >
+              {t('common.edit')}
+            </Button>
+          </Permission>
+          <Permission requiredPermissions={['Delete']}>
+            <Button type="link" onClick={() => showDeleteConfirm(record)}>
+              {t('common.delete')}
+            </Button>
+          </Permission>
         </>
       ),
     },
@@ -282,13 +288,15 @@ const Strategy: React.FC = () => {
                 onChange={(e) => setSearchText(e.target.value)}
               ></Input>
             </div>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => linkToStrategyDetail('add')}
-            >
-              {t('common.add')}
-            </Button>
+            <Permission requiredPermissions={['Add']}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => linkToStrategyDetail('add')}
+              >
+                {t('common.add')}
+              </Button>
+            </Permission>
           </div>
           <CustomTable
             scroll={{ y: 'calc(100vh - 336px)', x: 'calc(100vw - 500px)' }}
