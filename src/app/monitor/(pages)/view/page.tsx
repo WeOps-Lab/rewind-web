@@ -18,10 +18,7 @@ import {
   TableDataItem,
   TreeItem,
 } from '@/app/monitor/types';
-import {
-  useKeyMetricLabelMap,
-  COLLECT_TYPE_MAP,
-} from '@/app/monitor/constants/monitor';
+import { COLLECT_TYPE_MAP } from '@/app/monitor/constants/monitor';
 import CustomTable from '@/components/custom-table';
 import TimeSelector from '@/components/time-selector';
 import { INDEX_CONFIG } from '@/app/monitor/constants/monitor';
@@ -33,7 +30,6 @@ import Permission from '@/components/permission';
 const Intergration = () => {
   const { get, isLoading } = useApiClient();
   const { t } = useTranslation();
-  const KEY_METRIC_LABEL_MAP = useKeyMetricLabelMap();
   const router = useRouter();
   const { convertToLocalizedTime } = useLocalizedTime();
   const viewRef = useRef<ModalRef>(null);
@@ -185,19 +181,19 @@ const Intergration = () => {
           if (item.type === 'progress') {
             return {
               title:
-                KEY_METRIC_LABEL_MAP[target?.name] ||
+                t(`monitor.views.${[item.key]}`) ||
                 target?.display_name ||
                 '--',
-              dataIndex: target?.name,
-              key: target?.name,
+              dataIndex: item.key,
+              key: item.key,
               width: 300,
               render: (_: unknown, record: TableDataItem) => (
                 <Progress
                   className="flex"
                   strokeLinecap="butt"
-                  showInfo={!!record[target?.name]}
+                  showInfo={!!record[item.key]}
                   format={(percent) => `${percent?.toFixed(2)}%`}
-                  percent={getPercent(record[target?.name] || 0)}
+                  percent={getPercent(record[item.key] || 0)}
                   percentPosition={{ align: 'start', type: 'outer' }}
                   size={[260, 20]}
                 />
@@ -206,14 +202,12 @@ const Intergration = () => {
           }
           return {
             title:
-              KEY_METRIC_LABEL_MAP[target?.name] ||
-              target?.display_name ||
-              '--',
-            dataIndex: target?.name,
-            key: target?.name,
+              t(`monitor.views.${[item.key]}`) || target?.display_name || '--',
+            dataIndex: item.key,
+            key: item.key,
             width: 200,
             render: (_: unknown, record: TableDataItem) => (
-              <>{getEnumValueUnit(target, record[target?.name])}</>
+              <>{getEnumValueUnit(target, record[item.key])}</>
             ),
           };
         });

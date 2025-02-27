@@ -54,33 +54,6 @@ const useConditionList = (): ListItem[] => {
   );
 };
 
-const useKeyMetricLabelMap = (): ObjectIconMap => {
-  const { t } = useTranslation();
-  return useMemo(
-    () => ({
-      'cpu_summary.usage': t('monitor.views.cpu_summary.usage'),
-      'mem.pct_used': t('monitor.views.mem.pct_usable'),
-      load5: t('monitor.views.load5'),
-      sysUpTime: t('monitor.views.sysUpTime'),
-      iftotalInOctets: t('monitor.views.iftotalInOctets'),
-      iftotalOutOctets: t('monitor.views.iftotalOutOctets'),
-      'http_success.rate': t('monitor.views.http_success.rate'),
-      http_duration: t('monitor.views.http_duration'),
-      ping_response_time: t('monitor.views.ping_response_time'),
-      ping_error_response_code: t('monitor.views.ping_error_response_code'),
-      pod_status: t('monitor.views.pod_status'),
-      pod_cpu_utilization: t('monitor.views.pod_cpu_utilization'),
-      pod_memory_utilization: t('monitor.views.pod_memory_utilization'),
-      node_status_condition: t('monitor.views.node_status_condition'),
-      node_cpu_utilization: t('monitor.views.node_cpu_utilization'),
-      node_memory_utilization: t('monitor.views.node_memory_utilization'),
-      cluster_pod_count: t('monitor.views.cluster_pod_count'),
-      cluster_node_count: t('monitor.views.cluster_node_count'),
-    }),
-    [t]
-  );
-};
-
 const useStateMap = (): StateMap => {
   const { t } = useTranslation();
   return useMemo(
@@ -369,7 +342,7 @@ const INDEX_CONFIG = [
         indexId: 'disk.is_use',
         displayType: 'lineChart',
         sortIndex: 5,
-        displayDimension: ['device '],
+        displayDimension: ['device'],
         style: {
           height: '200px',
           width: '32%',
@@ -379,7 +352,7 @@ const INDEX_CONFIG = [
         indexId: 'mem.pct_used',
         displayType: 'lineChart',
         sortIndex: 6,
-        displayDimension: ['device '],
+        displayDimension: ['device'],
         style: {
           height: '200px',
           width: '32%',
@@ -389,7 +362,7 @@ const INDEX_CONFIG = [
         indexId: 'io.util',
         displayType: 'lineChart',
         sortIndex: 7,
-        displayDimension: ['device '],
+        displayDimension: ['device'],
         style: {
           height: '200px',
           width: '32%',
@@ -399,7 +372,7 @@ const INDEX_CONFIG = [
         indexId: 'net.speed_sent',
         displayType: 'lineChart',
         sortIndex: 8,
-        displayDimension: ['device '],
+        displayDimension: ['device'],
         style: {
           height: '200px',
           width: '32%',
@@ -409,7 +382,7 @@ const INDEX_CONFIG = [
         indexId: 'net.speed_recv',
         displayType: 'lineChart',
         sortIndex: 9,
-        displayDimension: ['device '],
+        displayDimension: ['device'],
         style: {
           height: '200px',
           width: '32%',
@@ -1202,6 +1175,91 @@ const INDEX_CONFIG = [
       { type: 'value', key: 'sysUpTime' },
     ],
   },
+  {
+    name: 'Docker Container',
+    id: 15,
+    dashboardDisplay: [],
+    tableDiaplay: [{ type: 'value', key: 'docker_n_containers' }],
+  },
+  {
+    name: 'Docker',
+    id: 16,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'docker_container_status' },
+      { type: 'progress', key: 'docker_container_cpu_usage_percent' },
+      { type: 'progress', key: 'docker_container_mem_usage_percent' },
+    ],
+  },
+  {
+    name: 'Zookeeper',
+    id: 17,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'zookeeper_uptime' },
+      { type: 'value', key: 'zookeeper_avg_latency' },
+    ],
+  },
+  {
+    name: 'Apache',
+    id: 18,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'apache_uptime' },
+      { type: 'value', key: 'apache_req_per_sec' },
+      { type: 'progress', key: 'apache_cpu_load' },
+    ],
+  },
+  {
+    name: 'ClickHouse',
+    id: 19,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'clickhouse_events_query' },
+      { type: 'value', key: 'clickhouse_events_inserted_rows' },
+      { type: 'value', key: 'clickhouse_asynchronous_metrics_load_average1' },
+    ],
+  },
+  {
+    name: 'RabbitMQ',
+    id: 20,
+    dashboardDisplay: [],
+    tableDiaplay: [{ type: 'value', key: 'rabbitmq_overview_messages_ready' }],
+  },
+  {
+    name: 'ActiveMQ',
+    id: 21,
+    dashboardDisplay: [],
+    tableDiaplay: [{ type: 'value', key: 'activemq_topic_consumer_count' }],
+  },
+  {
+    name: 'Nginx',
+    id: 22,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'nginx_requests' },
+      { type: 'value', key: 'nginx_active' },
+    ],
+  },
+  {
+    name: 'Tomcat',
+    id: 23,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'tomcat_connector_request_count' },
+      { type: 'value', key: 'tomcat_connector_current_threads_busy' },
+      { type: 'value', key: 'tomcat_connector_error_count' },
+    ],
+  },
+  {
+    name: 'Consul',
+    id: 24,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'consul_health_checks_status' },
+      { type: 'value', key: 'consul_health_checks_passing' },
+    ],
+  },
 ];
 
 const SCHEDULE_UNIT_MAP: UnitMap = {
@@ -1535,7 +1593,6 @@ export {
   useScheduleList,
   useMethodList,
   useLevelList,
-  useKeyMetricLabelMap,
   useConditionList,
   useTimeRangeList,
   useFrequencyList,
