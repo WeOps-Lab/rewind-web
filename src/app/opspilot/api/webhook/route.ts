@@ -6,10 +6,15 @@ export const GET = async () => {
 
 export const POST = async (req: NextRequest) => {
   try {
-    const { sender, message, port } = await req.json();
+    const { sender, message, port, domain, ssl } = await req.json();
     const payload = { sender, message };
 
-    const backendResponse = await fetch(`http://104.215.58.237:${port}/webhooks/rest/webhook`, {
+    let protocol = ssl ? 'https://' : 'http://';
+    if (domain.startsWith('http://') || domain.startsWith('https://')) {
+      protocol = '';
+    }
+    const fullUrl = `${protocol}${domain}:${port}/webhooks/rest/webhook`;
+    const backendResponse = await fetch(fullUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

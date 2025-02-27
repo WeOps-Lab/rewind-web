@@ -207,6 +207,8 @@ const StudioSettingsPage: React.FC = () => {
           sender: "user",
           message: message?.content || '',
           port: nodePort || 5005,
+          domain: botDomain,
+          ssl: enableSsl
         };
         const response = await fetch('/opspilot/api/webhook', {
           method: 'POST',
