@@ -89,6 +89,7 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ selectedToolIds, onChange }
         cancelText={t('common.cancel')}
         loading={loading}
         options={tools}
+        isNeedGuide={false}
         selectedOptions={selectedToolIds}
         onOk={handleModalConfirm}
         onCancel={handleModalCancel}

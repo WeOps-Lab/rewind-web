@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spin, Tooltip, Button, Input } from 'antd';
+import { Spin, Tooltip, Button, Input, Empty } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import Icon from '@/components/icon';
 import { useTranslation } from '@/utils/i18n';
@@ -16,6 +16,7 @@ interface OperateModalProps {
   options: SelectorOption[];
   selectedOptions: number[];
   loading?: boolean;
+  isNeedGuide?: boolean;
   onOk: (selected: number[]) => void;
   onCancel: () => void;
 }
@@ -28,6 +29,7 @@ const SelectorOperateModal: React.FC<OperateModalProps> = ({
   options,
   selectedOptions,
   loading = false,
+  isNeedGuide = true,
   onOk,
   onCancel
 }) => {
@@ -78,13 +80,15 @@ const SelectorOperateModal: React.FC<OperateModalProps> = ({
     >
       <Spin spinning={loading}>
         {options.length === 0 ? (
-          <div className="text-center">
-            <p>{t('skill.settings.noKnowledgeBase')}</p>
-            <Button type="link" onClick={handleConfigureOptions}>
-              {t('skill.settings.clickHere')}
-            </Button>
-            {t('skill.settings.toConfigureKnowledgeBase')}
-          </div>
+          isNeedGuide ? (
+            <div className="text-center">
+              <p>{t('skill.settings.noKnowledgeBase')}</p>
+              <Button type="link" onClick={handleConfigureOptions}>
+                {t('skill.settings.clickHere')}
+              </Button>
+              {t('skill.settings.toConfigureKnowledgeBase')}
+            </div>
+          ) : (<Empty description={t('common.noData')}/>)
         ) : (
           <>
             <div className="flex justify-end">
