@@ -19,6 +19,7 @@ interface WithSideMenuLayoutProps {
   showSideMenu?: boolean;
   layoutType?: 'sideMenu' | 'segmented';
   taskProgressComponent?: React.ReactNode;
+  pagePathName?: string;
 }
 
 const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
@@ -31,9 +32,11 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   showSideMenu = true,
   layoutType = 'sideMenu',
   taskProgressComponent,
+  pagePathName
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
+  const curRouterName = usePathname();
+  const pathname = pagePathName ?? curRouterName;
   const { menus } = usePermissions();
   const [selectedKey, setSelectedKey] = useState<string>(pathname);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
