@@ -4,16 +4,11 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 ADD . .
-
-RUN rm -Rf ./src/app/example
 RUN pnpm install
-
 RUN cp ./.env.example ./.env
-
 RUN pnpm run build
 
 FROM node:18-alpine
-    
 RUN npm install -g pnpm
 WORKDIR /app
 COPY --from=builder /app/.next ./.next

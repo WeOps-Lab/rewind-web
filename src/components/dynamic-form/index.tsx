@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Select, InputNumber, Switch, FormInstance } from 'antd';
+import { Form, Input, Select, FormInstance } from 'antd';
 
 interface Field {
   name: string;
@@ -20,9 +20,7 @@ interface DynamicFormProps {
 
 const componentMap: { [key: string]: React.FC<any> } = {
   input: (props) => <Input {...props} />,
-  inputPwd: (props) => <Input.Password {...props} />,
   textarea: (props) => <Input.TextArea {...props} />,
-  switch: (props) => <Switch {...props} />,
   select: ({ options, ...props }) => (
     <Select {...props}>
       {options?.map((option: any) => (
@@ -32,7 +30,6 @@ const componentMap: { [key: string]: React.FC<any> } = {
       ))}
     </Select>
   ),
-  inputNumber: (props) => <InputNumber {...props} />,
 };
 
 const DynamicForm: React.FC<DynamicFormProps> = ({ form, fields, initialValues }) => {
