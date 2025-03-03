@@ -31,5 +31,11 @@
         flex: 1;
         height: 100%;
         overflow-y: auto;
+
+        :global {
+            .grid-cols-1 {
+                padding-bottom: 10px;
+            }
+        }
     }
 }
