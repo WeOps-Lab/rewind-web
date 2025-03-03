@@ -559,7 +559,9 @@ const Asset = () => {
                           : 'xuanze'
                       }
                     />
-                    <span>{item.name}</span>
+                    <span title={item.name} className={assetStyle.ruleName}>
+                      {item.name}
+                    </span>
                     <div className={assetStyle.operate}>
                       <Dropdown
                         menu={{

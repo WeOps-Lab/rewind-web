@@ -1378,10 +1378,10 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   Consul: 'middleware',
   Zookeeper: 'middleware',
   Tomcat: 'middleware',
-  //   MongoDB: 'database',
-  //   Mysql: 'database',
-  //   Redis: 'database',
-  //   Postgres: 'database',
+  MongoDB: 'database',
+  Mysql: 'database',
+  // Redis: 'database',
+  // Postgres: 'database',
   ElasticSearch: 'database',
 };
 

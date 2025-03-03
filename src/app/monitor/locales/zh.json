@@ -238,7 +238,7 @@
       "reportedFor": "当没有数据报告连续",
       "nodataPeriods": "，将生成“无数据”告警，级别为",
       "nodataRecoverCondition": "。当数据报告在",
-      "nodataRecover": "内恢复正常时，“无数据告警”将自动恢复。",
+      "nodataRecover": "内恢复正常时，“无数据告警” 将自动恢复。",
       "notification": "通知",
       "email": "电子邮件",
       "createPolicy": "创建策略",
