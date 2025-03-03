@@ -25,10 +25,30 @@
           "url": "/system-manager/application/manage/role"
         }
       ]
+    },
+    {
+      "title": "通知渠道",
+      "icon": "Channel",
+      "name": "channel_list",
+      "url": "/system-manager/channel",
+      "children": [
+        {
+          "title": "设置",
+          "icon": "shezhi",
+          "name": "channel_setting",
+          "url": "/system-manager/channel/detail/settings"
+        },
+        {
+          "title": "模板",
+          "icon": "zichan-quanbushebei",
+          "name": "channel_template",
+          "url": "/system-manager/channel/detail/template"
+        }
+      ]
     }
   ],
   "en": [
-      {
+    {
       "title": "User",
       "icon": "yonghu1",
       "name": "user_list",
@@ -51,6 +71,26 @@
           "icon": "guanliyuan_jiaoseguanli",
           "name": "applicaiton_role",
           "url": "/system-manager/application/manage/role"
+        }
+      ]
+    },
+    {
+      "title": "Channel",
+      "icon": "Channel",
+      "name": "channel_list",
+      "url": "/system-manager/channel",
+      "children": [
+        {
+          "title": "Settings",
+          "icon": "shezhi",
+          "name": "channel_setting",
+          "url": "/system-manager/channel/detail/settings"
+        },
+        {
+          "title": "Template",
+          "icon": "zichan-quanbushebei",
+          "name": "channel_template",
+          "url": "/system-manager/channel/detail/template"
         }
       ]
     }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
-import { Input, Button, Form, Transfer, message, Spin, Tree, Select } from 'antd';
+import { Input, Button, Form, message, Spin, Select } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
 import { useTranslation } from '@/utils/i18n';
@@ -159,15 +159,6 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
   };
 
   const filteredTreeData = treeData ? transformTreeData(treeData) : [];
-  const flattenTree = (nodes: any[]): { key: string; title: string }[] =>
-    nodes.reduce((acc, node) => {
-      acc.push({ key: node.value, title: node.title });
-      if (node.children && node.children.length) {
-        acc = acc.concat(flattenTree(node.children));
-      }
-      return acc;
-    }, [] as { key: string; title: string }[]);
-  const groupDataSource = flattenTree(filteredTreeData);
 
   return (
     <OperateModal
@@ -238,41 +229,15 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
             label={t('system.user.form.group')}
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
-            <Transfer
-              oneWay
-              dataSource={groupDataSource}
-              targetKeys={selectedGroups}
-              className="tree-transfer"
-              render={(item) => item.title}
-              showSelectAll={false}
-              onChange={nextTargetKeys => {
-                setSelectedGroups(nextTargetKeys as string[]);
-                formRef.current?.setFieldsValue({ groups: nextTargetKeys });
+            <RoleTransfer
+              mode="group"
+              treeData={filteredTreeData}
+              selectedKeys={selectedGroups}
+              onChange={newKeys => {
+                setSelectedGroups(newKeys);
+                formRef.current?.setFieldsValue({ groups: newKeys });
               }}
-            >
-              {({ direction }) => {
-                if (direction === 'left') {
-                  return (
-                    <div style={{ padding: '4px', maxHeight: 250, overflow: 'auto' }}>
-                      <Tree
-                        blockNode
-                        checkable
-                        checkStrictly
-                        defaultExpandAll
-                        checkedKeys={selectedGroups}
-                        treeData={filteredTreeData}
-                        onCheck={(checkedKeys, info) => {
-                          const newKeys = info.checkedNodes.map((node: any) => node.key);
-                          setSelectedGroups(newKeys);
-                          formRef.current?.setFieldsValue({ groups: newKeys });
-                        }}
-                      />
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            </Transfer>
+            />
           </Form.Item>
           <Form.Item
             name="roles"
@@ -280,11 +245,11 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
             rules={[{ required: true, message: t('common.inputRequired') }]}
           >
             <RoleTransfer
-              roleTreeData={roleTreeData}
-              selectedRoles={selectedRoles}
-              onChange={newRoles => {
-                setSelectedRoles(newRoles);
-                formRef.current?.setFieldsValue({ roles: newRoles });
+              treeData={roleTreeData}
+              selectedKeys={selectedRoles}
+              onChange={newKeys => {
+                setSelectedRoles(newKeys);
+                formRef.current?.setFieldsValue({ roles: newKeys });
               }}
             />
           </Form.Item>

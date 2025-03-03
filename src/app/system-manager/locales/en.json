@@ -103,6 +103,33 @@
         "menu": "MENU",
         "operation": "OPERATION"
       }
+    },
+    "channel": {
+      "name": "Name",
+      "type": "Type",
+      "description": "Description",
+      "addChannel": "Add Channel",
+      "editChannel": "Edit Channel",
+      "deleteConfirm": "Are you sure you want to delete this channel?",
+      "settings": {
+        "smtp_server": "Smtp Server",
+        "port": "Port",
+        "smtp_user": "Smtp User",
+        "smtp_pwd": "Smtp Password",
+        "smtp_usessl": "Use SSL",
+        "smtp_usetls": "Use TLS",
+        "mail_sender": "Mail Sender",
+        "corp_id": "Corp ID",
+        "secret": "Secret",
+        "token": "Token",
+        "aes_key": "Aes Key",
+        "agent_id": "Agent ID"
+      },
+      "template": {
+        "name": "NAME",
+        "app": "APP",
+        "detail": "DETAIL"
+      }
     }
   }
 }
