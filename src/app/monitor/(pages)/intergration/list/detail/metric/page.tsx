@@ -49,13 +49,13 @@ const Configure = () => {
     {
       title: t('common.id'),
       dataIndex: 'name',
-      width: 100,
+      width: 120,
       key: 'name',
     },
     {
       title: t('common.name'),
       dataIndex: 'display_name',
-      width: 100,
+      width: 120,
       key: 'display_name',
     },
     {
@@ -83,7 +83,7 @@ const Configure = () => {
     {
       title: t('common.unit'),
       dataIndex: 'unit',
-      width: 100,
+      width: 80,
       key: 'unit',
       render: (_, record) => (
         <>{record.data_type === 'Enum' ? '--' : record.unit || '--'}</>
@@ -93,13 +93,15 @@ const Configure = () => {
       title: t('common.descripition'),
       dataIndex: 'display_description',
       key: 'display_description',
+      width: 150,
       render: (_, record) => <>{record.display_description || '--'}</>,
     },
     {
       title: t('common.action'),
       key: 'action',
       dataIndex: 'action',
-      width: 130,
+      fixed: 'right',
+      width: 110,
       render: (_, record) => (
         <>
           <Permission
@@ -434,6 +436,7 @@ const Configure = () => {
                 <CustomTable
                   pagination={false}
                   dataSource={metricItem.child || []}
+                  scroll={{ x: 'calc(100vw - 260px)' }}
                   columns={columns}
                   rowKey="id"
                 />

@@ -451,10 +451,7 @@ const INDEX_CONFIG = [
       },
     ],
     tableDiaplay: [
-      {
-        type: 'enum',
-        key: 'http_success.rate',
-      },
+      { type: 'enum', key: 'http_success.rate' },
       { type: 'value', key: 'http_duration' },
     ],
   },
@@ -485,10 +482,7 @@ const INDEX_CONFIG = [
     ],
     tableDiaplay: [
       { type: 'value', key: 'ping_response_time' },
-      {
-        type: 'enum',
-        key: 'ping_error_response_code',
-      },
+      { type: 'enum', key: 'ping_error_response_code' },
     ],
   },
   {
@@ -547,7 +541,7 @@ const INDEX_CONFIG = [
       },
     ],
     tableDiaplay: [
-      { type: 'value', key: 'pod_status' },
+      { type: 'enum', key: 'pod_status' },
       { type: 'progress', key: 'pod_cpu_utilization' },
       { type: 'progress', key: 'pod_memory_utilization' },
     ],
@@ -650,7 +644,7 @@ const INDEX_CONFIG = [
       },
     ],
     tableDiaplay: [
-      { type: 'value', key: 'node_status_condition' },
+      { type: 'enum', key: 'node_status_condition' },
       { type: 'progress', key: 'node_cpu_utilization' },
       { type: 'progress', key: 'node_memory_utilization' },
     ],
@@ -1176,17 +1170,17 @@ const INDEX_CONFIG = [
     ],
   },
   {
-    name: 'Docker Container',
+    name: 'Docker',
     id: 15,
     dashboardDisplay: [],
     tableDiaplay: [{ type: 'value', key: 'docker_n_containers' }],
   },
   {
-    name: 'Docker',
+    name: 'Docker Container',
     id: 16,
     dashboardDisplay: [],
     tableDiaplay: [
-      { type: 'value', key: 'docker_container_status' },
+      { type: 'enum', key: 'docker_container_status' },
       { type: 'progress', key: 'docker_container_cpu_usage_percent' },
       { type: 'progress', key: 'docker_container_mem_usage_percent' },
     ],
@@ -1256,7 +1250,7 @@ const INDEX_CONFIG = [
     id: 24,
     dashboardDisplay: [],
     tableDiaplay: [
-      { type: 'value', key: 'consul_health_checks_status' },
+      { type: 'enum', key: 'consul_health_checks_status' },
       { type: 'value', key: 'consul_health_checks_passing' },
     ],
   },
@@ -1388,7 +1382,7 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   //   Mysql: 'database',
   //   Redis: 'database',
   //   Postgres: 'database',
-  //   ElasticSearch: 'database',
+  ElasticSearch: 'database',
 };
 
 const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
