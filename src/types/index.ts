@@ -69,7 +69,6 @@ export interface EntityListProps<T> {
   openModal?: (item?: T) => void;
   onSearch?: (value: string) => void;
   onCardClick?: (item: T) => void;
-  displayTagBelowName?: boolean;
   searchSize?: 'large' | 'middle' | 'small';
   singleActionType?: 'button' | 'icon';
 }
