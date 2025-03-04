@@ -1380,8 +1380,8 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   Tomcat: 'middleware',
   MongoDB: 'database',
   Mysql: 'database',
-  // Redis: 'database',
-  // Postgres: 'database',
+  Redis: 'database',
+  Postgres: 'database',
   ElasticSearch: 'database',
 };
 
