@@ -17,9 +17,8 @@ const EntityList = <T,>({
   openModal,
   onSearch,
   onCardClick,
-  displayTagBelowName,
   singleActionType = 'icon',
-}: EntityListProps<T> & { displayTagBelowName?: boolean }) => {
+}: EntityListProps<T>) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -34,17 +33,6 @@ const EntityList = <T,>({
   const filteredItems = useMemo(() => {
     return data.filter((item) => (item as any).name?.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [data, searchTerm]);
-
-  const tagColors = ['red', 'orange', 'blue', 'purple'];
-
-  const getColorForTag = (tag: string) => {
-    let hash = 0;
-    for (let i = 0; i < tag.length; i++) {
-      hash = tag.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const index = Math.abs(hash) % tagColors.length;
-    return tagColors[index];
-  };
 
   const renderCard = useCallback((item: T) => {
     const { id, name, description, icon, tag } = item as any;
@@ -61,7 +49,7 @@ const EntityList = <T,>({
         onMouseLeave={() => setHoveredCard((current) => (current === id ? null : current))}
       >
         {menuActions && (
-          <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute right-2 z-10 top-6" onClick={(e) => e.stopPropagation()}>
             <Dropdown overlay={menuActions(item) as React.ReactElement} trigger={['click']} placement="bottomRight">
               <div className="cursor-pointer">
                 <Icon type="sangedian-copy" className="text-xl" />
@@ -71,7 +59,7 @@ const EntityList = <T,>({
         )}
         {
           isSingleIconAction && (
-            <div className="absolute top-2 right-2 z-10" onClick={(e) => {
+            <div className="absolute right-2 z-10 top-6" onClick={(e) => {
               e.stopPropagation();
               singleButtonAction.onClick(item);
             }}>
@@ -80,40 +68,28 @@ const EntityList = <T,>({
           )
         }
         <div className="flex items-center">
-          <div
-            className={displayTagBelowName ? 'flex items-center justify-center' : 'rounded-full'}
-            style={displayTagBelowName ? { height: 'auto' } : {}}
-          >
-            <Icon type={icon} className={displayTagBelowName ? `text-6xl` : 'text-4xl'} />
+          <div className="rounded-full">
+            <Icon type={icon} className="text-4xl" />
           </div>
           <div className="ml-2">
-            <h3 className="text-base font-semibold truncate" title={name}>
+            <h3 className="font-semibold truncate text-base" title={name}>
               {name}
             </h3>
-            {displayTagBelowName && tag && tag.length > 0 && (
-              <div>
-                {tag.map((t: any, idx: number) => (
-                  <Tag key={idx} color={getColorForTag(t)} className="mr-1">
-                    {t}
-                  </Tag>
-                ))}
-              </div>
-            )}
           </div>
         </div>
-        {!displayTagBelowName && tag && tag.length > 0 && (
+        <div className="h-[66px]">
+          <p
+            className={`mt-3 text-sm max-h-[66px] ${(isSingleButtonAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
+        </div>
+        {tag && tag.length > 0 && (
           <div className="mt-2">
             {tag.map((t: any, idx: number) => (
-              <Tag key={idx} color={getColorForTag(t)} className="mr-1">
+              <Tag key={idx} className="mr-1">
                 {t}
               </Tag>
             ))}
           </div>
         )}
-        <div className="h-[66px]">
-          <p
-            className={`mt-3 text-sm max-h-[66px] ${(isSingleButtonAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
-        </div>
         {isSingleButtonAction && (
           <Button
             type="primary"
@@ -128,7 +104,7 @@ const EntityList = <T,>({
         )}
       </div>
     );
-  }, [displayTagBelowName, hoveredCard]);
+  }, [hoveredCard]);
 
   return (
     <div className="w-full h-full">
@@ -155,7 +131,7 @@ const EntityList = <T,>({
               {openModal && (
                 <PermissionWrapper
                   requiredPermissions={['Add']}
-                  className={`shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer ${styles.addNew}`}
+                  className="shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer bg-[var(--color-bg)]"
                 >
                   <div
                     className="w-full h-full flex items-center justify-center"
