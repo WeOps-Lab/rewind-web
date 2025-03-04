@@ -269,6 +269,7 @@ const RecordDetail = forwardRef<FieldModalRef, RecordDetailProps>(
                 })}
               </ul>
               <CustomTable
+                size="middle"
                 scroll={{ y: 'calc(100vh - 500px)' }}
                 columns={formData.attrColumns}
                 dataSource={formData.attrList}

@@ -232,6 +232,7 @@ const Attributes = () => {
           </div>
         </div>
         <CustomTable
+          size="middle"
           scroll={{ y: 'calc(100vh - 390px)' }}
           columns={columns}
           dataSource={tableData}

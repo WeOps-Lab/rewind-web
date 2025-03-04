@@ -382,7 +382,7 @@ const AssetData = () => {
   };
 
   const showAttrModal = (type: string, row = {}) => {
-    const title = type === 'add' ? 'Add' : 'Edit';
+    const title = type === 'add' ? t('add') : t('edit');
     fieldRef.current?.showModal({
       title,
       type,
@@ -626,6 +626,7 @@ const AssetData = () => {
             </Space>
           </div>
           <CustomTable
+            size="middle"
             rowSelection={rowSelection}
             dataSource={tableData}
             columns={currentColumns}

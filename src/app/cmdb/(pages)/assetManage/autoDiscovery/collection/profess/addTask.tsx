@@ -3,7 +3,6 @@
 import React from 'react';
 import {
   Form,
-  Modal,
   Input,
   Radio,
   Switch,
@@ -20,14 +19,11 @@ import {
 import { useTranslation } from '@/utils/i18n';
 import styles from './index.module.scss';
 
-interface AddTaskProps {
-  visible: boolean;
+interface AddTaskFormProps {
   onClose: () => void;
 }
 
-const { Panel } = Collapse;
-
-const AddTask: React.FC<AddTaskProps> = ({ visible, onClose }) => {
+const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose }) => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
 
@@ -36,23 +32,14 @@ const AddTask: React.FC<AddTaskProps> = ({ visible, onClose }) => {
   };
 
   return (
-    <Modal
-      title={t('Collection.addTaskTitle')}
-      open={visible}
-      footer={null}
-      onCancel={onClose}
-      destroyOnClose
-      width={800}
-      styles={{ body: { overflowY: 'auto', maxHeight: 'calc(80vh - 108px)' } }}
+    <Form
+      form={form}
+      layout="horizontal"
+      labelCol={{ span: 5 }}
+      onFinish={onFinish}
     >
-      <Form
-        form={form}
-        layout="horizontal"
-        labelCol={{ span: 4 }}
-        onFinish={onFinish}
-        className="mr-4"
-      >
-        <div className={styles.sectionTitle}>{t('Collection.baseSetting')}</div>
+      <div className={styles.sectionTitle}>{t('Collection.baseSetting')}</div>
+      <div className={styles.mainContent}>
         <Form.Item
           name="taskName"
           label={t('Collection.taskNameLabel')}
@@ -148,7 +135,7 @@ const AddTask: React.FC<AddTaskProps> = ({ visible, onClose }) => {
             />
           )}
         >
-          <Panel
+          <Collapse.Panel
             header={
               <div className={styles.panelHeader}>
                 {t('Collection.credential')}
@@ -185,8 +172,8 @@ const AddTask: React.FC<AddTaskProps> = ({ visible, onClose }) => {
             >
               <Switch defaultChecked />
             </Form.Item>
-          </Panel>
-          <Panel
+          </Collapse.Panel>
+          <Collapse.Panel
             header={
               <div className={styles.panelHeader}>
                 {t('Collection.advanced')}
@@ -208,32 +195,32 @@ const AddTask: React.FC<AddTaskProps> = ({ visible, onClose }) => {
             >
               <Input className="w-32" defaultValue="600" />
             </Form.Item>
-          </Panel>
+          </Collapse.Panel>
         </Collapse>
+      </div>
 
-        <Form.Item>
-          <div className="flex justify-end space-x-4">
-            <Button className="!rounded-button whitespace-nowrap">
-              {t('Collection.test')}
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="!rounded-button whitespace-nowrap"
-            >
-              {t('Collection.confirm')}
-            </Button>
-            <Button
-              className="!rounded-button whitespace-nowrap"
-              onClick={onClose}
-            >
-              {t('Collection.cancel')}
-            </Button>
-          </div>
-        </Form.Item>
-      </Form>
-    </Modal>
+      <Form.Item>
+        <div className="flex justify-end space-x-4">
+          <Button className="!rounded-button whitespace-nowrap">
+            {t('Collection.test')}
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="!rounded-button whitespace-nowrap"
+          >
+            {t('Collection.confirm')}
+          </Button>
+          <Button
+            className="!rounded-button whitespace-nowrap"
+            onClick={onClose}
+          >
+            {t('Collection.cancel')}
+          </Button>
+        </div>
+      </Form.Item>
+    </Form>
   );
 };
 
-export default AddTask;
+export default AddTaskForm;

@@ -192,6 +192,7 @@
         "newTask": "New Task",
         "inputTaskPlaceholder": "Please enter task name",
         "addTaskTitle": "Add Task",
+        "editTaskTitle": "Edit Task",
         "baseSetting": "Base Setting",
         "taskNameLabel": "Task Name",
         "taskNamePlaceholder": "Enter task name",
@@ -217,6 +218,43 @@
         "timeoutTooltip": "This timeout is the collection timeout for a single object, and if it exceeds this time, the collection for that object will be skipped.",
         "test": "Test",
         "confirm": "Confirm",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "execStatus": {
+            "add": "Add Assets",
+            "update": "Update Assets",
+            "association": "Associate Assets",
+            "delete": "Delete Assets"
+        },
+        "k8sTask": {
+            "title": "Add Task",
+            "baseSetting": "Basic Settings",
+            "name": "Name",
+            "namePlaceholder": "Please enter task name",
+            "nameRequired": "Please enter task name",
+            "scanCycle": "Scan Cycle",
+            "cycleRequired": "Please select scan cycle",
+            "everyMinute": "Every",
+            "minutePlaceholder": "Please enter interval time",
+            "executeOnce": "Execute once",
+            "executeInterval": "minutes interval",
+            "selectK8S": "Select K8S",
+            "selectK8sPlaceholder": "Please select K8S",
+            "instRequired": "Please select K8S",
+            "second": "seconds",
+            "intervalRequired": "Please enter execution interval",
+            "timeoutRequired": "Please enter timeout"
+        },
+        "table": {
+            "taskName": "Task Name",
+            "execStatus": "Execution Status",
+            "collectSummary": "Collection Summary",
+            "creator": "Creator",
+            "execTime": "Execution Time",
+            "actions": "Actions",
+            "detail": "Detail",
+            "executeNow": "Execute Now",
+            "modify": "Modify",
+            "delete": "Delete"
+        }
     }
-  }
+}

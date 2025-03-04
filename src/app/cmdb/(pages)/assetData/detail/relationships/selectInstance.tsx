@@ -343,6 +343,7 @@ const SelectInstance = forwardRef<RelationInstanceRef, SelectInstanceProps>(
                   />
                 </div>
                 <CustomTable
+                  size="middle"
                   dataSource={tableData}
                   columns={columns}
                   pagination={pagination}

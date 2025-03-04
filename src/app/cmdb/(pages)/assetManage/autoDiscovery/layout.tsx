@@ -1,17 +1,14 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import WithSideMenuLayout from '@/components/sub-layout';
-import useApiClient from '@/utils/request';
 
 const AutoDiscoveryLayout = ({ children }: { children: React.ReactNode }) => {
-  const { get, isLoading } = useApiClient();
-
-  useEffect(() => {
-    if (isLoading) return;
-  }, [isLoading, get]);
-
-  return <WithSideMenuLayout>{children}</WithSideMenuLayout>;
+  return (
+    <div style={{ ['--custom-height' as string]: 'calc(100vh - 150px)' }}>
+      <WithSideMenuLayout>{children}</WithSideMenuLayout>
+    </div>
+  );
 };
 
 export default AutoDiscoveryLayout;

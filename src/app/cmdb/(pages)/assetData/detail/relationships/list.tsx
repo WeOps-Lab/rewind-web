@@ -173,6 +173,7 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
           model_asst_id: item.model_asst_id,
           children: (
             <CustomTable
+              size="middle"
               pagination={false}
               dataSource={item.inst_list}
               columns={columns}

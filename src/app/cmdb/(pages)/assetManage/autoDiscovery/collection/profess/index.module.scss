@@ -2,7 +2,6 @@
 %titleBase {
   font-size: 16px;
   font-weight: bold;
-  margin-top: 20px;
   margin-bottom: 12px;
   padding-bottom: 8px;
 }
@@ -18,4 +17,9 @@
   margin-left: 0;
   display: inline-flex;
   align-items: center;
+}
+
+.mainContent {
+    max-height: calc(100vh - 210px);
+    overflow-y: auto;
 }

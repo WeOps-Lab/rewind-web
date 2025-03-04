@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Spin } from 'antd';
 import WithSideMenuLayout from '@/components/sub-layout';
 import { useRouter } from 'next/navigation';
@@ -8,7 +8,6 @@ import { getIconUrl } from '@/app/cmdb/utils/common';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import attrLayoutStyle from './layout.module.scss';
-import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 
 const AboutLayout = ({ children }: { children: React.ReactNode }) => {
@@ -19,16 +18,9 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
   const modelName: string = searchParams.get('model_name') || '';
   const modelId: string = searchParams.get('model_id') || '';
   const instName: string = searchParams.get('inst_name') || '--';
-  const { get, isLoading } = useApiClient();
   const { t } = useTranslation();
 
-  useEffect(() => {
-    if (isLoading) return;
-  }, [isLoading, get]);
-
-
   const handleBackButtonClick = () => {
-    // 处理返回按钮点击事件
     router.push(`/cmdb/assetData`);
   };
 

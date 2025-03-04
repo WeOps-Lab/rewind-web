@@ -206,4 +206,18 @@ export interface RelationInstanceRef {
   showModal: (config: RelationInstanceConfig) => void;
 }
 
+export interface FieldConfig {
+    type: string;
+    attrList: AttrFieldType[];
+    formInfo: any;
+    subTitle: string;
+    title: string;
+    model_id: string;
+    list: Array<any>;
+}
+
+export interface FieldModalRef {
+    showModal: (config: FieldConfig) => void;
+}
+
 
