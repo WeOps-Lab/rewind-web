@@ -45,7 +45,6 @@ const CustomTable = <T extends object>({
   ...TableProps
 }: CustomTableProps<T>) => {
   const fieldRef = useRef<FieldRef>(null);
-  const columns = useRef<TableProps<T>['columns']>(TableProps.columns).current;
   const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -76,10 +75,10 @@ const CustomTable = <T extends object>({
             <HolderOutlined className="font-[800] text-[16px] mr-[6px] cursor-move" />
           ),
         },
-        ...(columns || []),
+        ...(TableProps.columns || []),
       ];
-    return columns;
-  }, [columns, rowDraggable]);
+    return TableProps.columns;
+  }, [TableProps.columns, rowDraggable]);
 
   const parseCalcY = (value: string): number => {
     if (!pagination) return 0;
