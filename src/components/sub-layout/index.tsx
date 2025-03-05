@@ -85,30 +85,37 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   };
 
   return (
-    <div className={`flex grow w-full h-full ${sideMenuStyle.sideMenuLayout}`}>
+    <div className={`flex w-full h-full ${sideMenuStyle.sideMenuLayout} ${(intro && topSection) ? 'grow' : 'flex-col'}`}>
       {layoutType === 'sideMenu' ? (
         <>
-          {showSideMenu && menuItems.length > 0 && (
-            <SideMenu
-              menuItems={menuItems}
-              showBackButton={showBackButton}
-              showProgress={showProgress}
-              taskProgressComponent={taskProgressComponent}
-              onBackButtonClick={onBackButtonClick}
-            >
-              {intro}
-            </SideMenu>
-          )}
-          <section className="flex-1 flex flex-col overflow-hidden">
-            {topSection && (
-              <div className={`mb-4 w-full rounded-md ${sideMenuStyle.sectionContainer}`}>
-                {topSection}
-              </div>
-            )}
-            <div className={`p-4 flex-1 rounded-md overflow-auto ${sideMenuStyle.sectionContainer} ${sideMenuStyle.sectionContext}`}>
-              {children}
+          {(!intro && topSection) && (
+            <div className="mb-4 w-full rounded-md">
+              {topSection}
             </div>
-          </section>
+          )}
+          <div className="flex grow flex-1 h-full">
+            {showSideMenu && menuItems.length > 0 && (
+              <SideMenu
+                menuItems={menuItems}
+                showBackButton={showBackButton}
+                showProgress={showProgress}
+                taskProgressComponent={taskProgressComponent}
+                onBackButtonClick={onBackButtonClick}
+              >
+                {intro}
+              </SideMenu>
+            )}
+            <section className="flex-1 flex flex-col overflow-hidden">
+              {(intro && topSection) && (
+                <div className={`mb-4 w-full rounded-md ${sideMenuStyle.sectionContainer}`}>
+                  {topSection}
+                </div>
+              )}
+              <div className={`p-4 flex-1 rounded-md overflow-auto ${sideMenuStyle.sectionContainer} ${sideMenuStyle.sectionContext}`}>
+                {children}
+              </div>
+            </section>
+          </div>
         </>
       ) : (
         <div className={`flex flex-col w-full h-full ${sideMenuStyle.segmented}`}>
