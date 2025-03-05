@@ -190,6 +190,7 @@ const CustomTable = <T extends object>({
           onChange &&
           onChange(
             {
+              total: pagination ? pagination.total : 0,
               current: pagination ? pagination.current : 1,
               pageSize: pagination ? pagination.pageSize : 20
             },
