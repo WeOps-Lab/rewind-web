@@ -189,7 +189,6 @@
         "fullMessage": "您可以根据通过创建全面采集任务，针对批量的主机采集多数资产信息。",
         "professionalTitle": "专业采集",
         "professionalMessage": "您可以根据通过创建采集任务，自动采集不同对象的配置信息和关联信息。",
-        "newTask": "新建任务",
         "inputTaskPlaceholder": "请输入任务名称",
         "addTaskTitle": "新增任务",
         "editTaskTitle": "编辑任务",
@@ -223,8 +222,19 @@
             "add": "新增资产",
             "update": "更新资产",
             "association": "关联资产",
-            "delete": "下降资产"
+            "delete": "下降资产",
+            "unexecuted": "未执行",
+            "collecting": "正在采集",
+            "success": "成功",
+            "error": "异常",
+            "timeout": "超时",
+            "writing": "正在写入",
+            "forceStop": "强制终止",
+            "pendingApproval": "待审批"
         },
+        "executing": "执行中",
+        "executeSuccess": "执行成功!",
+        "executeFailed": "执行失败",
         "k8sTask": {
             "title": "添加任务",
             "baseSetting": "基本配置",
@@ -255,6 +265,9 @@
             "executeNow": "立即执行",
             "modify": "修改",
             "delete": "删除"
+        },
+        "taskDetail": {
+            "title": "任务详情"
         }
     }
 }

@@ -39,7 +39,7 @@ const CommonContextProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const getPermissionGroups = async () => {
-    // setPageLoading(true);
+    setPageLoading(true);
     try {
       const getUserList = get('/core/api/user_group/user_list/');
       const getOrganizationList = get('/core/api/user_group/group_list/');

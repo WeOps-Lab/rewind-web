@@ -79,7 +79,7 @@ const FullCollection: React.FC = () => {
             className="max-w-md"
           />
           <Button type="primary" className="!rounded-button whitespace-nowrap">
-            {t('Collection.newTask')}
+            {t('Collection.addTaskTitle')}
           </Button>
         </div>
         <div className="bg-white rounded-lg shadow-sm flex-1 overflow-auto">

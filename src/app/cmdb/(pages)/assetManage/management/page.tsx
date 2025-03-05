@@ -20,7 +20,6 @@ import { useRouter } from 'next/navigation';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
 import PermissionWrapper from '@/components/permission';
 
 const AssetManage = () => {
@@ -338,4 +337,4 @@ const AssetManage = () => {
   );
 };
 
-export default withCommon(AssetManage);
+export default AssetManage;

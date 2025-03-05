@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
 import { FieldModalRef } from '@/app/cmdb/types/assetManage';
 import useApiClient from '@/utils/request';
 import FieldModal from '@/app/cmdb/(pages)/assetData/list/fieldModal';
@@ -62,6 +61,7 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
     { label: string; value: string }[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const fetchK8sOptions = async () => {
     try {
@@ -89,18 +89,19 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
     try {
       setLoading(true);
       const data = await get(`/cmdb/api/collect/${id}/`);
-      const cycleValue = data.scan_cycle?.value_type || CYCLE_OPTIONS.ONCE;
+      const cycleType = data.cycle_value_type || CYCLE_OPTIONS.ONCE;
+      const cycleValue = data.cycle_value;
       const formData = {
         ...data,
         name: data.name,
         inst: data.instances?.[0]?._id,
         timeout: data.timeout,
-        cycle: cycleValue,
-        ...(cycleValue === CYCLE_OPTIONS.DAILY && {
-          dailyTime: dayjs(data.scan_cycle.value, 'HH:mm'),
+        cycle: cycleType,
+        ...(cycleType === CYCLE_OPTIONS.DAILY && {
+          dailyTime: dayjs(cycleValue, 'HH:mm'),
         }),
-        ...(cycleValue === CYCLE_OPTIONS.INTERVAL && {
-          intervalMinutes: Number(data.scan_cycle.value),
+        ...(cycleType === CYCLE_OPTIONS.INTERVAL && {
+          intervalMinutes: Number(cycleValue),
         }),
       };
       return formData;
@@ -167,6 +168,7 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
 
   const onFinish = async (values: any) => {
     try {
+      setSubmitLoading(true);
       const params = {
         name: values.name,
         instances: [instOptions.find((item) => item.value === values.inst)],
@@ -190,6 +192,8 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
       onClose();
     } catch (error) {
       console.error('Failed to save task:', error);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -329,12 +333,14 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
               type="primary"
               htmlType="submit"
               className="!rounded-button whitespace-nowrap"
+              loading={submitLoading}
             >
               {t('Collection.confirm')}
             </Button>
             <Button
               className="!rounded-button whitespace-nowrap"
               onClick={onClose}
+              disabled={submitLoading}
             >
               {t('Collection.cancel')}
             </Button>
@@ -352,4 +358,4 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
   );
 };
 
-export default withCommon(K8sTaskForm);
+export default K8sTaskForm;

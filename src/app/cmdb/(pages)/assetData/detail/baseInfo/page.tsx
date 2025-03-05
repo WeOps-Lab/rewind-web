@@ -5,7 +5,6 @@ import useApiClient from '@/utils/request';
 import { useSearchParams } from 'next/navigation';
 import { Spin } from 'antd';
 import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
 import {
   AttrFieldType,
   UserItem,
@@ -74,4 +73,4 @@ const BaseInfo = () => {
     </Spin>
   );
 };
-export default withCommon(BaseInfo);
+export default BaseInfo;

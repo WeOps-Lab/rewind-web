@@ -30,6 +30,54 @@ export const createExecStatusMap = (
   },
 });
 
+export const EXEC_STATUS = {
+  UNEXECUTED: 0,
+  COLLECTING: 1,
+  SUCCESS: 2,
+  ERROR: 3,
+  TIMEOUT: 4,
+  WRITING: 5,
+  FORCE_STOP: 6,
+  PENDING_APPROVAL: 7,
+} as const;
+
+export type ExecStatusType = (typeof EXEC_STATUS)[keyof typeof EXEC_STATUS];
+
+export const getExecStatusConfig = (t: (key: string) => string) => ({
+  [EXEC_STATUS.UNEXECUTED]: {
+    text: t('Collection.execStatus.unexecuted'),
+    color: 'var(--color-text-3)',
+  },
+  [EXEC_STATUS.COLLECTING]: {
+    text: t('Collection.execStatus.collecting'),
+    color: 'var(--color-primary)',
+  },
+  [EXEC_STATUS.SUCCESS]: {
+    text: t('Collection.execStatus.success'),
+    color: '#4ACF88',
+  },
+  [EXEC_STATUS.ERROR]: {
+    text: t('Collection.execStatus.error'),
+    color: '#FF6A57',
+  },
+  [EXEC_STATUS.TIMEOUT]: {
+    text: t('Collection.execStatus.timeout'),
+    color: '#FF6A57',
+  },
+  [EXEC_STATUS.WRITING]: {
+    text: t('Collection.execStatus.writing'),
+    color: 'var(--color-primary)',
+  },
+  [EXEC_STATUS.FORCE_STOP]: {
+    text: t('Collection.execStatus.forceStop'),
+    color: '#FF6A57',
+  },
+  [EXEC_STATUS.PENDING_APPROVAL]: {
+    text: t('Collection.execStatus.pendingApproval'),
+    color: '#F7BA1E',
+  },
+});
+
 export const CYCLE_OPTIONS = {
   DAILY: 'timing',
   INTERVAL: 'cycle',
@@ -75,3 +123,75 @@ export const createValidationRules = (t: (key: string) => string) => ({
     },
   ],
 });
+
+export type AlertType = 'info' | 'warning' | 'error';
+
+export interface TabConfig {
+  count: number;
+  label: string;
+  message: string;
+  alertType: AlertType;
+  columns: {
+    title: string;
+    dataIndex: string;
+    width: number;
+  }[];
+}
+
+export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
+  new: {
+    count: 0,
+    label: '新增资产',
+    message:
+      '注：针对资产新增进行审批，审批通过后，资产的相关信息会同步更新至资产记录。',
+    alertType: 'warning',
+    columns: [
+      { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '实例名', dataIndex: 'instance', width: 260 },
+      { title: '状态', dataIndex: 'status', width: 120 },
+    ],
+  },
+  update: {
+    count: 4,
+    label: '更新资产',
+    message: '注：展示任务执行后资产更新情况，自动更新至在资产记录。',
+    alertType: 'warning',
+    columns: [
+      { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '实例名', dataIndex: 'instance', width: 260 },
+      { title: '更新状态', dataIndex: 'status', width: 120 },
+    ],
+  },
+  relation: {
+    count: 0,
+    label: '新增关联',
+    message: '注：展示任务执行后，新创建的资产关联情况，自动更新至在资产记录。',
+    alertType: 'warning',
+    columns: [
+      { title: '源对象类型', dataIndex: 'type', width: 180 },
+      { title: '源实例', dataIndex: 'instance', width: 260 },
+      { title: '关联状态', dataIndex: 'status', width: 120 },
+    ],
+  },
+  offline: {
+    count: 3,
+    label: '下架资产',
+    message:
+      '注：展示任务执行后，采集到已下架的资产，需要手动操作“下架”，方可在资产记录更新。',
+    alertType: 'warning',
+    columns: [
+      { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '实例名', dataIndex: 'instance', width: 260 },
+      { title: '下架状态', dataIndex: 'status', width: 120 },
+    ],
+  },
+};
+
+export const MOCK_TABLE_DATA = [
+  {
+    key: '1',
+    type: '自定义ipmi采集模型',
+    instance: 'ex_useripmi-10.10.25.62',
+    status: '已更新',
+  },
+];

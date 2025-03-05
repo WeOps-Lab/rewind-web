@@ -13,7 +13,6 @@ import {
 import { Spin, Input, Tabs, Button, Tag, Empty } from 'antd';
 import useApiClient from '@/utils/request';
 import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
 import { deepClone, getFieldItem } from '@/app/cmdb/utils/common';
 const { Search } = Input;
 interface AssetListItem {
@@ -418,4 +417,4 @@ const AssetSearch = () => {
     </div>
   );
 };
-export default withCommon(AssetSearch);
+export default AssetSearch;

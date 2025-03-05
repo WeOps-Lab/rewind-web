@@ -189,7 +189,6 @@
         "fullMessage": "You can automatically collect configuration information and associated information of different objects by creating collection tasks.",
         "professionalTitle": "Professional Collection",
         "professionalMessage": "You can automatically collect configuration information and associated information of different objects by creating collection tasks.",
-        "newTask": "New Task",
         "inputTaskPlaceholder": "Please enter task name",
         "addTaskTitle": "Add Task",
         "editTaskTitle": "Edit Task",
@@ -223,8 +222,19 @@
             "add": "Add Assets",
             "update": "Update Assets",
             "association": "Associate Assets",
-            "delete": "Delete Assets"
+            "delete": "Delete Assets",
+            "unexecuted": "Not Executed",
+            "collecting": "Collecting",
+            "success": "Success",
+            "error": "Error",
+            "timeout": "Timeout",
+            "writing": "Writing",
+            "forceStop": "Force Stop",
+            "pendingApproval": "Pending Approval"
         },
+        "executing": "Executing",
+        "executeSuccess": "Execute Successfully!",
+        "executeFailed": "Execute Failed",
         "k8sTask": {
             "title": "Add Task",
             "baseSetting": "Basic Settings",
@@ -255,6 +265,9 @@
             "executeNow": "Execute Now",
             "modify": "Modify",
             "delete": "Delete"
+        },
+        "taskDetail": {
+            "title": "Task Detail"
         }
     }
 }

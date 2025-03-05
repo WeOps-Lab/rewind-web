@@ -38,7 +38,6 @@ import {
 import axios from 'axios';
 import { useAuth } from '@/context/auth';
 import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
 import type { MenuProps } from 'antd';
 import { useRouter } from 'next/navigation';
 import PermissionWrapper from '@/components/permission';
@@ -490,7 +489,7 @@ const AssetData = () => {
           title: t('action'),
           key: 'action',
           dataIndex: 'action',
-          width: 120,
+          width: 180,
           fixed: 'right',
           render: (_: unknown, record: any) => (
             <>
@@ -632,7 +631,7 @@ const AssetData = () => {
             columns={currentColumns}
             pagination={pagination}
             loading={tableLoading}
-            scroll={{ x: 'calc(100vw - 100px)', y: 'calc(100vh - 296px)' }}
+            scroll={{ x: 'calc(100vw - 400px)', y: 'calc(100vh - 400px)' }}
             fieldSetting={{
               showSetting: true,
               displayFieldKeys,
@@ -663,4 +662,4 @@ const AssetData = () => {
   );
 };
 
-export default withCommon(AssetData);
+export default AssetData;

@@ -14,7 +14,6 @@ import useApiClient from '@/utils/request';
 import { ClassificationItem } from '@/app/cmdb/types/assetManage';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
 import PermissionWrapper from '@/components/permission';
 
 const AboutLayout = ({ children }: { children: React.ReactNode }) => {
@@ -164,4 +163,4 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default withCommon(AboutLayout);
+export default AboutLayout;

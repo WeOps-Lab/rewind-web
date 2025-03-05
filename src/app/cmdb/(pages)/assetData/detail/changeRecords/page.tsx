@@ -8,8 +8,12 @@ import { DatePicker, Timeline, Spin, Empty } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import { useSearchParams } from 'next/navigation';
 import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
-import { RecordsEnum, RecordItemList, RecordItem, detailRef } from '@/app/cmdb/types/assetData';
+import {
+  RecordsEnum,
+  RecordItemList,
+  RecordItem,
+  detailRef,
+} from '@/app/cmdb/types/assetData';
 import {
   AttrFieldType,
   ModelItem,
@@ -85,7 +89,7 @@ const ChangeRecords: React.FC = () => {
         .finally(() => {
           setLoading(false);
         });
-    } catch{
+    } catch {
       setLoading(false);
     }
   };
@@ -211,4 +215,4 @@ const ChangeRecords: React.FC = () => {
   );
 };
 
-export default withCommon(ChangeRecords);
+export default ChangeRecords;

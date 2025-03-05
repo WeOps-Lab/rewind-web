@@ -12,7 +12,6 @@ import { ATTR_TYPE_LIST } from '@/app/cmdb/constants/asset';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useCommon } from '@/app/cmdb/context/common';
-import { withCommon } from '@/app/cmdb/context/withCommon';
 import PermissionWrapper from '@/components/permission';
 
 const Attributes = () => {
@@ -251,4 +250,4 @@ const Attributes = () => {
   );
 };
 
-export default withCommon(Attributes);
+export default Attributes;
