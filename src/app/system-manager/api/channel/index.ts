@@ -1,9 +1,9 @@
 import useApiClient from '@/utils/request';
 export const useChannelApi = () => {
-  const { get, post, patch, del } = useApiClient();
+  const { get, post, put, del } = useApiClient();
 
-  async function getChannelData() {
-    return await get('/channel_mgmt/channel/');
+  async function getChannelData(params: any) {
+    return await get('/channel_mgmt/channel/', { params });
   }
 
   async function getChannelDetail(id: string) {
@@ -15,11 +15,7 @@ export const useChannelApi = () => {
   }
 
   async function updateChannel(params: any) {
-    return await patch(`/channel_mgmt/channel/${params.id}/`, params);
-  }
-
-  async function updateChannelSettings(params: any) {
-    return await post(`/channel_mgmt/channel/${params.id}/update_settings/`, params);
+    return await put(`/channel_mgmt/channel/${params.id}/`, params);
   }
 
   async function deleteChannel(params: any) {
@@ -35,7 +31,6 @@ export const useChannelApi = () => {
     getChannelDetail,
     addChannel,
     updateChannel,
-    updateChannelSettings,
     deleteChannel,
     getChannelTemp,
   }

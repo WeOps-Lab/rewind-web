@@ -105,13 +105,21 @@
       }
     },
     "channel": {
-      "name": "Name",
-      "type": "Type",
-      "description": "Description",
-      "addChannel": "Add Channel",
-      "editChannel": "Edit Channel",
-      "deleteConfirm": "Are you sure you want to delete this channel?",
+      "email": "Email",
+      "emailDesc": "The email channel supports the integration of various notification methods and the flexible configuration of different notification templates.",
+      "weCom": "WeCom",
+      "weComDesc": "The weCom channel supports the integration of various notification methods and the flexible configuration of different notification templates.",
+      "table": {
+        "name": "NAME",
+        "description": "DESCRIPTION"
+      },
       "settings": {
+        "name": "Name",
+        "type": "Type",
+        "description": "Description",
+        "addChannel": "Add Channel",
+        "editChannel": "Edit Channel",
+        "deleteConfirm": "Are you sure you want to delete this channel?",
         "smtp_server": "Smtp Server",
         "port": "Port",
         "smtp_user": "Smtp User",
@@ -128,7 +136,8 @@
       "template": {
         "name": "NAME",
         "app": "APP",
-        "detail": "DETAIL"
+        "detail": "Detail",
+        "context": "CONTEXT"
       }
     }
   }

@@ -21,7 +21,7 @@
         {
           "title": "角色",
           "icon": "guanliyuan_jiaoseguanli",
-          "name": "applicaiton_role",
+          "name": "application_role",
           "url": "/system-manager/application/manage/role"
         }
       ]
@@ -69,7 +69,7 @@
         {
           "title": "Role",
           "icon": "guanliyuan_jiaoseguanli",
-          "name": "applicaiton_role",
+          "name": "application_role",
           "url": "/system-manager/application/manage/role"
         }
       ]

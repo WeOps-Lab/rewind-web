@@ -1,22 +1,17 @@
 "use client";
-import React, { useEffect, useState, useCallback } from 'react';
-import { Table, Input, Spin, Drawer, Button, Pagination, message } from 'antd';
-import useApiClient from '@/utils/request';
-import { useTranslation } from '@/utils/i18n';
-import { useSearchParams } from 'next/navigation';
-import type { ColumnType } from 'antd/es/table';
-import { useChannelApi } from '@/app/system-manager/api/channel';
-import { ChannelTemplate } from '@/app/system-manager/types/channel';
+import React, { useEffect, useState, useCallback } from "react";
+import { Table, Input, Spin, Drawer, Button, Pagination, message } from "antd";
+import { useTranslation } from "@/utils/i18n";
+import type { ColumnType } from "antd/es/table";
+import { ChannelTemplate } from "@/app/system-manager/types/channel";
+import { useChannelApi } from "@/app/system-manager/api/channel";
 
 const { Search } = Input;
 
 const TemplatePage: React.FC = () => {
   const { t } = useTranslation();
-  const { get } = useApiClient();
-  const searchParams = useSearchParams();
-  const channelId = searchParams.get("id"); // 获取传入的 channel id
-  const [searchText, setSearchText] = useState(""); // 搜索的关键字
-  const [data, setData] = useState<ChannelTemplate[]>([]); // 模板数据
+  const [searchText, setSearchText] = useState("");
+  const [data, setData] = useState<ChannelTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ChannelTemplate | null>(null);
@@ -28,58 +23,38 @@ const TemplatePage: React.FC = () => {
 
   const { getChannelTemp } = useChannelApi();
 
-  // 调用后端接口获取模板数据
   const fetchChannelTemplates = useCallback(
     async (searchText = "", page = 1, pageSize = 10) => {
-      if (!channelId) {
-        console.error("Channel ID is required.");
-        return;
-      }
       setLoading(true);
       try {
-        const params = {
-          name: "监控模板",
-          channel_obj: channelId, // 传入的 channel ID
-          title: searchText || "${title}", // 搜索条件
-          app: "monitor",
-          context: "这是告警模板内容",
+        const data = await getChannelTemp({
+          searchText,
           page,
-          page_size: pageSize,
-        };
-        const response = await getChannelTemp(params);
-        const items: ChannelTemplate[] = response.items.map((item: any) => ({
-          key: item.id,
-          id: item.id,
-          name: item.name,
-          app: item.app,
-          title: item.title,
-          context: item.context,
-          channelObj: item.channel_obj,
-        }));
+          pageSize,
+        });
+        const { items, total } = data;
         setData(items);
-        setTotal(response.count || 0);
+        setTotal(total);
       } catch (error) {
         console.error(`${t("common.fetchFailed")}:`, error);
+        message.error(t("common.fetchFailed"));
       } finally {
         setLoading(false);
       }
     },
-    [channelId, get, t]
+    []
   );
 
-  // 初始化获取数据
   useEffect(() => {
-    fetchChannelTemplates();
-  }, [fetchChannelTemplates]);
+    fetchChannelTemplates('', pagination.current, pagination.pageSize);
+  }, [fetchChannelTemplates, pagination.current, pagination.pageSize]);
 
-  // 搜索事件处理
   const handleSearch = (value: string) => {
     setSearchText(value);
     setPagination({ ...pagination, current: 1 });
     fetchChannelTemplates(value, 1, pagination.pageSize);
   };
 
-  // 分页切换事件
   const handleTableChange = (page: number, pageSize?: number) => {
     const newPagination = {
       current: page,
@@ -89,21 +64,11 @@ const TemplatePage: React.FC = () => {
     fetchChannelTemplates(searchText, newPagination.current, newPagination.pageSize);
   };
 
-  // 打开抽屉显示模板详情
   const handleDetailClick = (record: ChannelTemplate) => {
     setSelectedTemplate(record);
     setDrawerVisible(true);
   };
 
-  // 复制内容到剪贴板
-  const handleCopy = (content: string) => {
-    navigator.clipboard
-      .writeText(content)
-      .then(() => message.success(t("system.channel.template.copySuccess")))
-      .catch(() => message.error(t("system.channel.template.copyFailed")));
-  };
-
-  // 表格列定义
   const columns: ColumnType<ChannelTemplate>[] = [
     {
       title: t("system.channel.template.name"),
@@ -114,11 +79,6 @@ const TemplatePage: React.FC = () => {
       title: t("system.channel.template.app"),
       dataIndex: "app",
       key: "app",
-    },
-    {
-      title: t("system.channel.template.title"),
-      dataIndex: "title",
-      key: "title",
     },
     {
       title: t("common.actions"),
@@ -136,7 +96,7 @@ const TemplatePage: React.FC = () => {
       <div className="mb-[20px]">
         <div className="flex justify-end space-x-4">
           <Search
-            placeholder={`${t("system.channel.template.search")}...`}
+            placeholder={`${t("common.search")}...`}
             allowClear
             onSearch={handleSearch}
             enterButton
@@ -155,6 +115,7 @@ const TemplatePage: React.FC = () => {
             columns={columns}
             pagination={false}
             scroll={{ y: "calc(100vh - 400px)" }}
+            rowKey="id"
           />
         )}
       </div>
@@ -169,32 +130,25 @@ const TemplatePage: React.FC = () => {
         />
       )}
       <Drawer
-        title={t("system.channel.template.detail")}
+        title={selectedTemplate?.name || t("system.channel.template.detail")}
         open={drawerVisible}
         onClose={() => setDrawerVisible(false)}
         width={680}
       >
         {selectedTemplate && (
-          <div>
-            <p>
-              <strong>{t("system.channel.template.name")}: </strong>
-              {selectedTemplate.name}
-            </p>
-            <p>
-              <strong>{t("system.channel.template.app")}: </strong>
-              {selectedTemplate.app}
-            </p>
-            <p>
-              <strong>{t("system.channel.template.title")}: </strong>
-              {selectedTemplate.title}
-            </p>
-            <p>
-              <strong>{t("system.channel.template.context")}: </strong>
-              {selectedTemplate.context}
-            </p>
-            <Button type="primary" onClick={() => handleCopy(selectedTemplate.context)}>
-              {t("system.channel.template.copyContext")}
-            </Button>
+          <div className="flex flex-col">
+            <div className="mb-4">
+              <p className="mb-2">{t("system.channel.template.name")}: </p>
+              <div className="border p-2 rounded-md text-sm text-[var(--color-text-2)]">{selectedTemplate.name}</div>
+            </div>
+            <div className="mb-4">
+              <p className="mb-2">{t("system.channel.template.app")}: </p>
+              <div className="border p-2 rounded-md text-sm text-[var(--color-text-2)]">{selectedTemplate.app}</div>
+            </div>
+            <div className="mb-4">
+              <p className="mb-2">{t("system.channel.template.context")}: </p>
+              <div className="border p-2 rounded-md text-sm text-[var(--color-text-2)] min-h-[100px]">{selectedTemplate.context}</div>
+            </div>
           </div>
         )}
       </Drawer>

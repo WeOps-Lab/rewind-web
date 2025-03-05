@@ -2,7 +2,7 @@
 
 import { useRedirectFirstChild } from '@/hooks/useRedirectFirstChild';
 
-export default function KnowledgeDetailPage() {
+export default function ChannelDetailPage() {
   useRedirectFirstChild();
   return null;
 }
