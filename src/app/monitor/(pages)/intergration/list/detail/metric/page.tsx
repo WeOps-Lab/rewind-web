@@ -38,6 +38,7 @@ const Configure = () => {
   const isSuperUser = superRef?.current;
   const [searchText, setSearchText] = useState<string>('');
   const [metricData, setMetricData] = useState<MetricListItem[]>([]);
+  const [metrics, setMetrics] = useState<MetricItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [groupList, setGroupList] = useState<MetricListItem[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
@@ -228,6 +229,7 @@ const Configure = () => {
             child: [],
           }));
           const metricData = res[1];
+          setMetrics(res[1] || []);
           metricData.forEach((metric: MetricItem) => {
             const target = groupData.find(
               (item: GroupInfo) => item.id === metric.metric_group
@@ -347,6 +349,21 @@ const Configure = () => {
     }
   };
 
+  const onRowDragEnd = async (data: any) => {
+    setLoading(true);
+    metrics.forEach((metricItem) => {
+      if (!data.map((item: MetricItem) => item.id).includes(metricItem.id)) {
+        data.push(metricItem);
+      }
+    });
+    const updatedOrder = data.map((item: MetricItem, index: number) => ({
+      id: item.id,
+      sort_order: index,
+    }));
+    await post('/monitor/api/metrics/set_order/', updatedOrder);
+    getInitData();
+  };
+
   return (
     <div className={metricStyle.metric}>
       {['Docker', 'Cluster'].includes(groupName) && (
@@ -439,6 +456,8 @@ const Configure = () => {
                   scroll={{ x: 'calc(100vw - 260px)' }}
                   columns={columns}
                   rowKey="id"
+                  rowDraggable
+                  onRowDragEnd={onRowDragEnd}
                 />
               </Collapse>
             ))
