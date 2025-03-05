@@ -1254,6 +1254,54 @@ const INDEX_CONFIG = [
       { type: 'value', key: 'consul_health_checks_passing' },
     ],
   },
+  {
+    name: 'ElasticSearch',
+    id: 25,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'elasticsearch_fs_total_available_in_bytes' },
+      { type: 'value', key: 'elasticsearch_http_current_open' },
+      { type: 'value', key: 'elasticsearch_indices_docs_count' },
+    ],
+  },
+  {
+    name: 'MongoDB',
+    id: 26,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'mongodb_connections_current' },
+      { type: 'value', key: 'mongodb_latency_commands' },
+      { type: 'value', key: 'mongodb_resident_megabytes' },
+    ],
+  },
+  {
+    name: 'Mysql',
+    id: 27,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'mysql_bytes_received' },
+      { type: 'value', key: 'mysql_bytes_sent' },
+      { type: 'value', key: 'mysql_connections_total' },
+    ],
+  },
+  {
+    name: 'Postgres',
+    id: 28,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'postgresql_active_time' },
+      { type: 'value', key: 'postgresql_blks_hit' },
+    ],
+  },
+  {
+    name: 'Redis',
+    id: 29,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'redis_used_memory' },
+      { type: 'value', key: 'redis_instantaneous_ops_per_sec' },
+    ],
+  },
 ];
 
 const SCHEDULE_UNIT_MAP: UnitMap = {
