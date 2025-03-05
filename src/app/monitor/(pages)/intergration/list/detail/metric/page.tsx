@@ -361,6 +361,7 @@ const Configure = () => {
       sort_order: index,
     }));
     await post('/monitor/api/metrics/set_order/', updatedOrder);
+    message.success(t('common.updateSuccess'));
     getInitData();
   };
 
