@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Input, Spin, Dropdown, Tag, Button, Empty } from 'antd';
+import { Input, Spin, Dropdown, Tag, Button, Empty, Select, Space } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
@@ -11,13 +11,17 @@ const { Search } = Input;
 const EntityList = <T,>({
   data,
   loading,
+  singleActionType = 'icon',
   searchSize = 'large',
+  filterOptions = [],
+  filter = false,
+  filterLoading = false,
   menuActions,
   singleAction,
   openModal,
   onSearch,
   onCardClick,
-  singleActionType = 'icon',
+  changeFilter,
 }: EntityListProps<T>) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,6 +31,12 @@ const EntityList = <T,>({
     setSearchTerm(value);
     if (onSearch) {
       onSearch(value);
+    }
+  };
+
+  const handleFilter = (value: string[]) => {
+    if (changeFilter) {
+      changeFilter(value);
     }
   };
 
@@ -109,14 +119,28 @@ const EntityList = <T,>({
   return (
     <div className="w-full h-full">
       <div className="flex justify-end mb-4">
-        <Search
-          size={searchSize}
-          allowClear
-          enterButton
-          placeholder={`${t('common.search')}...`}
-          style={{width: '350px'}}
-          onSearch={handleSearch}
-        />
+        <Space.Compact>
+          {filter && (<Select
+            size={searchSize}
+            allowClear={true}
+            placeholder={`${t('common.select')}...`}
+            mode="multiple"
+            maxTagCount="responsive"
+            className="w-[170px]"
+            options={filterOptions}
+            disabled={filterLoading}
+            loading={filterLoading}
+            onChange={handleFilter}
+          />)}
+          <Search
+            size={searchSize}
+            allowClear
+            enterButton
+            placeholder={`${t('common.search')}...`}
+            style={{width: '350px'}}
+            onSearch={handleSearch}
+          />
+        </Space.Compact>
       </div>
       {loading ? (
         <div className="min-h-[300px] flex items-center justify-center">
