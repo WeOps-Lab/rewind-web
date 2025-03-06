@@ -61,14 +61,23 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
+export interface Option {
+  label: string;
+  value: string;
+}
+
 export interface EntityListProps<T> {
   data: T[];
   loading: boolean;
+  searchSize?: 'large' | 'middle' | 'small';
+  singleActionType?: 'button' | 'icon';
+  filterOptions?: Option[];
+  filter?: boolean;
+  filterLoading?: boolean;
   menuActions?: (item: T) => React.ReactNode;
   singleAction?: (item: T) => { text: string, onClick: (item: T) => void };
   openModal?: (item?: T) => void;
   onSearch?: (value: string) => void;
   onCardClick?: (item: T) => void;
-  searchSize?: 'large' | 'middle' | 'small';
-  singleActionType?: 'button' | 'icon';
+  changeFilter?: (value: string[]) => void;
 }
