@@ -15,7 +15,7 @@ const TopSection: React.FC<TopSectionProps> = ({ title, content, iconType }) => 
         <Icon type={iconType} className="mr-2 text-6xl" />
       </div>
     )}
-    <div style={iconType ? { width: 'calc(100% - 68px)' } : { flex: 1 }}>
+    <div className="flex-1 overflow-hidden">
       <h2 className="text-lg font-semibold mb-2">{title}</h2>
       <EllipsisWithTooltip className="whitespace-nowrap overflow-hidden text-ellipsis" text={content} />
     </div>
