@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Tooltip } from 'antd';
+import { useTranslation } from '@/utils/i18n';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import TopSection from '@/components/top-section';
 import WithSideMenuLayout from '@/components/sub-layout';
 import OnelineEllipsisIntro from '@/app/opspilot/components/oneline-ellipsis-intro';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useTranslation } from '@/utils/i18n';
 
 const SkillSettingsLayout = ({ children }: { children: React.ReactNode }) => {
   const { t } = useTranslation();
@@ -35,18 +35,9 @@ const SkillSettingsLayout = ({ children }: { children: React.ReactNode }) => {
     <OnelineEllipsisIntro name={name} desc={desc}></OnelineEllipsisIntro>
   );
 
-  const TopSection = () => (
-    <div className="p-4 rounded-md w-full h-[95px]">
-      <h2 className="text-lg font-semibold mb-2">{t('skill.settings.title')}</h2>
-      <Tooltip title={t('skill.settings.description')}>
-        <p className="truncate max-w-full text-sm">{t('skill.settings.description')}</p>
-      </Tooltip>
-    </div>
-  );
-
   return (
     <WithSideMenuLayout
-      topSection={<TopSection />}
+      topSection={<TopSection title={t('skill.settings.title')} content={t('skill.settings.description')} />}
       intro={intro}
       showBackButton={true}
       onBackButtonClick={handleBackButtonClick}

@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Tooltip } from 'antd';
 import WithSideMenuLayout from '@/components/sub-layout';
 import OnelineEllipsisIntro from '@/app/opspilot/components/oneline-ellipsis-intro';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
+import TopSection from "@/components/top-section";
 
 const KnowledgeDetailLayout = ({ children }: { children: React.ReactNode }) => {
   const { t } = useTranslation();
@@ -40,51 +40,58 @@ const KnowledgeDetailLayout = ({ children }: { children: React.ReactNode }) => {
       case '/opspilot/studio/detail/settings':
         return (
           <>
-            <h2 className="text-lg font-semibold mb-2">{t('studio.settings.title')}</h2>
-            <Tooltip title={t('knowledge.documents.description')}>
-              <p className="truncate max-w-full text-sm">{t('studio.settings.description')}</p>
-            </Tooltip>
+            <TopSection
+              title={t('studio.settings.title')}
+              content={t('studio.settings.description')}
+            />
           </>
         );
       case '/opspilot/studio/detail/channel':
         return (
           <>
-            <h2 className="text-lg font-semibold mb-2">{t('studio.channel.title')}</h2>
-            <Tooltip title={t('knowledge.testing.description')}>
-              <p className="truncate max-w-full text-sm">{t('studio.channel.description')}</p>
-            </Tooltip>
+            <TopSection
+              title={t('studio.channel.title')}
+              content={t('studio.channel.description')}
+            />
           </>
         );
       case '/opspilot/studio/detail/logs':
         return (
           <>
-            <h2 className="text-lg font-semibold mb-2">{t('studio.logs.title')}</h2>
-            <Tooltip title={t('knowledge.settings.description')}>
-              <p className="truncate max-w-full text-sm">{t('studio.logs.description')}</p>
-            </Tooltip>
+            <TopSection
+              title={t('studio.logs.title')}
+              content={t('studio.logs.description')}
+            />
+          </>
+        );
+      case '/opspilot/studio/detail/statistics':
+        return (
+          <>
+            <TopSection
+              title={t('studio.statistics.title')}
+              content={t('studio.statistics.description')}
+            />
           </>
         );
       default:
         return (
           <>
-            <h2 className="text-lg font-semibold mb-2">{t('studio.settings.title')}</h2>
-            <Tooltip title={t('knowledge.documents.description')}>
-              <p className="truncate max-w-full">{t('studio.settings.description')}</p>
-            </Tooltip>
+            <TopSection
+              title={t('studio.settings.title')}
+              content={t('studio.settings.description')}
+            />
           </>
         );
     }
   };
 
-  const TopSection = () => (
-    <div className="p-4 rounded-md w-full h-[88px]">
-      {getTopSectionContent()}
-    </div>
+  const topSection = (
+    getTopSectionContent()
   );
 
   return (
     <WithSideMenuLayout
-      topSection={<TopSection />}
+      topSection={topSection}
       intro={intro}
       showBackButton={true}
       onBackButtonClick={handleBackButtonClick}

@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Tooltip } from 'antd';
+import { useTranslation } from '@/utils/i18n';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import TopSection from '@/components/top-section';
 import WithSideMenuLayout from '@/components/sub-layout';
 import TaskProgress from '@/app/opspilot/components/task-progress'
 import OnelineEllipsisIntro from '@/app/opspilot/components/oneline-ellipsis-intro';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useTranslation } from '@/utils/i18n';
 
 const KnowledgeDetailLayout = ({ children }: { children: React.ReactNode }) => {
   const { t } = useTranslation();
@@ -41,52 +41,50 @@ const KnowledgeDetailLayout = ({ children }: { children: React.ReactNode }) => {
       case '/opspilot/knowledge/detail/documents':
         return (
           <>
-            <h2 className="text-lg font-semibold mb-2">{t('knowledge.documents.title')}</h2>
-            <Tooltip title={t('knowledge.documents.description')}>
-              <p className="truncate max-w-full text-sm">{t('knowledge.documents.description')}</p>
-            </Tooltip>
+            <TopSection
+              title={t('knowledge.documents.title')}
+              content={t('knowledge.documents.description')}
+            />
           </>
         );
       case '/opspilot/knowledge/detail/testing':
         return (
           <>
-            <h2 className="text-lg font-semibold mb-2">{t('knowledge.testing.title')}</h2>
-            <Tooltip title={t('knowledge.testing.description')}>
-              <p className="truncate max-w-full text-sm">{t('knowledge.testing.description')}</p>
-            </Tooltip>
+            <TopSection
+              title={t('knowledge.testing.title')}
+              content={t('knowledge.testing.description')}
+            />
           </>
         );
       case '/opspilot/knowledge/detail/settings':
         return (
           <>
-            <h2 className="text-lg font-semibold mb-2">{t('knowledge.settings.title')}</h2>
-            <Tooltip title={t('knowledge.settings.description')}>
-              <p className="truncate max-w-full text-sm">{t('knowledge.settings.description')}</p>
-            </Tooltip>
+            <TopSection
+              title={t('knowledge.settings.title')}
+              content={t('knowledge.testing.description')}
+            />
           </>
         );
       default:
         return (
           <>
-            <h2 className="text-lg font-semibold mb-2">{t('knowledge.documents.title')}</h2>
-            <Tooltip title={t('knowledge.documents.description')}>
-              <p className="truncate max-w-full">{t('knowledge.documents.description')}</p>
-            </Tooltip>
+            <TopSection
+              title={t('knowledge.documents.title')}
+              content={t('knowledge.documents.description')}
+            />
           </>
         );
     }
   };
 
-  const TopSection = () => (
-    <div className="p-4 rounded-md w-full h-[95px]">
-      {getTopSectionContent()}
-    </div>
+  const topSection = (
+    getTopSectionContent()
   );
 
   return (
     <>
       <WithSideMenuLayout
-        topSection={<TopSection />}
+        topSection={topSection}
         intro={intro}
         showBackButton={true}
         showProgress={true}

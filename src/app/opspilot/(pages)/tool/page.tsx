@@ -31,12 +31,13 @@ const ToolListPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await get('/model_provider_mgmt/skill_tools/');
-      setToolData(data.map((tool: { display_name: string; id: string; description: string; name: keyof typeof TOOL_ICON_MAP, team: string[] }) => ({
+      setToolData(data.map((tool: { display_name: string; id: string; description: string; name: keyof typeof TOOL_ICON_MAP, team: string[], tags: string[] }) => ({
         name: tool.display_name,
         id: tool.id,
         description: tool.description,
         icon: TOOL_ICON_MAP[tool.name] || 'duckduckgo1',
-        team: tool.team || []
+        team: tool.team || [],
+        tag: tool.tags || [],
       })));
     } catch (error) {
       console.error(t('common.fetchFailed'), error);
@@ -82,7 +83,6 @@ const ToolListPage: React.FC = () => {
     setSelectedTool(tool);
     setIsModalVisible(true);
     Promise.resolve().then(() => {
-      console.log('selectedTool', selectedTool);
       form.setFieldsValue({
         team: tool.team
       });
@@ -106,7 +106,6 @@ const ToolListPage: React.FC = () => {
       <EntityList<Tool>
         data={toolData}
         loading={loading}
-        displayTagBelowName={false}
         singleAction={singleAction}
       />
       <OperateModal

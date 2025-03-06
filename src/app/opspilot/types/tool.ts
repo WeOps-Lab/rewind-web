@@ -4,6 +4,7 @@ export interface Tool {
   description: string;
   icon: string;
   team: string[];
+  tag: string[];
 }
 
 export interface FormValues {
