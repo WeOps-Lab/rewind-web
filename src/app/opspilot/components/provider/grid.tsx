@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Spin, message, Dropdown, Menu, Modal } from 'antd';
+import { Spin, message, Dropdown, Menu, Modal, Empty } from 'antd';
 import Icon from '@/components/icon';
 import { useTranslation } from '@/utils/i18n';
 import styles from './index.module.scss';
@@ -27,7 +27,6 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
     'deep-seek': 'deepseek',
     'chat-gpt': 'chatgpticon',
     'hugging_face': 'huggingface',
-    'zhipu': 'a-zhipuAI',
     'default': 'chatgpticon'
   };
 
@@ -35,7 +34,6 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
     embed_provider: 'Embeddings',
     rerank_provider: 'jigoushuzhongxinpaixu',
     ocr_provider: 'ocr',
-    default: 'chatgpticon'
   };
 
   const getModelIcon = (model: Model) => {
@@ -76,7 +74,7 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
       rerank_provider: 'rerank_config',
       ocr_provider: 'ocr_config',
     };
-    return configMap[type]; // 返回可能为 undefined
+    return configMap[type];
   };
 
   const handleEditOk = async (values: any) => {
@@ -143,33 +141,37 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
   return (
     <>
       <Spin spinning={loading}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {models.map((model) => (
-            <div className={`rounded-lg shadow px-4 py-6 relative ${styles.gridContainer}`} key={model.id}>
-              <div className="flex justify-between items-start">
-                <div style={{flex: '0 0 auto'}}>
-                  <Icon type={getModelIcon(model)} className="text-5xl"/>
+        {!loading && models.length === 0 ? (
+          <Empty description={t('common.noData')} />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {models.map((model) => (
+              <div className={`rounded-lg shadow px-4 py-6 relative ${styles.gridContainer}`} key={model.id}>
+                <div className="flex justify-between items-start">
+                  <div style={{flex: '0 0 auto'}}>
+                    <Icon type={getModelIcon(model)} className="text-5xl"/>
+                  </div>
+                  <div className={`flex-1 ml-2 ${styles.nameContainer}`}>
+                    <h3 className={`text-base font-semibold break-words mb-1 ${styles.name}`}>{model.name}</h3>
+                    <span className="inline-block mt-1 px-2 py-1 text-xs rounded-xl border">
+                      {filterType}
+                    </span>
+                  </div>
+                  <Dropdown overlay={menu(model)} trigger={['click']} placement="bottomRight">
+                    <div className="cursor-pointer">
+                      <Icon type="sangedian-copy" className="text-xl" />
+                    </div>
+                  </Dropdown>
                 </div>
-                <div className={`flex-1 ml-2 ${styles.nameContainer}`}>
-                  <h3 className={`text-base font-semibold break-words mb-1 ${styles.name}`}>{model.name}</h3>
-                  <span className="inline-block mt-1 px-2 py-1 text-xs rounded-xl border">
-                    {filterType}
+                <div className="absolute bottom-0 right-0 rounded-lg z-20">
+                  <span className={`${styles.iconTriangle} ${model.enabled ? styles.enabled : styles.disabled}`}>
+                    {model.enabled ? <Icon type="select-line" /> : <Icon type="guanbi" />}
                   </span>
                 </div>
-                <Dropdown overlay={menu(model)} trigger={['click']} placement="bottomRight">
-                  <div className="cursor-pointer">
-                    <Icon type="sangedian-copy" className="text-xl" />
-                  </div>
-                </Dropdown>
               </div>
-              <div className="absolute bottom-0 right-0 rounded-lg z-20">
-                <span className={`${styles.iconTriangle} ${model.enabled ? styles.enabled : styles.disabled}`}>
-                  {model.enabled ? <Icon type="select-line" /> : <Icon type="guanbi" />}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </Spin>
       <ConfigModal
         visible={isModalVisible}

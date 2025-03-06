@@ -6,7 +6,6 @@ import SelectorOperateModal from './operateModal';
 import useApiClient from '@/utils/request';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
-import { TOOL_ICON_MAP } from '@/app/opspilot/constants/tool';
 import { SelectTool } from '@/app/opspilot/types/tool';
 
 interface ToolSelectorProps {
@@ -29,10 +28,10 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ selectedToolIds, onChange }
     setLoading(true);
     try {
       const data = await get('/model_provider_mgmt/skill_tools/');
-      setTools(data.map((tool: { display_name: string; id: string; name: keyof typeof TOOL_ICON_MAP }) => ({
+      setTools(data.map((tool: { display_name: string; id: string; name: string, icon: string }) => ({
         name: tool.display_name,
         id: tool.name,
-        icon: TOOL_ICON_MAP[tool.name] || 'duckduckgo1'
+        icon: tool.icon || 'duckduckgo1'
       })));
     } catch (error) {
       console.error(t('common.fetchFailed'), error);
