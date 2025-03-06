@@ -9,7 +9,7 @@
     "successfullyAdded": "新增成功！",
     "successfulSetted": "设置成功！",
     "successfulCopied": "复制成功！",
-    "successfullyModified": "修改成功！",
+    "successfullyModified": "编辑成功！",
     "successfullyAssociated": "关联成功！",
     "successfullyDisassociated": "取消关联成功！",
     "batchDeleteTitle": "您确定要删除这些项目吗？",
@@ -222,7 +222,7 @@
             "add": "新增资产",
             "update": "更新资产",
             "association": "关联资产",
-            "delete": "下降资产",
+            "delete": "下架资产",
             "unexecuted": "未执行",
             "collecting": "正在采集",
             "success": "成功",
@@ -252,6 +252,7 @@
             "instRequired": "请选择 K8S",
             "second": "秒",
             "intervalRequired": "请输入执行间隔时间",
+            "timeRequired": "请选择执行时间",
             "timeoutRequired": "请输入超时时间"
         },
         "table": {
@@ -263,7 +264,7 @@
             "actions": "操作",
             "detail": "详情",
             "executeNow": "立即执行",
-            "modify": "修改",
+            "modify": "编辑",
             "delete": "删除"
         },
         "taskDetail": {

@@ -139,16 +139,16 @@ export interface TabConfig {
 }
 
 export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
-  new: {
+  add: {
     count: 0,
     label: '新增资产',
     message:
       '注：针对资产新增进行审批，审批通过后，资产的相关信息会同步更新至资产记录。',
     alertType: 'warning',
     columns: [
-      { title: '对象类型', dataIndex: 'type', width: 180 },
-      { title: '实例名', dataIndex: 'instance', width: 260 },
-      { title: '状态', dataIndex: 'status', width: 120 },
+      // { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '实例名', dataIndex: 'inst_name', width: 260 },
+      //   { title: '状态', dataIndex: '_status', width: 120 },
     ],
   },
   update: {
@@ -157,32 +157,32 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
     message: '注：展示任务执行后资产更新情况，自动更新至在资产记录。',
     alertType: 'warning',
     columns: [
-      { title: '对象类型', dataIndex: 'type', width: 180 },
-      { title: '实例名', dataIndex: 'instance', width: 260 },
-      { title: '更新状态', dataIndex: 'status', width: 120 },
+      // { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '实例名', dataIndex: 'inst_name', width: 260 },
+      // { title: '更新状态', dataIndex: '_status', width: 120 },
     ],
   },
-  relation: {
-    count: 0,
-    label: '新增关联',
-    message: '注：展示任务执行后，新创建的资产关联情况，自动更新至在资产记录。',
-    alertType: 'warning',
-    columns: [
-      { title: '源对象类型', dataIndex: 'type', width: 180 },
-      { title: '源实例', dataIndex: 'instance', width: 260 },
-      { title: '关联状态', dataIndex: 'status', width: 120 },
-    ],
-  },
-  offline: {
+  //   relation: {
+  //     count: 0,
+  //     label: '新增关联',
+  //     message: '注：展示任务执行后，新创建的资产关联情况，自动更新至在资产记录。',
+  //     alertType: 'warning',
+  //     columns: [
+  //         { title: '源对象类型', dataIndex: 'type', width: 180 },
+  //         { title: '源实例', dataIndex: 'inst_name', width: 260 },
+  //         { title: '关联状态', dataIndex: '_status', width: 120 },
+  //     ],
+  //   },
+  delete: {
     count: 3,
     label: '下架资产',
     message:
       '注：展示任务执行后，采集到已下架的资产，需要手动操作“下架”，方可在资产记录更新。',
     alertType: 'warning',
     columns: [
-      { title: '对象类型', dataIndex: 'type', width: 180 },
-      { title: '实例名', dataIndex: 'instance', width: 260 },
-      { title: '下架状态', dataIndex: 'status', width: 120 },
+      // { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '实例名', dataIndex: 'inst_name', width: 260 },
+      //   { title: '下架状态', dataIndex: '_status', width: 120 },
     ],
   },
 };

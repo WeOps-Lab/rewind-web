@@ -54,7 +54,6 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
   const users = useRef(commonContext?.userList || []);
   const userList = users.current;
   const fieldRef = useRef<FieldModalRef>(null);
-  const rules = React.useMemo(() => createValidationRules(t), [t]);
   const [form] = Form.useForm();
   const [instOptLoading, setK8sOptLoading] = useState(false);
   const [instOptions, setK8sOptions] = useState<
@@ -62,6 +61,39 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
   >([]);
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  const rules = React.useMemo(
+    () => ({
+      ...createValidationRules(t),
+      dailyTime: [
+        {
+          validator: (_: any, value: any) => {
+            const cycle = form.getFieldValue('cycle');
+            if (cycle === CYCLE_OPTIONS.DAILY && !value) {
+              return Promise.reject(
+                new Error(t('Collection.k8sTask.timeRequired'))
+              );
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
+      intervalMinutes: [
+        {
+          validator: (_: any, value: any) => {
+            const cycle = form.getFieldValue('cycle');
+            if (cycle === CYCLE_OPTIONS.INTERVAL && !value) {
+              return Promise.reject(
+                new Error(t('Collection.k8sTask.intervalRequired'))
+              );
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
+    }),
+    [t, form]
+  );
 
   const fetchK8sOptions = async () => {
     try {
@@ -133,7 +165,7 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
         attrList,
         formInfo: {},
         subTitle: '',
-        title: t('add'),
+        title: t('common.addNew'),
         model_id: modelId,
         list: [],
       });
@@ -221,17 +253,18 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
             />
           </Form.Item>
 
-          <Form.Item
-            label={t('Collection.k8sTask.scanCycle')}
-            name="cycle"
-            rules={rules.cycle}
-          >
+          <Form.Item label={t('Collection.k8sTask.scanCycle')} name="cycle">
             <Radio.Group>
               <div className="space-y-3">
                 <div className="flex items-center">
                   <Radio value={CYCLE_OPTIONS.DAILY}>
                     {t('Collection.dailyAt')}
-                    <Form.Item name="dailyTime" noStyle>
+                    <Form.Item
+                      name="dailyTime"
+                      noStyle
+                      dependencies={['cycle']}
+                      rules={rules.dailyTime}
+                    >
                       <TimePicker className="w-40 ml-2" format="HH:mm" />
                     </Form.Item>
                   </Radio>
@@ -243,6 +276,7 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
                       <Form.Item
                         name="intervalMinutes"
                         noStyle
+                        dependencies={['cycle']}
                         rules={rules.intervalMinutes}
                       >
                         <InputNumber

@@ -252,6 +252,7 @@
             "instRequired": "Please select K8S",
             "second": "seconds",
             "intervalRequired": "Please enter execution interval",
+            "timeRequired": "Please select execution time",
             "timeoutRequired": "Please enter timeout"
         },
         "table": {

@@ -13,7 +13,7 @@ import type { ColumnItem } from '@/app/cmdb/types/assetManage';
 import { Modal } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
-import { Input, Button, Spin, Tag, Tree, Drawer, message } from 'antd';
+import { Input, Button, Spin, Tag, Tree, Drawer, message, Tabs } from 'antd';
 import {
   createExecStatusMap,
   ExecStatusKey,
@@ -28,6 +28,7 @@ import {
   CollectTaskMessage,
 } from '@/app/cmdb/types/autoDiscovery';
 import type { ColumnType } from 'antd/es/table';
+import PermissionWrapper from '@/components/permission';
 
 type ExtendedColumnItem = ColumnType<CollectTask> & {
   key: string;
@@ -42,7 +43,11 @@ const ProfessionalCollection: React.FC = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
-  const [selectedNode, setSelectedNode] = useState<string>('');
+  const [selectedNodeId, setSelectedNodeId] = useState<string>('');
+  const [selectedNode, setSelectedNode] = useState<TreeNode>();
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [currentTask, setCurrentTask] = useState<CollectTask | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('');
   const [tableData, setTableData] = useState<CollectTask[]>([]);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [displayFieldKeys, setDisplayFieldKeys] = useState<string[]>([]);
@@ -59,8 +64,6 @@ const ProfessionalCollection: React.FC = () => {
     pageSize: 10,
     total: 0,
   });
-  const [detailVisible, setDetailVisible] = useState(false);
-  const [currentTask, setCurrentTask] = useState<CollectTask | null>(null);
 
   const getAllKeys = (nodes: TreeNode[]): string[] => {
     let keys: string[] = [];
@@ -85,7 +88,9 @@ const ProfessionalCollection: React.FC = () => {
       try {
         setTableLoading(true);
         const params = {
-          model_id: selectedNode,
+          model_id: selectedNode?.tabItems?.length
+            ? activeTab || selectedNode?.tabItems?.[0]?.id
+            : selectedNodeId,
           search: options.search ?? searchText,
           page: options.page ?? pagination.current,
           page_size: options.pageSize ?? pagination.pageSize,
@@ -103,7 +108,15 @@ const ProfessionalCollection: React.FC = () => {
         setTableLoading(false);
       }
     },
-    [selectedNode, searchText, pagination.current, pagination.pageSize, get]
+    [
+      selectedNodeId,
+      selectedNode,
+      activeTab,
+      searchText,
+      pagination.current,
+      pagination.pageSize,
+      get,
+    ]
   );
 
   const handleEnterSearch = () => {
@@ -122,7 +135,6 @@ const ProfessionalCollection: React.FC = () => {
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchText(e.target.value);
-      console.log(searchText);
     },
     []
   );
@@ -143,7 +155,15 @@ const ProfessionalCollection: React.FC = () => {
   const onTreeSelect = async (selectedKeys: any[]) => {
     if (selectedKeys.length > 0) {
       const nodeId = selectedKeys[0] as string;
-      setSelectedNode(nodeId);
+      setSelectedNodeId(nodeId);
+      const node = treeData.find((node) => node.id === nodeId);
+      setSelectedNode(node);
+
+      if (node?.tabItems?.length) {
+        setActiveTab(node.tabItems[0].id);
+      } else {
+        setActiveTab('');
+      }
     }
   };
 
@@ -210,14 +230,10 @@ const ProfessionalCollection: React.FC = () => {
       onSuccess: () => {
         fetchData();
       },
-      modelId: selectedNode,
+      modelId: activeTab || selectedNodeId,
       editId: editingId,
     };
-
-    const parentNode = treeData.find((node) =>
-      node.children?.some((child) => child.id === selectedNode)
-    );
-    if (parentNode?.id === 'k8s') {
+    if (selectedNodeId === 'k8s') {
       return <K8sTaskForm {...props} />;
     }
     return <AddTaskForm {...props} />;
@@ -266,7 +282,7 @@ const ProfessionalCollection: React.FC = () => {
         key: 'name',
         fixed: 'left',
         width: 180,
-        render: (text: any) => <span>{text ?? '--'}</span>,
+        render: (text: any) => <span>{text || '--'}</span>,
       },
       {
         title: t('Collection.table.execStatus'),
@@ -274,6 +290,7 @@ const ProfessionalCollection: React.FC = () => {
         key: 'exec_status',
         width: 120,
         filters: statusFilters,
+        filterMultiple: false,
         render: (status: ExecStatusType) => {
           const config = execStatusConfig[status];
           return (
@@ -314,7 +331,7 @@ const ProfessionalCollection: React.FC = () => {
         dataIndex: 'created_by',
         key: 'created_by',
         width: 120,
-        render: (text: any) => <span>{text ?? '--'}</span>,
+        render: (text: any) => <span>{text || '--'}</span>,
       },
       {
         title: t('Collection.table.execTime'),
@@ -344,33 +361,39 @@ const ProfessionalCollection: React.FC = () => {
               >
                 {t('Collection.table.detail')}
               </Button>
-              <Button
-                type="link"
-                size="small"
-                disabled={executing}
-                loading={executingTaskIds.includes(record.id)}
-                onClick={() => handleExecuteNow(record)}
-              >
-                {executingTaskIds.includes(record.id)
-                  ? t('Collection.executing')
-                  : t('Collection.table.executeNow')}
-              </Button>
-              <Button
-                type="link"
-                size="small"
-                disabled={executing}
-                onClick={() => handleEdit(record)}
-              >
-                {t('Collection.table.modify')}
-              </Button>
-              <Button
-                type="link"
-                size="small"
-                disabled={executing}
-                onClick={() => handleDelete(record)}
-              >
-                {t('Collection.table.delete')}
-              </Button>
+              <PermissionWrapper requiredPermissions={['Execute']}>
+                <Button
+                  type="link"
+                  size="small"
+                  disabled={executing}
+                  loading={executingTaskIds.includes(record.id)}
+                  onClick={() => handleExecuteNow(record)}
+                >
+                  {executingTaskIds.includes(record.id)
+                    ? t('Collection.executing')
+                    : t('Collection.table.executeNow')}
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper requiredPermissions={['Edit']}>
+                <Button
+                  type="link"
+                  size="small"
+                  disabled={executing}
+                  onClick={() => handleEdit(record)}
+                >
+                  {t('Collection.table.modify')}
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper requiredPermissions={['Delete']}>
+                <Button
+                  type="link"
+                  size="small"
+                  disabled={executing}
+                  onClick={() => handleDelete(record)}
+                >
+                  {t('Collection.table.delete')}
+                </Button>
+              </PermissionWrapper>
             </div>
           );
         },
@@ -388,17 +411,30 @@ const ProfessionalCollection: React.FC = () => {
   };
 
   useEffect(() => {
-    if (selectedNode) {
+    if (selectedNodeId) {
       fetchData();
     }
-  }, [selectedNode]);
+  }, [selectedNodeId]);
+
+  const getItems = (node: TreeNode) => {
+    if (node.children?.[0]?.type) {
+      node.tabItems = node.children;
+      node.children = [];
+    } else if (node.children) {
+      node.children.forEach(getItems);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setTreeLoading(true);
         const data = await get('/cmdb/api/collect/collect_model_tree/');
-        setTreeData(data);
+        const treeData = data.map((node: TreeNode) => {
+          getItems(node);
+          return node;
+        });
+        setTreeData(treeData);
         setExpandedKeys(getAllKeys(data));
         if (!data.length) return;
 
@@ -406,7 +442,11 @@ const ProfessionalCollection: React.FC = () => {
         const defaultKey = firstItem.children?.length
           ? firstItem.children[0].id
           : firstItem.id;
-        setSelectedNode(defaultKey);
+        setSelectedNodeId(defaultKey);
+        setSelectedNode(
+          treeData.find((node: TreeNode) => node.id === defaultKey)
+        );
+        setActiveTab(firstItem.tabItems?.[0]?.id || '');
       } catch (error) {
         console.error('Failed to fetch tree data:', error);
       } finally {
@@ -418,19 +458,30 @@ const ProfessionalCollection: React.FC = () => {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <div className="w-56 flex-shrink-0 border-r border-gray-200 px-4 py-2 overflow-auto">
+      <div className="w-56 flex-shrink-0 border-r border-gray-200 pr-4 py-2 overflow-auto">
         <Spin spinning={treeLoading}>
           <Tree
             blockNode
             treeData={treeData}
             fieldNames={{ title: 'name', key: 'id', children: 'children' }}
             expandedKeys={expandedKeys}
-            selectedKeys={[selectedNode]}
+            selectedKeys={[selectedNodeId]}
             onSelect={onTreeSelect}
           />
         </Spin>
       </div>
       <div className="flex-1 pt-1 pl-5 flex flex-col overflow-hidden">
+        {selectedNode?.tabItems && selectedNode.tabItems.length > 1 && (
+          <Tabs
+            activeKey={activeTab}
+            items={selectedNode?.tabItems?.map((tab) => ({
+              key: tab.id,
+              label: tab.name,
+            }))}
+            onChange={setActiveTab}
+            className="border-b"
+          />
+        )}
         <div className="mb-4 flex justify-between items-center flex-shrink-0">
           <Input
             placeholder={t('Collection.inputTaskPlaceholder')}
@@ -442,13 +493,15 @@ const ProfessionalCollection: React.FC = () => {
             onPressEnter={handleEnterSearch}
             onClear={handleClearSearch}
           />
-          <Button
-            type="primary"
-            className="!rounded-button whitespace-nowrap"
-            onClick={handleCreate}
-          >
-            {t('Collection.addTaskTitle')}
-          </Button>
+          <PermissionWrapper requiredPermissions={['Add']}>
+            <Button
+              type="primary"
+              className="!rounded-button whitespace-nowrap"
+              onClick={handleCreate}
+            >
+              {t('Collection.addTaskTitle')}
+            </Button>
+          </PermissionWrapper>
         </div>
         <div className="bg-white rounded-lg shadow-sm flex-1 overflow-auto">
           <CustomTable
