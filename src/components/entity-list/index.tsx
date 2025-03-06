@@ -59,7 +59,7 @@ const EntityList = <T,>({
         )}
         {
           isSingleIconAction && (
-            <div className="absolute right-2 z-10 top-6" onClick={(e) => {
+            <div className="absolute right-4 z-10 top-6" onClick={(e) => {
               e.stopPropagation();
               singleButtonAction.onClick(item);
             }}>

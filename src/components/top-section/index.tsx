@@ -1,14 +1,25 @@
-import { Tooltip } from 'antd';
+import React from 'react';
+import Icon from '@/components/icon'
+import EllipsisWithTooltip from '@/components/ellipsis-with-tooltip'
+
 interface TopSectionProps {
   title: string;
   content: string;
+  iconType?: string;
 }
-const TopSection : React.FC<TopSectionProps> = ({title, content}) => (
-  <div className="p-4 rounded-md w-full h-[88px] bg-[var(--color-bg)]">
-    <h2 className="text-lg font-semibold mb-2">{title}</h2>
-    <Tooltip>
-      <p className="truncate max-w-full text-sm">{content}</p>
-    </Tooltip>
+
+const TopSection: React.FC<TopSectionProps> = ({ title, content, iconType }) => (
+  <div className="p-4 rounded-md w-full h-[88px] bg-[var(--color-bg)] flex items-center">
+    {iconType && (
+      <div>
+        <Icon type={iconType} className="mr-2 text-6xl" />
+      </div>
+    )}
+    <div className="flex-1 overflow-hidden">
+      <h2 className="text-lg font-semibold mb-2">{title}</h2>
+      <EllipsisWithTooltip className="whitespace-nowrap overflow-hidden text-ellipsis" text={content} />
+    </div>
   </div>
 );
+
 export default TopSection;
