@@ -93,7 +93,7 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
               {topSection}
             </div>
           )}
-          <div className="flex grow flex-1 h-full">
+          <div className="w-full flex grow flex-1 h-full">
             {showSideMenu && menuItems.length > 0 && (
               <SideMenu
                 menuItems={menuItems}
