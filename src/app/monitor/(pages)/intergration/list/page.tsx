@@ -8,7 +8,7 @@ import { useTranslation } from '@/utils/i18n';
 import Icon from '@/components/icon';
 import { deepClone } from '@/app/monitor/utils/common';
 import { useRouter } from 'next/navigation';
-import { ObectItem } from '@/app/monitor/types/monitor';
+import { ObectItem, TreeSortData } from '@/app/monitor/types/monitor';
 import {
   OBJECT_ICON_MAP,
   COLLECT_TYPE_MAP,
@@ -22,7 +22,7 @@ import { useSearchParams } from 'next/navigation';
 import Permission from '@/components/permission';
 
 const Intergration = () => {
-  const { get, isLoading } = useApiClient();
+  const { get, post, isLoading } = useApiClient();
   const { t } = useTranslation();
   const router = useRouter();
   const importRef = useRef<ModalRef>(null);
@@ -47,6 +47,17 @@ const Intergration = () => {
     if (isLoading) return;
     getObjects();
   }, [isLoading]);
+
+  const handleNodeDrag = async (data: TreeSortData[]) => {
+    try {
+      setTreeLoading(true);
+      await post(`/monitor/api/monitor_object/order/`, data);
+      message.success(t('common.updateSuccess'));
+      getObjects();
+    } catch {
+      setTreeLoading(false);
+    }
+  };
 
   const handleObjectChange = async (id: string) => {
     setObjectId(id);
@@ -199,7 +210,9 @@ const Intergration = () => {
           data={treeData}
           defaultSelectedKey={defaultSelectObj as string}
           loading={treeLoading}
+          draggable
           onNodeSelect={handleObjectChange}
+          onNodeDrag={handleNodeDrag}
         />
       </div>
       <div className={intergrationStyle.cards}>

@@ -25,7 +25,6 @@ import {
   ObectItem,
   RuleInfo,
   ObjectInstItem,
-  TreeSortData,
 } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
 import TimeSelector from '@/components/time-selector';
@@ -245,17 +244,6 @@ const Asset = () => {
     setObjectId(id);
   };
 
-  const handleNodeDrag = async (data: TreeSortData[]) => {
-    try {
-      setTreeLoading(true);
-      await post(`/monitor/api/monitor_object/order/`, data);
-      message.success(t('common.updateSuccess'));
-      getObjects();
-    } catch {
-      setTreeLoading(false);
-    }
-  };
-
   const getCollectType = (row: Record<string, string>) => {
     if (row.collect_type === 'host') {
       return `${row.collect_type}(${row.config_type})`;
@@ -375,7 +363,6 @@ const Asset = () => {
         acc[item.type].children.push({
           title: `${item.display_name || '--'}(${item.instance_count ?? 0})`,
           key: item.id,
-          label: item.name,
           children: [],
         });
         return acc;
@@ -478,9 +465,7 @@ const Asset = () => {
         <TreeSelector
           data={treeData}
           defaultSelectedKey={defaultSelectObj as string}
-          draggable
           onNodeSelect={handleObjectChange}
-          onNodeDrag={handleNodeDrag}
           loading={treeLoading}
         />
       </div>
