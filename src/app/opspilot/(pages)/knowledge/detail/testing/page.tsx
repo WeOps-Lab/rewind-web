@@ -46,6 +46,7 @@ const TestingPage: React.FC = () => {
       vector_search_weight: configData.vectorSearchWeight,
       rag_k: configData.quantity,
       rag_num_candidates: configData.candidate,
+      result_count: configData.resultCount,
     };
   };
 
