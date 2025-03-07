@@ -311,3 +311,8 @@ export interface MetricListItem {
   display_name?: string;
   is_pre: boolean;
 }
+
+export interface TreeSortData {
+  type: string;
+  name_list: string[];
+}

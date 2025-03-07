@@ -6,6 +6,7 @@ import {
   ListItem,
   ViewQueryKeyValuePairs,
   ChartData,
+  TreeItem,
 } from '@/app/monitor/types';
 import { Group } from '@/types';
 import {
@@ -437,4 +438,24 @@ export const useHandleCopy = (value: string) => {
   return {
     handleCopy,
   };
+};
+
+export const findTreeParentKey = (
+  treeData: TreeItem[],
+  targetKey: React.Key
+): React.Key | null => {
+  let parentKey: React.Key | null = null;
+  const loop = (nodes: TreeItem[], parent: React.Key | null) => {
+    for (const node of nodes) {
+      if (node.key === targetKey) {
+        parentKey = parent;
+        return;
+      }
+      if (node.children) {
+        loop(node.children, node.key); // 递归遍历子节点
+      }
+    }
+  };
+  loop(treeData, null); // 初始父节点为 null
+  return parentKey;
 };

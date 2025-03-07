@@ -25,6 +25,7 @@ import {
   ObectItem,
   RuleInfo,
   ObjectInstItem,
+  TreeSortData,
 } from '@/app/monitor/types/monitor';
 import CustomTable from '@/components/custom-table';
 import TimeSelector from '@/components/time-selector';
@@ -60,7 +61,7 @@ const Asset = () => {
   });
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   const [ruleLoading, setRuleLoading] = useState<boolean>(false);
-  const [pageLoading, setPageLoading] = useState<boolean>(false);
+  const [treeLoading, setTreeLoading] = useState<boolean>(false);
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
   const [ruleList, setRuleList] = useState<RuleInfo[]>([]);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
@@ -240,8 +241,19 @@ const Asset = () => {
     setFrequence(val);
   };
 
-  const handleObjectChange = async (id: string) => {
+  const handleObjectChange = (id: string) => {
     setObjectId(id);
+  };
+
+  const handleNodeDrag = async (data: TreeSortData[]) => {
+    try {
+      setTreeLoading(true);
+      await post(`/monitor/api/monitor_object/order/`, data);
+      message.success(t('common.updateSuccess'));
+      getObjects();
+    } catch {
+      setTreeLoading(false);
+    }
   };
 
   const getCollectType = (row: Record<string, string>) => {
@@ -331,7 +343,7 @@ const Asset = () => {
 
   const getObjects = async (type?: string) => {
     try {
-      setPageLoading(type !== 'timer');
+      setTreeLoading(type !== 'timer');
       const data = await get(`/monitor/api/monitor_object/`, {
         params: {
           name: '',
@@ -346,7 +358,7 @@ const Asset = () => {
         setDefaultSelectObj(defaultKey);
       }
     } finally {
-      setPageLoading(false);
+      setTreeLoading(false);
     }
   };
 
@@ -363,6 +375,7 @@ const Asset = () => {
         acc[item.type].children.push({
           title: `${item.display_name || '--'}(${item.instance_count ?? 0})`,
           key: item.id,
+          label: item.name,
           children: [],
         });
         return acc;
@@ -460,168 +473,165 @@ const Asset = () => {
   };
 
   return (
-    <Spin spinning={pageLoading}>
-      <div className={assetStyle.asset}>
-        <div className={assetStyle.tree}>
-          <TreeSelector
-            data={treeData}
-            defaultSelectedKey={defaultSelectObj as string}
-            onNodeSelect={handleObjectChange}
+    <div className={assetStyle.asset}>
+      <div className={assetStyle.tree}>
+        <TreeSelector
+          data={treeData}
+          defaultSelectedKey={defaultSelectObj as string}
+          draggable
+          onNodeSelect={handleObjectChange}
+          onNodeDrag={handleNodeDrag}
+          loading={treeLoading}
+        />
+      </div>
+      <div className={assetStyle.table}>
+        <div className={assetStyle.search}>
+          <Input
+            allowClear
+            className="w-[320px]"
+            placeholder={t('common.searchPlaceHolder')}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            onPressEnter={() => getAssetInsts(objectId)}
+            onClear={clearText}
+          ></Input>
+          <TimeSelector
+            onlyRefresh
+            onFrequenceChange={onFrequenceChange}
+            onRefresh={onRefresh}
           />
         </div>
-        <Spin spinning={pageLoading}>
-          <div className={assetStyle.table}>
-            <div className={assetStyle.search}>
-              <Input
-                allowClear
-                className="w-[320px]"
-                placeholder={t('common.searchPlaceHolder')}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                onPressEnter={() => getAssetInsts(objectId)}
-                onClear={clearText}
-              ></Input>
-              <TimeSelector
-                onlyRefresh
-                onFrequenceChange={onFrequenceChange}
-                onRefresh={onRefresh}
+        <CustomTable
+          scroll={{ y: 'calc(100vh - 320px)', x: 'calc(100vh - 480px)' }}
+          columns={columns}
+          dataSource={tableData}
+          pagination={pagination}
+          loading={tableLoading}
+          expandable={{
+            expandedRowRender: (record) => (
+              <CustomTable
+                scroll={{ x: 'calc(100vh - 480px)' }}
+                loading={record.loading}
+                rowKey="id"
+                dataSource={record.dataSource || []}
+                columns={childColumns}
               />
-            </div>
-            <CustomTable
-              scroll={{ y: 'calc(100vh - 320px)', x: 'calc(100vh - 480px)' }}
-              columns={columns}
-              dataSource={tableData}
-              pagination={pagination}
-              loading={tableLoading}
-              expandable={{
-                expandedRowRender: (record) => (
-                  <CustomTable
-                    scroll={{ x: 'calc(100vh - 480px)' }}
-                    loading={record.loading}
-                    rowKey="id"
-                    dataSource={record.dataSource || []}
-                    columns={childColumns}
-                  />
-                ),
-                onExpand: (expanded, record) => {
-                  expandRow(expanded, record);
-                },
-                expandedRowKeys: expandedRowKeys,
-                onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as any),
-              }}
-              rowKey="instance_id"
-              onChange={handleTableChange}
-            ></CustomTable>
-          </div>
-        </Spin>
-        <Spin spinning={ruleLoading}>
-          <div className={assetStyle.rule}>
-            <div className={`${assetStyle.ruleTips} relative`}>
-              {t('monitor.intergrations.rule')}
-              <Tooltip
-                placement="top"
-                title={t('monitor.intergrations.ruleTips')}
-              >
-                <div
-                  className="absolute cursor-pointer"
-                  style={{
-                    top: '-3px',
-                    right: '4px',
-                  }}
-                >
-                  <Icon
-                    type="a-shuoming2"
-                    className="text-[14px] text-[var(--color-text-3)]"
-                  />
-                </div>
-              </Tooltip>
-            </div>
-            <ul className={assetStyle.ruleList}>
-              <Permission
-                requiredPermissions={['Edit']}
-                className={`${assetStyle.ruleItem} ${assetStyle.add} shadow-sm rounded-sm`}
-              >
-                <li onClick={() => openRuleModal('add')}>
-                  <PlusOutlined />
-                </li>
-              </Permission>
-              {ruleList.map((item) => (
-                <li
-                  key={item.id}
-                  className={`${assetStyle.ruleItem} shadow-sm rounded-sm`}
-                >
-                  <div className={assetStyle.editItem}>
-                    <Icon
-                      className={assetStyle.icon}
-                      type={
-                        item.type === 'condition'
-                          ? 'shaixuantiaojian'
-                          : 'xuanze'
-                      }
-                    />
-                    <span title={item.name} className={assetStyle.ruleName}>
-                      {item.name}
-                    </span>
-                    <div className={assetStyle.operate}>
-                      <Dropdown
-                        menu={{
-                          items: [
-                            {
-                              key: 'edit',
-                              label: (
-                                <Permission requiredPermissions={['Edit']}>
-                                  <a
-                                    className="text-[12px]"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => openRuleModal('edit', item)}
-                                  >
-                                    {t('common.edit')}
-                                  </a>
-                                </Permission>
-                              ),
-                            },
-                            {
-                              key: 'delete',
-                              label: (
-                                <Permission requiredPermissions={['Delete']}>
-                                  <a
-                                    className="text-[12px]"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => showDeleteConfirm(item)}
-                                  >
-                                    {t('common.delete')}
-                                  </a>
-                                </Permission>
-                              ),
-                            },
-                          ],
-                        }}
-                      >
-                        <div>
-                          <Icon
-                            className={assetStyle.moreIcon}
-                            type="sangedian-copy"
-                          />
-                        </div>
-                      </Dropdown>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Spin>
-        <RuleModal
-          ref={ruleRef}
-          monitorObject={objectId}
-          groupList={organizationList}
-          onSuccess={operateRule}
-        />
-        <EditConfig ref={configRef} onSuccess={() => getAssetInsts(objectId)} />
+            ),
+            onExpand: (expanded, record) => {
+              expandRow(expanded, record);
+            },
+            expandedRowKeys: expandedRowKeys,
+            onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as any),
+          }}
+          rowKey="instance_id"
+          onChange={handleTableChange}
+        ></CustomTable>
       </div>
-    </Spin>
+      <Spin spinning={ruleLoading}>
+        <div className={assetStyle.rule}>
+          <div className={`${assetStyle.ruleTips} relative`}>
+            {t('monitor.intergrations.rule')}
+            <Tooltip
+              placement="top"
+              title={t('monitor.intergrations.ruleTips')}
+            >
+              <div
+                className="absolute cursor-pointer"
+                style={{
+                  top: '-3px',
+                  right: '4px',
+                }}
+              >
+                <Icon
+                  type="a-shuoming2"
+                  className="text-[14px] text-[var(--color-text-3)]"
+                />
+              </div>
+            </Tooltip>
+          </div>
+          <ul className={assetStyle.ruleList}>
+            <Permission
+              requiredPermissions={['Edit']}
+              className={`${assetStyle.ruleItem} ${assetStyle.add} shadow-sm rounded-sm`}
+            >
+              <li onClick={() => openRuleModal('add')}>
+                <PlusOutlined />
+              </li>
+            </Permission>
+            {ruleList.map((item) => (
+              <li
+                key={item.id}
+                className={`${assetStyle.ruleItem} shadow-sm rounded-sm`}
+              >
+                <div className={assetStyle.editItem}>
+                  <Icon
+                    className={assetStyle.icon}
+                    type={
+                      item.type === 'condition' ? 'shaixuantiaojian' : 'xuanze'
+                    }
+                  />
+                  <span title={item.name} className={assetStyle.ruleName}>
+                    {item.name}
+                  </span>
+                  <div className={assetStyle.operate}>
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: 'edit',
+                            label: (
+                              <Permission requiredPermissions={['Edit']}>
+                                <a
+                                  className="text-[12px]"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={() => openRuleModal('edit', item)}
+                                >
+                                  {t('common.edit')}
+                                </a>
+                              </Permission>
+                            ),
+                          },
+                          {
+                            key: 'delete',
+                            label: (
+                              <Permission requiredPermissions={['Delete']}>
+                                <a
+                                  className="text-[12px]"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={() => showDeleteConfirm(item)}
+                                >
+                                  {t('common.delete')}
+                                </a>
+                              </Permission>
+                            ),
+                          },
+                        ],
+                      }}
+                    >
+                      <div>
+                        <Icon
+                          className={assetStyle.moreIcon}
+                          type="sangedian-copy"
+                        />
+                      </div>
+                    </Dropdown>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Spin>
+      <RuleModal
+        ref={ruleRef}
+        monitorObject={objectId}
+        groupList={organizationList}
+        onSuccess={operateRule}
+      />
+      <EditConfig ref={configRef} onSuccess={() => getAssetInsts(objectId)} />
+    </div>
   );
 };
 
