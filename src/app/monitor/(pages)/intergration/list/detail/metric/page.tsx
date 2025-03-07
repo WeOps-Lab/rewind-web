@@ -44,7 +44,7 @@ const Configure = () => {
   const [activeTab, setActiveTab] = useState<string>('');
   const [items, setItems] = useState<IntergrationItem[]>([]);
   const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
-  const [dragOverTargetId, setDragOverTargetId] = useState<string | null>(null); // 新增状态，用于存储当前拖拽悬停的目标 ID
+  const [dragOverTargetId, setDragOverTargetId] = useState<string | null>(null);
 
   const columns: ColumnItem[] = [
     {
@@ -224,9 +224,10 @@ const Configure = () => {
     try {
       Promise.all([getGroupList, getMetrics])
         .then((res) => {
-          const groupData = res[0].map((item: GroupInfo) => ({
+          const groupData = res[0].map((item: GroupInfo, index: number) => ({
             ...item,
             child: [],
+            isOpen: !index,
           }));
           const metricData = res[1];
           setMetrics(res[1] || []);
@@ -311,7 +312,17 @@ const Configure = () => {
     if (draggingItemId) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      setDragOverTargetId(targetId); // 设置当前悬停的目标 ID
+      setDragOverTargetId(targetId);
+      if (
+        dragOverTargetId === targetId &&
+        draggingItemId !== dragOverTargetId
+      ) {
+        setMetricData((prev) =>
+          prev.map((item) =>
+            item.id === targetId ? { ...item, isOpen: false } : item
+          )
+        );
+      }
     }
   };
 
@@ -320,7 +331,7 @@ const Configure = () => {
     targetId: string
   ) => {
     e.preventDefault();
-    setDragOverTargetId(null); // 清除悬停目标 ID
+    setDragOverTargetId(null);
     if (draggingItemId && draggingItemId !== targetId) {
       const draggingIndex = metricData.findIndex(
         (item) => item.id === draggingItemId
@@ -363,6 +374,12 @@ const Configure = () => {
     await post('/monitor/api/metrics/set_order/', updatedOrder);
     message.success(t('common.updateSuccess'));
     getInitData();
+  };
+
+  const onToggle = (id: string, isOpen: boolean) => {
+    setMetricData((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, isOpen } : item))
+    );
   };
 
   return (
@@ -411,7 +428,7 @@ const Configure = () => {
           }}
         >
           {!!metricData.length ? (
-            metricData.map((metricItem, index) => (
+            metricData.map((metricItem) => (
               <Collapse
                 className={`mb-[10px] ${
                   dragOverTargetId === metricItem.id &&
@@ -425,7 +442,8 @@ const Configure = () => {
                 onDragOver={(e) => onDragOver(e, metricItem.id)}
                 onDrop={(e) => onDrop(e, metricItem.id)}
                 title={metricItem.display_name || ''}
-                isOpen={!index}
+                isOpen={metricItem.isOpen}
+                onToggle={(isOpen) => onToggle(metricItem.id, isOpen)}
                 icon={
                   <div>
                     <Permission requiredPermissions={['Edit Group']}>

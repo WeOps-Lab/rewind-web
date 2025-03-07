@@ -310,6 +310,7 @@ export interface MetricListItem {
   name: string;
   child: MetricItem[];
   display_name?: string;
+  isOpen?: boolean;
   is_pre: boolean;
 }
 
