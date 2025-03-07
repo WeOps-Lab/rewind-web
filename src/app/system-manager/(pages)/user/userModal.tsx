@@ -142,8 +142,13 @@ const UserModal = forwardRef<ModalRef, ModalProps>(({ onSuccess, treeData }, ref
       }
       onSuccess();
       setVisible(false);
-    } catch {
-      message.error(t('common.valFailed'));
+    } catch (error: any) {
+      if (error.errorFields && error.errorFields.length) {
+        const firstFieldErrorMessage = error.errorFields[0].errors[0];
+        message.error(firstFieldErrorMessage || t('common.valFailed'));
+      } else {
+        message.error(t('common.saveSuccess'));
+      }
     } finally {
       setIsSubmitting(false);
     }

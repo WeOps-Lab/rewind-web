@@ -80,7 +80,8 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
       const values = await form.validateFields();
       const payload = {
         channel_type: channelType,
-        ...values,
+        name: values.name,
+        description: values.description,
         config: {
           ...values
         }
@@ -90,11 +91,16 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
       } else if (type === 'edit' && channelId) {
         await updateChannel({ id: channelId, ...payload });
       }
-      message.success(t('common.updateSuccess'));
+      message.success(t('common.saveSuccess'));
       onSuccess();
       onClose();
-    } catch {
-      message.error(t('common.updateFailed'));
+    } catch (error: any) {
+      if (error.errorFields && error.errorFields.length) {
+        const firstFieldErrorMessage = error.errorFields[0].errors[0];
+        message.error(firstFieldErrorMessage || t('common.valFailed'));
+      } else {
+        message.error(t('common.saveFailed'));
+      }
     } finally {
       setConfirmLoading(false);
     }
@@ -140,6 +146,7 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
       type: getFieldType(key),
       label: t(`system.channel.settings.${key}`),
       placeholder: `${t('common.inputMsg')}${t(`system.channel.settings.${key}`)}`,
+      initialValue: ['smtp_usessl', 'smtp_usetls'].includes(key) ? false : undefined,
       rules: [{ required: !['smtp_usessl', 'smtp_usetls'].includes(key), message: `${t('common.inputMsg')}${t(`system.channel.settings.${key}`)}` }],
     }));
 
