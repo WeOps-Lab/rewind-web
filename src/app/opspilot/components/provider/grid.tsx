@@ -144,7 +144,7 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
         {!loading && models.length === 0 ? (
           <Empty description={t('common.noData')} />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
             {models.map((model) => (
               <div className={`rounded-lg shadow px-4 py-6 relative ${styles.gridContainer}`} key={model.id}>
                 <div className="flex justify-between items-start">

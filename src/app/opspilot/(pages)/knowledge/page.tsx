@@ -122,7 +122,7 @@ const KnowledgePage = () => {
         />
       </div>
       <Spin spinning={loading}>
-        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${knowledgeStyle.knowledge}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 ${knowledgeStyle.knowledge}`}>
           <PermissionWrapper
             requiredPermissions={['Add']}
             className={`p-4 rounded-xl flex items-center justify-center shadow-md cursor-pointer ${knowledgeStyle.add}`}
