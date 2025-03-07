@@ -62,7 +62,7 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
 
   const onSuccess = (info: any) => {
     router.replace(
-      `/cmdb/assetManage/detail/attributes?icn=${info.icn}&model_name=${info.model_name}&model_id=${info.model_id}&classification_id=${info.classification_id}`
+      `/cmdb/assetManage/management/detail/attributes?icn=${info.icn}&model_name=${info.model_name}&model_id=${info.model_id}&classification_id=${info.classification_id}`
     );
   };
 
@@ -147,12 +147,14 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
             )}
           </header>
         </Card>
-        <WithSideMenuLayout
-          showBackButton={true}
-          onBackButtonClick={handleBackButtonClick}
-        >
-          {children}
-        </WithSideMenuLayout>
+        <div style={{ ['--custom-height' as string]: 'calc(100vh - 260px)' }}>
+          <WithSideMenuLayout
+            showBackButton={true}
+            onBackButtonClick={handleBackButtonClick}
+          >
+            {children}
+          </WithSideMenuLayout>
+        </div>
         <ModelModal
           ref={modelRef}
           groupList={groupList}

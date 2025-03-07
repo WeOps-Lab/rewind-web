@@ -41,12 +41,27 @@
             "icon": "shujumoxingguanli",
             "url": "/cmdb/assetManage",
             "name": "management",
+            "isNotMenuItem": true,
             "children": [
                 {
                     "title": "模型管理",
                     "icon": "shujumoxingguanli",
                     "url": "/cmdb/assetManage/management",
-                    "name": "asset_management"
+                    "name": "model_management",
+                    "children": [
+                        {
+                            "title": "属性",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/management/detail/attributes",
+                            "name": "model_attributes"
+                        },
+                        {
+                            "title": "关系",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/management/detail/associations",
+                            "name": "model_relationships"
+                        }
+                    ]
                 },
                 {
                     "title": "自动发现",
@@ -119,12 +134,27 @@
             "icon": "shujumoxingguanli",
             "url": "/cmdb/assetManage",
             "name": "management",
+            "isNotMenuItem": true,
             "children": [
                 {
                     "title": "Model Management",
                     "icon": "shujumoxingguanli",
                     "url": "/cmdb/assetManage/management",
-                    "name": "asset_management"
+                    "name": "model_management",
+                    "children": [
+                        {
+                            "title": "Attributes",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/management/detail/attributes",
+                            "name": "model_attributes"
+                        },
+                        {
+                            "title": "Associations",
+                            "icon": "shujumoxingguanli",
+                            "url": "/cmdb/assetManage/management/detail/associations",
+                            "name": "model_relationships"
+                        }
+                    ]
                 },
                 {
                     "title": "Auto discover",

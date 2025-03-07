@@ -232,7 +232,7 @@ const Attributes = () => {
         </div>
         <CustomTable
           size="middle"
-          scroll={{ y: 'calc(100vh - 390px)' }}
+          scroll={{ y: 'calc(100vh - 440px)' }}
           columns={columns}
           dataSource={tableData}
           pagination={pagination}

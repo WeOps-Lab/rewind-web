@@ -59,6 +59,7 @@ const ProfessionalCollection: React.FC = () => {
   const [tableLoading, setTableLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [executingTaskIds, setExecutingTaskIds] = useState<number[]>([]);
+  const timerRef = React.useRef<NodeJS.Timeout>();
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -86,6 +87,10 @@ const ProfessionalCollection: React.FC = () => {
       } = {}
     ) => {
       try {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+
         setTableLoading(true);
         const params = {
           model_id: selectedNode?.tabItems?.length
@@ -102,6 +107,9 @@ const ProfessionalCollection: React.FC = () => {
           ...prev,
           total: data.count || 0,
         }));
+        timerRef.current = setTimeout(() => {
+          fetchData();
+        }, 10 * 1000);
       } catch (error) {
         console.error('Failed to fetch table data:', error);
       } finally {
@@ -156,7 +164,7 @@ const ProfessionalCollection: React.FC = () => {
     if (selectedKeys.length > 0) {
       const nodeId = selectedKeys[0] as string;
       setSelectedNodeId(nodeId);
-      const node = treeData.find((node) => node.id === nodeId);
+      const node = findNodeById(treeData, nodeId);
       setSelectedNode(node);
 
       if (node?.tabItems?.length) {
@@ -166,7 +174,19 @@ const ProfessionalCollection: React.FC = () => {
       }
     }
   };
-
+  const findNodeById = (
+    nodes: TreeNode[],
+    id: string
+  ): TreeNode | undefined => {
+    for (const node of nodes) {
+      if (node.id === id) return node;
+      if (node.children) {
+        const found = findNodeById(node.children, id);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  };
   const handleCreate = () => {
     setEditingId(null);
     setDrawerVisible(true);
@@ -414,6 +434,11 @@ const ProfessionalCollection: React.FC = () => {
     if (selectedNodeId) {
       fetchData();
     }
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
   }, [selectedNodeId]);
 
   const getItems = (node: TreeNode) => {
@@ -426,7 +451,7 @@ const ProfessionalCollection: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchTreeData = async () => {
       try {
         setTreeLoading(true);
         const data = await get('/cmdb/api/collect/collect_model_tree/');
@@ -453,7 +478,7 @@ const ProfessionalCollection: React.FC = () => {
         setTreeLoading(false);
       }
     };
-    fetchData();
+    fetchTreeData();
   }, []);
 
   return (

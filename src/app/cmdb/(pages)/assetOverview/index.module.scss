@@ -6,8 +6,9 @@
   .my-masonry-grid {
     margin-top: 20px;
     display: flex;
-    margin-left: -20px;
-    width: auto;
+    width: 100%;
+    max-height: calc(100vh - 160px);
+    overflow: auto;
   }
 
   .title {

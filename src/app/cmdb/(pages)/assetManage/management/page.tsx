@@ -113,7 +113,7 @@ const AssetManage = () => {
       classification_id: model.classification_id,
       is_pre: model.is_pre,
     }).toString();
-    router.push(`/cmdb/assetManage/detail/attributes?${params}`);
+    router.push(`/cmdb/assetManage/management/detail/attributes?${params}`);
   };
 
   const handleDragStart = (item: any) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Button,
   Space,
@@ -12,12 +12,13 @@ import {
   TablePaginationConfig,
   CascaderProps,
   Tree,
+  Input,
 } from 'antd';
 import CustomTable from '@/components/custom-table';
 import SearchFilter from './list/searchFilter';
 import ImportInst from './list/importInst';
 import SelectInstance from './detail/relationships/selectInstance';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useSearchParams } from 'next/navigation';
 import assetDataStyle from './index.module.scss';
 import FieldModal from './list/fieldModal';
@@ -110,6 +111,8 @@ const AssetData = () => {
     total: 0,
     pageSize: 20,
   });
+  const [treeSearchText, setTreeSearchText] = useState('');
+  const [filteredTreeData, setFilteredTreeData] = useState<any[]>([]);
 
   const handleExport = async (keys: string[]) => {
     try {
@@ -427,14 +430,74 @@ const AssetData = () => {
     });
   };
 
-  const treeData = modelGroup.map((group) => ({
-    title: group.classification_name,
-    key: `group:${group.classification_id}`,
-    children: group.list.map((item) => ({
-      title: item.model_name,
-      key: item.model_id,
-    })),
-  }));
+  const filterTreeNodes = useCallback((nodes: any[], searchText: string) => {
+    if (!searchText) return nodes;
+
+    return nodes.reduce((filtered: any[], node) => {
+      const matchesSearch = node.title
+        .toLowerCase()
+        .includes(searchText.toLowerCase());
+
+      if (node.children) {
+        const filteredChildren = filterTreeNodes(node.children, searchText);
+        if (filteredChildren.length > 0 || matchesSearch) {
+          filtered.push({
+            ...node,
+            children: filteredChildren,
+          });
+        }
+      } else if (matchesSearch) {
+        filtered.push(node);
+      }
+
+      return filtered;
+    }, []);
+  }, []);
+
+  const handleTreeSearch = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const searchText = e.target.value;
+      setTreeSearchText(searchText);
+
+      const treeData = modelGroup.map((group) => ({
+        title: group.classification_name,
+        key: `group:${group.classification_id}`,
+        children: group.list.map((item) => ({
+          title: item.model_name,
+          key: item.model_id,
+        })),
+      }));
+
+      const filtered = filterTreeNodes(treeData, searchText);
+      setFilteredTreeData(filtered);
+
+      if (searchText) {
+        const getAllKeys = (nodes: any[]): string[] => {
+          return nodes.reduce((keys: string[], node) => {
+            keys.push(node.key);
+            if (node.children) {
+              keys.push(...getAllKeys(node.children));
+            }
+            return keys;
+          }, []);
+        };
+        setExpandedTreeKeys(getAllKeys(filtered));
+      }
+    },
+    [modelGroup, filterTreeNodes]
+  );
+
+  useEffect(() => {
+    const treeData = modelGroup.map((group) => ({
+      title: group.classification_name,
+      key: `group:${group.classification_id}`,
+      children: group.list.map((item) => ({
+        title: item.model_name,
+        key: item.model_id,
+      })),
+    }));
+    setFilteredTreeData(treeData);
+  }, [modelGroup]);
 
   const onSelectUnified = (selectedKeys: React.Key[]) => {
     if (!selectedKeys.length) return;
@@ -567,14 +630,25 @@ const AssetData = () => {
     <Spin spinning={loading} wrapperClassName={assetDataStyle.assetLoading}>
       <div className={assetDataStyle.assetData}>
         <div className={`${assetDataStyle.groupSelector}`}>
-          <Tree
-            showLine
-            selectedKeys={selectedTreeKeys}
-            expandedKeys={expandedTreeKeys}
-            onExpand={(keys) => setExpandedTreeKeys(keys as string[])}
-            onSelect={onSelectUnified}
-            treeData={treeData}
-          />
+          <div className={assetDataStyle.treeSearchWrapper}>
+            <Input
+              placeholder={t('searchTxt')}
+              value={treeSearchText}
+              onChange={handleTreeSearch}
+              allowClear
+              prefix={<SearchOutlined className="text-gray-400" />}
+            />
+          </div>
+          <div className={assetDataStyle.treeWrapper}>
+            <Tree
+              showLine
+              selectedKeys={selectedTreeKeys}
+              expandedKeys={expandedTreeKeys}
+              onExpand={(keys) => setExpandedTreeKeys(keys as string[])}
+              onSelect={onSelectUnified}
+              treeData={filteredTreeData}
+            />
+          </div>
         </div>
         <div className={assetDataStyle.assetList}>
           <div className="flex justify-between mb-4">
@@ -631,7 +705,7 @@ const AssetData = () => {
             columns={currentColumns}
             pagination={pagination}
             loading={tableLoading}
-            scroll={{ x: 'calc(100vw - 400px)', y: 'calc(100vh - 400px)' }}
+            scroll={{ x: 'calc(100vw - 400px)', y: 'calc(100vh - 300px)' }}
             fieldSetting={{
               showSetting: true,
               displayFieldKeys,

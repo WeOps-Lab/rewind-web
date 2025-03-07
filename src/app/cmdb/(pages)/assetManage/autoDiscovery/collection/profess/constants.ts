@@ -146,7 +146,7 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
       '注：针对资产新增进行审批，审批通过后，资产的相关信息会同步更新至资产记录。',
     alertType: 'warning',
     columns: [
-      // { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '对象类型', dataIndex: 'model_id', width: 160 },
       { title: '实例名', dataIndex: 'inst_name', width: 260 },
       //   { title: '状态', dataIndex: '_status', width: 120 },
     ],
@@ -157,7 +157,7 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
     message: '注：展示任务执行后资产更新情况，自动更新至在资产记录。',
     alertType: 'warning',
     columns: [
-      // { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '对象类型', dataIndex: 'model_id', width: 160 },
       { title: '实例名', dataIndex: 'inst_name', width: 260 },
       // { title: '更新状态', dataIndex: '_status', width: 120 },
     ],
@@ -180,7 +180,7 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
       '注：展示任务执行后，采集到已下架的资产，需要手动操作“下架”，方可在资产记录更新。',
     alertType: 'warning',
     columns: [
-      // { title: '对象类型', dataIndex: 'type', width: 180 },
+      { title: '对象类型', dataIndex: 'model_id', width: 160 },
       { title: '实例名', dataIndex: 'inst_name', width: 260 },
       //   { title: '下架状态', dataIndex: '_status', width: 120 },
     ],
