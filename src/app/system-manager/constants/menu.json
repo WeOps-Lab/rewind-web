@@ -37,12 +37,6 @@
           "icon": "shezhi",
           "name": "channel_setting",
           "url": "/system-manager/channel/detail/settings"
-        },
-        {
-          "title": "模板",
-          "icon": "zichan-quanbushebei",
-          "name": "channel_template",
-          "url": "/system-manager/channel/detail/template"
         }
       ]
     }
@@ -85,12 +79,6 @@
           "icon": "shezhi",
           "name": "channel_setting",
           "url": "/system-manager/channel/detail/settings"
-        },
-        {
-          "title": "Template",
-          "icon": "zichan-quanbushebei",
-          "name": "channel_template",
-          "url": "/system-manager/channel/detail/template"
         }
       ]
     }

@@ -46,6 +46,8 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
   };
 
   useEffect(() => {
+    if (!visible) return;
+    form.resetFields();
     if (type === 'edit' && channelId) {
       fetchChannelDetail(channelId);
     } else {
@@ -69,9 +71,8 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
           agent_id: '',
         },
       });
-      form.resetFields();
     }
-  }, [type, channelId]);
+  }, [type, channelId, visible]);
 
   const handleOk = async () => {
     try {
@@ -139,7 +140,7 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
       type: getFieldType(key),
       label: t(`system.channel.settings.${key}`),
       placeholder: `${t('common.inputMsg')}${t(`system.channel.settings.${key}`)}`,
-      rules: [{ required: true, message: `${t('common.inputMsg')}${t(`system.channel.settings.${key}`)}` }],
+      rules: [{ required: !['smtp_usessl', 'smtp_usetls'].includes(key), message: `${t('common.inputMsg')}${t(`system.channel.settings.${key}`)}` }],
     }));
 
     return [...basicFields, ...configFields];
