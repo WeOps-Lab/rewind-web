@@ -34,6 +34,7 @@ import {
   PluginItem,
   IndexViewItem,
   GroupInfo,
+  ChannelItem,
 } from '@/app/monitor/types/monitor';
 import { useCommon } from '@/app/monitor/context/common';
 import { deepClone } from '@/app/monitor/utils/common';
@@ -131,11 +132,16 @@ const StrategyOperation = () => {
   const [pluginList, setPluginList] = useState<SegmentedItem[]>([]);
   const [originMetricData, setOriginMetricData] = useState<IndexViewItem[]>([]);
   const [initMetricData, setInitMetricData] = useState<MetricItem[]>([]);
+  const [channelList, setChannelList] = useState<ChannelItem[]>([]);
 
   useEffect(() => {
     if (!isLoading) {
       setPageLoading(true);
-      Promise.all([getPlugins(), detailId && getStragyDetail()]).finally(() => {
+      Promise.all([
+        getPlugins(),
+        getChannelList(),
+        detailId && getStragyDetail(),
+      ]).finally(() => {
         setPageLoading(false);
       });
     }
@@ -147,9 +153,11 @@ const StrategyOperation = () => {
       const strategyInfo = JSON.parse(
         sessionStorage.getItem('strategyInfo') || '{}'
       );
+      const channelItem = channelList[0];
       const initForm: TableDataItem = {
         organizations: groupId,
-        notice_type: 'email',
+        notice_type_id: channelItem?.id,
+        notice_type: channelItem?.channel_type,
         notice: false,
         period: 5,
         schedule: 5,
@@ -175,13 +183,18 @@ const StrategyOperation = () => {
     } else {
       dealDetail(formData);
     }
-  }, [type, formData, pluginList, initMetricData]);
+  }, [type, formData, pluginList, initMetricData, channelList]);
 
   const changeCollectType = (id: string) => {
     getMetrics({
       monitor_object_id: monitorObjId,
       monitor_plugin_id: id,
     });
+  };
+
+  const getChannelList = async () => {
+    const data = await get('/monitor/api/system_mgmt/search_channel_list/');
+    setChannelList(data);
   };
 
   const getPlugins = async () => {
@@ -502,6 +515,11 @@ const StrategyOperation = () => {
         _values.no_data_level = noDataLevel;
       } else {
         _values.no_data_period = _values.no_data_recovery_period = {};
+      }
+      if (_values.notice_type_id) {
+        _values.notice_type =
+          channelList.find((item) => item.id === _values.notice_type_id)
+            ?.channel_type || '';
       }
       _values.recovery_condition = _values.recovery_condition || 0;
       _values.group_by = groupBy;
@@ -1261,7 +1279,7 @@ const StrategyOperation = () => {
                                     {t('monitor.events.method')}
                                   </span>
                                 }
-                                name="notice_type"
+                                name="notice_type_id"
                                 rules={[
                                   {
                                     required: true,
@@ -1270,9 +1288,11 @@ const StrategyOperation = () => {
                                 ]}
                               >
                                 <Radio.Group>
-                                  <Radio value="email">
-                                    {t('monitor.events.email')}
-                                  </Radio>
+                                  {channelList.map((item) => (
+                                    <Radio key={item.id} value={item.id}>
+                                      {item.name}
+                                    </Radio>
+                                  ))}
                                 </Radio.Group>
                               </Form.Item>
                               <Form.Item<StrategyFields>

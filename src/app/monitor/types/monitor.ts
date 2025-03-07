@@ -218,6 +218,7 @@ export interface StrategyFields {
   no_data_level?: string;
   notice?: boolean;
   notice_type?: string;
+  notice_type_id?: number;
   notice_users?: string[];
   monitor_object?: number;
   id?: number;
@@ -315,4 +316,10 @@ export interface MetricListItem {
 export interface TreeSortData {
   type: string;
   name_list: string[];
+}
+
+export interface ChannelItem {
+  channel_type: string;
+  id: number;
+  name: string;
 }
