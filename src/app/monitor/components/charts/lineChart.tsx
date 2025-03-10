@@ -81,9 +81,13 @@ const LineChart: React.FC<LineChartProps> = ({
     );
     setDetails(chartDetails);
     setVisibleAreas(chartKeys); // 默认显示所有area
-    if (colors.length) return;
     const generatedColors = chartKeys.map(() => generateUniqueRandomColor());
-    setColors(generatedColors);
+    setColors((prev: string[]) => {
+      return [
+        ...prev,
+        ...generatedColors.slice(prev.length, generatedColors.length),
+      ];
+    });
   }, [data]);
 
   useEffect(() => {
