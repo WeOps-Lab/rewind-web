@@ -19,6 +19,7 @@ import {
 import chartLineStyle from './index.module.scss';
 import dayjs, { Dayjs } from 'dayjs';
 import DimensionFilter from './dimensionFilter';
+import DimensionTable from './dimensionTable';
 import { ChartData, ListItem } from '@/app/monitor/types';
 import { MetricItem } from '@/app/monitor/types/monitor';
 
@@ -27,6 +28,7 @@ interface LineChartProps {
   unit?: string;
   metric?: MetricItem;
   showDimensionFilter?: boolean;
+  showDimensionTable?: boolean;
   allowSelect?: boolean;
   onXRangeChange?: (arr: [Dayjs, Dayjs]) => void;
 }
@@ -55,6 +57,7 @@ const LineChart: React.FC<LineChartProps> = ({
   showDimensionFilter = false,
   metric = {},
   allowSelect = true,
+  showDimensionTable = false,
   onXRangeChange,
 }) => {
   const { formatTime } = useFormatTime();
@@ -233,6 +236,9 @@ const LineChart: React.FC<LineChartProps> = ({
               details={details}
               onLegendClick={handleLegendClick}
             />
+          )}
+          {showDimensionTable && hasDimension && (
+            <DimensionTable data={data} colors={colors} details={details} />
           )}
         </>
       ) : (

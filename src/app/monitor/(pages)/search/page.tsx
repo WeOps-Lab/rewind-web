@@ -693,6 +693,7 @@ const SearchView: React.FC = () => {
                     metric={metrics.find((item) => item.name === metric)}
                     data={chartData}
                     unit={unit}
+                    showDimensionTable
                     onXRangeChange={onXRangeChange}
                   />
                 </div>
