@@ -238,9 +238,6 @@
         "k8sTask": {
             "title": "Add Task",
             "baseSetting": "Basic Settings",
-            "name": "Name",
-            "namePlaceholder": "Please enter task name",
-            "nameRequired": "Please enter task name",
             "scanCycle": "Scan Cycle",
             "cycleRequired": "Please select scan cycle",
             "everyMinute": "Every",
@@ -254,6 +251,19 @@
             "intervalRequired": "Please enter execution interval",
             "timeRequired": "Please select execution time",
             "timeoutRequired": "Please enter timeout"
+        },
+        "VMTask": {
+            "enterType": "Enter Type",
+            "enterTypeTooltip": "Set the input method for New Asset. Automatic Input will automatically update to the Asset Record after the task is completed, and Approval Input will update to the Asset Record based on the approval result.",
+            "automatic": "Automatic",
+            "approvalRequired": "Approval required",
+            "chooseVCenter": "Choose vCenter",
+            "proxy": "Proxy",
+            "credential": "Credential",
+            "account": "Account",
+            "password": "Password",
+            "port": "Port",
+            "sslVerify": "SSL verify"
         },
         "table": {
             "taskName": "Task Name",

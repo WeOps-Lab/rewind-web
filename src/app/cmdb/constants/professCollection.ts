@@ -91,38 +91,29 @@ export const FORM_INITIAL_VALUES = {
   inst: undefined,
 };
 
-export const createValidationRules = (t: (key: string) => string) => ({
-  name: [
-    {
-      required: true,
-      message: t('Collection.k8sTask.nameRequired'),
-    },
-  ],
-  cycle: [
-    {
-      required: true,
-      message: t('Collection.k8sTask.cycleRequired'),
-    },
-  ],
-  inst: [
-    {
-      required: true,
-      message: t('Collection.k8sTask.instRequired'),
-    },
-  ],
-  intervalMinutes: [
-    {
-      required: true,
-      message: t('Collection.k8sTask.intervalRequired'),
-    },
-  ],
-  timeout: [
-    {
-      required: true,
-      message: t('Collection.k8sTask.timeoutRequired'),
-    },
-  ],
-});
+export const ENTER_TYPE = {
+  AUTOMATIC: 'automatic',
+  APPROVAL: 'approval',
+} as const;
+
+export const ADD_FORM_INITIAL_VALUES = {
+  cycle: CYCLE_OPTIONS.ONCE,
+  enterType: ENTER_TYPE.AUTOMATIC,
+  port: '443',
+  timeout: 600,
+  sslVerify: true,
+};
+
+export const validateCycleTime = (
+  type: string,
+  value: any,
+  message: string
+) => {
+  if (!value && (type === 'daily' || type === 'every')) {
+    return Promise.reject(new Error(message));
+  }
+  return Promise.resolve();
+};
 
 export type AlertType = 'info' | 'warning' | 'error';
 
@@ -137,6 +128,74 @@ export interface TabConfig {
     width: number;
   }[];
 }
+interface ValidationContext {
+  form: any;
+  t: (key: string) => string;
+  taskType?: 'k8s' | 'vm';
+}
+
+const baseValidators = {
+  required: (message: string) => ({ required: true, message }),
+};
+
+const cycleValidators = (context: ValidationContext) => ({
+  dailyTime: [
+    {
+      validator: (_: any, value: any) => {
+        const cycle = context.form.getFieldValue('cycle');
+        if (cycle === CYCLE_OPTIONS.DAILY && !value) {
+          return Promise.reject(new Error(context.t('Collection.selectTime')));
+        }
+        return Promise.resolve();
+      },
+    },
+  ],
+  intervalValue: [
+    {
+      validator: (_: any, value: any) => {
+        const cycle = context.form.getFieldValue('cycle');
+        if (cycle === CYCLE_OPTIONS.INTERVAL && !value) {
+          return Promise.reject(
+            new Error(context.t('Collection.k8sTask.intervalRequired'))
+          );
+        }
+        return Promise.resolve();
+      },
+    },
+  ],
+});
+
+export const createTaskValidationRules = (context: ValidationContext) => {
+  const { t, taskType } = context;
+
+  const baseRules = {
+    taskName: [baseValidators.required(t('Collection.taskNamePlaceholder'))],
+    cycle: [baseValidators.required(t('Collection.k8sTask.cycleRequired'))],
+    inst: [
+      baseValidators.required(
+        taskType === 'vm'
+          ? t('Collection.VMTask.chooseVCenter')
+          : t('Collection.k8sTask.instRequired')
+      ),
+    ],
+    timeout: [baseValidators.required(t('Collection.k8sTask.timeoutRequired'))],
+    ...cycleValidators(context),
+  };
+
+  if (taskType === 'vm') {
+    return {
+      ...baseRules,
+      enterType: [baseValidators.required(t('Collection.VMTask.enterType'))],
+      proxy: [baseValidators.required(t('Collection.VMTask.proxy'))],
+      account: [baseValidators.required(t('Collection.VMTask.account'))],
+      password: [baseValidators.required(t('Collection.VMTask.password'))],
+      port: [baseValidators.required(t('Collection.VMTask.port'))],
+      sslVerify: [baseValidators.required(t('Collection.VMTask.sslVerify'))],
+    };
+  }
+
+  return baseRules;
+};
 
 export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
   add: {
@@ -186,12 +245,3 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
     ],
   },
 };
-
-export const MOCK_TABLE_DATA = [
-  {
-    key: '1',
-    type: '自定义ipmi采集模型',
-    instance: 'ex_useripmi-10.10.25.62',
-    status: '已更新',
-  },
-];

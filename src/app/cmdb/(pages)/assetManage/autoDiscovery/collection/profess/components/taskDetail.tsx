@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { Alert, Tabs } from 'antd';
 import CustomTable from '@/components/custom-table';
 import type { CollectTask } from '@/app/cmdb/types/autoDiscovery';
-import { TASK_DETAIL_CONFIG } from './constants'; 
-import styles from './index.module.scss';
+import { TASK_DETAIL_CONFIG } from '@/app/cmdb/constants/professCollection';
+import styles from '../index.module.scss';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
+
 interface TaskDetailProps {
   task: CollectTask;
 }

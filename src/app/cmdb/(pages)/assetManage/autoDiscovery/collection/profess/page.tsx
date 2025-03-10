@@ -2,9 +2,9 @@
 
 import dayjs from 'dayjs';
 import styles from './index.module.scss';
-import K8sTaskForm from './k8sTask';
-import AddTaskForm from './addTask';
-import TaskDetail from './taskDetail';
+import K8sTaskForm from './components/k8sTask';
+import VMTask from './components/vmTask';
+import TaskDetail from './components/taskDetail';
 import useApiClient from '@/utils/request';
 import CustomTable from '@/components/custom-table';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -14,6 +14,8 @@ import { Modal } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
 import { Input, Button, Spin, Tag, Tree, Drawer, message, Tabs } from 'antd';
+import type { ColumnType } from 'antd/es/table';
+import PermissionWrapper from '@/components/permission';
 import {
   createExecStatusMap,
   ExecStatusKey,
@@ -21,14 +23,13 @@ import {
   getExecStatusConfig,
   EXEC_STATUS,
   ExecStatusType,
-} from './constants';
+} from '@/app/cmdb/constants/professCollection';
 import {
   CollectTask,
   TreeNode,
   CollectTaskMessage,
 } from '@/app/cmdb/types/autoDiscovery';
-import type { ColumnType } from 'antd/es/table';
-import PermissionWrapper from '@/components/permission';
+
 
 type ExtendedColumnItem = ColumnType<CollectTask> & {
   key: string;
@@ -244,7 +245,7 @@ const ProfessionalCollection: React.FC = () => {
     setDrawerVisible(false);
   };
 
-  const getDrawerContent = () => {
+  const getTaskContent = () => {
     const props = {
       onClose: closeDrawer,
       onSuccess: () => {
@@ -256,7 +257,7 @@ const ProfessionalCollection: React.FC = () => {
     if (selectedNodeId === 'k8s') {
       return <K8sTaskForm {...props} />;
     }
-    return <AddTaskForm {...props} />;
+    return <VMTask {...props} />;
   };
 
   const toCamelCase = (str: string) => {
@@ -562,11 +563,11 @@ const ProfessionalCollection: React.FC = () => {
             : t('Collection.addTaskTitle')
         }
         placement="right"
-        width={620}
+        width={640}
         onClose={closeDrawer}
         open={drawerVisible}
       >
-        {drawerVisible && getDrawerContent()}
+        {drawerVisible && getTaskContent()}
       </Drawer>
 
       <Drawer
