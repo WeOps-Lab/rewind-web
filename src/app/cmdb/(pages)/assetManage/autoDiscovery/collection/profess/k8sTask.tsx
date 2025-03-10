@@ -361,25 +361,23 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
           </Collapse>
         </div>
 
-        <Form.Item>
-          <div className="flex justify-end space-x-4">
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="!rounded-button whitespace-nowrap"
-              loading={submitLoading}
-            >
-              {t('Collection.confirm')}
-            </Button>
-            <Button
-              className="!rounded-button whitespace-nowrap"
-              onClick={onClose}
-              disabled={submitLoading}
-            >
-              {t('Collection.cancel')}
-            </Button>
-          </div>
-        </Form.Item>
+        <div className="flex justify-end space-x-4">
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="!rounded-button whitespace-nowrap"
+            loading={submitLoading}
+          >
+            {t('Collection.confirm')}
+          </Button>
+          <Button
+            className="!rounded-button whitespace-nowrap"
+            onClick={onClose}
+            disabled={submitLoading}
+          >
+            {t('Collection.cancel')}
+          </Button>
+        </div>
       </Form>
 
       <FieldModal

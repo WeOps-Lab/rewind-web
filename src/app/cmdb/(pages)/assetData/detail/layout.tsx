@@ -33,11 +33,11 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
         width={30}
         height={30}
       />
-      <div className="flex items-center mr-[10px]">
-        <span className="text-[14px] font-[800] mb-[2px] ">{modelName}</span>
-        <span className="w-[100px] text-[var(--color-text-2)] font-[400] text-[12px] hide-text">
-          -{instName}
-        </span>
+      <div>
+        <div className="text-[14px] font-[800] mb-[2px] ">{modelName}</div>
+        <div className="w-[100px] text-[var(--color-text-2)] font-[400] text-[12px] hide-text">
+          {instName}
+        </div>
       </div>
     </header>
   );

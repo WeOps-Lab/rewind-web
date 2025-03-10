@@ -204,7 +204,7 @@ export const InitNode: React.FC<TopoDataProps> = ({
       inst_id: node.id,
     };
     const queryString = new URLSearchParams(params).toString();
-    const url = `/assetData/detail/baseInfo?${queryString}`;
+    const url = `/cmdb/assetData/detail/baseInfo?${queryString}`;
     window.open(url, '_blank', 'noopener,noreferrer');
     console.log(data);
   };

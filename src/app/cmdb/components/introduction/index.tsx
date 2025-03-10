@@ -11,7 +11,6 @@ interface IntroductionProp {
 
 const Introduction: React.FC<IntroductionProp> = ({ message, title }) => (
   <Card
-    bordered={false}
     className={`${introductionStyle.introduction} mb-[16px]`}
     style={{ width: '100%', minWidth: '800px' }}
   >

@@ -11,7 +11,7 @@ export default function AssetDetail() {
   const instId = searchParams.get('inst_id');
   const instName = searchParams.get('inst_name');
   redirect(
-    `/assetData/detail/baseInfo?icn=${objIcon}&model_name=${modelName}&model_id=${modelId}&classification_id=${classificationId}&inst_id=${instId}&inst_name=${instName}`
+    `/cmdb/assetData/detail/baseInfo?icn=${objIcon}&model_name=${modelName}&model_id=${modelId}&classification_id=${classificationId}&inst_id=${instId}&inst_name=${instName}`
   );
   return null;
 }
