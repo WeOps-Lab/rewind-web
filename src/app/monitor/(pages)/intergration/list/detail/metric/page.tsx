@@ -475,7 +475,7 @@ const Configure = () => {
                   scroll={{ x: 'calc(100vw - 260px)' }}
                   columns={columns}
                   rowKey="id"
-                  rowDraggable
+                  rowDraggable={metricItem.child?.length > 0}
                   onRowDragEnd={onRowDragEnd}
                 />
               </Collapse>
