@@ -127,11 +127,7 @@
         "smtp_usessl": "Use SSL",
         "smtp_usetls": "Use TLS",
         "mail_sender": "Mail Sender",
-        "corp_id": "Corp ID",
-        "secret": "Secret",
-        "token": "Token",
-        "aes_key": "Aes Key",
-        "agent_id": "Agent ID"
+        "bot_key": "Bot Key"
       },
       "template": {
         "name": "NAME",

@@ -64,11 +64,7 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
           smtp_usetls: false,
           mail_sender: '',
         } : {
-          corp_id: '',
-          secret: '',
-          token: '',
-          aes_key: '',
-          agent_id: '',
+          bot_key: '',
         },
       });
     }
@@ -78,13 +74,12 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
     try {
       setConfirmLoading(true);
       const values = await form.validateFields();
+      const { name, description, ...config } = values
       const payload = {
         channel_type: channelType,
-        name: values.name,
-        description: values.description,
-        config: {
-          ...values
-        }
+        name,
+        description,
+        config
       };
       if (type === 'add') {
         await addChannel(payload);
@@ -114,7 +109,7 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
     if (['smtp_usessl', 'smtp_usetls'].includes(key)) {
       return 'switch';
     }
-    if (['smtp_pwd', 'token', 'aes_key', 'secret'].includes(key)) {
+    if (['smtp_pwd'].includes(key)) {
       return 'inputPwd';
     }
     return 'input';

@@ -123,11 +123,7 @@
         "smtp_usessl": "是否使用 SSL",
         "smtp_usetls": "是否使用 TLS",
         "mail_sender": "邮件发送者",
-        "corp_id": "公司 ID",
-        "secret": "密钥",
-        "token": "令牌",
-        "aes_key": "AES 密钥",
-        "agent_id": "代理 ID"
+        "bot_key": "机器人Key"
       },
       "template": {
         "name": "标题",
