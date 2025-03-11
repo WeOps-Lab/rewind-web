@@ -13,6 +13,7 @@
     "next": "下一步",
     "pre": "上一步",
     "train": "训练",
+    "batchOperation": "批量操作",
     "batchTrain": "批量训练",
     "done": "完成",
     "batchDelete": "批量删除",
