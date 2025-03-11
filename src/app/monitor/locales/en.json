@@ -98,10 +98,10 @@
     "organizations": "Organizations",
     "all": "All",
     "copy": "Copy",
-    "remove": "Remove",
-    "cutomTable": {
-      "fieldSetting": "List field settings"
-    }
+    "remove": "Remove"
+  },
+  "cutomTable": {
+    "fieldSetting": "List field settings"
   },
   "monitor": {
     "view": "View",

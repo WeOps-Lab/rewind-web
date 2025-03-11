@@ -98,10 +98,10 @@
     "organizations": "组织",
     "all": "全部",
     "copy": "复制",
-    "remove": "删除",
-    "cutomTable": {
-      "fieldSetting": "列表字段设置"
-    }
+    "remove": "删除"
+  },
+  "cutomTable": {
+    "fieldSetting": "列表字段设置"
   },
   "monitor": {
     "view": "视图",
