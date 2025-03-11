@@ -1,36 +1,28 @@
 'use client';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Input, Button, Modal, message, Tag, Tabs, Tooltip } from 'antd';
-import { PlusOutlined, DeleteOutlined, TrademarkOutlined, SyncOutlined } from '@ant-design/icons';
+import { Input, Button, Modal, message, Tag, Tabs, Tooltip, Dropdown, Menu, Space } from 'antd';
+import { PlusOutlined, DeleteOutlined, TrademarkOutlined, SyncOutlined, DownOutlined } from '@ant-design/icons';
+import { useAuth } from '@/context/auth';
+import useApiClient from '@/utils/request';
+import { useTranslation } from '@/utils/i18n';
+import { useLocalizedTime } from '@/hooks/useLocalizedTime';
+import type { TableColumnsType, PaginationProps } from 'antd';
 import CustomTable from '@/components/custom-table';
 import PermissionWrapper from '@/components/permission';
 import SelectSourceModal from './selectSourceModal';
-import useApiClient from '@/utils/request';
-import type { TableColumnsType, PaginationProps } from 'antd';
-import { useTranslation } from '@/utils/i18n';
-import { useLocalizedTime } from '@/hooks/useLocalizedTime';
+import { TableData } from '@/app/opspilot/types/knowledge'
+import styles from '@/app/opspilot/styles/common.module.scss'
 
 const { confirm } = Modal;
 const { TabPane } = Tabs;
 const { Search } = Input;
 
-interface TableData {
-  id: string | number;
-  name: string;
-  chunk_size: number;
-  created_by: string;
-  created_at: string;
-  train_status: number;
-  train_status_display: string;
-  [key: string]: any
-}
-
 const DocumentsPage: React.FC = () => {
   const router = useRouter();
   const { t } = useTranslation();
   const { get, post } = useApiClient();
+  const authContext = useAuth();
   const { convertToLocalizedTime } = useLocalizedTime();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
@@ -119,12 +111,26 @@ const DocumentsPage: React.FC = () => {
       key: 'action',
       render: (_, record) => (
         <>
+          <Button
+            type='link'
+            className='mr-[10px]'
+            disabled={[0, 4].includes(record.train_status)}
+            onClick={() => handleFile(record, 'preview')}>
+            Preview
+          </Button>
+          <Button
+            type='link'
+            className='mr-[10px]'
+            disabled={[0, 4].includes(record.train_status)}
+            onClick={() => handleFile(record, 'download')}>
+            Download
+          </Button>
           <PermissionWrapper requiredPermissions={['Set']}>
             <Button
               type='link'
               className='mr-[10px]'
               disabled={[0, 4].includes(record.train_status)}
-              onClick={() => handleSetClick(record)}>
+              onClick={() => handleSetClick(record.id)}>
               {t('common.set')}
             </Button>
           </PermissionWrapper>
@@ -151,6 +157,35 @@ const DocumentsPage: React.FC = () => {
       ),
     },
   ];
+
+  const handleFile = async (record: TableData, type: string) => {
+    if (type === 'preview') {
+      window.open(`/opspilot/knowledge/preview?id=${record.id}`);
+      return;
+    }
+    try {
+      const response = await fetch(`/opspilot/api/docFile?id=${record.id}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${authContext?.token}`,
+        },
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to download file');
+      }
+      const blob = await response.blob();
+      const fileUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = record.name;
+      link.click();
+      window.URL.revokeObjectURL(fileUrl);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      alert('Failed to download file');
+    }
+  }
 
   const handleSetClick = (record: any) => {
     const config = {
@@ -297,6 +332,38 @@ const DocumentsPage: React.FC = () => {
     router.push(`/opspilot/knowledge/detail/documents/modify?type=${selectedType}&id=${id}&name=${name}&desc=${desc}`);
   };
 
+  const batchOperationMenu = (
+    <Menu className={styles.menuContainer}>
+      <Menu.Item key="batchTrain">
+        <PermissionWrapper requiredPermissions={['Train']}>
+          <Button
+            type="text"
+            className="w-full"
+            icon={<TrademarkOutlined />}
+            onClick={() => handleTrain(selectedRowKeys)}
+            disabled={!selectedRowKeys.length}
+            loading={isTrainLoading}
+          >
+            {t('common.batchTrain')}
+          </Button>
+        </PermissionWrapper>
+      </Menu.Item>
+      <Menu.Item key="batchDelete">
+        <PermissionWrapper requiredPermissions={['Delete']}>
+          <Button
+            type="text"
+            className="w-full"
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(selectedRowKeys)}
+            disabled={!selectedRowKeys.length}
+          >
+            {t('common.batchDelete')}
+          </Button>
+        </PermissionWrapper>
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
     <div style={{marginTop: '-10px'}}>
       <Tabs defaultActiveKey={activeTabKey} onChange={handleTabChange}>
@@ -328,28 +395,14 @@ const DocumentsPage: React.FC = () => {
               {t('common.add')}
             </Button>
           </PermissionWrapper>
-          <PermissionWrapper requiredPermissions={['Train']}>
-            <Button
-              type='primary'
-              className='mr-[8px]'
-              icon={<TrademarkOutlined />}
-              onClick={() => handleTrain(selectedRowKeys)}
-              disabled={!selectedRowKeys.length}
-              loading={isTrainLoading}
-            >
-              {t('common.batchTrain')}
+          <Dropdown overlay={batchOperationMenu}>
+            <Button>
+              <Space>
+                {t('common.batchOperation')}
+                <DownOutlined />
+              </Space>
             </Button>
-          </PermissionWrapper>
-          <PermissionWrapper requiredPermissions={['Delete']}>
-            <Button
-              type='primary'
-              icon={<DeleteOutlined />}
-              onClick={() => handleDelete(selectedRowKeys)}
-              disabled={!selectedRowKeys.length}
-            >
-              {t('common.batchDelete')}
-            </Button>
-          </PermissionWrapper>
+          </Dropdown>
         </div>
       </div>
       <CustomTable

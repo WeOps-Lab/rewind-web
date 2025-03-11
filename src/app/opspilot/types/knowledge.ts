@@ -56,3 +56,14 @@ export interface ConfigDataProps {
   selectedEmbedModel: string | null;
   resultCount: number | null;
 }
+
+export interface TableData {
+  id: string | number;
+  name: string;
+  chunk_size: number;
+  created_by: string;
+  created_at: string;
+  train_status: number;
+  train_status_display: string;
+  [key: string]: any
+}

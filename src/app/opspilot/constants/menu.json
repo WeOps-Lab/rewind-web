@@ -89,6 +89,12 @@
           "isNotMenuItem": true
         },
         {
+          "title": "文件预览",
+          "url": "/opspilot/knowledge/preview",
+          "name": "file_preview",
+          "isNotMenuItem": true
+        },
+        {
           "title": "测试",
           "url": "/opspilot/knowledge/detail/testing",
           "icon": "ceshi",
@@ -234,6 +240,12 @@
           "title": "Result",
           "url": "/opspilot/knowledge/detail/documents/result",
           "name": "knowledge_document_result",
+          "isNotMenuItem": true
+        },
+        {
+          "title": "File Preview",
+          "url": "/opspilot/knowledge/preview",
+          "name": "file_preview",
           "isNotMenuItem": true
         },
         {
