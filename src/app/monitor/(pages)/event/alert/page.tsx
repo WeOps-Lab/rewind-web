@@ -329,7 +329,7 @@ const Alert: React.FC = () => {
               status: 'closed',
             });
             message.success(t('monitor.events.successfullyClosed'));
-            getAssetInsts('refresh');
+            onRefresh();
           } finally {
             resolve(true);
           }
