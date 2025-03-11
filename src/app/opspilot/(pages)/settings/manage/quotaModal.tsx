@@ -4,8 +4,8 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import OperateModal from '@/components/operate-modal';
 import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
-import Cookies from 'js-cookie';
 import styles from './index.module.scss';
+import { useUserInfoContext } from '@/context/userInfo';
 
 const { Option } = Select;
 
@@ -26,41 +26,30 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const { get } = useApiClient();
+  const { groups: groupList, selectedGroup } = useUserInfoContext();
   const [targetType, setTargetType] = useState<string>('user');
   const [userList, setUserList] = useState<TargetOption[]>([]);
-  const [groupList, setGroupList] = useState<TargetOption[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [targetLoading, setTargetLoading] = useState<boolean>(false);
 
-  const fetchData = useCallback(async (type: 'user' | 'group') => {
+  const fetchData = useCallback(async () => {
     setTargetLoading(true);
     try {
-      if (type === 'user') {
-        const userData = await get('/base/quota_rule/get_group_user/');
-        setUserList(userData.map((user: any) => ({ id: user.username, name: user.username })));
-      } else {
-        const groupData = await get('/core/login_info/');
-        const { group_list: groupListData } = groupData;
-        setGroupList(groupListData.map((group: any) => ({ id: group.id, name: group.name })));
-        const currentGroupId = Cookies.get('current_team');
-        const currentGroup = groupListData.find((group: any) => group.id === currentGroupId);
-        if (currentGroup) {
-          form.setFieldsValue({ targetList: [currentGroup.id] });
-        }
-      }
+      const userData = await get('/base/quota_rule/get_group_user/');
+      setUserList(userData.map((user: any) => ({ id: user.username, name: user.username })));
     } finally {
       setTargetLoading(false);
     }
   }, [form, get]);
 
   useEffect(() => {
-    if (visible) {
-      if (targetType === 'user') {
-        fetchData('user');
-      } else if (targetType === 'group') {
-        fetchData('group');
-      }
+    if (visible && targetType === 'user' && userList.length === 0) {
+      fetchData()
+    }
+  }, [visible])
 
+  useEffect(() => {
+    if (visible) {
       if (mode === 'edit' && initialValues) {
         form.setFieldsValue(initialValues);
         setTargetType(initialValues.targetType);
@@ -75,15 +64,13 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
   }, [visible, targetType, mode, initialValues, form, fetchData]);
 
   const handleTargetTypeChange = (value: string) => {
-    setTargetType(value);
     if (value === 'user' && userList.length === 0) {
-      fetchData('user');
-    } else if (value === 'group' && groupList.length === 0) {
-      fetchData('group');
+      fetchData();
     }
     form.setFieldsValue({
       rule: 'uniform',
-      targetList: undefined
+      targetList: value === 'user' ? undefined : [selectedGroup?.id],
+      targetType: value
     });
   };
 
@@ -138,12 +125,14 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
               rules={[{ required: true, message: `${t('common.selectMsg')}${t('settings.manageQuota.form.target')}` }]}
             >
               <Select
-                placeholder={`${t('common.selectMsg')}${t('settings.manageQuota.form.target')}`}
-                mode={targetType === 'user' ? 'multiple' : undefined}
+                allowClear
+                mode="multiple"
+                maxTagCount="responsive"
                 className={styles.multipleSelect}
                 style={{ width: '70%' }}
                 loading={targetLoading}
-                disabled={targetLoading || targetType !== 'user'}>
+                disabled={targetLoading}
+                placeholder={`${t('common.selectMsg')}${t('settings.manageQuota.form.target')}`}>
                 {(targetType === 'user' ? userList : groupList).map(item => (
                   <Option key={item.id} value={item.id}>{item.name}</Option>
                 ))}
