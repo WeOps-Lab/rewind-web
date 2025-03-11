@@ -3,7 +3,7 @@ import { Table, TableProps, Pagination } from 'antd';
 import { SettingFilled, HolderOutlined } from '@ant-design/icons';
 import customTableStyle from './index.module.scss';
 import FieldSettingModal from './fieldSettingModal';
-import { ColumnItem } from '@/types/index';
+import { ColumnItem, GroupFieldItem } from '@/types/index';
 import { TableCurrentDataSource } from 'antd/es/table/interface';
 import { cloneDeep } from 'lodash';
 
@@ -14,6 +14,7 @@ interface CustomTableProps<T>
     showSetting: boolean;
     displayFieldKeys: string[];
     choosableFields: ColumnItem[];
+    groupFields?: GroupFieldItem[];
   };
   onSelectFields?: (fields: string[]) => void;
   rowDraggable?: boolean;
@@ -218,6 +219,7 @@ const CustomTable = <T extends object>({
         ref={fieldRef}
         choosableFields={fieldSetting.choosableFields || []}
         displayFieldKeys={fieldSetting.displayFieldKeys}
+        groupFields={fieldSetting.groupFields}
         onConfirm={onSelectFields}
       />
     </div>

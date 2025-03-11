@@ -227,6 +227,7 @@
       "executionTime": "执行时间",
       "effective": "是否生效",
       "basicInformation": "基本信息",
+      "metricInformation": "指标信息",
       "defineTheMetric": "定义指标",
       "setAlertConditions": "设置告警条件",
       "configureNotifications": "配置通知",

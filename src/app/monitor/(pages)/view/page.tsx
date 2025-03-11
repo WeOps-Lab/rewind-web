@@ -339,6 +339,10 @@ const Intergration = () => {
     });
   };
 
+  const handleSelectFields = (fields: string[]) => {
+    console.log(fields);
+  };
+
   return (
     <div className={`${viewStyle.view} w-full`}>
       <div className={viewStyle.tree}>
@@ -375,7 +379,28 @@ const Intergration = () => {
           pagination={pagination}
           loading={tableLoading}
           rowKey="instance_id"
+          fieldSetting={{
+            showSetting: false,
+            displayFieldKeys: [
+              'elasticsearch_fs_total_available_in_bytes',
+              'instance_name',
+            ],
+            choosableFields: tableColumn.slice(0, tableColumn.length - 1),
+            groupFields: [
+              {
+                title: t('monitor.events.basicInformation'),
+                key: 'baseInfo',
+                child: columns.slice(0, 2),
+              },
+              {
+                title: t('monitor.events.metricInformation'),
+                key: 'metricInfo',
+                child: tableColumn.slice(2, tableColumn.length - 1),
+              },
+            ],
+          }}
           onChange={handleTableChange}
+          onSelectFields={handleSelectFields}
         ></CustomTable>
       </div>
       <ViewModal
