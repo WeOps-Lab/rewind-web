@@ -84,24 +84,37 @@ export const CYCLE_OPTIONS = {
   ONCE: 'close',
 } as const;
 
-export const FORM_INITIAL_VALUES = {
-  cycle: CYCLE_OPTIONS.ONCE,
-  intervalMinutes: 60,
-  timeout: 60,
-  inst: undefined,
-};
-
 export const ENTER_TYPE = {
   AUTOMATIC: 'automatic',
   APPROVAL: 'approval',
 } as const;
 
-export const ADD_FORM_INITIAL_VALUES = {
+export const K8S_FORM_INITIAL_VALUES = {
+  instId: undefined,
+  cycle: CYCLE_OPTIONS.ONCE,
+  intervalMinutes: 60,
+  timeout: 60,
+};
+
+export const VM_FORM_INITIAL_VALUES = {
+  instId: undefined,
   cycle: CYCLE_OPTIONS.ONCE,
   enterType: ENTER_TYPE.AUTOMATIC,
   port: '443',
   timeout: 600,
   sslVerify: true,
+};
+
+export const SNMP_FORM_INITIAL_VALUES = {
+  instId: undefined,
+  cycle: CYCLE_OPTIONS.ONCE,
+  enterType: ENTER_TYPE.AUTOMATIC,
+  snmpVersion: 'V2',
+  port: '161',
+  timeout: 60,
+  securityLevel: 'authNoPriv',
+  hashAlgorithm: 'MD5',
+  encryptionAlgorithm: 'AES',
 };
 
 export const validateCycleTime = (
@@ -131,7 +144,7 @@ export interface TabConfig {
 interface ValidationContext {
   form: any;
   t: (key: string) => string;
-  taskType?: 'k8s' | 'vm';
+  taskType?: 'k8s' | 'vm' | 'snmp';
 }
 
 const baseValidators = {
@@ -169,28 +182,140 @@ export const createTaskValidationRules = (context: ValidationContext) => {
   const { t, taskType } = context;
 
   const baseRules = {
-    taskName: [baseValidators.required(t('Collection.taskNamePlaceholder'))],
-    cycle: [baseValidators.required(t('Collection.k8sTask.cycleRequired'))],
-    inst: [
+    taskName: [
       baseValidators.required(
-        taskType === 'vm'
-          ? t('Collection.VMTask.chooseVCenter')
-          : t('Collection.k8sTask.instRequired')
+        `${t('common.inputMsg')}${t('Collection.taskNameLabel')}`
       ),
     ],
-    timeout: [baseValidators.required(t('Collection.k8sTask.timeoutRequired'))],
+    cycle: [
+      baseValidators.required(
+        `${t('common.selectMsg')}${t('Collection.cycle')}`
+      ),
+    ],
+    instId: [baseValidators.required(`${t('common.selectMsg')}`)],
+    timeout: [
+      baseValidators.required(
+        `${t('common.inputMsg')}${t('Collection.timeout')}`
+      ),
+    ],
     ...cycleValidators(context),
   };
 
   if (taskType === 'vm') {
     return {
       ...baseRules,
-      enterType: [baseValidators.required(t('Collection.VMTask.enterType'))],
-      proxy: [baseValidators.required(t('Collection.VMTask.proxy'))],
-      account: [baseValidators.required(t('Collection.VMTask.account'))],
-      password: [baseValidators.required(t('Collection.VMTask.password'))],
-      port: [baseValidators.required(t('Collection.VMTask.port'))],
-      sslVerify: [baseValidators.required(t('Collection.VMTask.sslVerify'))],
+      enterType: [
+        baseValidators.required(
+          `${t('common.selectMsg')}${t('Collection.enterType')}`
+        ),
+      ],
+      accessPoint: [
+        baseValidators.required(
+          `${t('common.selectMsg')}${t('Collection.accessPoint')}`
+        ),
+      ],
+      account: [
+        baseValidators.required(
+          `${t('common.inputMsg')}${t('Collection.VMTask.account')}`
+        ),
+      ],
+      password: [
+        baseValidators.required(
+          `${t('common.inputMsg')}${t('Collection.VMTask.password')}`
+        ),
+      ],
+      port: [
+        baseValidators.required(
+          `${t('common.inputMsg')}${t('Collection.VMTask.port')}`
+        ),
+      ],
+      sslVerify: [
+        baseValidators.required(
+          `${t('common.selectMsg')}${t('Collection.VMTask.sslVerify')}`
+        ),
+      ],
+    };
+  }
+
+  if (taskType === 'snmp') {
+    return {
+      ...baseRules,
+      enterType: [
+        baseValidators.required(
+          `${t('common.selectMsg')}${t('Collection.enterType')}`
+        ),
+      ],
+      snmpVersion: [
+        baseValidators.required(
+          `${t('common.selectMsg')}${t('Collection.SNMPTask.version')}`
+        ),
+      ],
+      port: [
+        baseValidators.required(
+          `${t('common.inputMsg')}${t('Collection.SNMPTask.port')}`
+        ),
+      ],
+      communityString: [
+        {
+          validator: (_: any, value: any) => {
+            const version = context.form.getFieldValue('snmpVersion');
+            if (['V2', 'V2C'].includes(version) && !value) {
+              return Promise.reject(
+                new Error(
+                  `${t('common.inputMsg')}${t('Collection.SNMPTask.communityString')}`
+                )
+              );
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
+      userName: [
+        {
+          validator: (_: any, value: any) => {
+            const version = context.form.getFieldValue('snmpVersion');
+            if (version === 'V3' && !value) {
+              return Promise.reject(
+                new Error(
+                  `${t('common.inputMsg')}${t('Collection.SNMPTask.userName')}`
+                )
+              );
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
+      authPassword: [
+        {
+          validator: (_: any, value: any) => {
+            const version = context.form.getFieldValue('snmpVersion');
+            if (version === 'V3' && !value) {
+              return Promise.reject(
+                new Error(
+                  `${t('common.inputMsg')}${t('Collection.SNMPTask.authPassword')}`
+                )
+              );
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
+      encryptKey: [
+        {
+          validator: (_: any, value: any) => {
+            const version = context.form.getFieldValue('snmpVersion');
+            const securityLevel = context.form.getFieldValue('securityLevel');
+            if (version === 'V3' && securityLevel === 'authPriv' && !value) {
+              return Promise.reject(
+                new Error(
+                  `${t('common.inputMsg')}${t('Collection.SNMPTask.encryptKey')}`
+                )
+              );
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
     };
   }
 
@@ -207,7 +332,6 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
     columns: [
       { title: '对象类型', dataIndex: 'model_id', width: 160 },
       { title: '实例名', dataIndex: 'inst_name', width: 260 },
-      //   { title: '状态', dataIndex: '_status', width: 120 },
     ],
   },
   update: {
@@ -218,20 +342,18 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
     columns: [
       { title: '对象类型', dataIndex: 'model_id', width: 160 },
       { title: '实例名', dataIndex: 'inst_name', width: 260 },
-      // { title: '更新状态', dataIndex: '_status', width: 120 },
     ],
   },
-  //   relation: {
-  //     count: 0,
-  //     label: '新增关联',
-  //     message: '注：展示任务执行后，新创建的资产关联情况，自动更新至在资产记录。',
-  //     alertType: 'warning',
-  //     columns: [
-  //         { title: '源对象类型', dataIndex: 'type', width: 180 },
-  //         { title: '源实例', dataIndex: 'inst_name', width: 260 },
-  //         { title: '关联状态', dataIndex: '_status', width: 120 },
-  //     ],
-  //   },
+  relation: {
+    count: 0,
+    label: '新增关联',
+    message: '注：展示任务执行后，新创建的资产关联情况，自动更新至在资产记录。',
+    alertType: 'warning',
+    columns: [
+      { title: '源对象类型', dataIndex: 'type', width: 180 },
+      { title: '源实例', dataIndex: 'inst_name', width: 260 },
+    ],
+  },
   delete: {
     count: 3,
     label: '下架资产',
@@ -241,7 +363,6 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
     columns: [
       { title: '对象类型', dataIndex: 'model_id', width: 160 },
       { title: '实例名', dataIndex: 'inst_name', width: 260 },
-      //   { title: '下架状态', dataIndex: '_status', width: 120 },
     ],
   },
 };

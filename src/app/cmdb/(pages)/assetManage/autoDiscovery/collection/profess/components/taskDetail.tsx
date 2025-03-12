@@ -11,6 +11,7 @@ import { useTranslation } from '@/utils/i18n';
 
 interface TaskDetailProps {
   task: CollectTask;
+  modelId?: string;
 }
 
 interface TaskData {
@@ -100,7 +101,7 @@ const TaskTable: React.FC<{
   );
 };
 
-const TaskDetail: React.FC<TaskDetailProps> = ({ task }) => {
+const TaskDetail: React.FC<TaskDetailProps> = ({ task, modelId }) => {
   const { get } = useApiClient();
   const { t } = useTranslation();
   const [detailData, setDetailData] = useState<TaskDetailData>({
@@ -122,18 +123,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task }) => {
     fetchDetailData();
   }, [task.id]);
 
-  //   const actionColumn = {
-  //     title: '操作',
-  //     key: 'action',
-  //     fixed: 'right' as const,
-  //     width: 120,
-  //     render: () => (
-  //       <Button type="link" size="small">
-  //         变更记录
-  //       </Button>
-  //     ),
-  //   };
-
   const statusColumn = {
     title: '状态',
     dataIndex: '_status',
@@ -152,28 +141,30 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task }) => {
     },
   };
 
-  const tabItems = Object.entries(TASK_DETAIL_CONFIG).map(([key, config]) => {
-    const count = detailData[key as keyof TaskDetailData]?.count || 0;
-    return {
-      key,
-      label: `${config.label} (${count})`,
-      children: (
-        <div className="flex flex-col h-full">
-          <Alert
-            message={config.message}
-            type={config.alertType}
-            showIcon
-            className="mb-4"
-          />
-          <TaskTable
-            type={key}
-            taskId={task.id}
-            columns={[...config.columns, statusColumn]}
-          />
-        </div>
-      ),
-    };
-  });
+  const tabItems = Object.entries(TASK_DETAIL_CONFIG)
+    .filter(([key]) => !(modelId === 'k8s' && key === 'relation'))
+    .map(([key, config]) => {
+      const count = detailData[key as keyof TaskDetailData]?.count || 0;
+      return {
+        key,
+        label: `${config.label} (${count})`,
+        children: (
+          <div className="flex flex-col h-full">
+            <Alert
+              message={config.message}
+              type={config.alertType}
+              showIcon
+              className="mb-4"
+            />
+            <TaskTable
+              type={key}
+              taskId={task.id}
+              columns={[...config.columns, statusColumn]}
+            />
+          </div>
+        ),
+      };
+    });
 
   return (
     <div

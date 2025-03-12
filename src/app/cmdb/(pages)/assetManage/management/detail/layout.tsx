@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Card, Modal, message, Spin } from 'antd';
+import { Modal, message, Spin } from 'antd';
 import WithSideMenuLayout from '@/components/sub-layout';
 import { useRouter } from 'next/navigation';
 import { getIconUrl } from '@/app/cmdb/utils/common';
@@ -33,13 +33,6 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
     commonContext?.permissionGroupsInfo || null
   );
   const isAdmin = permissionGroupsInfo.current?.is_all;
-  //   const menuItems = [
-  //     { label: t('Model.attributes'), path: '/assetManage/detail/attributes' },
-  //     {
-  //       label: t('Model.relationships'),
-  //       path: '/assetManage/detail/associations',
-  //     },
-  //   ];
   const [groupList, setGroupList] = useState<ClassificationItem[]>([]);
   const [pageLoading, setPageLoading] = useState<boolean>(false);
 
@@ -67,7 +60,6 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   const handleBackButtonClick = () => {
-    // 处理返回按钮点击事件
     router.push(`/cmdb/assetManage`);
   };
 
@@ -100,61 +92,69 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  return (
-    <div className={`flex flex-col ${attrLayoutStyle.attrLayout}`}>
-      <Spin spinning={pageLoading}>
-        <Card style={{ width: '100%' }} className="mb-[20px]">
-          <header className="flex items-center">
-            <Image
-              src={getIconUrl({ icn: objIcon, model_id: modelId })}
-              className="block mr-[20px]"
-              alt={t('picture')}
-              width={40}
-              height={40}
-            />
-            <div className="flex flex-col mr-[10px]">
-              <span className="text-[16px] font-[800] mb-[2px] ">
-                {modelName}
-              </span>
-              <span className="text-[var(--color-text-3)]">{modelId}</span>
-            </div>
-            {(isAdmin || !isPre) && (
-              <div className="self-start">
-                <PermissionWrapper requiredPermissions={['Edit']}>
-                  <EditTwoTone
-                    className="edit mr-[10px] cursor-pointer"
-                    onClick={() =>
-                      shoModelModal('edit', {
-                        model_name: modelName,
-                        model_id: modelId,
-                        classification_id: classificationId,
-                        icn: objIcon,
-                      })
-                    }
-                  />
-                </PermissionWrapper>
-                <PermissionWrapper requiredPermissions={['Delete']}>
-                  <DeleteTwoTone
-                    className="delete cursor-pointer"
-                    onClick={() =>
-                      showDeleteConfirm({
-                        model_id: modelId,
-                      })
-                    }
-                  />
-                </PermissionWrapper>
-              </div>
-            )}
-          </header>
-        </Card>
-        <div style={{ ['--custom-height' as string]: 'calc(100vh - 260px)' }}>
-          <WithSideMenuLayout
-            showBackButton={true}
-            onBackButtonClick={handleBackButtonClick}
-          >
-            {children}
-          </WithSideMenuLayout>
+  const intro = (
+    <header className="flex items-center">
+      <Image
+        src={getIconUrl({ icn: objIcon, model_id: modelId })}
+        className="block mr-[10px]"
+        alt={t('picture')}
+        width={30}
+        height={30}
+      />
+      <div className="flex flex-col mr-[6px] min-w-[84px]">
+        <div
+          className={`text-[14px] font-[800] mb-[2px] ${attrLayoutStyle.ellipsisText}`}
+        >
+          {modelName}
         </div>
+        <div className="text-[var(--color-text-2)] text-[12px]">{modelId}</div>
+      </div>
+      {(isAdmin || !isPre) && (
+        <div className="self-start">
+          <PermissionWrapper requiredPermissions={['Edit']}>
+            <EditTwoTone
+              className="edit mr-[8px] text-[14px] cursor-pointer"
+              onClick={() =>
+                shoModelModal('edit', {
+                  model_name: modelName,
+                  model_id: modelId,
+                  classification_id: classificationId,
+                  icn: objIcon,
+                })
+              }
+            />
+          </PermissionWrapper>
+          <PermissionWrapper requiredPermissions={['Delete']}>
+            <DeleteTwoTone
+              className="delete text-[14px] cursor-pointer"
+              onClick={() =>
+                showDeleteConfirm({
+                  model_id: modelId,
+                })
+              }
+            />
+          </PermissionWrapper>
+        </div>
+      )}
+    </header>
+  );
+
+  return (
+    <div
+      style={{
+        height: 'calc(100vh - 150px)',
+        ['--custom-height' as string]: 'calc(100vh - 150px)',
+      }}
+      className={attrLayoutStyle.attrLayout}
+    >
+      <Spin spinning={pageLoading}>
+        <WithSideMenuLayout
+          showBackButton={true}
+          onBackButtonClick={handleBackButtonClick}
+          intro={intro}
+        >
+          {children}
+        </WithSideMenuLayout>
         <ModelModal
           ref={modelRef}
           groupList={groupList}

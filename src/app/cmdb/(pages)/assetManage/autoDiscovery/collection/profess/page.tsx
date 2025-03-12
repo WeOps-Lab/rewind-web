@@ -2,8 +2,9 @@
 
 import dayjs from 'dayjs';
 import styles from './index.module.scss';
-import K8sTaskForm from './components/k8sTask';
+import K8sTask from './components/k8sTask';
 import VMTask from './components/vmTask';
+import SNMPTask from './components/snmpTask';
 import TaskDetail from './components/taskDetail';
 import useApiClient from '@/utils/request';
 import CustomTable from '@/components/custom-table';
@@ -29,7 +30,6 @@ import {
   TreeNode,
   CollectTaskMessage,
 } from '@/app/cmdb/types/autoDiscovery';
-
 
 type ExtendedColumnItem = ColumnType<CollectTask> & {
   key: string;
@@ -246,16 +246,21 @@ const ProfessionalCollection: React.FC = () => {
   };
 
   const getTaskContent = () => {
+    if (!selectedNode) return null;
+
     const props = {
       onClose: closeDrawer,
       onSuccess: () => {
         fetchData();
       },
+      selectedNode,
       modelId: activeTab || selectedNodeId,
       editId: editingId,
     };
     if (selectedNodeId === 'k8s') {
-      return <K8sTaskForm {...props} />;
+      return <K8sTask {...props} />;
+    } else if (selectedNodeId === 'network') {
+      return <SNMPTask {...props} />;
     }
     return <VMTask {...props} />;
   };
@@ -563,7 +568,7 @@ const ProfessionalCollection: React.FC = () => {
             : t('Collection.addTaskTitle')
         }
         placement="right"
-        width={640}
+        width={700}
         onClose={closeDrawer}
         open={drawerVisible}
       >
@@ -579,7 +584,7 @@ const ProfessionalCollection: React.FC = () => {
       >
         {detailVisible && currentTask && (
           <div className="bg-gray-50">
-            <TaskDetail task={currentTask} />
+            <TaskDetail task={currentTask} modelId={selectedNodeId} />
           </div>
         )}
       </Drawer>

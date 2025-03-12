@@ -20,8 +20,14 @@
 }
 
 .mainContent {
-  height: calc(100vh - 200px);
+  height: calc(100vh - 150px);
   overflow-y: auto;
+
+  :global {
+    .ant-collapse-content-box {
+      padding-left: 0 !important;
+    }
+  }
 }
 
 .status {

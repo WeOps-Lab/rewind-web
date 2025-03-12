@@ -25,3 +25,18 @@ export interface TreeNode {
     children?: TreeNode[];
     tabItems?: TreeNode[];
 }
+
+export interface BaseTaskFormProps {
+  children?: React.ReactNode;
+  showAdvanced?: boolean;
+  timeoutProps?: {
+    min?: number;
+    defaultValue?: number;
+    addonAfter?: string;
+  };
+  modelId: string;
+  submitLoading?: boolean;
+  onClose: () => void;
+  onTest?: () => void;
+}
+

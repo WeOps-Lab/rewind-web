@@ -241,7 +241,7 @@ const Associations = () => {
   return (
     <div>
       <div>
-        <div className="nav-box flex justify-end mb-[10px]">
+        <div className="nav-box flex justify-end mb-[16px]">
           <div className="left-side w-[240px] mr-[8px]">
             <Input
               placeholder={t('search')}
@@ -267,7 +267,7 @@ const Associations = () => {
         </div>
         <CustomTable
           size="middle"
-          scroll={{ y: 'calc(100vh - 390px)' }}
+          scroll={{ y: 'calc(100vh - 340px)' }}
           columns={columns}
           dataSource={tableData}
           pagination={pagination}

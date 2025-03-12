@@ -50,11 +50,10 @@ export const useTaskForm = ({
       const data = await get(`/cmdb/api/collect/${id}/`);
       const cycleType = data.cycle_value_type || CYCLE_OPTIONS.ONCE;
       const cycleValue = data.cycle_value;
-
       form.setFieldsValue({
         ...data,
         taskName: data.name,
-        inst: data.instances?.[0]?._id,
+        instId: data.instances?.[0]?._id,
         cycle: cycleType,
         ...(cycleType === CYCLE_OPTIONS.DAILY && {
           dailyTime: dayjs(cycleValue, 'HH:mm'),
@@ -67,7 +66,6 @@ export const useTaskForm = ({
       return data;
     } catch (error) {
       console.error('Failed to fetch task detail:', error);
-      message.error(t('common.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -89,7 +87,6 @@ export const useTaskForm = ({
       onClose();
     } catch (error) {
       console.error('Failed to save task:', error);
-      message.error(t('common.saveFailed'));
     } finally {
       setSubmitLoading(false);
     }
