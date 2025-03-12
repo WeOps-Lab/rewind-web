@@ -35,7 +35,8 @@ import { useCommon } from '@/app/monitor/context/common';
 import { deepClone, showGroupName } from '@/app/monitor/utils/common';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import TreeSelector from '@/app/monitor/components/treeSelector';
-import EditConfig from './editConfig';
+// import EditConfig from './editConfig';
+import UpdateConfig from '@/app/monitor/components/updateConfig';
 import {
   OBJECT_INSTANCE_TYPE_MAP,
   NODE_STATUS_MAP,
@@ -615,7 +616,8 @@ const Asset = () => {
         groupList={organizationList}
         onSuccess={operateRule}
       />
-      <EditConfig ref={configRef} onSuccess={() => getAssetInsts(objectId)} />
+      {/* <EditConfig ref={configRef} onSuccess={() => getAssetInsts(objectId)} /> */}
+      <UpdateConfig ref={configRef} onSuccess={() => getAssetInsts(objectId)} />
     </div>
   );
 };
