@@ -225,13 +225,11 @@ const StudioSettingsPage: React.FC = () => {
         }
 
         const json = await response.json();
-
         if (Array.isArray(json) && json.length > 0) {
-          const reply = json[0];
-
+          const reply = json.reduce((acc, cur) => acc + cur.text, '');
           const botMessage: CustomChatMessage = {
             id: uuidv4(),
-            content: reply.text,
+            content: reply,
             role: 'bot',
             createAt: new Date().toISOString(),
             updateAt: new Date().toISOString(),
