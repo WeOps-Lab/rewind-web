@@ -1613,6 +1613,15 @@ const NODE_STATUS_MAP: ObjectIconMap = {
   unavailable: 'gray',
 };
 
+const INIT_VIEW_MODAL_FORM = {
+  instance_id_values: [],
+  instance_name: '',
+  instance_id: '',
+  instance_id_keys: [],
+  dimensions: [],
+  title: '',
+};
+
 export {
   UNIT_LIST,
   INDEX_CONFIG,
@@ -1630,6 +1639,7 @@ export {
   OBJECT_INSTANCE_TYPE_MAP,
   NODE_STATUS_MAP,
   MANUAL_CONFIG_TEXT_MAP,
+  INIT_VIEW_MODAL_FORM,
   useMiddleWareFields,
   useInterfaceLabelMap,
   useScheduleList,

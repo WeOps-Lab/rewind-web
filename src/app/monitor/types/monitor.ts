@@ -288,6 +288,9 @@ export interface ViewModalProps {
   monitorObject: React.Key;
   monitorName: string;
   plugins: IntergrationItem[];
+  form?: ChartProps;
+  metrics?: MetricItem[];
+  objects?: ObectItem[];
 }
 
 export interface IntergrationMonitoredObject {

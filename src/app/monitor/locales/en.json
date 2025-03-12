@@ -191,7 +191,9 @@
       "redis_used_memory": "Used Memory",
       "redis_instantaneous_ops_per_sec": "Operations per Second",
       "reportTime": "Report Time",
-      "metrics": "Metrics"
+      "metrics": "Metrics",
+      "monitorView": "Monitoring View",
+      "alertList": "Alarm List"
     },
     "events": {
       "event": "Event",
