@@ -22,7 +22,7 @@ const useBtnPermissions = () => {
         userPermissions.add(permission);
       });
 
-      return requiredPermissions.every((permission) =>
+      return requiredPermissions.some((permission) =>
         userPermissions.has(permission)
       );
     };
