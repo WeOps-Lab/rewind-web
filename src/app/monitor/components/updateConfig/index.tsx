@@ -1,38 +1,37 @@
 import { ModalRef } from '@/app/monitor/types';
 import { Form, Button, message, InputNumber, Select } from 'antd';
+import { deepClone } from '@/app/monitor/utils/common';
 import React, { useState, useRef, useEffect,useImperativeHandle,forwardRef } from 'react';
 import { useTranslation } from '@/utils/i18n';
-import { deepClone } from '@/app/monitor/utils/common';
+import { useFormItems } from '@/app/monitor/hooks/intergration';
 import {
   COLLECT_TYPE_MAP,
   CONFIG_TYPE_MAP,
   INSTANCE_TYPE_MAP,
   TIMEOUT_UNITS,
 } from '@/app/monitor/constants/monitor';
-import { useSearchParams } from 'next/navigation';
-import useApiClient from '@/utils/request';
-import { useFormItems } from '@/app/monitor/hooks/intergration';
-import { TableDataItem } from '@/app/monitor/types';
 const { Option } = Select;
-import Permission from '@/components/permission';
 import OperateModal from '@/components/operate-modal';
 interface ModalProps {
   onSuccess: () => void;
 }
 
+
 const UpdateConfig = forwardRef<ModalRef,ModalProps>(
   ({ onSuccess }, ref ) => {
-    const [form] = Form.useForm();
     const formRef = useRef(null);
+    const [form] = Form.useForm();
     const { t } = useTranslation();
-    const searchParams = useSearchParams();
-    const { post, isLoading } = useApiClient();
-    const pluginName = searchParams.get('collect_type') || '';
-    const objId = searchParams.get('id') || '';
-    const objectName = searchParams.get('name') || '';
+    const [pluginName,setPluginName] = useState<string>('');
+    const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
+    const [modalVisible,setModalVisible] = useState<boolean>(false);
+    const [title,setTitle] = useState<string>('');
+    const [type,setType] = useState<string>('');
     const collectType = COLLECT_TYPE_MAP[pluginName];
     const configTypes = CONFIG_TYPE_MAP[pluginName];
-    const instanceType = INSTANCE_TYPE_MAP[pluginName];
+
+
+
     const authPasswordRef = useRef<any>(null);
     const privPasswordRef = useRef<any>(null);
     const passwordRef = useRef<any>(null);
@@ -41,21 +40,7 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     const [privPasswordDisabled, setPrivPasswordDisabled] =
       useState<boolean>(true);
     const [passwordDisabled, setPasswordDisabled] = useState<boolean>(true);
-    const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
-    const [modalVisible,setModalVisible] = useState<boolean>(false);
-    const [title,setTitle] = useState<string>('');
     
-    useImperativeHandle(ref, () => ({
-      showModal: ({type,form,title}) => {
-        console.log(type,form);
-        
-        setModalVisible(true)
-        setTitle(title)
-        onSuccess()
-      }
-    }))
-
-
 
     const handleEditAuthPassword = () => {
       if (authPasswordDisabled) {
@@ -65,7 +50,7 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       }
       setAuthPasswordDisabled(false);
     };
-
+  
     const handleEditPrivPassword = () => {
       if (privPasswordDisabled) {
         form.setFieldsValue({
@@ -74,7 +59,7 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       }
       setPrivPasswordDisabled(false);
     };
-
+  
     const handleEditPassword = () => {
       if (passwordDisabled) {
         form.setFieldsValue({
@@ -84,8 +69,18 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       setPasswordDisabled(false);
     };
 
+    function getKeyByValueStrict<T extends Record<string, unknown>>(
+      obj: T,
+      value: T[keyof T]
+    ): keyof T {
+      const key = (Object.keys(obj) as Array<keyof T>).find((k) => obj[k] === value);
+      if (!key) throw new Error("未找到匹配的键名");
+      return key;
+    }
+
+    // 根据自定义hook，生成不同的模板
     // 使用自定义 Hook
-    const { formItems, configText } = useFormItems({
+    const { formItems } = useFormItems({
       collectType,
       columns: [],
       authPasswordRef,
@@ -99,31 +94,24 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       handleEditPassword,
       pluginName,
     });
-
     
-
-    useEffect(() => {
-      if (!authPasswordDisabled && authPasswordRef?.current) {
-        authPasswordRef.current.focus();
+    useImperativeHandle(ref, () => ({
+      showModal: ({type,form,title}) => {
+        setType(type)
+        setModalVisible(true)
+        setTitle(title)
+        const _form = deepClone(form);
+        const types = getKeyByValueStrict(INSTANCE_TYPE_MAP,_form?.config_type);
+        setPluginName(types as string);
+        console.log(types,_form.content)
       }
-    }, [authPasswordDisabled]);
+    }))
 
-    useEffect(() => {
-      if (!privPasswordDisabled && privPasswordRef?.current) {
-        privPasswordRef.current.focus();
-      }
-    }, [privPasswordDisabled]);
-
-    useEffect(() => {
-      if (!passwordDisabled && passwordRef?.current) {
-        passwordRef.current.focus();
-      }
-    }, [passwordDisabled]);
-
-    useEffect(() => {
-      if (isLoading) return;
+    useEffect(()=>{
       initData();
-    }, [isLoading]);
+      console.log(type);
+      setConfirmLoading(false)
+    },[])
 
     const initData = () => {
       form.setFieldsValue({
@@ -153,88 +141,27 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       }
     };
 
-    const handleSave = () => {
-      form.validateFields().then((values) => {
-        // 处理表单提交逻辑
-        const _values = deepClone(values);
-        _values.instance_id = getInstId(_values);
-        _values.instance_type = instanceType;
-        _values.collect_type = collectType;
-        _values.config_type = configTypes[0] || '';
-        getConfigText(_values);
-      });
-    };
-
-    const getInstId = (row: TableDataItem) => {
-      switch (collectType) {
-        case 'host':
-          return row.monitor_ip;
-        case 'trap':
-          return 'trap' + row.monitor_ip;
-        case 'web':
-          return row.monitor_url;
-        case 'ping':
-          return row.monitor_url;
-        case 'middleware':
-          return row.monitor_url;
-        case 'docker':
-          return row.endpoint;
-        case 'database':
-          return row.server || `${row.host}:${row.port}`;
-        default:
-          return objectName + '-' + (row.monitor_ip || '');
-      }
-    };
-
-    const getConfigText = async (params: TableDataItem) => {
-      try {
-        setConfirmLoading(true);
-        await post(
-          `/monitor/api/monitor_instance/${objId}/check_monitor_instance/`,
-          {
-            instance_id: params.instance_id,
-            instance_name: params.instance_id,
-          }
-        );
-        let _configMsg = deepClone(configText);
-        if (collectType === 'snmp') {
-          _configMsg = _configMsg[`v${params.version}`];
-        }
-        if (collectType === 'host') {
-          _configMsg = params.metric_type.reduce((pre: string, cur: string) => {
-            return (pre += _configMsg[cur]);
-          }, '');
-        }
-        // setConfigMsg(replaceTemplate(_configMsg as string, params));
-        message.success(t('common.successfullyAdded'));
-      } finally {
-        setConfirmLoading(false);
-      }
-    };
-
-    // const replaceTemplate = (
-    //   template: string,
-    //   data: { [key: string]: string | number }
-    // ): string => {
-    //   return Object.keys(data).reduce((acc, key) => {
-    //     // 使用正则表达式来匹配模板字符串中的 ${key} 或 $key
-    //     const regex = new RegExp(`\\$${key}`, 'g');
-    //     // 替换匹配到的内容为对象中的值
-    //     return acc.replace(regex, data[key].toString());
-    //   }, template);
-    // };
-
     const handleCancel = () => {
       setModalVisible(false);
     };
 
     const handleSubmit = () => {
-      // formRef.current
+      form.validateFields().then((values)=>{
+        setConfirmLoading(true);
+        console.log(values);
+        onSuccess()
+        setTimeout(()=>{
+          setConfirmLoading(false)
+          message.success(t('common.successfullyModified'))
+          setModalVisible(false)
+        },3000)
+      })
+      
     };
     
     return(
       <OperateModal
-        width={600}
+        width={550}
         title={title}
         visible={modalVisible}
         onCancel={handleCancel}
@@ -253,12 +180,7 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
         }
       >
         <div className="px-[10px]">
-          <Form form={form} ref={formRef} name="basic" layout="vertical">
-            {/* {formItems && (
-              <p className="mb-[20px]">
-                {t('monitor.intergrations.configureStepIntro')}1111
-              </p>
-            )} */}
+          <Form ref={formRef} form={form} name="basic" layout="vertical">
             {formItems}
             <Form.Item required label={t('monitor.intergrations.interval')}>
               <Form.Item
@@ -291,11 +213,6 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
               </span>
             </Form.Item>
           </Form>
-          <Permission requiredPermissions={['Add']}>
-            <Button type="primary" loading={confirmLoading} onClick={handleSave}>
-              {t('monitor.intergrations.generateConfiguration')}
-            </Button>
-          </Permission>
         </div>
       </OperateModal>
     )
