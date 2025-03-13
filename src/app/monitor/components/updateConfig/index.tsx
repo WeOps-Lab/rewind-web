@@ -1,9 +1,11 @@
 import { ModalRef } from '@/app/monitor/types';
+import { ModalProps } from '@/app/monitor/types';
 import { Form, Button, message, InputNumber, Select } from 'antd';
 import { deepClone } from '@/app/monitor/utils/common';
 import React, { useState, useRef, useEffect,useImperativeHandle,forwardRef } from 'react';
 import { useTranslation } from '@/utils/i18n';
 import { useFormItems } from '@/app/monitor/hooks/intergration';
+import OperateModal from '@/components/operate-modal';
 import {
   COLLECT_TYPE_MAP,
   CONFIG_TYPE_MAP,
@@ -11,15 +13,11 @@ import {
   TIMEOUT_UNITS,
 } from '@/app/monitor/constants/monitor';
 const { Option } = Select;
-import OperateModal from '@/components/operate-modal';
-interface ModalProps {
-  onSuccess: () => void;
-}
+
 
 
 const UpdateConfig = forwardRef<ModalRef,ModalProps>(
   ({ onSuccess }, ref ) => {
-    const formRef = useRef(null);
     const [form] = Form.useForm();
     const { t } = useTranslation();
     const [pluginName,setPluginName] = useState<string>('');
@@ -27,20 +25,35 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     const [modalVisible,setModalVisible] = useState<boolean>(false);
     const [title,setTitle] = useState<string>('');
     const [type,setType] = useState<string>('');
-    const collectType = COLLECT_TYPE_MAP[pluginName];
-    const configTypes = CONFIG_TYPE_MAP[pluginName];
-
-
-
-    const authPasswordRef = useRef<any>(null);
-    const privPasswordRef = useRef<any>(null);
-    const passwordRef = useRef<any>(null);
+    const [passwordDisabled, setPasswordDisabled] = useState<boolean>(true);
     const [authPasswordDisabled, setAuthPasswordDisabled] =
       useState<boolean>(true);
     const [privPasswordDisabled, setPrivPasswordDisabled] =
       useState<boolean>(true);
-    const [passwordDisabled, setPasswordDisabled] = useState<boolean>(true);
+    const collectType = COLLECT_TYPE_MAP[pluginName];
+    const configTypes = CONFIG_TYPE_MAP[pluginName];
+    const formRef = useRef(null);
+    const authPasswordRef = useRef<any>(null);
+    const privPasswordRef = useRef<any>(null);
+    const passwordRef = useRef<any>(null);
     
+    useImperativeHandle(ref, () => ({
+      showModal: ({type,form,title}) => {
+        setType(type)
+        setModalVisible(true)
+        setTitle(title)
+        const _form = deepClone(form);
+        const types = getKeyByValueStrict(INSTANCE_TYPE_MAP,_form?.config_type);
+        setPluginName(types as string);
+        console.log(types,_form.content)
+      }
+    }))
+
+    useEffect(()=>{
+      initData();
+      console.log(type);
+      setConfirmLoading(false)
+    },[])
 
     const handleEditAuthPassword = () => {
       if (authPasswordDisabled) {
@@ -69,10 +82,8 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       setPasswordDisabled(false);
     };
 
-    function getKeyByValueStrict<T extends Record<string, unknown>>(
-      obj: T,
-      value: T[keyof T]
-    ): keyof T {
+    // 获取对应键值
+    const getKeyByValueStrict = <T extends Record<string, unknown>>(obj: T,value: T[keyof T]): keyof T => {
       const key = (Object.keys(obj) as Array<keyof T>).find((k) => obj[k] === value);
       if (!key) throw new Error("未找到匹配的键名");
       return key;
@@ -95,24 +106,6 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       pluginName,
     });
     
-    useImperativeHandle(ref, () => ({
-      showModal: ({type,form,title}) => {
-        setType(type)
-        setModalVisible(true)
-        setTitle(title)
-        const _form = deepClone(form);
-        const types = getKeyByValueStrict(INSTANCE_TYPE_MAP,_form?.config_type);
-        setPluginName(types as string);
-        console.log(types,_form.content)
-      }
-    }))
-
-    useEffect(()=>{
-      initData();
-      console.log(type);
-      setConfirmLoading(false)
-    },[])
-
     const initData = () => {
       form.setFieldsValue({
         interval: 10,
@@ -156,7 +149,6 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
           setModalVisible(false)
         },3000)
       })
-      
     };
     
     return(
