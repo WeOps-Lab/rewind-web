@@ -163,7 +163,7 @@ const Information: React.FC<TableDataItem> = ({
         </Descriptions.Item>
       </Descriptions>
       <div className="mt-4">
-        <Permission requiredPermissions={['Operate']}>
+        <Permission requiredPermissions={['Operate', 'Detail']}>
           <Button
             type="link"
             disabled={formData.status !== 'new'}

@@ -191,7 +191,9 @@
       "redis_used_memory": "已用内存",
       "redis_instantaneous_ops_per_sec": "每秒操作次数",
       "reportTime": "上报时间",
-      "metrics": "全量指标"
+      "metrics": "全量指标",
+      "monitorView": "监控视图",
+      "alertList": "告警列表"
     },
     "events": {
       "event": "事件",

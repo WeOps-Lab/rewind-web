@@ -1431,6 +1431,7 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   Redis: 'database',
   Postgres: 'database',
   ElasticSearch: 'database',
+  VWWare: 'vmware',
 };
 
 const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
@@ -1464,6 +1465,7 @@ const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
   Redis: 'redis',
   Postgres: 'postgres',
   ElasticSearch: 'elasticsearch',
+  vCenter: 'vmware',
 };
 
 const INSTANCE_TYPE_MAP: ObjectIconMap = {
@@ -1497,6 +1499,7 @@ const INSTANCE_TYPE_MAP: ObjectIconMap = {
   Redis: 'redis',
   Postgres: 'postgres',
   ElasticSearch: 'elasticsearch',
+  VWWare: 'vmware',
 };
 
 const CONFIG_TYPE_MAP: ConfigTypeMap = {
@@ -1530,6 +1533,7 @@ const CONFIG_TYPE_MAP: ConfigTypeMap = {
   Redis: ['redis'],
   Postgres: ['postgres'],
   ElasticSearch: ['elasticsearch'],
+  VWWare: ['http'],
 };
 
 const MANUAL_CONFIG_TEXT_MAP: ObjectIconMap = {
@@ -1613,6 +1617,15 @@ const NODE_STATUS_MAP: ObjectIconMap = {
   unavailable: 'gray',
 };
 
+const INIT_VIEW_MODAL_FORM = {
+  instance_id_values: [],
+  instance_name: '',
+  instance_id: '',
+  instance_id_keys: [],
+  dimensions: [],
+  title: '',
+};
+
 export {
   UNIT_LIST,
   INDEX_CONFIG,
@@ -1630,6 +1643,7 @@ export {
   OBJECT_INSTANCE_TYPE_MAP,
   NODE_STATUS_MAP,
   MANUAL_CONFIG_TEXT_MAP,
+  INIT_VIEW_MODAL_FORM,
   useMiddleWareFields,
   useInterfaceLabelMap,
   useScheduleList,

@@ -140,7 +140,7 @@ const Configure = () => {
     setLoading(true);
     let _objId = '';
     try {
-      if (['Docker', 'Cluster'].includes(groupName)) {
+      if (['Docker', 'Cluster', 'vCenter'].includes(groupName)) {
         const typeMaps: Record<string, string> = {
           Docker: 'Container Management',
           Cluster: 'K8S',
@@ -384,7 +384,7 @@ const Configure = () => {
 
   return (
     <div className={metricStyle.metric}>
-      {['Docker', 'Cluster'].includes(groupName) && (
+      {['Docker', 'Cluster', 'vCenter'].includes(groupName) && (
         <Segmented
           className="mb-[20px] custom-tabs"
           value={activeTab}

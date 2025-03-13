@@ -64,9 +64,7 @@ const SearchView: React.FC = () => {
     }[]
   >([]);
   const [labels, setLabels] = useState<string[]>([]);
-  const [object, setObject] = useState<string | undefined>(
-    url_obj_name as string
-  );
+  const [object, setObject] = useState<string>('');
   const [objects, setObjects] = useState<ObectItem[]>([]);
   const [activeTab, setActiveTab] = useState<string>('area');
   const [conditions, setConditions] = useState<ConditionItem[]>([]);
@@ -87,6 +85,7 @@ const SearchView: React.FC = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
   const [originMetricData, setOriginMetricData] = useState<IndexViewItem[]>([]);
+  const [defaultSelectObj, setDefaultSelectObj] = useState<React.Key>('');
 
   useEffect(() => {
     if (isLoading) return;
@@ -107,10 +106,11 @@ const SearchView: React.FC = () => {
   }, [activeTab, frequence, object, metric, conditions, instances, timeRange]);
 
   useEffect(() => {
-    if (url_obj_name && objects.length) {
-      handleObjectChange('otherWay');
+    if (isLoading) return;
+    if (url_obj_name && metrics.length && instances.length) {
+      handleSearch('refresh', 'area');
     }
-  }, [url_instance_id, url_obj_name, url_metric_id, objects]);
+  }, [url_obj_name, metrics, instances, isLoading]);
 
   const getObjects = async () => {
     try {
@@ -123,6 +123,7 @@ const SearchView: React.FC = () => {
       const _treeData = getTreeData(deepClone(data));
       setTreeData(_treeData);
       setObjects(data);
+      setDefaultSelectObj(url_obj_name || '');
     } finally {
       setObjLoading(false);
     }
@@ -253,7 +254,7 @@ const SearchView: React.FC = () => {
 
   const createPolicy = () => {
     const params = new URLSearchParams({
-      monitorName: object as string,
+      monitorName: object,
       monitorObjId: objects.find((item) => item.name === object)?.id + '',
       metricId: metric || '',
       instanceId: instanceId.join(','),
@@ -276,8 +277,7 @@ const SearchView: React.FC = () => {
   };
 
   const handleObjectChange = (val: string) => {
-    if (val !== 'otherWay') {
-      setObject(val);
+    if (object) {
       setMetrics([]);
       setLabels([]);
       setMetric(null);
@@ -285,13 +285,13 @@ const SearchView: React.FC = () => {
       setInstances([]);
       setConditions([]);
     }
-    const value = val === 'otherWay' ? url_obj_name : val;
-    if (value) {
+    setObject(val);
+    if (val) {
       getMetrics({
-        monitor_object_name: value,
+        monitor_object_name: val,
       });
     }
-    const id = objects.find((item) => item.name === value)?.id || 0;
+    const id = objects.find((item) => item.name === val)?.id || 0;
     if (id) {
       getInstList(id);
     }
@@ -482,6 +482,7 @@ const SearchView: React.FC = () => {
           <TreeSelector
             data={treeData}
             loading={objLoading}
+            defaultSelectedKey={defaultSelectObj as string}
             onNodeSelect={handleObjectChange}
           />
         </div>

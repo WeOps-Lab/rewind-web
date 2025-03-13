@@ -160,6 +160,8 @@ const AutomaticConfiguration: React.FC = () => {
         return row.endpoint;
       case 'database':
         return row.server || `${row.host}:${row.port}`;
+      case 'vmware':
+        return `vc-${row.host}`;
       default:
         return objectName + '-' + (row.monitor_ip || '');
     }

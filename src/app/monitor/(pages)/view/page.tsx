@@ -78,11 +78,11 @@ const Intergration = () => {
             type="link"
             onClick={() => openViewModal(record)}
           >
-            {t('monitor.view')}
+            {t('common.detail')}
           </Button>
           <Permission requiredPermissions={['Detail']}>
             <Button type="link" onClick={() => linkToDetial(record)}>
-              {t('common.detail')}
+              {t('monitor.views.overview')}
             </Button>
           </Permission>
         </>
@@ -90,6 +90,7 @@ const Intergration = () => {
     },
   ];
   const [tableColumn, setTableColumn] = useState<ColumnItem[]>(columns);
+  const [metrics, setMetrics] = useState<MetricItem[]>([]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -169,6 +170,7 @@ const Intergration = () => {
         ...prev,
         total: res[0]?.count || 0,
       }));
+      setMetrics(res[1] || []);
       const _objectName = objects.find((item) => item.id === objectId)?.name;
       if (_objectName) {
         const filterMetrics =
@@ -407,6 +409,8 @@ const Intergration = () => {
         ref={viewRef}
         plugins={plugins}
         monitorObject={objectId}
+        metrics={metrics}
+        objects={objects}
         monitorName={objects.find((item) => item.id === objectId)?.name || ''}
       />
     </div>
