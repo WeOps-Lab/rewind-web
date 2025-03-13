@@ -1431,6 +1431,7 @@ const COLLECT_TYPE_MAP: ObjectIconMap = {
   Redis: 'database',
   Postgres: 'database',
   ElasticSearch: 'database',
+  VWWare: 'vmware',
 };
 
 const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
@@ -1464,6 +1465,7 @@ const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
   Redis: 'redis',
   Postgres: 'postgres',
   ElasticSearch: 'elasticsearch',
+  vCenter: 'vmware',
 };
 
 const INSTANCE_TYPE_MAP: ObjectIconMap = {
@@ -1497,6 +1499,7 @@ const INSTANCE_TYPE_MAP: ObjectIconMap = {
   Redis: 'redis',
   Postgres: 'postgres',
   ElasticSearch: 'elasticsearch',
+  VWWare: 'vmware',
 };
 
 const CONFIG_TYPE_MAP: ConfigTypeMap = {
@@ -1530,6 +1533,7 @@ const CONFIG_TYPE_MAP: ConfigTypeMap = {
   Redis: ['redis'],
   Postgres: ['postgres'],
   ElasticSearch: ['elasticsearch'],
+  VWWare: ['http'],
 };
 
 const MANUAL_CONFIG_TEXT_MAP: ObjectIconMap = {

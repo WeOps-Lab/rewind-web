@@ -61,6 +61,9 @@ const AutomaticConfiguration: React.FC = () => {
         ? { ...initItem, server: null }
         : { ...initItem, host: null, port: null };
     }
+    if (collectType === 'vmware') {
+      return { ...initItem, host: null };
+    }
     return initItem as IntergrationMonitoredObject;
   };
   const authPasswordRef = useRef<any>(null);
@@ -290,6 +293,23 @@ const AutomaticConfiguration: React.FC = () => {
         />
       ),
     },
+    {
+      title: t('monitor.intergrations.host'),
+      dataIndex: 'host',
+      key: 'host',
+      width: 200,
+      render: (_: unknown, record: TableDataItem, index: number) => (
+        <Input
+          value={record.host}
+          onChange={(e) =>
+            handleFieldAndInstNameChange(e, {
+              index,
+              field: 'host',
+            })
+          }
+        />
+      ),
+    },
   ];
 
   const handleEditAuthPassword = () => {
@@ -494,6 +514,8 @@ const AutomaticConfiguration: React.FC = () => {
         return row.endpoint;
       case 'database':
         return row.server || `${row.host}:${row.port}`;
+      case 'vmware':
+        return `vc-${row.host}`;
       default:
         return objectName + '-' + (row.ip || '');
     }

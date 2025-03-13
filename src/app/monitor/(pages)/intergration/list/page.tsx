@@ -109,7 +109,16 @@ const Intergration = () => {
             children: [],
           };
         }
-        if (!['Pod', 'Node', 'Docker Container'].includes(item.name)) {
+        if (
+          ![
+            'Pod',
+            'Node',
+            'Docker Container',
+            'ESXI',
+            'VM',
+            'DataStorage',
+          ].includes(item.name)
+        ) {
           acc[item.type].children.push({
             title: item.display_name || '--',
             label: item.name || '--',
