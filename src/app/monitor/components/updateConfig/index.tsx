@@ -14,8 +14,6 @@ import {
 } from '@/app/monitor/constants/monitor';
 const { Option } = Select;
 
-
-
 const UpdateConfig = forwardRef<ModalRef,ModalProps>(
   ({ onSuccess }, ref ) => {
     const [form] = Form.useForm();
