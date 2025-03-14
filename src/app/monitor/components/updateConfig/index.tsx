@@ -1,7 +1,7 @@
 import { ModalRef } from '@/app/monitor/types';
 import { ModalProps } from '@/app/monitor/types';
 import { Form, Button, message, InputNumber, Select } from 'antd';
-import { deepClone } from '@/app/monitor/utils/common';
+import { cloneDeep } from 'lodash';
 import React, { useState, useRef, useEffect,useImperativeHandle,forwardRef } from 'react';
 import { useTranslation } from '@/utils/i18n';
 import { useFormItems } from '@/app/monitor/hooks/intergration';
@@ -37,19 +37,17 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     
     useImperativeHandle(ref, () => ({
       showModal: ({type,form,title}) => {
-        setType(type)
         setModalVisible(true)
         setTitle(title)
-        const _form = deepClone(form);
+        setType(type)
+        const _form = cloneDeep(form);
         const types = getKeyByValueStrict(INSTANCE_TYPE_MAP,_form?.config_type);
         setPluginName(types as string);
-        console.log(types,_form.content)
       }
     }))
 
     useEffect(()=>{
       initData();
-      console.log(type);
       setConfirmLoading(false)
     },[])
 
@@ -139,10 +137,10 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     const handleSubmit = () => {
       form.validateFields().then((values)=>{
         setConfirmLoading(true);
-        console.log(values);
         onSuccess()
         setTimeout(()=>{
           setConfirmLoading(false)
+          console.log(type,values);
           message.success(t('common.successfullyModified'))
           setModalVisible(false)
         },3000)
