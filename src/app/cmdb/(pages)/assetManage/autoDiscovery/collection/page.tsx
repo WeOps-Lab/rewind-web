@@ -19,12 +19,7 @@ const CollectionPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <Tabs
-        activeKey={activeTab}
-        onChange={handleTabChange}
-        items={tabItems}
-        className="border-b"
-      />
+      <Tabs activeKey={activeTab} onChange={handleTabChange} items={tabItems} />
       <Introduction
         title={
           activeTab === 'professional'

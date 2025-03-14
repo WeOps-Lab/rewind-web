@@ -494,6 +494,9 @@ const ProfessionalCollection: React.FC = () => {
     setCurrentColumns(newColumns);
   }, []);
 
+  const hasMultipleTabs =
+    (selectedRef.current?.node?.tabItems?.length ?? 0) > 1;
+
   return (
     <div className="flex flex-1 overflow-hidden">
       <div className="w-56 flex-shrink-0 border-r border-gray-200 pr-4 py-2 overflow-auto">
@@ -509,7 +512,7 @@ const ProfessionalCollection: React.FC = () => {
         </Spin>
       </div>
       <div className="flex-1 pt-1 pl-5 flex flex-col overflow-hidden">
-        {selectedRef.current?.node?.tabItems?.length && (
+        {hasMultipleTabs && (
           <Tabs
             activeKey={activeTab}
             items={selectedRef.current.node?.tabItems?.map((tab) => ({
@@ -517,7 +520,6 @@ const ProfessionalCollection: React.FC = () => {
               label: tab.name,
             }))}
             onChange={setActiveTab}
-            className="border-b"
           />
         )}
         <div className="mb-4 flex justify-between items-center flex-shrink-0">

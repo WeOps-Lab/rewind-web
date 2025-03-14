@@ -168,6 +168,7 @@ const AssetData = () => {
 
   useEffect(() => {
     if (modelId) {
+      setSelectedTreeKeys([modelId]);
       fetchData();
     }
   }, [pagination?.current, pagination?.pageSize, queryList, organization]);
@@ -231,6 +232,7 @@ const AssetData = () => {
       setAssoTypes(assoType);
       setModelList(_modelList);
       setModelId(defaultModelId);
+      setSelectedTreeKeys([defaultModelId]);
       getInitData(defaultModelId);
     } catch {
       setLoading(false);
@@ -699,7 +701,7 @@ const AssetData = () => {
             </Space>
           </div>
           <CustomTable
-            size="middle"
+            size="small"
             rowSelection={rowSelection}
             dataSource={tableData}
             columns={currentColumns}

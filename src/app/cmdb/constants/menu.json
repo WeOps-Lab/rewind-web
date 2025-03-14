@@ -41,7 +41,6 @@
             "icon": "shujumoxingguanli",
             "url": "/cmdb/assetManage",
             "name": "management",
-            "isNotMenuItem": true,
             "children": [
                 {
                     "title": "模型管理",
@@ -134,7 +133,6 @@
             "icon": "shujumoxingguanli",
             "url": "/cmdb/assetManage",
             "name": "management",
-            "isNotMenuItem": true,
             "children": [
                 {
                     "title": "Model Management",

@@ -2,6 +2,7 @@ import { BUILD_IN_MODEL, CREDENTIAL_LIST } from '@/app/cmdb/constants/asset';
 import { getSvgIcon } from './utils';
 import { AttrFieldType } from '@/app/cmdb/types/assetManage';
 import { Tag, Select, Input, Cascader, DatePicker } from 'antd';
+import UserAvatar from '@/app/cmdb/components/userAvatar';
 import {
   ModelIconItem,
   ColumnItem,
@@ -88,13 +89,6 @@ export const deepClone = (obj: any, hash = new WeakMap()) => {
   return result;
 };
 
-export const getRandomColor = () => {
-  const colors = ['#875CFF', '#FF9214', '#00CBA6', '#1272FF'];
-  const randomIndex = Math.floor(Math.random() * colors.length);
-  return colors[randomIndex];
-};
-
-// 根据分组id找出分组名称
 export const findGroupNameById = (arr: Array<SubGroupItem>, value: unknown) => {
   for (let i = 0; i < arr.length; i++) {
     if (arr[i].value === value) {
@@ -163,19 +157,7 @@ export const getAssetColumns = (config: {
             const userName = (config.userList || []).find(
               (item) => item.id === record[attrId]
             )?.username;
-            return userName ? (
-              <div className="column-user" title={userName}>
-                <span
-                  className="user-avatar"
-                  style={{ background: getRandomColor() }}
-                >
-                  {userName.slice(0, 1).toLocaleUpperCase()}
-                </span>
-                <span className="user-name">{userName}</span>
-              </div>
-            ) : (
-              <>--</>
-            );
+            return userName ? <UserAvatar userName={userName} /> : <>--</>;
           },
         };
       case 'pwd':
@@ -299,15 +281,7 @@ export const getFieldItem = (config: {
       return config.hideUserAvatar ? (
         userName
       ) : (
-        <div className="column-user">
-          <span
-            className="user-avatar"
-            style={{ background: getRandomColor() }}
-          >
-            {userName.slice(0, 1).toLocaleUpperCase()}
-          </span>
-          {userName}
-        </div>
+        <UserAvatar userName={userName} />
       );
     case 'organization':
       return (
