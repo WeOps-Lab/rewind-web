@@ -16,13 +16,24 @@ const TopMenu = () => {
   const pathname = usePathname();
   const { clientData, loading } = useClientData();
 
+  const sortedClientData = (clientData || []).sort((a, b) => {
+    const forefrontId = 'ops-console';
+    if (a.client_id === forefrontId && b.client_id !== forefrontId) {
+      return -1;
+    }
+    if (a.client_id !== forefrontId && b.client_id === forefrontId) {
+      return 1;
+    }
+    return 0;
+  });
+
   const renderContent = loading ? (
     <div className="flex justify-center items-center h-32">
       <Spin tip="Loading..." />
     </div>
   ) : (
     <div className="grid grid-cols-3 gap-4 max-h-[350px] overflow-auto">
-      {clientData.map((app) => (
+      {sortedClientData.map((app) => (
         <div
           key={app.name}
           className={`group flex flex-col items-center p-4 rounded-sm cursor-pointer ${styles.navApp}`}
