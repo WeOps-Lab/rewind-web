@@ -17,6 +17,13 @@
 }
 
 .settingFields {
+  @mixin hide-text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .rightSide {
     background: var(--color-fill-1);
     overflow-y: auto;
@@ -25,6 +32,8 @@
       background: var(--color-bg-1);
       border-bottom: 1px solid var(--color-border);
       font-size: 12px;
+      display: flex;
+      align-items: center;
       position: relative;
 
       .dragTrigger {
@@ -41,6 +50,11 @@
         right: 6px;
       }
 
+      .dragLabel {
+        @include hide-text;
+        width: 108px;
+      }
+
       &:last-child {
         border-bottom: none;
       }
@@ -52,6 +66,13 @@
           color: var(--color-primary);
         }
       }
+    }
+  }
+
+  .leftSide {
+    .fieldLabel {
+      @include hide-text;
+      width: 130px;
     }
   }
 }
