@@ -122,3 +122,7 @@ export interface ViewQueryKeyValuePairs {
   keys: string[];
   values: string[];
 }
+
+export interface ModalProps {
+  onSuccess: () => void;
+}

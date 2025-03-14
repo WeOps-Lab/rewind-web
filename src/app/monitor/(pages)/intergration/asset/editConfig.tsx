@@ -32,8 +32,6 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
 
   useImperativeHandle(ref, () => ({
     showModal: ({ title, form }) => {
-      console.log(form);
-      
       // 开启弹窗的交互
       setTitle(title);
       setConfigForm(deepClone(form));
@@ -48,7 +46,6 @@ const EditConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
         content: configForm.content,
         id: configForm.config_id,
       });
-      console.log(typeof configForm.content);
     }
   }, [visible, configForm]);
 
