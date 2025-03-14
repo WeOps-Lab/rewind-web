@@ -1,7 +1,7 @@
 import { ModalRef, ModalProps } from '@/app/monitor/types';
 import { Form, Button, message, InputNumber, Select } from 'antd';
 import { cloneDeep } from 'lodash';
-import React, { useState, useRef, useEffect,useImperativeHandle,forwardRef } from 'react';
+import React, { useState, useRef, useImperativeHandle,forwardRef } from 'react';
 import { useTranslation } from '@/utils/i18n';
 import { useFormItems } from '@/app/monitor/hooks/intergration';
 import OperateModal from '@/components/operate-modal';
@@ -18,6 +18,7 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     const [form] = Form.useForm();
     const { t } = useTranslation();
     const [pluginName,setPluginName] = useState<string>('');
+    const [collectType, setCollectType] = useState<string>('');
     const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
     const [modalVisible,setModalVisible] = useState<boolean>(false);
     const [title,setTitle] = useState<string>('');
@@ -27,8 +28,6 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       useState<boolean>(true);
     const [privPasswordDisabled, setPrivPasswordDisabled] =
       useState<boolean>(true);
-    const collectType = COLLECT_TYPE_MAP[pluginName];
-    const configTypes = CONFIG_TYPE_MAP[pluginName];
     const formRef = useRef(null);
     const authPasswordRef = useRef<any>(null);
     const privPasswordRef = useRef<any>(null);
@@ -36,19 +35,19 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     
     useImperativeHandle(ref, () => ({
       showModal: ({type,form,title}) => {
-        setModalVisible(true)
-        setTitle(title)
-        setType(type)
         const _form = cloneDeep(form);
-        const types = getKeyByValueStrict(INSTANCE_TYPE_MAP,_form?.config_type);
-        setPluginName(types as string);
+        const _types = getKeyByValueStrict(INSTANCE_TYPE_MAP,_form?.config_type);
+        const _collectType = COLLECT_TYPE_MAP[_types];
+        const _configTypes = CONFIG_TYPE_MAP[_types];
+        setCollectType(_collectType);
+        setPluginName(_types as string);
+        setTitle(title);
+        setType(type);
+        setModalVisible(true);
+        setConfirmLoading(false);
+        initData(_collectType, _configTypes);
       }
     }))
-
-    useEffect(()=>{
-      initData();
-      setConfirmLoading(false)
-    },[])
 
     const handleEditAuthPassword = () => {
       if (authPasswordDisabled) {
@@ -80,7 +79,10 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     // 获取对应键值
     const getKeyByValueStrict = <T extends Record<string, unknown>>(obj: T,value: T[keyof T]): keyof T => {
       const key = (Object.keys(obj) as Array<keyof T>).find((k) => obj[k] === value);
-      if (!key) throw new Error("未找到匹配的键名");
+      if (!key) {
+        console.log('未找到对应键');
+        return '';
+      };
       return key;
     }
 
@@ -101,7 +103,7 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
       pluginName,
     });
     
-    const initData = () => {
+    const initData = (collectType: string,configTypes:string[]) => {
       form.setFieldsValue({
         interval: 10,
       });
@@ -130,6 +132,7 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     };
 
     const handleCancel = () => {
+      form.resetFields();
       setModalVisible(false);
     };
 
