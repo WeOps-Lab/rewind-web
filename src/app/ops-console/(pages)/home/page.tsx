@@ -18,6 +18,8 @@ const ControlPage = () => {
   const { clientData, loading } = useClientData();
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 
+  const isDemoEnv = process.env.NEXT_PUBLIC_IS_DEMO_ENV === 'true';
+
   useEffect(() => {
     const consoleContainer = document.querySelector(".console-container");
     if (consoleContainer?.parentElement) {
@@ -74,37 +76,39 @@ const ControlPage = () => {
               {t('opsConsole.description')}
             </p>
           </div>
-          <div className="absolute right-4 top-4 flex flex-col text-sm">
-            <div
-              onClick={handleApplyDemoClick}
-              className="bg-gradient-to-b from-blue-500 tracking-[3px] to-indigo-600 text-white rounded-3xl py-1 shadow-md w-[32px] flex items-center justify-center mb-2 cursor-pointer"
-              style={{
-                writingMode: "vertical-rl",
-                textOrientation: "upright",
-              }}
-            >
-              {t('opsConsole.freeApply')}
-            </div>
-            <Popover
-              content={popoverContent}
-              visible={isPopoverVisible}
-              trigger="click"
-              placement="left"
-              onVisibleChange={setIsPopoverVisible}
-            >
+          {isDemoEnv && (
+            <div className="absolute right-4 top-4 flex flex-col text-sm">
               <div
-                onClick={handleContactUsClick}
-                className="bg-white text-[var(--color-primary)] tracking-[3px]  rounded-3xl shadow-md w-[32px] py-1 flex items-center justify-center cursor-pointer"
+                onClick={handleApplyDemoClick}
+                className="bg-gradient-to-b from-blue-500 tracking-[3px] to-indigo-600 text-white rounded-3xl py-1 shadow-md w-[32px] flex items-center justify-center mb-2 cursor-pointer"
                 style={{
                   writingMode: "vertical-rl",
                   textOrientation: "upright",
                 }}
               >
-                <Icon type="lianxiwomen1" className="mb-1" />
-                {t('opsConsole.contactUs')}
+                {t('opsConsole.freeApply')}
               </div>
-            </Popover>
-          </div>
+              <Popover
+                content={popoverContent}
+                visible={isPopoverVisible}
+                trigger="click"
+                placement="left"
+                onVisibleChange={setIsPopoverVisible}
+              >
+                <div
+                  onClick={handleContactUsClick}
+                  className="bg-white text-[var(--color-primary)] tracking-[3px]  rounded-3xl shadow-md w-[32px] py-1 flex items-center justify-center cursor-pointer"
+                  style={{
+                    writingMode: "vertical-rl",
+                    textOrientation: "upright",
+                  }}
+                >
+                  <Icon type="lianxiwomen1" className="mb-1" />
+                  {t('opsConsole.contactUs')}
+                </div>
+              </Popover>
+            </div>
+          )}
         </div>
         <div className="flex items-center mb-6 border border-[var(--color-border-1)] rounded-3xl w-[180px] text-sm">
           <span className="bg-[var(--color-text-2)] text-white px-4 py-1 rounded-2xl mr-2">{t('opsConsole.date')}</span>
