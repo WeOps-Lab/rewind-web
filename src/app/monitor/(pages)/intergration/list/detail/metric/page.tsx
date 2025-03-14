@@ -52,18 +52,21 @@ const Configure = () => {
       dataIndex: 'name',
       width: 120,
       key: 'name',
+      ellipsis: true,
     },
     {
       title: t('common.name'),
       dataIndex: 'display_name',
       width: 120,
       key: 'display_name',
+      ellipsis: true,
     },
     {
       title: t('monitor.intergrations.dimension'),
       dataIndex: 'dimensions',
       width: 100,
       key: 'dimensions',
+      ellipsis: true,
       render: (_, record) => (
         <>
           {record.dimensions?.length
@@ -95,6 +98,7 @@ const Configure = () => {
       dataIndex: 'display_description',
       key: 'display_description',
       width: 150,
+      ellipsis: true,
       render: (_, record) => <>{record.display_description || '--'}</>,
     },
     {

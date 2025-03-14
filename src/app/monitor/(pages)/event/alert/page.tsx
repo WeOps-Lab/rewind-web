@@ -128,6 +128,7 @@ const Alert: React.FC = () => {
       dataIndex: 'title',
       key: 'title',
       width: 120,
+      ellipsis: true,
       render: (_, record) => <>{record.content || '--'}</>,
     },
     {
@@ -135,6 +136,7 @@ const Alert: React.FC = () => {
       dataIndex: 'asset',
       key: 'asset',
       width: 200,
+      ellipsis: true,
       render: (_, record) => <>{record.monitor_instance_name || '--'}</>,
     },
     {

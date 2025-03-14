@@ -54,6 +54,7 @@ const Intergration = () => {
       title: t('common.name'),
       dataIndex: 'instance_name',
       width: 140,
+      ellipsis: true,
       key: 'instance_name',
     },
     {

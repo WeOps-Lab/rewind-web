@@ -48,6 +48,7 @@ const Strategy: React.FC = () => {
       title: t('common.name'),
       dataIndex: 'name',
       key: 'name',
+      ellipsis: true,
     },
     {
       title: t('common.creator'),

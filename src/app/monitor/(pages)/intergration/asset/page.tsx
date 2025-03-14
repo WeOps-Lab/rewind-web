@@ -76,6 +76,7 @@ const Asset = () => {
       title: t('common.name'),
       dataIndex: 'instance_name',
       key: 'instance_name',
+      ellipsis: true,
       width: 200,
     },
     {
@@ -125,6 +126,7 @@ const Asset = () => {
       dataIndex: 'agent_id',
       key: 'agent_id',
       width: 150,
+      ellipsis: true,
       render: (_, record) => <>{record.agent_id || '--'}</>,
     },
     {
