@@ -209,14 +209,14 @@ export const createTaskValidationRules = (context: ValidationContext) => {
           `${t('common.selectMsg')}${t('Collection.enterType')}`
         ),
       ],
-      accessPoint: [
+      accessPointId: [
         baseValidators.required(
           `${t('common.selectMsg')}${t('Collection.accessPoint')}`
         ),
       ],
-      account: [
+      username: [
         baseValidators.required(
-          `${t('common.inputMsg')}${t('Collection.VMTask.account')}`
+          `${t('common.inputMsg')}${t('Collection.VMTask.username')}`
         ),
       ],
       password: [

@@ -210,7 +210,7 @@
         "timeout": "超时时间",
         "timeoutTooltip": "该超时时间为单个对象的采集超时时间，超过该时长将跳过该对象的采集。",
         "credential": "凭据",
-        "executeInterval": "小时执行一次",
+        "executeInterval": "分钟执行一次",
         "test": "测试",
         "confirm": "确认",
         "cancel": "取消",
@@ -221,6 +221,8 @@
         "ipRange": "IP范围",
         "chooseIp": "选择IP",
         "chooseAsset": "选择资产",
+        "everyMinute": "每",
+        "executeOnce": "执行一次",
         "execStatus": {
             "add": "新增资产",
             "update": "更新资产",
@@ -237,9 +239,6 @@
         },
         "k8sTask": {
             "title": "添加任务",
-            "everyMinute": "每",
-            "executeOnce": "执行一次",
-            "executeInterval": "分钟执行一次",
             "selectK8S": "K8S",
             "second": "秒",
             "intervalRequired": "请输入执行间隔时间",
@@ -248,7 +247,7 @@
         },
         "VMTask": {
             "chooseVCenter": "vCenter",
-            "account": "账户",
+            "username": "账户",
             "password": "密码",
             "port": "端口",
             "sslVerify": "SSL 验证"

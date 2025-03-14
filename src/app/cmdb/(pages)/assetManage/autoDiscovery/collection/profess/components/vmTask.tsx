@@ -7,7 +7,7 @@ import { useTranslation } from '@/utils/i18n';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { TreeNode } from '@/app/cmdb/types/autoDiscovery';
-import { Form, Spin, Input, Switch, Collapse } from 'antd';
+import { Form, Spin, Input, Switch, Collapse, InputNumber } from 'antd';
 import {
   ENTER_TYPE,
   VM_FORM_INITIAL_VALUES,
@@ -49,25 +49,28 @@ const VMTask: React.FC<VMTaskFormProps> = ({
       const instance = baseRef.current?.instOptions.find(
         (item: any) => item.value === values.instId
       );
+      const accessPoint = baseRef.current?.accessPoints.find(
+        (item: any) => item.value === values.accessPointId
+      );
       const driverType = selectedNode.tabItems?.find(
         (item) => item.id === modelId
       )?.type;
 
       return {
         name: values.taskName,
-        instances: [instance],
+        instances: instance?.origin && [instance.origin],
         input_method: values.enterType === ENTER_TYPE.AUTOMATIC ? 0 : 1,
-        access_point: values.accessPoint || {},
+        access_point: accessPoint?.origin && [accessPoint.origin],
         timeout: values.timeout || 600,
         scan_cycle: formatCycleValue(values),
         model_id: modelId,
         driver_type: driverType,
         task_type: 'vm',
         credential: {
-          account: values.account,
+          username: values.username,
           password: values.password,
           port: values.port,
-          ssl_verify: values.sslVerify,
+          ssl: values.sslVerify,
         },
       };
     },
@@ -82,7 +85,18 @@ const VMTask: React.FC<VMTaskFormProps> = ({
     const initForm = async () => {
       if (editId) {
         const values = await fetchTaskDetail(editId);
-        form.setFieldsValue(values);
+        form.setFieldsValue({
+          ...values,
+          enterType:
+            values.input_method === 0
+              ? ENTER_TYPE.AUTOMATIC
+              : ENTER_TYPE.APPROVAL,
+          accessPointId: values.access_point?.[0]?.id,
+          username: values.credential?.username,
+          password: values.credential?.password,
+          port: values.credential?.port,
+          sslVerify: values.credential?.ssl,
+        });
       } else {
         form.setFieldsValue(VM_FORM_INITIAL_VALUES);
       }
@@ -95,7 +109,7 @@ const VMTask: React.FC<VMTaskFormProps> = ({
       <Form
         form={form}
         layout="horizontal"
-        labelCol={{ span: 5 }}
+        labelCol={{ span: 6 }}
         onFinish={onFinish}
         initialValues={VM_FORM_INITIAL_VALUES}
       >
@@ -106,7 +120,6 @@ const VMTask: React.FC<VMTaskFormProps> = ({
           onClose={onClose}
           submitLoading={submitLoading}
           instPlaceholder={`${t('common.select')}${t('Collection.VMTask.chooseVCenter')}`}
-          executeIntervalLabel={t('Collection.executeInterval')}
           timeoutProps={{
             min: 0,
             defaultValue: 600,
@@ -132,9 +145,9 @@ const VMTask: React.FC<VMTaskFormProps> = ({
               key="credential"
             >
               <Form.Item
-                name="account"
-                label={t('Collection.VMTask.account')}
-                rules={rules.account}
+                name="username"
+                label={t('Collection.VMTask.username')}
+                rules={rules.username}
               >
                 <Input placeholder={t('common.inputMsg')} />
               </Form.Item>
@@ -152,10 +165,12 @@ const VMTask: React.FC<VMTaskFormProps> = ({
                 label={t('Collection.VMTask.port')}
                 rules={rules.port}
               >
-                <Input
+                <InputNumber
+                  min={1}
+                  max={65535}
                   placeholder={t('common.inputMsg')}
                   className="w-32"
-                  defaultValue="443"
+                  defaultValue={443}
                 />
               </Form.Item>
 

@@ -49,7 +49,7 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
 
       return {
         name: values.taskName,
-        instances: [instance],
+        instances: instance?.origin && [instance.origin],
         timeout: values.timeout || 60,
         driver_type: driverType,
         scan_cycle: formatCycleValue(values),
@@ -79,7 +79,7 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
       <Form
         form={form}
         layout="horizontal"
-        labelCol={{ span: 5 }}
+        labelCol={{ span: 6 }}
         onFinish={onFinish}
         initialValues={K8S_FORM_INITIAL_VALUES}
       >
@@ -90,7 +90,6 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
           onClose={onClose}
           submitLoading={submitLoading}
           instPlaceholder={`${t('common.select')}${t('Collection.k8sTask.selectK8S')}`}
-          executeIntervalLabel={t('Collection.k8sTask.executeInterval')}
           timeoutProps={{
             min: 0,
             defaultValue: 60,

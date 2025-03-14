@@ -50,7 +50,6 @@ interface BaseTaskFormProps {
   modelId: string;
   submitLoading?: boolean;
   instPlaceholder?: string;
-  executeIntervalLabel?: string;
   timeoutProps?: {
     min?: number;
     defaultValue?: number;
@@ -62,6 +61,7 @@ interface BaseTaskFormProps {
 
 export interface BaseTaskRef {
   instOptions: { label: string; value: string; [key: string]: any }[];
+  accessPoints: { label: string; value: string; [key: string]: any }[];
 }
 
 const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
@@ -77,7 +77,6 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
         defaultValue: 600,
         addonAfter: '',
       },
-      executeIntervalLabel,
       instPlaceholder,
       onClose,
       onTest,
@@ -111,6 +110,10 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
         status: '异常',
       },
     ]);
+    const [accessPoints, setAccessPoints] = useState<
+      { label: string; value: string }[]
+    >([]);
+    const [accessPointLoading, setAccessPointLoading] = useState(false);
 
     const columns = [
       {
@@ -130,8 +133,12 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       [t, form]
     );
 
+    const initRef = useRef(false);
     useEffect(() => {
+      if (initRef.current) return;
+      initRef.current = true;
       fetchOptions();
+      fetchAccessPoints();
     }, []);
 
     const onIpChange = () => {};
@@ -148,7 +155,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
           data.insts.map((item: any) => ({
             label: item.inst_name,
             value: item._id,
-            ...item,
+            origin: item,
           }))
         );
       } catch (error) {
@@ -157,6 +164,31 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
         setOptLoading(false);
       }
     };
+
+    const fetchAccessPoints = async () => {
+      try {
+        setAccessPointLoading(true);
+        const res = await get('/cmdb/api/collect/nodes/', {
+          params: {
+            page: 1,
+            page_size: 10,
+            name: '',
+          },
+        });
+        setAccessPoints(
+          res.nodes?.map((node: any) => ({
+            label: node.name,
+            value: node.id,
+            origin: node,
+          })) || []
+        );
+      } catch (error) {
+        console.error('获取接入点失败:', error);
+      } finally {
+        setAccessPointLoading(false);
+      }
+    };
+
     const showFieldModal = async () => {
       try {
         const attrList = await get(`/cmdb/api/model/${modelId}/attr_list/`);
@@ -176,6 +208,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
 
     useImperativeHandle(ref, () => ({
       instOptions,
+      accessPoints,
     }));
 
     return (
@@ -191,7 +224,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
             rules={rules.taskName}
           >
             <Input
-              className="w-[490px]"
+              className="w-[420px]"
               placeholder={t('Collection.taskNamePlaceholder')}
             />
           </Form.Item>
@@ -224,7 +257,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
                 <div className="flex items-center">
                   <Radio value={CYCLE_OPTIONS.INTERVAL}>
                     <Space>
-                      {t('Collection.k8sTask.everyMinute')}
+                      {t('Collection.everyMinute')}
                       <Form.Item
                         name="intervalValue"
                         noStyle
@@ -237,12 +270,12 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
                           placeholder={t('common.inputMsg')}
                         />
                       </Form.Item>
-                      {executeIntervalLabel}
+                      {t('Collection.executeInterval')}
                     </Space>
                   </Radio>
                 </div>
                 <Radio value={CYCLE_OPTIONS.ONCE}>
-                  {t('Collection.k8sTask.executeOnce')}
+                  {t('Collection.executeOnce')}
                 </Radio>
               </div>
             </Radio.Group>
@@ -306,7 +339,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
             <Space>
               <Form.Item name="instId" rules={rules.instId} noStyle>
                 <Select
-                  style={{ width: '450px' }}
+                  style={{ width: '380px' }}
                   placeholder={instPlaceholder}
                   options={instOptions}
                   loading={instOptLoading}
@@ -326,21 +359,34 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
             </Space>
           </Form.Item>
 
+          {/* IP范围 */}
           {nodeId === 'network' && (
             <Form.Item label={t('Collection.ipRange')} name="ipRange" required>
               <IpRangeInput value={IpRange} onChange={onIpChange} />
             </Form.Item>
           )}
 
-          {nodeId === 'network' && (
-            <Form.Item label={t('Collection.accessPoint')} required>
+          {/* 接入点 */}
+          {nodeId !== 'k8s' && (
+            <Form.Item
+              label={t('Collection.accessPoint')}
+              name="accessPointId"
+              required
+              rules={[
+                {
+                  required: true,
+                  message: t('common.selectMsg') + t('Collection.accessPoint'),
+                },
+              ]}
+            >
               <Select
-                style={{ width: '490px' }}
-                defaultValue="direct"
-                className="w-full"
-              >
-                <Select.Option value="direct">Direct</Select.Option>
-              </Select>
+                style={{ width: '420px' }}
+                placeholder={
+                  t('common.selectMsg') + t('Collection.accessPoint')
+                }
+                options={accessPoints}
+                loading={accessPointLoading}
+              />
             </Form.Item>
           )}
 
@@ -376,14 +422,12 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
                   name="timeout"
                   rules={rules.timeout}
                 >
-                  <div className="flex items-center">
-                    <InputNumber
-                      className="w-28"
-                      min={timeoutProps.min}
-                      defaultValue={timeoutProps.defaultValue}
-                      addonAfter={timeoutProps.addonAfter}
-                    />
-                  </div>
+                  <InputNumber
+                    className="w-28"
+                    min={timeoutProps.min}
+                    defaultValue={timeoutProps.defaultValue}
+                    addonAfter={timeoutProps.addonAfter}
+                  />
                 </Form.Item>
               </Collapse.Panel>
             </Collapse>

@@ -12,7 +12,7 @@ import {
   SNMP_FORM_INITIAL_VALUES,
   createTaskValidationRules,
 } from '@/app/cmdb/constants/professCollection';
-import { Form, Spin, Input, Select, Collapse } from 'antd';
+import { Form, Spin, Input, Select, Collapse, InputNumber } from 'antd';
 
 interface SNMPTaskFormProps {
   onClose: () => void;
@@ -57,7 +57,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
 
       return {
         name: values.taskName,
-        instances: [instance],
+        instances: instance?.origin && [instance.origin],
         input_method: values.enterType === ENTER_TYPE.AUTOMATIC ? 0 : 1,
         access_point: values.accessPoint || {},
         timeout: values.timeout || 600,
@@ -66,10 +66,10 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
         driver_type: driverType,
         task_type: 'snmp',
         credential: {
-          account: values.account,
+          username: values.username,
           password: values.password,
           port: values.port,
-          ssl_verify: values.sslVerify,
+          ssl: values.sslVerify,
         },
       };
     },
@@ -97,7 +97,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
       <Form
         form={form}
         layout="horizontal"
-        labelCol={{ span: 5 }}
+        labelCol={{ span: 6 }}
         onFinish={onFinish}
         initialValues={SNMP_FORM_INITIAL_VALUES}
       >
@@ -108,7 +108,6 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
           onClose={onClose}
           submitLoading={submitLoading}
           instPlaceholder={`${t('common.select')}${t('Collection.SNMPTask.chooseSNMP')}`}
-          executeIntervalLabel={t('Collection.executeInterval')}
           timeoutProps={{
             min: 0,
             defaultValue: 600,
@@ -147,12 +146,17 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
               </Form.Item>
 
               <Form.Item
-                label={t('Collection.SNMPTask.port')}
                 name="port"
+                label={t('Collection.SNMPTask.port')}
                 rules={rules.port}
-                required
               >
-                <Input placeholder={t('common.inputMsg')} />
+                <InputNumber
+                  min={1}
+                  max={65535}
+                  placeholder={t('common.inputMsg')}
+                  className="w-32"
+                  defaultValue={161}
+                />
               </Form.Item>
 
               {(snmpVersion === 'V2' || snmpVersion === 'V2C') && (

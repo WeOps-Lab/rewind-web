@@ -206,7 +206,6 @@
         "enterTypeTooltip": "Set the input method for New Asset. Automatic Input will automatically update to the Asset Record after the task is completed, and Approval Input will update to the Asset Record based on the approval result.",
         "automatic": "Automatic",
         "approvalRequired": "Approval required",
-        "account": "Account",
         "password": "Password",
         "port": "Port",
         "sslVerify": "SSL verify",
@@ -225,6 +224,8 @@
         "ipRange": "IP Range",
         "chooseIp": "Choose IP",
         "chooseAsset": "Choose Asset",
+        "everyMinute": "Every",
+        "executeOnce": "Execute once",
         "execStatus": {
             "add": "Add Assets",
             "update": "Update Assets",
@@ -241,9 +242,6 @@
         },
         "k8sTask": {
             "title": "Add Task",
-            "everyMinute": "Every",
-            "executeOnce": "Execute once",
-            "executeInterval": "hour interval",
             "selectK8S": "K8S",
             "second": "seconds",
             "intervalRequired": "Please enter execution interval",
@@ -252,7 +250,7 @@
         },
         "VMTask": {
             "chooseVCenter": "vCenter",
-            "account": "Account",
+            "username": "Account",
             "password": "Password",
             "port": "Port",
             "sslVerify": "SSL verify"
