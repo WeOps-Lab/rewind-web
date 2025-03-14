@@ -3,8 +3,8 @@ import { Table, TableProps, Pagination } from 'antd';
 import { SettingFilled, HolderOutlined } from '@ant-design/icons';
 import customTableStyle from './index.module.scss';
 import FieldSettingModal from './fieldSettingModal';
-import { ColumnItem } from '@/types/index';
-import { TableCurrentDataSource } from 'antd/es/table/interface';
+import { ColumnItem, GroupFieldItem } from '@/types/index';
+import { TableCurrentDataSource, FilterValue, SorterResult } from 'antd/es/table/interface';
 import { cloneDeep } from 'lodash';
 
 interface CustomTableProps<T>
@@ -14,6 +14,7 @@ interface CustomTableProps<T>
     showSetting: boolean;
     displayFieldKeys: string[];
     choosableFields: ColumnItem[];
+    groupFields?: GroupFieldItem[];
   };
   onSelectFields?: (fields: string[]) => void;
   rowDraggable?: boolean;
@@ -48,6 +49,9 @@ const CustomTable = <T extends object>({
   const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [filters, setFilters] = useState<Record<string, FilterValue | null>>({});
+  const [sorter, setSorter] = useState<SorterResult<T> | SorterResult<T>[]>({});
+  const [extra, setExtra] = useState<TableCurrentDataSource<T>>();
 
   useEffect(() => {
     const updateTableHeight = () => {
@@ -124,9 +128,9 @@ const CustomTable = <T extends object>({
     onChange &&
       onChange(
         { current, pageSize },
-        {}, // filters
-        [], // sorter
-        {} as TableCurrentDataSource<T> // extra
+        filters,
+        sorter,
+        extra as TableCurrentDataSource<T>
       );
   };
 
@@ -170,6 +174,27 @@ const CustomTable = <T extends object>({
     };
   };
 
+  const handleTableChange = (
+    filters: Record<string, FilterValue | null>,
+    sorter: SorterResult<T> | SorterResult<T>[],
+    extra: TableCurrentDataSource<T>
+  ) => {
+    setFilters(filters);
+    setSorter(sorter);
+    setExtra(extra);
+    onChange &&
+      onChange(
+        {
+          total: pagination ? pagination.total : 0,
+          current: pagination ? pagination.current : 1,
+          pageSize: pagination ? pagination.pageSize : 20,
+        },
+        filters,
+        sorter,
+        extra
+      );
+  };
+
   return (
     <div
       className={`relative ${customTableStyle.customTable}`}
@@ -186,17 +211,7 @@ const CustomTable = <T extends object>({
         {...TableProps}
         columns={renderColumns() as TableProps<T>['columns']}
         onChange={(pageConfig, filters, sorter, extra) =>
-          onChange &&
-          onChange(
-            {
-              total: pagination ? pagination.total : 0,
-              current: pagination ? pagination.current : 1,
-              pageSize: pagination ? pagination.pageSize : 20
-            },
-            filters,
-            sorter,
-            extra
-          )
+          handleTableChange(filters, sorter, extra)
         }
       />
       {pagination && !loading && !!pagination.total && (<div className="absolute right-0 bottom-0 flex justify-end">
@@ -218,6 +233,7 @@ const CustomTable = <T extends object>({
         ref={fieldRef}
         choosableFields={fieldSetting.choosableFields || []}
         displayFieldKeys={fieldSetting.displayFieldKeys}
+        groupFields={fieldSetting.groupFields}
         onConfirm={onSelectFields}
       />
     </div>
