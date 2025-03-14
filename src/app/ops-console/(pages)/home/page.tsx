@@ -28,7 +28,7 @@ const ControlPage = () => {
   }, []);
 
   const handleApplyDemoClick = () => {
-    window.location.href = "https://example.com/demo";
+    window.location.href = "https://www.canway.net/apply.html";
   };
 
   const handleContactUsClick = () => {
