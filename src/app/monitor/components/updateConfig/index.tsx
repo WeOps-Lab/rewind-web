@@ -1,5 +1,4 @@
-import { ModalRef } from '@/app/monitor/types';
-import { ModalProps } from '@/app/monitor/types';
+import { ModalRef, ModalProps } from '@/app/monitor/types';
 import { Form, Button, message, InputNumber, Select } from 'antd';
 import { cloneDeep } from 'lodash';
 import React, { useState, useRef, useEffect,useImperativeHandle,forwardRef } from 'react';
