@@ -12,6 +12,12 @@ export interface ColumnItem {
   [key: string]: unknown;
 }
 
+export interface GroupFieldItem {
+  title: string;
+  key: string;
+  child: ColumnItem[];
+}
+
 export interface ListItem {
   title?: string;
   label?: string;
