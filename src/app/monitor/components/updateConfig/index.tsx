@@ -40,10 +40,10 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
         const _collectType = COLLECT_TYPE_MAP[_types];
         const _configTypes = CONFIG_TYPE_MAP[_types];
         setCollectType(_collectType);
-        setModalVisible(true);
+        setPluginName(_types as string);
         setTitle(title);
         setType(type);
-        setPluginName(_types as string);
+        setModalVisible(true);
         setConfirmLoading(false);
         initData(_collectType, _configTypes);
       }
@@ -132,6 +132,7 @@ const UpdateConfig = forwardRef<ModalRef,ModalProps>(
     };
 
     const handleCancel = () => {
+      form.resetFields();
       setModalVisible(false);
     };
 
