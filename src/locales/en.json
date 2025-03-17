@@ -4,7 +4,6 @@
     "delete": "Delete",
     "add": "Add",
     "set": "Set",
-    "search": "Search",
     "create": "Create",
     "update": "Update",
     "save": "Save",
@@ -77,6 +76,8 @@
     "notFound": "We can't seem to find the page you're looking for.",
     "backToHome": "Back to Home",
     "noPermission": "You don't have permission to access this page",
+    "preview": "Preview",
+    "download": "Download",
     "timeSelector": {
       "15Minutes": "The past 15 minutes",
       "30Minutes": "The past 30 minutes",
