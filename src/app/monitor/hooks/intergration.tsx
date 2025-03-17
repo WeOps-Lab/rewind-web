@@ -1660,6 +1660,54 @@ const useFormItems = ({
         return {
           formItems: (
             <>
+              <Form.Item label={t('monitor.intergrations.username')} required>
+                <Form.Item
+                  noStyle
+                  name="username"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input className="w-[300px] mr-[10px]" />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.usernameDes')}
+                </span>
+              </Form.Item>
+              <Form.Item label={t('monitor.intergrations.password')} required>
+                <Form.Item
+                  noStyle
+                  name="password"
+                  rules={[
+                    {
+                      required: true,
+                      message: t('common.required'),
+                    },
+                  ]}
+                >
+                  <Input
+                    ref={passwordRef}
+                    disabled={passwordDisabled}
+                    className="w-[300px] mr-[10px]"
+                    type="password"
+                    suffix={
+                      <EditOutlined
+                        className="text-[var(--color-text-2)]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPassword();
+                        }}
+                      />
+                    }
+                  />
+                </Form.Item>
+                <span className="text-[12px] text-[var(--color-text-3)]">
+                  {t('monitor.intergrations.passwordDes')}
+                </span>
+              </Form.Item>
               <Form.Item required label={t('monitor.intergrations.host')}>
                 <Form.Item
                   noStyle
@@ -1680,7 +1728,7 @@ const useFormItems = ({
             </>
           ),
           configText: `[[inputs.$config_type]]
-        urls = ["$host"]
+        urls = ["http://stargazer:8083/api/monitor/vmware/metrics?username=$username&password=$password&host=$host"]
         interval = "$intervals"
         tags = { "instance_id"="$instance_id", "instance_type"="$instance_type", "collect_type"="http" }`,
         };

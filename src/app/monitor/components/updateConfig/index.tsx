@@ -12,8 +12,6 @@ import { useFormItems } from '@/app/monitor/hooks/intergration';
 import OperateModal from '@/components/operate-modal';
 import {
   COLLECT_TYPE_MAP,
-  CONFIG_TYPE_MAP,
-  INSTANCE_TYPE_MAP,
   TIMEOUT_UNITS,
 } from '@/app/monitor/constants/monitor';
 const { Option } = Select;
@@ -40,11 +38,14 @@ const UpdateConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
   useImperativeHandle(ref, () => ({
     showModal: ({ type, form, title }) => {
       const _form = cloneDeep(form);
-      const _types = getKeyByValueStrict(INSTANCE_TYPE_MAP, _form?.config_type);
-      const _collectType = COLLECT_TYPE_MAP[_types];
-      const _configTypes = CONFIG_TYPE_MAP[_types];
+      const _collectType =
+        _form?.collect_type === 'http' ? 'vmware' : _form?.collect_type;
+      const _configTypes = [_form?.config_type];
+      const _PluginName = Object.keys(COLLECT_TYPE_MAP).find(
+        (key) => COLLECT_TYPE_MAP[key] === _collectType
+      );
       setCollectType(_collectType);
-      setPluginName(_types as string);
+      setPluginName(_PluginName as string);
       setTitle(title);
       setType(type);
       setModalVisible(true);
@@ -80,23 +81,7 @@ const UpdateConfig = forwardRef<ModalRef, ModalProps>(({ onSuccess }, ref) => {
     setPasswordDisabled(false);
   };
 
-  // 获取对应键值
-  const getKeyByValueStrict = <T extends Record<string, unknown>>(
-    obj: T,
-    value: T[keyof T]
-  ): keyof T => {
-    const key = (Object.keys(obj) as Array<keyof T>).find(
-      (k) => obj[k] === value
-    );
-    if (!key) {
-      console.log('未找到对应键');
-      return '';
-    }
-    return key;
-  };
-
   // 根据自定义hook，生成不同的模板
-  // 使用自定义 Hook
   const { formItems } = useFormItems({
     collectType,
     columns: [],
