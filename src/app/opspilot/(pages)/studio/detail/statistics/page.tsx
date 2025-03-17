@@ -162,6 +162,7 @@ const ChartComponent: React.FC = () => {
 
   const renderCard = (titleKey: string, tooltipKey: string, children: React.ReactNode, key: string) => (
     <Card
+      size="small"
       title={
         <div className="flex justify-between items-center">
           <span>{t(titleKey)}</span>

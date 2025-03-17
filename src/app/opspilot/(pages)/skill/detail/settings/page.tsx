@@ -209,7 +209,7 @@ const SkillSettingsPage: React.FC = () => {
           <div className='w-1/2 space-y-4 flex flex-col h-full'>
             <section className={`flex-1 ${styles.llmSection}`}>
               <div className={`border rounded-md mb-5 ${styles.llmContainer}`}>
-                <h2 className="text-lg font-semibold mb-3">{t('skill.information')}</h2>
+                <h2 className="font-semibold mb-3 text-base">{t('skill.information')}</h2>
                 <div className="px-4">
                   <Form
                     form={form}
@@ -289,7 +289,7 @@ const SkillSettingsPage: React.FC = () => {
                 </div>
               </div>
               <div className={`border rounded-md ${styles.llmContainer}`}>
-                <h2 className="text-lg font-semibold mb-3">{t('skill.chatEnhancement')}</h2>
+                <h2 className="font-semibold mb-3 text-base">{t('skill.chatEnhancement')}</h2>
                 <div className={`p-4 rounded-md pb-0 ${styles.contentWrapper}`}>
                   <Form labelCol={{flex: '0 0 80px'}} wrapperCol={{flex: '1'}}>
                     <div className="flex justify-between">

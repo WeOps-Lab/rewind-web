@@ -113,11 +113,10 @@ const KnowledgePage = () => {
     <div className="w-full">
       <div className="flex justify-end mb-4">
         <Search
-          size="large"
           allowClear
           enterButton
           placeholder={`${t('common.search')}...`}
-          style={{ width: '350px' }}
+          className="w-60"
           onSearch={handleSearch}
         />
       </div>
@@ -152,14 +151,13 @@ const KnowledgePage = () => {
                 <div className="rounded-full">
                   <Icon type={getIconTypeByIndex(index)} className="text-4xl" />
                 </div>
-                <h3 className="ml-2 text-base font-semibold truncate" title={card.name}>
+                <h3 className="ml-2 text-sm font-semibold truncate" title={card.name}>
                   {card.name}
                 </h3>
               </div>
-              <p className={`my-5 text-sm line-clamp-3 ${knowledgeStyle.desc}`}>{card.introduction}</p>
+              <p className={`my-5 text-xs line-clamp-3 ${knowledgeStyle.desc}`}>{card.introduction}</p>
               <div className={`absolute bottom-4 right-4 text-xs ${knowledgeStyle.desc}`}>
-                <span className="pr-5">{t('knowledge.form.owner')}: {card.created_by}</span>
-                {/*<span>{t('knowledge.form.group')}: {Array.isArray(card.team_name) ? card.team_name.join(',') : '--'}</span>*/}
+                <span className="font-mini">{t('knowledge.form.owner')}: {card.created_by}</span>
               </div>
             </div>
           ))}

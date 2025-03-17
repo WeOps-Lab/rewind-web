@@ -107,7 +107,7 @@ const TestingPage: React.FC = () => {
       <div className="flex">
         <div className="w-1/2 pr-4">
           <div className={`mb-4 border rounded-md ${styles.testingHeader}`}>
-            <h2 className="text-lg font-semibold">{t('knowledge.testing.text')}</h2>
+            <h2 className="font-semibold text-base">{t('knowledge.testing.text')}</h2>
             <div className="relative">
               <TextArea
                 placeholder="Enter text to search"
@@ -130,7 +130,7 @@ const TestingPage: React.FC = () => {
             </div>
           </div>
           <div className={`border rounded-md ${styles.testingHeader}`}>
-            <h2 className="text-lg font-semibold mb-2">Config</h2>
+            <h2 className="font-semibold mb-2 text-base">{t('knowledge.config')}</h2>
             <div className="p-4">
               <ConfigComponent
                 configData={configData}
@@ -147,7 +147,7 @@ const TestingPage: React.FC = () => {
           </div>
         </div>
         <div className="w-1/2 pl-4">
-          <h2 className="text-lg font-semibold mb-2">{t('knowledge.results')}</h2>
+          <h2 className="font-semibold mb-2 text-base">{t('knowledge.results')}</h2>
           <div className="space-y-4">
             {loading ? (
               <>

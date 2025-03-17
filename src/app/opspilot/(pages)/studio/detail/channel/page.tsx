@@ -135,8 +135,8 @@ const ChannelPage: React.FC = () => {
                 </PermissionWrapper>
               </div>
               <div className="flex justify-center items-center space-x-4 my-10">
-                <Icon type={app.icon} className="text-6xl" />
-                <h2 className="text-xl font-bold m-0">{app.name}</h2>
+                <Icon type={app.icon} className="text-4xl" />
+                <h2 className="text-lg font-bold m-0">{app.name}</h2>
               </div>
               <div className="w-full h-[32px] flex justify-center items-end">
                 <PermissionWrapper className="w-full" requiredPermissions={['Setting']}>

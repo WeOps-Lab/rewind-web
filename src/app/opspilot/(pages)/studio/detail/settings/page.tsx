@@ -160,19 +160,19 @@ const StudioSettingsPage: React.FC = () => {
   const menu = (
     <Menu style={{ width: 300 }}>
       <Menu.Item key="info" disabled style={{ whiteSpace: 'normal', opacity: 1, cursor: 'default' }}>
-        <div>{t('studio.settings.publishTip')} {t('studio.settings.selectedParams')}</div>
+        <div className="text-sm">{t('studio.settings.publishTip')} {t('studio.settings.selectedParams')}</div>
       </Menu.Item>
       <Menu.Divider />
       <Menu.Item key="save_publish">
         <PermissionWrapper requiredPermissions={['Save&Publish']}>
-          <Button type="primary" style={{ width: '100%' }} onClick={handleSaveAndPublish}>
+          <Button type="primary" size="small" style={{ width: '100%' }} onClick={handleSaveAndPublish}>
             {t('common.save')} & {t('common.publish')}
           </Button>
         </PermissionWrapper>
       </Menu.Item>
       <Menu.Item key="save_only">
         <PermissionWrapper requiredPermissions={['Edit']}>
-          <Button style={{ width: '100%' }} onClick={() => handleSave(false)}>
+          <Button size="small" style={{ width: '100%' }} onClick={() => handleSave(false)}>
             {t('common.saveOnly')}
           </Button>
         </PermissionWrapper>
@@ -266,14 +266,14 @@ const StudioSettingsPage: React.FC = () => {
                 {online ? t('studio.on') : t('studio.off')}
               </Tag>
               <Dropdown overlay={menu} trigger={['click']}>
-                <Button icon={<DownOutlined />} type="primary">
+                <Button icon={<DownOutlined />} size="small" type="primary">
                   {t('common.settings')}
                 </Button>
               </Dropdown>
             </div>
             <div className="space-y-4">
               <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">{t('studio.information')}</h2>
+                <h2 className="font-semibold mb-2 text-base">{t('studio.information')}</h2>
                 <div className="px-4 pt-[24px] border rounded-md shadow-sm">
                   <Form form={form} labelCol={{ flex: '0 0 128px' }} wrapperCol={{ flex: '1' }}>
                     <Form.Item
@@ -330,7 +330,7 @@ const StudioSettingsPage: React.FC = () => {
                 </div>
               </div>
               <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">{t('skill.menu')}</h2>
+                <h2 className="font-semibold mb-2 text-base">{t('skill.menu')}</h2>
                 <div className="px-4 pt-4 border rounded-md shadow-sm">
                   <Form.Item className="mb-0">
                     <div className="mb-4 flex justify-end">
@@ -358,7 +358,7 @@ const StudioSettingsPage: React.FC = () => {
                 </div>
               </div>
               <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">{t('studio.channel.title')}</h2>
+                <h2 className="font-semibold mb-2 text-base">{t('studio.channel.title')}</h2>
                 <div className="px-4 pt-4 border rounded-md shadow-sm">
                   <Form.Item className="mb-4">
                     <div className="grid gap-3 grid-cols-3">
