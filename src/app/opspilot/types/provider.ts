@@ -16,6 +16,7 @@ export interface Model {
     embed_config?: ModelConfig;
     rerank_config?: ModelConfig;
     ocr_config?: ModelConfig;
+    consumer_team: string;
 }
 
 export interface TabConfig {

@@ -5,11 +5,14 @@
       color: var(--color-text-1);
       border: none;
       background-color: var(--color-bg);
+      .ant-card-meta-title {
+        font-size: 14px;
+      }
     }
   }
   .iconContainer {
     position: absolute;
-    top: 25px;
+    top: 20px;
     right: 35px;
     background-color: var(--color-bg);
   }
@@ -20,7 +23,7 @@
 
 .addNew {
   background-color: var(--color-bg);
-  min-height: 200px;
+  min-height: 185px;
 }
 .borderContainer {
   border: 1px solid var(--color-border-2);
@@ -31,6 +34,7 @@
   display: flex;
   align-items: center;
   border: none;
+  font-size: 10px;
 
   &::before {
     content: '';

@@ -198,7 +198,8 @@
       "name": "名称",
       "modelName": "模型名称",
       "type": "类型",
-      "group": "分组"
+      "group": "分组",
+      "consumerTeam": "配额分配组"
     },
     "deleteConfirm": "你确定要删除此模型吗？"
   },
@@ -322,7 +323,10 @@
         "shared": "共享配额",
         "sharedTooltip": "组织内个体共享的配额。",
         "uniform": "统一配额",
-        "uniformTooltip": "组织内每个个体均适用的配额。"
+        "uniformTooltip": "组织内每个个体均适用的配额。",
+        "token": "token数",
+        "thousand": "千",
+        "million": "百万"
       }
     },
     "myQuota": {
@@ -339,7 +343,7 @@
       "key": "密钥",
       "createdAt": "创建时间",
       "title": "API密钥",
-      "subTitle": "为了防止API滥用，请保护你的API密钥。",
+      "content": "为了防止API滥用，请保护你的API密钥。",
       "create": "创建新密钥",
       "selectGroup": "选择分组",
       "group": "分组",
