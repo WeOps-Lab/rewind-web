@@ -12,7 +12,6 @@ import { useCommon } from '@/app/monitor/context/common';
 import { Modal, message, Button } from 'antd';
 import useApiClient from '@/utils/request';
 import { LEVEL_MAP, useLevelList } from '@/app/monitor/constants/monitor';
-import CodeEditor from '@/app/monitor/components/codeEditor';
 import Permission from '@/components/permission';
 
 const Information: React.FC<TableDataItem> = ({
@@ -180,17 +179,18 @@ const Information: React.FC<TableDataItem> = ({
               {t('monitor.events.message')}
             </h3>
             <div className="leading-[24px]">
-              <CodeEditor
-                className="mb-[10px]"
-                showCopy
-                mode="python"
-                theme="monokai"
-                name="editor"
-                width="100%"
-                height="400px"
-                readOnly
-                value={JSON.stringify(trapData.metric || {})}
-              />
+              {/* 报文表格 */}
+              <Descriptions column={2} bordered>
+                {
+                  Object.entries<string | Array<string>>(trapData).map(([key, value]) => {
+                    return (
+                      <Descriptions.Item label={key} key={key}>
+                        {Array.isArray(value) ? value[0][1] : value}
+                      </Descriptions.Item>
+                    )
+                  })
+                }
+              </Descriptions>
             </div>
           </div>
         ) : (
