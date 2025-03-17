@@ -1290,7 +1290,7 @@ const StrategyOperation = () => {
                                 <Radio.Group>
                                   {channelList.map((item) => (
                                     <Radio key={item.id} value={item.id}>
-                                      {item.name}
+                                      {`${item.name}（${item.channel_type}）`}
                                     </Radio>
                                   ))}
                                 </Radio.Group>
