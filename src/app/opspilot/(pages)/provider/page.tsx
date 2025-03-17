@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Segmented, message, Input, Spin, Button } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
 import useApiClient from '@/utils/request';
 import ProviderGrid from '@/app/opspilot/components/provider/grid';
 import ConfigModal from '@/app/opspilot/components/provider/configModal';
@@ -79,6 +78,7 @@ const ProviderPage: React.FC = () => {
       llm_model_type: values.type,
       enabled: values.enabled,
       team: values.team,
+      consumer_team: values.consumer_team,
       llm_config: {
         model: values.modelName,
         openai_api_key: values.apiKey,
@@ -121,14 +121,13 @@ const ProviderPage: React.FC = () => {
       />
       <div className="flex justify-end mb-4">
         <Search
-          size="large"
           allowClear
           enterButton
           placeholder={`${t('common.search')}...`}
-          style={{width: '350px'}}
+          className="w-60"
           onSearch={handleSearch}
         />
-        {activeTab === '1' && (<Button type="primary" size="large" className="ml-2" icon={<PlusOutlined />} onClick={() => setIsAddModalVisible(true)}>
+        {activeTab === '1' && (<Button type="primary" className="ml-2" onClick={() => setIsAddModalVisible(true)}>
           {t('common.add')}
         </Button>)}
       </div>
@@ -136,7 +135,7 @@ const ProviderPage: React.FC = () => {
         {activeTab === '1' ? (
           Object.entries(getCategorizedModels()).map(([type, models]) => (
             <div key={type} className="mb-4">
-              <h3 className="text-lg font-semibold mb-4">{MODEL_TYPE_OPTIONS[type]}</h3>
+              <h3 className="font-semibold mb-4">{MODEL_TYPE_OPTIONS[type]}</h3>
               <ProviderGrid
                 models={models}
                 filterType="llm_model"

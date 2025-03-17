@@ -5,3 +5,12 @@
     }
   }
 }
+
+.tokenSetWrapper {
+  :global {
+    .ant-form-item {
+      position: relative;
+      margin-bottom: 24px;
+    }
+  }
+}

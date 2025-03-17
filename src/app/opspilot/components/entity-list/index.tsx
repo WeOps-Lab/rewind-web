@@ -109,11 +109,10 @@ const EntityList = <T,>({ endpoint, CardComponent, ModifyModalComponent, itemTyp
     <div className="w-full h-full">
       <div className="flex justify-end mb-4">
         <Search
-          size="large"
           allowClear
           enterButton
           placeholder={`${t('common.search')}...`}
-          style={{ width: '350px' }}
+          className="w-60"
           onSearch={handleSearch}
         />
       </div>

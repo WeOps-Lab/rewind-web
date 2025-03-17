@@ -78,7 +78,7 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
         <div className="flex-1">
           <div className="p-4 pb-0 border rounded-md mb-4">
             <div className="flex items-center mb-2 justify-between">
-              <h3 className="text-base font-semibold">{t('knowledge.textSearch')}</h3>
+              <h3 className="font-semibold">{t('knowledge.textSearch')}</h3>
               <Switch
                 size="small"
                 checked={configData.selectedSearchTypes.includes('textSearch')}
@@ -121,7 +121,7 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
           </div>
           <div className="p-4 pb-0 border rounded-md mb-4">
             <div className="flex items-center mb-2 justify-between">
-              <h3 className="text-base font-semibold">{t('knowledge.vectorSearch')}</h3>
+              <h3 className="font-semibold">{t('knowledge.vectorSearch')}</h3>
               <Switch
                 size="small"
                 checked={configData.selectedSearchTypes.includes('vectorSearch')}
@@ -172,7 +172,7 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
           </div>
           <div className="p-4 pb-0 border rounded-md mb-4">
             <div className="flex items-center justify-between mb-4">
-              <label className="text-base font-semibold">{t('knowledge.rerankModel')}</label>
+              <label className="font-semibold">{t('knowledge.rerankModel')}</label>
               <Switch
                 size="small"
                 checked={configData.rerankModel}

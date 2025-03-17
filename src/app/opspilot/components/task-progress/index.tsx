@@ -40,7 +40,7 @@ const TaskProgress: React.FC = () => {
     <div className="p-4 absolute bottom-10 left-0 w-full max-h-[300px] overflow-y-auto">
       {tasks.map((task) => (
         <div key={task.id} className="mb-2">
-          <div className="flex justify-between items-center text-sm mb-1">
+          <div className="flex justify-between items-center text-xs mb-1">
             <span>{task.name}</span>
             <span>{task.train_progress}%</span>
           </div>

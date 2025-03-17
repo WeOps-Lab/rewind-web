@@ -72,18 +72,18 @@ const EntityCard: React.FC<EntityCardProps> = ({
           </div>
         </Dropdown>
       </div>
-      <div className="w-full h-[60px] relative">
+      <div className="w-full h-[50px] relative">
         <Image alt="avatar" src={avatar} layout="fill" objectFit="cover" className="rounded-t-xl" />
       </div>
-      <div className={`w-16 h-16 rounded-full flex justify-center items-center ${styles.iconContainer}`}>
-        <Icon type={iconType} className="text-5xl" />
+      <div className={`w-14 h-14 rounded-full flex justify-center items-center ${styles.iconContainer}`}>
+        <Icon type={iconType} className="text-4xl" />
       </div>
       <div className="p-4 relative">
         <Meta
           title={name}
           description={
             <>
-              <p className={`my-5 text-sm line-clamp-3 h-[60px] ${styles.desc}`}>{introduction}</p>
+              <p className={`mt-3 mb-2 text-xs line-clamp-3 h-[50px] ${styles.desc}`}>{introduction}</p>
               <div className={`flex items-center justify-between ${entityStyles.footer}`}>
                 {online !== undefined && (
                   <Tag
@@ -92,9 +92,8 @@ const EntityCard: React.FC<EntityCardProps> = ({
                     {online ? t('studio.on') : t('studio.off')}
                   </Tag>
                 )}
-                <div className={online === undefined ? "absolute bottom-4 right-4 text-xs" : entityStyles.info}>
-                  <span className="pr-5">{t('skill.form.owner')}: {created_by}</span>
-                  {/*<span>{t('skill.form.group')}: {Array.isArray(team_name) ? team_name.join(',') : '--'}</span>*/}
+                <div className={online === undefined ? 'font-mini' : entityStyles.info}>
+                  <span>{t('skill.form.owner')}: {created_by}</span>
                 </div>
               </div>
             </>

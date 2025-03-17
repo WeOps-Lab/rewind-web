@@ -226,7 +226,7 @@ const CustomChat: React.FC<CustomChatProps> = ({ handleSendMessage, showMarkOnly
     <div className={`rounded-lg h-full ${isFullscreen ? styles.fullscreen : ''}`}>
       {mode === 'chat' &&
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-lg font-semibold">{t('chat.test')}</h2>
+          <h2 className="text-base font-semibold">{t('chat.test')}</h2>
           <div>
             <button title="fullScreen" onClick={handleFullscreenToggle} aria-label="Toggle Fullscreen">
               {isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}

@@ -86,7 +86,8 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
       name: values.name,
       llm_model_type: values.type,
       enabled: values.enabled,
-      team: values.team
+      team: values.team,
+      consumer_team: values.consumer_team
     };
 
     if (filterType === 'llm_model') {
@@ -146,14 +147,14 @@ const ProviderGrid: React.FC<ProviderGridProps> = ({ models, filterType, loading
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
             {models.map((model) => (
-              <div className={`rounded-lg shadow px-4 py-6 relative ${styles.gridContainer}`} key={model.id}>
+              <div className={`rounded-lg shadow p-4 relative ${styles.gridContainer}`} key={model.id}>
                 <div className="flex justify-between items-start">
                   <div style={{flex: '0 0 auto'}}>
                     <Icon type={getModelIcon(model)} className="text-5xl"/>
                   </div>
                   <div className={`flex-1 ml-2 ${styles.nameContainer}`}>
-                    <h3 className={`text-base font-semibold break-words mb-1 ${styles.name}`}>{model.name}</h3>
-                    <span className="inline-block mt-1 px-2 py-1 text-xs rounded-xl border">
+                    <h3 className={`text-sm font-semibold break-words mb-1 ${styles.name}`}>{model.name}</h3>
+                    <span className="inline-block mt-1 px-2 font-mini rounded-xl border">
                       {filterType}
                     </span>
                   </div>

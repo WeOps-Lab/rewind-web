@@ -42,6 +42,7 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
         apiKey: model.llm_config?.openai_api_key || '',
         url: filterType === 'llm_model' ? model.llm_config?.openai_base_url || '' : config?.base_url || '',
         enabled: model.enabled || false,
+        consumer_team: model.consumer_team ?? '',
       });
     } else {
       form.resetFields();
@@ -144,6 +145,17 @@ const ProviderModal: React.FC<ProviderModalProps> = ({
             mode="multiple"
             placeholder={`${t('common.selectMsg')}${t('provider.form.group')}`}
           >
+            {groups.map(group => (
+              <Select.Option key={group.id} value={group.id}>
+                {group.name}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+        <Form.Item
+          name="consumer_team"
+          label={t('provider.form.consumerTeam')}>
+          <Select placeholder={`${t('common.selectMsg')}${t('provider.form.consumerTeam')}`}>
             {groups.map(group => (
               <Select.Option key={group.id} value={group.id}>
                 {group.name}
