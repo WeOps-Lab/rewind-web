@@ -185,7 +185,7 @@ const Information: React.FC<TableDataItem> = ({
                   Object.entries<string | Array<string>>(trapData).map(([key, value]) => {
                     return (
                       <Descriptions.Item label={key} key={key}>
-                        {Array.isArray(value) ? value[0][1] : value}
+                        {Array.isArray(value) ? (value[0]?.[1] ?? "--") : (value ?? "--")}
                       </Descriptions.Item>
                     )
                   })
