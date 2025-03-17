@@ -9,15 +9,15 @@ interface TopSectionProps {
 }
 
 const TopSection: React.FC<TopSectionProps> = ({ title, content, iconType }) => (
-  <div className="p-4 rounded-md w-full h-[88px] bg-[var(--color-bg)] flex items-center">
+  <div className="p-4 rounded-md w-full h-[80px] bg-[var(--color-bg)] flex items-center">
     {iconType && (
       <div>
         <Icon type={iconType} className="mr-2 text-6xl" />
       </div>
     )}
     <div className="flex-1 overflow-hidden">
-      <h2 className="text-lg font-semibold mb-2">{title}</h2>
-      <EllipsisWithTooltip className="whitespace-nowrap overflow-hidden text-ellipsis" text={content} />
+      <h2 className="text-base font-semibold mb-2">{title}</h2>
+      <EllipsisWithTooltip className="text-xs text-[var(--color-text-3)] whitespace-nowrap overflow-hidden text-ellipsis" text={content} />
     </div>
   </div>
 );

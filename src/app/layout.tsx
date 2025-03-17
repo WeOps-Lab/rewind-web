@@ -81,7 +81,7 @@ const LayoutWithProviders = ({ children }: { children: React.ReactNode }) => {
       <header className="sticky top-0 left-0 right-0 flex justify-between items-center header-bg">
         <TopMenu />
       </header>
-      <main className="flex-1 p-4 flex">
+      <main className="flex-1 p-4 flex text-sm">
         <AntdRegistry>{children}</AntdRegistry>
       </main>
     </div>
