@@ -324,7 +324,7 @@
         "sharedTooltip": "组织内个体共享的配额。",
         "uniform": "统一配额",
         "uniformTooltip": "组织内每个个体均适用的配额。",
-        "token": "token数",
+        "token": "Token数",
         "thousand": "千(K)",
         "million": "百万(M)"
       }

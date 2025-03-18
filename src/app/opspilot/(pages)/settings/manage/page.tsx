@@ -197,14 +197,14 @@ const QuotaManagementPage: React.FC = () => {
         <div className="p-4 rounded-md bg-[var(--color-bg)]">
           <div className="flex justify-end mb-4">
             <Search
-              placeholder="Search..."
+              placeholder={`${t('common.search')}...`}
               onSearch={handleSearch}
               enterButton={<SearchOutlined />}
               className="mr-2 w-60"
               onChange={(e) => setSearchKey(e.target.value)}
             />
             <PermissionWrapper requiredPermissions={['Edit']}>
-              <Button type="primary" onClick={() => showModal('add')}>+ Add</Button>
+              <Button type="primary" onClick={() => showModal('add')}>+ {t('common.add')}</Button>
             </PermissionWrapper>
           </div>
           <CustomTable
