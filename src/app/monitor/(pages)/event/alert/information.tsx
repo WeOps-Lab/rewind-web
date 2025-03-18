@@ -205,6 +205,7 @@ const Information: React.FC<TableDataItem> = ({
               <LineChart
                 allowSelect={false}
                 data={chartData}
+                threshold={formData.policy?.threshold}
                 unit={formData.metric?.unit}
                 metric={formData.metric}
               />
