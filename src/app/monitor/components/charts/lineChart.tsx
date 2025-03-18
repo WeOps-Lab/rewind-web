@@ -9,6 +9,8 @@ import {
   Area,
   ResponsiveContainer,
   ReferenceArea,
+  ReferenceLine,
+  Label,
 } from 'recharts';
 import CustomTooltip from './customTooltips';
 import {
@@ -21,12 +23,14 @@ import dayjs, { Dayjs } from 'dayjs';
 import DimensionFilter from './dimensionFilter';
 import DimensionTable from './dimensionTable';
 import { ChartData, ListItem } from '@/app/monitor/types';
-import { MetricItem } from '@/app/monitor/types/monitor';
+import { MetricItem, ThresholdField } from '@/app/monitor/types/monitor';
+import { LEVEL_MAP } from '../../constants/monitor';
 
 interface LineChartProps {
   data: ChartData[];
   unit?: string;
   metric?: MetricItem;
+  threshold?: ThresholdField[]
   showDimensionFilter?: boolean;
   showDimensionTable?: boolean;
   allowSelect?: boolean;
@@ -56,6 +60,7 @@ const LineChart: React.FC<LineChartProps> = ({
   unit = '',
   showDimensionFilter = false,
   metric = {},
+  threshold = [],
   allowSelect = true,
   showDimensionTable = false,
   onXRangeChange,
@@ -197,6 +202,22 @@ const LineChart: React.FC<LineChartProps> = ({
                   return tick;
                 }}
               />
+
+              {
+                (Array.isArray(threshold) ? threshold.length : false) && threshold.map((item, index) => {
+                  return (
+                    <ReferenceLine
+                      key={index}
+                      y={`${item.value}`}
+                      isFront
+                      stroke={`${LEVEL_MAP[item.level]}`}
+                      strokeDasharray="12 3 3 3 3 3" >
+                      <Label value={`${item.value}`} fill={`${LEVEL_MAP[item.level]}`} position={{x:32,y:-5}}></Label>
+                    </ReferenceLine>
+                  )
+                })
+              }
+
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <Tooltip
                 offset={-40}
