@@ -9,6 +9,7 @@ import {
   IntergrationItem,
   ObectItem,
   MetricItem,
+  EnumItem
 } from '@/app/monitor/types/monitor';
 import ViewModal from './viewModal';
 import {
@@ -165,13 +166,16 @@ const Intergration = () => {
         label: COLLECT_TYPE_MAP[item.name || ''],
         value: item.id,
       }));
+      const _metrics = res[1] || [];
+      const _dataType = _metrics?.[0].data_type;
+      const _enumList: EnumItem[] = _dataType === 'Enum'? JSON.parse(_metrics[0].unit) : [];
       setPlugins(_plugins);
       setTableData(res[0]?.results || []);
       setPagination((prev: Pagination) => ({
         ...prev,
         total: res[0]?.count || 0,
       }));
-      setMetrics(res[1] || []);
+      setMetrics(_metrics);
       const _objectName = objects.find((item) => item.id === objectId)?.name;
       if (_objectName) {
         const filterMetrics =
@@ -209,9 +213,17 @@ const Intergration = () => {
             dataIndex: item.key,
             key: item.key,
             width: 200,
-            render: (_: unknown, record: TableDataItem) => (
-              <>{getEnumValueUnit(target, record[item.key])}</>
-            ),
+            render: (_: unknown, record: TableDataItem) => {
+              let color = '';
+              if(_dataType === 'Enum') {
+                color = _enumList.find(
+                  (i) => i.name === getEnumValueUnit(target, record[item.key])
+                )?.color as string;
+              }
+              return (
+                <><span style={{color: color}}>{getEnumValueUnit(target, record[item.key])}</span></>
+              )
+            },
           };
         });
         const originColumns = deepClone(columns);
