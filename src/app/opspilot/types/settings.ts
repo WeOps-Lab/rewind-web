@@ -15,4 +15,18 @@ export interface ApiResponse {
   is_bot_uniform: boolean;
   is_file_uniform: boolean;
   is_skill_uniform: boolean;
+  token_set: any;
+}
+
+export interface QuotaModalProps {
+  visible: boolean;
+  onConfirm: (values: any) => Promise<void>;
+  onCancel: () => void;
+  mode: 'add' | 'edit';
+  initialValues?: any;
+}
+
+export interface TargetOption {
+  id: string;
+  name: string;
 }

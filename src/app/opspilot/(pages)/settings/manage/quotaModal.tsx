@@ -6,26 +6,9 @@ import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
 import styles from './index.module.scss';
 import { useUserInfoContext } from '@/context/userInfo';
+import { QuotaModalProps, TargetOption } from '@/app/opspilot/types/settings'
 
 const { Option } = Select;
-
-interface QuotaModalProps {
-  visible: boolean;
-  onConfirm: (values: any) => Promise<void>;
-  onCancel: () => void;
-  mode: 'add' | 'edit';
-  initialValues?: any;
-}
-
-interface TargetOption {
-  id: string;
-  name: string;
-}
-
-interface ModelOption {
-  id: string;
-  name: string;
-}
 
 const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, mode, initialValues }) => {
   const { t } = useTranslation();
@@ -33,10 +16,11 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
   const { get, post } = useApiClient();
   const { groups: groupList, selectedGroup } = useUserInfoContext();
   const [targetType, setTargetType] = useState<string>('user');
+  const [rule, setRule] = useState<string>('uniform');
   const [userList, setUserList] = useState<TargetOption[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [targetLoading, setTargetLoading] = useState<boolean>(false);
-  const [modelList, setModelList] = useState<ModelOption[]>([]);
+  const [modelList, setModelList] = useState<TargetOption[]>([]);
   const [modelLoading, setModelLoading] = useState<boolean>(false);
 
   const fetchData = useCallback(async () => {
@@ -83,6 +67,7 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
           ...initialValues,
           token_set: tokenSet
         });
+        setRule(initialValues.rule_type);
         setTargetType(initialValues.targetType);
       } else if (mode === 'add') {
         form.resetFields();
@@ -201,7 +186,12 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
           label={t('settings.manageQuota.form.rule')}
           name="rule"
           rules={[{ required: true, message: `${t('common.selectMsg')}` }]}>
-          <Radio.Group disabled={targetType === 'user'}>
+          <Radio.Group
+            disabled={targetType === 'user'}
+            onChange={(e) => {
+              setRule(e.target.value);
+              form.setFieldsValue({ rule: e.target.value });
+            }}>
             <Radio value="uniform">
               {t('settings.manageQuota.form.uniform')}
               <Tooltip title={t('settings.manageQuota.form.uniformTooltip')}>
@@ -255,7 +245,7 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
             placeholder={`${t('common.inputMsg')}${t('settings.manageQuota.form.knowledgeBase')}`}
           />
         </Form.Item>
-        {targetType === 'group' && (
+        {(targetType === 'group' && rule === 'shared') && (
           <>
             <Form.List name="token_set">
               {(fields, { add, remove }) => (
@@ -273,6 +263,7 @@ const QuotaModal: React.FC<QuotaModalProps> = ({ visible, onConfirm, onCancel, m
                               showSearch
                               style={{ width: 200 }}
                               loading={modelLoading}
+                              disabled={modelLoading}
                               value={form.getFieldValue(['token_set', index, 'model'])}
                               onChange={(value) => handleTokenChange(index, 'model', value)}
                             >

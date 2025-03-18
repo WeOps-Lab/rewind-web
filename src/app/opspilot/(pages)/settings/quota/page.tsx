@@ -37,6 +37,15 @@ const QuotaUsage: React.FC = () => {
             unit: ''
           },
         ];
+        const { token_set: tokenSet } = res;
+        Object.keys(tokenSet).forEach(key => {
+          formattedData.push({
+            label: `Token-${key} (${t('settings.myQuota.shared')})`,
+            usage: tokenSet[key].used_token,
+            total: tokenSet[key].all_token,
+            unit: ''
+          })
+        })
         setData(formattedData);
       } catch (error) {
         console.error(`${t('common.fetchFailed')}:`, error);
@@ -58,7 +67,7 @@ const QuotaUsage: React.FC = () => {
       </div>
       <section
         className="bg-[var(--color-bg)] p-4 rounded-md flex"
-        style={{ height: 'calc(100vh - 250px)' }}
+        style={{ height: 'calc(100vh - 235px)' }}
       >
         <div className="flex-1">
           {loading ? (

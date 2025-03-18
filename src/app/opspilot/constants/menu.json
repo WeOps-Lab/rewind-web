@@ -133,13 +133,13 @@
       "name": "Setting",
       "children": [
         {
-          "title": "管理凭据",
+          "title": "管理配额",
           "url": "/opspilot/settings/manage",
           "icon": "_quota_management",
           "name": "mange_quota"
         },
         {
-          "title": "我的凭据",
+          "title": "我的配额",
           "url": "/opspilot/settings/quota",
           "icon": "quota",
           "name": "my_quota"
