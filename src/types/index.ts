@@ -39,11 +39,14 @@ export interface Group {
 }
 
 export interface UserInfoContextType {
+  loading: boolean;
   roles: string[];
   groups: Group[];
   selectedGroup: Group | null;
   flatGroups: Group[];
   isSuperUser: boolean;
+  isFirstLogin: boolean;
+  userId: string;
   setSelectedGroup: (group: Group) => void;
 }
 
