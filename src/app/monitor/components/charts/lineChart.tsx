@@ -24,7 +24,7 @@ import DimensionFilter from './dimensionFilter';
 import DimensionTable from './dimensionTable';
 import { ChartData, ListItem } from '@/app/monitor/types';
 import { MetricItem, ThresholdField } from '@/app/monitor/types/monitor';
-import { LEVEL_MAP } from '../../constants/monitor';
+import { LEVEL_MAP } from '@/app/monitor/constants/monitor';
 
 interface LineChartProps {
   data: ChartData[];
@@ -204,7 +204,7 @@ const LineChart: React.FC<LineChartProps> = ({
               />
 
               {
-                (Array.isArray(threshold) ? threshold.length : false) && threshold.map((item, index) => {
+                threshold.map((item, index) => {
                   return (
                     <ReferenceLine
                       key={index}
