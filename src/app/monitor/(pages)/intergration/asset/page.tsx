@@ -35,7 +35,7 @@ import { useCommon } from '@/app/monitor/context/common';
 import { deepClone, showGroupName } from '@/app/monitor/utils/common';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import TreeSelector from '@/app/monitor/components/treeSelector';
-import EditConfig from './editConfig';
+import EditConfig from './updateConfig';
 import {
   OBJECT_INSTANCE_TYPE_MAP,
   NODE_STATUS_MAP,
@@ -461,6 +461,19 @@ const Asset = () => {
     }
   };
 
+  const getRowxpandable = () => {
+    const monitorObjName =
+      objects.find((item: ObectItem) => item.id === objectId)?.name || '';
+    return ![
+      'Pod',
+      'Node',
+      'Docker Container',
+      'ESXI',
+      'VM',
+      'DataStorage',
+    ].includes(monitorObjName);
+  };
+
   return (
     <div className={assetStyle.asset}>
       <div className={assetStyle.tree}>
@@ -495,6 +508,7 @@ const Asset = () => {
           pagination={pagination}
           loading={tableLoading}
           expandable={{
+            showExpandColumn: getRowxpandable(),
             expandedRowRender: (record) => (
               <CustomTable
                 scroll={{ x: 'calc(100vh - 480px)' }}
