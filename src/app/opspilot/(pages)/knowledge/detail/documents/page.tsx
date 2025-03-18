@@ -428,7 +428,7 @@ const DocumentsPage: React.FC = () => {
       <CustomTable
         rowKey="id"
         rowSelection={rowSelection}
-        scroll={{ y: 'calc(100vh - 450px)' }}
+        scroll={{ y: 'calc(100vh - 420px)' }}
         columns={columns}
         dataSource={tableData}
         pagination={{

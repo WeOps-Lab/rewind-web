@@ -208,7 +208,7 @@ const QuotaManagementPage: React.FC = () => {
             </PermissionWrapper>
           </div>
           <CustomTable
-            scroll={{ y: 'calc(100vh - 440px)' }}
+            scroll={{ y: 'calc(100vh - 425px)' }}
             dataSource={data}
             columns={columns}
             pagination={{

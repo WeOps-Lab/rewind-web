@@ -174,10 +174,10 @@ const PreprocessStep: React.FC<PreprocessStepProps> = ({ onConfigChange, knowled
   return (
     <div className="flex justify-between">
       <div className={`flex-1 px-4 ${styles.config}`}>
-        <h2 className="text-lg font-semibold mb-3">{t('knowledge.documents.general')}</h2>
+        <h2 className="text-base font-semibold mb-3">{t('knowledge.documents.general')}</h2>
         <div className={`rounded-md p-4 mb-6 ${styles.configItem}`}>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-semibold">{t('knowledge.documents.chunkParsing')}</h3>
+            <h3 className="text-sm font-semibold">{t('knowledge.documents.chunkParsing')}</h3>
             <Switch size="small" checked={formData.chunkParsing} onChange={(checked) => handleChange('chunkParsing', checked)} />
           </div>
           <p className="mb-4 text-sm">{t('knowledge.documents.chunkParsingDesc')}</p>
@@ -208,7 +208,7 @@ const PreprocessStep: React.FC<PreprocessStepProps> = ({ onConfigChange, knowled
         </div>
         <div className={`rounded-md p-4 mb-6 ${styles.configItem}`}>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-semibold">{t('knowledge.documents.semChunkParsing')}</h3>
+            <h3 className="text-sm font-semibold">{t('knowledge.documents.semChunkParsing')}</h3>
             <Switch size="small" checked={formData.semanticChunkParsing} onChange={(checked) => handleChange('semanticChunkParsing', checked)} />
           </div>
           <p className="mb-4 text-sm">{t('knowledge.documents.semChunkParsingDesc')}</p>
@@ -230,7 +230,7 @@ const PreprocessStep: React.FC<PreprocessStepProps> = ({ onConfigChange, knowled
         </div>
         <div className={`rounded-md p-4 mb-6 ${styles.configItem}`}>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-semibold">{t('knowledge.documents.ocrEnhancement')}</h3>
+            <h3 className="text-sm font-semibold">{t('knowledge.documents.ocrEnhancement')}</h3>
             <Switch size="small" checked={formData.ocrEnhancement} onChange={(checked) => handleChange('ocrEnhancement', checked)} />
           </div>
           <p className="mb-4 text-sm">{t('knowledge.documents.ocrEnhancementDesc')}</p>
@@ -250,10 +250,10 @@ const PreprocessStep: React.FC<PreprocessStepProps> = ({ onConfigChange, knowled
             </Form.Item>
           )}
         </div>
-        <h2 className="text-lg font-semibold mb-3">{t('knowledge.documents.advanceSettings')}</h2>
+        <h2 className="text-base font-semibold mb-3">{t('knowledge.documents.advanceSettings')}</h2>
         <div className={`rounded-md p-4 mb-6 ${styles.configItem}`}>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-semibold">{t('knowledge.documents.excelParsing')}</h3>
+            <h3 className="text-sm font-semibold">{t('knowledge.documents.excelParsing')}</h3>
             <Switch size="small" checked={formData.excelParsing} onChange={(checked) => handleChange('excelParsing', checked)} />
           </div>
           <p className="mb-4 text-sm">{t('knowledge.documents.excelParsingDesc')}</p>
@@ -271,7 +271,7 @@ const PreprocessStep: React.FC<PreprocessStepProps> = ({ onConfigChange, knowled
       </div>
       <div className="flex-1 px-4">
         <div className="flex justify-between">
-          <h2 className="text-lg font-semibold mb-3">{t('knowledge.documents.preview')}</h2>
+          <h2 className="text-base font-semibold mb-3">{t('knowledge.documents.preview')}</h2>
           <Button type="primary" size="small" onClick={handlePreviewClick} loading={loadingPreview}>{t('knowledge.documents.viewChunk')}</Button>
         </div>
         {loadingPreview ? (
