@@ -7,6 +7,8 @@
     "freeApply": "免费申请演示",
     "contactUs": "联系我们",
     "clickToEnter": "点击进入",
-    "date": "日期"
+    "date": "日期",
+    "initUserSet": "初始化用户配置",
+    "group": "分组名"
   }
 }
