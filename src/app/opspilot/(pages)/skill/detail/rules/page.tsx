@@ -195,19 +195,19 @@ const SkillRules: React.FC = () => {
         ) : (
           <Table
             rowKey='id'
+            size="middle"
             dataSource={data}
             columns={columns}
             pagination={false}
-            scroll={{ y: 'calc(100vh - 400px)' }}
+            scroll={{ y: 'calc(100vh - 370px)' }}
           />
         )}
       </div>
       <div className='fixed bottom-8 right-8'>
-        {!loading && (
+        {!loading && total > 0 && (
           <Pagination
             total={total}
             showSizeChanger
-            hideOnSinglePage
             current={pagination.current}
             pageSize={pagination.pageSize}
             onChange={handleTableChange}

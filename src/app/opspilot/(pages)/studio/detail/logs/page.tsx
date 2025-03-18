@@ -216,10 +216,11 @@ const StudioLogsPage: React.FC = () => {
           </div>
         ) : (
           <Table
+            size="middle"
             dataSource={data}
             columns={columns}
             pagination={false}
-            scroll={{ y: 'calc(100vh - 400px)' }}
+            scroll={{ y: 'calc(100vh - 370px)' }}
             onChange={(pagination, filters) => handleChannelFilterChange(filters.channel as string[])}
           />
         )}
