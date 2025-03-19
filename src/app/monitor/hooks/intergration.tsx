@@ -19,6 +19,7 @@ interface UseColumnsAndFormItemsParams {
   authPasswordDisabled: boolean;
   privPasswordDisabled: boolean;
   passwordDisabled: boolean;
+  mode?: string;
   handleEditAuthPassword: () => void;
   handleEditPrivPassword: () => void;
   handleEditPassword: () => void;
@@ -718,6 +719,7 @@ const useColumnsAndFormItems = ({
 };
 
 const useFormItems = ({
+  pluginName,
   collectType,
   authPasswordRef,
   privPasswordRef,
@@ -725,13 +727,14 @@ const useFormItems = ({
   authPasswordDisabled,
   privPasswordDisabled,
   passwordDisabled,
+  mode,
   handleEditAuthPassword,
   handleEditPrivPassword,
   handleEditPassword,
-  pluginName,
 }: UseColumnsAndFormItemsParams) => {
   const { t } = useTranslation();
   const middleWareFieldsMap = useMiddleWareFields();
+  const isEdit = mode === 'edit';
 
   const result = useMemo(() => {
     switch (collectType) {
@@ -749,7 +752,7 @@ const useFormItems = ({
                   },
                 ]}
               >
-                <Checkbox.Group>
+                <Checkbox.Group disabled={isEdit}>
                   <Space direction="vertical">
                     <Checkbox value="cpu">
                       <span>
@@ -821,7 +824,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.ipDes')}
@@ -887,7 +890,7 @@ const useFormItems = ({
                   },
                 ]}
               >
-                <Input className="w-[300px] mr-[10px]" />
+                <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
               </Form.Item>
               <span className="text-[12px] text-[var(--color-text-3)]">
                 {t('monitor.intergrations.ipDes')}
@@ -912,7 +915,7 @@ const useFormItems = ({
                   },
                 ]}
               >
-                <Input className="w-[300px] mr-[10px]" />
+                <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
               </Form.Item>
               <span className="text-[12px] text-[var(--color-text-3)]">
                 {t('monitor.intergrations.urlDes')}
@@ -938,7 +941,7 @@ const useFormItems = ({
                   },
                 ]}
               >
-                <Input className="w-[300px] mr-[10px]" />
+                <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
               </Form.Item>
               <span className="text-[12px] text-[var(--color-text-3)]">
                 {t('monitor.intergrations.urlDes')}
@@ -965,7 +968,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.ipDes')}
@@ -986,6 +989,7 @@ const useFormItems = ({
                     className="w-[300px] mr-[10px]"
                     min={1}
                     precision={0}
+                    disabled={isEdit}
                   />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
@@ -1003,7 +1007,11 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Select className="mr-[10px]" style={{ width: '300px' }}>
+                  <Select
+                    className="mr-[10px]"
+                    style={{ width: '300px' }}
+                    disabled={isEdit}
+                  >
                     <Option value={2}>v2c</Option>
                     <Option value={3}>v3</Option>
                   </Select>
@@ -1302,7 +1310,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.ipDes')}
@@ -1319,7 +1327,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.usernameDes')}
@@ -1338,7 +1346,7 @@ const useFormItems = ({
                 >
                   <Input
                     ref={passwordRef}
-                    disabled={passwordDisabled}
+                    disabled={isEdit || passwordDisabled}
                     className="w-[300px] mr-[10px]"
                     type="password"
                     suffix={
@@ -1346,6 +1354,7 @@ const useFormItems = ({
                         className="text-[var(--color-text-2)]"
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (isEdit) return;
                           handleEditPassword();
                         }}
                       />
@@ -1367,7 +1376,11 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input readOnly className="w-[300px] mr-[10px]" />
+                  <Input
+                    readOnly
+                    disabled={isEdit}
+                    className="w-[300px] mr-[10px]"
+                  />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.protocolDes')}
@@ -1400,7 +1413,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {middleWareFieldsMap[`${pluginName}Des`] ||
@@ -1455,7 +1468,10 @@ const useFormItems = ({
                         },
                       ]}
                     >
-                      <Input className="w-[300px] mr-[10px]" />
+                      <Input
+                        className="w-[300px] mr-[10px]"
+                        disabled={isEdit}
+                      />
                     </Form.Item>
                     <span className="text-[12px] text-[var(--color-text-3)]">
                       {t('monitor.intergrations.usernameDes')}
@@ -1477,7 +1493,7 @@ const useFormItems = ({
                     >
                       <Input
                         ref={passwordRef}
-                        disabled={passwordDisabled}
+                        disabled={isEdit || passwordDisabled}
                         className="w-[300px] mr-[10px]"
                         type="password"
                         suffix={
@@ -1485,6 +1501,7 @@ const useFormItems = ({
                             className="text-[var(--color-text-2)]"
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (isEdit) return;
                               handleEditPassword();
                             }}
                           />
@@ -1518,7 +1535,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.endpointDes')}
@@ -1547,7 +1564,7 @@ const useFormItems = ({
                       },
                     ]}
                   >
-                    <Input className="w-[300px] mr-[10px]" />
+                    <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                   </Form.Item>
                   <span className="text-[12px] text-[var(--color-text-3)]">
                     {t('monitor.intergrations.serversDes')}
@@ -1566,7 +1583,7 @@ const useFormItems = ({
                       },
                     ]}
                   >
-                    <Input className="w-[300px] mr-[10px]" />
+                    <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                   </Form.Item>
                   <span className="text-[12px] text-[var(--color-text-3)]">
                     {t('monitor.intergrations.usernameDes')}
@@ -1589,7 +1606,7 @@ const useFormItems = ({
                   >
                     <Input
                       ref={passwordRef}
-                      disabled={passwordDisabled}
+                      disabled={isEdit || passwordDisabled}
                       className="w-[300px] mr-[10px]"
                       type="password"
                       suffix={
@@ -1597,6 +1614,7 @@ const useFormItems = ({
                           className="text-[var(--color-text-2)]"
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (isEdit) return;
                             handleEditPassword();
                           }}
                         />
@@ -1621,7 +1639,10 @@ const useFormItems = ({
                         },
                       ]}
                     >
-                      <Input className="w-[300px] mr-[10px]" />
+                      <Input
+                        className="w-[300px] mr-[10px]"
+                        disabled={isEdit}
+                      />
                     </Form.Item>
                     <span className="text-[12px] text-[var(--color-text-3)]">
                       {t('monitor.intergrations.commonHostDes')}
@@ -1642,6 +1663,7 @@ const useFormItems = ({
                         className="mr-[10px] w-[303px]"
                         min={1}
                         precision={0}
+                        disabled={isEdit}
                       />
                     </Form.Item>
                     <span className="text-[12px] text-[var(--color-text-3)]">
@@ -1671,7 +1693,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.usernameDes')}
@@ -1690,7 +1712,7 @@ const useFormItems = ({
                 >
                   <Input
                     ref={passwordRef}
-                    disabled={passwordDisabled}
+                    disabled={isEdit || passwordDisabled}
                     className="w-[300px] mr-[10px]"
                     type="password"
                     suffix={
@@ -1698,6 +1720,7 @@ const useFormItems = ({
                         className="text-[var(--color-text-2)]"
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (isEdit) return;
                           handleEditPassword();
                         }}
                       />
@@ -1719,7 +1742,7 @@ const useFormItems = ({
                     },
                   ]}
                 >
-                  <Input className="w-[300px] mr-[10px]" />
+                  <Input className="w-[300px] mr-[10px]" disabled={isEdit} />
                 </Form.Item>
                 <span className="text-[12px] text-[var(--color-text-3)]">
                   {t('monitor.intergrations.commonHostDes')}

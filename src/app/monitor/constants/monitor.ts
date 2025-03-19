@@ -1448,8 +1448,6 @@ const OBJECT_INSTANCE_TYPE_MAP: ObjectIconMap = {
   Storage: 'storage',
   'Hardware Server': 'hardware_server',
   Cluster: 'k8s',
-  Pod: 'k8s',
-  Node: 'k8s',
   'SNMP Trap': 'snmp_trap',
   Docker: 'docker',
   RabbitMQ: 'rabbitmq',
