@@ -54,11 +54,10 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
       const driverType = selectedNode.tabItems?.find(
         (item) => item.id === modelId
       )?.type;
-
       return {
         name: values.taskName,
         instances: instance?.origin && [instance.origin],
-        input_method: values.enterType === ENTER_TYPE.AUTOMATIC ? 0 : 1,
+        input_method: values.enterType === ENTER_TYPE.APPROVAL ? 1 : 0,
         access_point: values.accessPoint || {},
         timeout: values.timeout || 600,
         scan_cycle: formatCycleValue(values),

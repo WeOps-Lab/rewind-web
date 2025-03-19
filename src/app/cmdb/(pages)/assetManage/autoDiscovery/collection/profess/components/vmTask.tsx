@@ -59,7 +59,7 @@ const VMTask: React.FC<VMTaskFormProps> = ({
       return {
         name: values.taskName,
         instances: instance?.origin && [instance.origin],
-        input_method: values.enterType === ENTER_TYPE.AUTOMATIC ? 0 : 1,
+        input_method: values.enterType === ENTER_TYPE.APPROVAL ? 1 : 0,
         access_point: accessPoint?.origin && [accessPoint.origin],
         timeout: values.timeout || 600,
         scan_cycle: formatCycleValue(values),

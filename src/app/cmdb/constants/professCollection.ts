@@ -102,7 +102,7 @@ export const VM_FORM_INITIAL_VALUES = {
   enterType: ENTER_TYPE.AUTOMATIC,
   port: '443',
   timeout: 600,
-  sslVerify: true,
+  sslVerify: false,
 };
 
 export const SNMP_FORM_INITIAL_VALUES = {

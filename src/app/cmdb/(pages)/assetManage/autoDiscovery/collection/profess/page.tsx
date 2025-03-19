@@ -346,145 +346,156 @@ const ProfessionalCollection: React.FC = () => {
     );
   };
 
-  const getColumns = (): TableColumnType<CollectTask>[] => [
-    {
-      title: t('Collection.table.taskName'),
-      dataIndex: 'name',
-      key: 'name',
-      fixed: 'left',
-      width: 180,
-      render: (text: any) => <span>{text || '--'}</span>,
-    },
-    {
-      title: t('Collection.table.execStatus'),
-      dataIndex: 'exec_status',
-      key: 'exec_status',
-      width: 120,
-      filters: statusFilters,
-      filterMultiple: false,
-      render: (status: ExecStatusType) => {
-        const config = execStatusConfig[status];
-        return (
-          <div className={styles.statusText}>
-            <span
-              className={styles.status}
-              style={{ background: config.color }}
-            />
-            <span>{config.text}</span>
-          </div>
-        );
-      },
-    },
-    {
-      title: t('Collection.table.collectSummary'),
-      dataIndex: 'collect_digest',
-      key: 'collect_digest',
-      width: 400,
-      render: (_: any, record: CollectTask) => {
-        const digest = (record.message || {}) as CollectTaskMessage;
-        return Object.keys(digest).length > 0 ? (
-          <div className="flex gap-2">
-            {(
-              Object.entries(ExecStatusMap) as [ExecStatusKey, ExecStatus][]
-            ).map(([key, value]) => (
-              <Tag key={key} color={value.color}>
-                {value.text}: {digest[key] ?? '--'}
-              </Tag>
-            ))}
-          </div>
-        ) : (
-          <span>--</span>
-        );
-      },
-    },
-    {
-      title: t('Collection.table.creator'),
-      dataIndex: 'created_by',
-      key: 'created_by',
-      width: 120,
-      render: (text: any) => <span>{text || '--'}</span>,
-    },
-    {
-      title: t('Collection.table.execTime'),
-      dataIndex: 'updated_at',
-      key: 'updated_at',
-      width: 220,
-      render: (text: string) => (
-        <span>{text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>
-      ),
-    },
-    {
-      title: t('Collection.table.actions'),
-      dataIndex: 'action',
-      key: 'action',
-      fixed: 'right',
-      width: 230,
-      render: (_: any, record: CollectTask) => {
-        const executing =
-          record.exec_status === EXEC_STATUS.COLLECTING ||
-          record.exec_status === EXEC_STATUS.WRITING;
-        return (
-          <div className="flex gap-3">
-            {record.input_method && !record.examine ? (
-              <PermissionWrapper requiredPermissions={['Execute']}>
-                <Button
-                  type="link"
-                  size="small"
-                  disabled={executing}
-                  loading={executingTaskIds.includes(record.id)}
-                  onClick={() => handleApproval(record)}
-                >
-                  {t('Collection.execStatus.approval')}
-                </Button>
-              </PermissionWrapper>
-            ) : (
-              <Button
-                type="link"
-                size="small"
-                onClick={() => handleViewDetail(record)}
-              >
-                {t('Collection.table.detail')}
-              </Button>
-            )}
+  const actionRender = useCallback(
+    (record: CollectTask) => {
+      const loadingExec = executingTaskIds.includes(record.id);
+      const executing =
+        record.exec_status === EXEC_STATUS.COLLECTING ||
+        record.exec_status === EXEC_STATUS.WRITING ||
+        loadingExec;
 
+      return (
+        <div className="flex gap-3">
+          {record.input_method && !record.examine ? (
             <PermissionWrapper requiredPermissions={['Execute']}>
               <Button
                 type="link"
                 size="small"
                 disabled={executing}
-                loading={executingTaskIds.includes(record.id)}
-                onClick={() => handleExecuteNow(record)}
+                loading={loadingExec}
+                onClick={() => handleApproval(record)}
               >
-                {executingTaskIds.includes(record.id)
-                  ? t('Collection.executing')
-                  : t('Collection.table.executeNow')}
+                {t('Collection.execStatus.approval')}
               </Button>
             </PermissionWrapper>
-            <PermissionWrapper requiredPermissions={['Edit']}>
-              <Button
-                type="link"
-                size="small"
-                disabled={executing}
-                onClick={() => handleEdit(record)}
-              >
-                {t('Collection.table.modify')}
-              </Button>
-            </PermissionWrapper>
-            <PermissionWrapper requiredPermissions={['Delete']}>
-              <Button
-                type="link"
-                size="small"
-                disabled={executing}
-                onClick={() => handleDelete(record)}
-              >
-                {t('Collection.table.delete')}
-              </Button>
-            </PermissionWrapper>
-          </div>
-        );
-      },
+          ) : (
+            <Button
+              type="link"
+              size="small"
+              onClick={() => handleViewDetail(record)}
+            >
+              {t('Collection.table.detail')}
+            </Button>
+          )}
+
+          <PermissionWrapper requiredPermissions={['Execute']}>
+            <Button
+              type="link"
+              size="small"
+              disabled={executing}
+              loading={loadingExec}
+              onClick={() => handleExecuteNow(record)}
+            >
+              {loadingExec
+                ? t('Collection.executing')
+                : t('Collection.table.executeNow')}
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper requiredPermissions={['Edit']}>
+            <Button
+              type="link"
+              size="small"
+              disabled={executing}
+              onClick={() => handleEdit(record)}
+            >
+              {t('Collection.table.modify')}
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper requiredPermissions={['Delete']}>
+            <Button
+              type="link"
+              size="small"
+              disabled={executing}
+              onClick={() => handleDelete(record)}
+            >
+              {t('Collection.table.delete')}
+            </Button>
+          </PermissionWrapper>
+        </div>
+      );
     },
-  ];
+    [executingTaskIds, t]
+  );
+
+  const getColumns = useCallback(
+    (): TableColumnType<CollectTask>[] => [
+      {
+        title: t('Collection.table.taskName'),
+        dataIndex: 'name',
+        key: 'name',
+        fixed: 'left',
+        width: 180,
+        render: (text: any) => <span>{text || '--'}</span>,
+      },
+      {
+        title: t('Collection.table.execStatus'),
+        dataIndex: 'exec_status',
+        key: 'exec_status',
+        width: 120,
+        filters: statusFilters,
+        filterMultiple: false,
+        render: (status: ExecStatusType) => {
+          const config = execStatusConfig[status];
+          return (
+            <div className={styles.statusText}>
+              <span
+                className={styles.status}
+                style={{ background: config.color }}
+              />
+              <span>{config.text}</span>
+            </div>
+          );
+        },
+      },
+      {
+        title: t('Collection.table.collectSummary'),
+        dataIndex: 'collect_digest',
+        key: 'collect_digest',
+        width: 400,
+        render: (_: any, record: CollectTask) => {
+          const digest = (record.message || {}) as CollectTaskMessage;
+          return Object.keys(digest).length > 0 ? (
+            <div className="flex gap-2">
+              {(
+                Object.entries(ExecStatusMap) as [ExecStatusKey, ExecStatus][]
+              ).map(([key, value]) => (
+                <Tag key={key} color={value.color}>
+                  {value.text}: {digest[key] ?? '--'}
+                </Tag>
+              ))}
+            </div>
+          ) : (
+            <span>--</span>
+          );
+        },
+      },
+      {
+        title: t('Collection.table.creator'),
+        dataIndex: 'created_by',
+        key: 'created_by',
+        width: 120,
+        render: (text: any) => <span>{text || '--'}</span>,
+      },
+      {
+        title: t('Collection.table.execTime'),
+        dataIndex: 'exec_time',
+        key: 'exec_time',
+        width: 220,
+        render: (text: string) => (
+          <span>{text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>
+        ),
+      },
+      {
+        title: t('Collection.table.actions'),
+        dataIndex: 'action',
+        key: 'action',
+        fixed: 'right',
+        width: 230,
+        render: (_, record) => actionRender(record),
+      },
+    ],
+    [t, actionRender]
+  );
 
   const handleViewDetail = (record: CollectTask) => {
     setCurrentTask(record);
@@ -512,7 +523,7 @@ const ProfessionalCollection: React.FC = () => {
       newColumns.map((col: TableColumnType) => col.key as string)
     );
     setCurrentColumns(newColumns);
-  }, []);
+  }, [executingTaskIds]);
 
   const hasMultipleTabs =
     (selectedRef.current?.node?.tabItems?.length ?? 0) > 1;

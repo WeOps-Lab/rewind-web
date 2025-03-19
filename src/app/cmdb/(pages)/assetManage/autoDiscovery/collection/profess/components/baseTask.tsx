@@ -20,10 +20,7 @@ import {
   QuestionCircleOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import {
-  createTaskValidationRules,
-  ENTER_TYPE,
-} from '@/app/cmdb/constants/professCollection';
+import { createTaskValidationRules } from '@/app/cmdb/constants/professCollection';
 import {
   Form,
   Radio,
@@ -281,8 +278,8 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
             </Radio.Group>
           </Form.Item>
 
-          {/* 录入方式 */}
-          {nodeId !== 'k8s' && (
+          {/* 录入方式-暂时隐藏 */}
+          {/* {nodeId !== 'k8s' && (
             <Form.Item
               name="enterType"
               rules={rules.enterType}
@@ -305,7 +302,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
                 </Radio>
               </Radio.Group>
             </Form.Item>
-          )}
+          )} */}
 
           {/* ip选择 */}
           {nodeId === 'network' && (

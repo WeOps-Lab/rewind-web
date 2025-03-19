@@ -127,7 +127,7 @@ export const InitNode: React.FC<TopoDataProps> = ({
         data: {
           expanded: true,
         },
-        draggable: false,
+        draggable: true,
         zIndex: 10,
       },
       true
