@@ -165,14 +165,13 @@ const Intergration = () => {
         label: COLLECT_TYPE_MAP[item.name || ''],
         value: item.id,
       }));
-      const _metrics = res[1] || [];
       setPlugins(_plugins);
       setTableData(res[0]?.results || []);
       setPagination((prev: Pagination) => ({
         ...prev,
         total: res[0]?.count || 0,
       }));
-      setMetrics(_metrics);
+      setMetrics(res[1] || []);
       const _objectName = objects.find((item) => item.id === objectId)?.name;
       if (_objectName) {
         const filterMetrics =
@@ -212,7 +211,6 @@ const Intergration = () => {
             width: 200,
             render: (_: unknown, record: TableDataItem) => {
               const color = getEnumColor(target, record[item.key]);
-              console.log(color)
               return (
                 <><span style={{ color: color }}>{getEnumValueUnit(target, record[item.key])}</span></>
               )
