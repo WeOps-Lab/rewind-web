@@ -18,9 +18,9 @@ const RolePage = () => {
     try {
       const data: ClientData[] = await getAll();
       const filteredData:ClientData[] = data.filter((item: ClientData) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
-      setDataList(filteredData.map((item: ClientData) => ({
+      setDataList(filteredData.filter((client: ClientData) => client.client_id !== 'ops-console').map((item: ClientData) => ({
         ...item,
-        icon: 'rizhiguanli',
+        icon: item.client_id,
       })));
     } catch {
       message.error(t('common.fetchFailed'));

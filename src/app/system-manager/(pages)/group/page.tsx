@@ -232,7 +232,7 @@ const Groups: React.FC = () => {
             pagination={false}
             expandedRowKeys={expandedRowKeys}
             onExpand={onExpand}
-            scroll={{ y: 'calc(100vh - 300px)' }}
+            scroll={{ y: 'calc(100vh - 330px)' }}
             columns={columns}
             dataSource={dataSource}
           />

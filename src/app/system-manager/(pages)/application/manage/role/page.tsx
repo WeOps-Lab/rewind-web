@@ -389,7 +389,7 @@ const RoleManagement: React.FC = () => {
               </div>
               <Spin spinning={loading}>
                 <CustomTable
-                  scroll={{ y: 'calc(100vh - 450px)' }}
+                  scroll={{ y: 'calc(100vh - 435px)' }}
                   rowSelection={{
                     selectedRowKeys: selectedUserKeys,
                     onChange: (selectedRowKeys) => setSelectedUserKeys(selectedRowKeys as React.Key[]),

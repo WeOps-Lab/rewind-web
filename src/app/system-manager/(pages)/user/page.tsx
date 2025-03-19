@@ -289,7 +289,7 @@ const User: React.FC = () => {
       </div>
       <Spin spinning={loading}>
         <CustomTable
-          scroll={{ y: 'calc(100vh - 370px)' }}
+          scroll={{ y: 'calc(100vh - 360px)' }}
           pagination={{
             pageSize,
             current: currentPage,

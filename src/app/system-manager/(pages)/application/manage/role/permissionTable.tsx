@@ -159,7 +159,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
   ];
 
   return (
-    <div className='flex w-full overflow-y-auto' style={{ height: 'calc(100vh - 350px)' }}>
+    <div className='flex w-full overflow-y-auto' style={{ height: 'calc(100vh - 335px)' }}>
       <CustomTable
         loading={loading}
         columns={columns}
