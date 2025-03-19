@@ -382,7 +382,8 @@
       "address": "地址",
       "addressDes": "接入地址",
       "commonPortDes": "与设备进行通信的端口",
-      "commonHostDes": "与设备进行通信的主机"
+      "commonHostDes": "与设备进行通信的主机",
+      "color": "颜色"
     }
   }
 }

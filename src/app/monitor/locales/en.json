@@ -382,7 +382,8 @@
       "address": "Address",
       "addressDes": "access address",
       "commonPortDes": "Port for communication with devices",
-      "commonHostDes": "Host for communication with devices"
+      "commonHostDes": "Host for communication with devices",
+      "color": "color"
     }
   }
 }

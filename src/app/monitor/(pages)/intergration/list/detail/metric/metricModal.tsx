@@ -426,7 +426,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
                             {t('monitor.intergrations.mappedValue')}
                           </span>
                           <span className="w-[160px]">
-                            {'color'}
+                            {t('monitor.intergrations.color')}
                           </span>
                         </div>
                       </li>
