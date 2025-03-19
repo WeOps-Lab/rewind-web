@@ -227,7 +227,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
       setEnumList(_enumList);
     };
 
-    const handleEnumColorChange = (value: AggregationColor,css:string,index: number) => {
+    const handleEnumColorChange = (value: AggregationColor, index: number) => {
       const _enumList = deepClone(enumList);
       _enumList[index].color = value.toHexString();
       setEnumList(_enumList);
@@ -422,10 +422,10 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
                           <span className="w-[160px]">
                             {t('monitor.intergrations.originalValue')}
                           </span>
-                          <span className="w-[160px]">
+                          <span className="w-[160px] ml-2">
                             {t('monitor.intergrations.mappedValue')}
                           </span>
-                          <span className="w-[160px]">
+                          <span className="w-[160px] ml-2">
                             {t('monitor.intergrations.color')}
                           </span>
                         </div>
@@ -451,19 +451,19 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
                               placeholder={t(
                                 'monitor.intergrations.mappedValue'
                               )}
-                              className="w-[160px]"
+                              className="w-[160px] ml-2"
                               value={item.name as string}
                               onChange={(e) => {
                                 handleEnumNameChange(e, index);
                               }}
                             />
-                            <ColorPicker 
-                              className="w-[160px]"
-                              value={item.color as string}
-                              onChange={(value,css) => {
-                                handleEnumColorChange(value,css,index)
-                              }}
+                            <ColorPicker
+                              className="w-[160px] ml-2"
+                              value={(item.color ? item.color as string : "#000000")}
                               showText
+                              onChange={(value) => {
+                                handleEnumColorChange(value, index)
+                              }}
                             />
                           </div>
                           <Button

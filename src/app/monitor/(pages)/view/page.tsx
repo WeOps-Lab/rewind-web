@@ -3,13 +3,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Input, Button, Progress } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
-import { deepClone, getEnumValueUnit } from '@/app/monitor/utils/common';
+import { deepClone, getEnumValueUnit, getEnumColor } from '@/app/monitor/utils/common';
 import { useRouter } from 'next/navigation';
 import {
   IntergrationItem,
   ObectItem,
   MetricItem,
-  EnumItem
 } from '@/app/monitor/types/monitor';
 import ViewModal from './viewModal';
 import {
@@ -167,8 +166,6 @@ const Intergration = () => {
         value: item.id,
       }));
       const _metrics = res[1] || [];
-      const _dataType = _metrics?.[0].data_type;
-      const _enumList: EnumItem[] = _dataType === 'Enum'? JSON.parse(_metrics[0].unit) : [];
       setPlugins(_plugins);
       setTableData(res[0]?.results || []);
       setPagination((prev: Pagination) => ({
@@ -214,14 +211,10 @@ const Intergration = () => {
             key: item.key,
             width: 200,
             render: (_: unknown, record: TableDataItem) => {
-              let color = '';
-              if(_dataType === 'Enum') {
-                color = _enumList.find(
-                  (i) => i.name === getEnumValueUnit(target, record[item.key])
-                )?.color as string;
-              }
+              const color = getEnumColor(target, record[item.key]);
+              console.log(color)
               return (
-                <><span style={{color: color}}>{getEnumValueUnit(target, record[item.key])}</span></>
+                <><span style={{ color: color }}>{getEnumValueUnit(target, record[item.key])}</span></>
               )
             },
           };
