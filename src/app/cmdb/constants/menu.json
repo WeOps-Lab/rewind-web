@@ -40,7 +40,7 @@
             "title": "管理",
             "icon": "shujumoxingguanli",
             "url": "/cmdb/assetManage",
-            "name": "management",
+            "name": "Management",
             "children": [
                 {
                     "title": "模型管理",
@@ -132,7 +132,7 @@
             "title": "Management",
             "icon": "shujumoxingguanli",
             "url": "/cmdb/assetManage",
-            "name": "management",
+            "name": "Management",
             "children": [
                 {
                     "title": "Model Management",
