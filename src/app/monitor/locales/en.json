@@ -136,6 +136,7 @@
       "iftotalInOctets": "Incoming Traffic",
       "iftotalOutOctets": "Outgoing Traffic",
       "http_success.rate": "Success Rate",
+      "http_code": "HTTP Code",
       "ping_response_time": "Response Time",
       "ping_error_response_code": "Ping State",
       "http_duration": "Response Time",
@@ -382,7 +383,8 @@
       "address": "Address",
       "addressDes": "access address",
       "commonPortDes": "Port for communication with devices",
-      "commonHostDes": "Host for communication with devices"
+      "commonHostDes": "Host for communication with devices",
+      "color": "Color"
     }
   }
 }

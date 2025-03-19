@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Input, Button, Progress } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
-import { deepClone, getEnumValueUnit } from '@/app/monitor/utils/common';
+import { deepClone, getEnumValueUnit, getEnumColor } from '@/app/monitor/utils/common';
 import { useRouter } from 'next/navigation';
 import {
   IntergrationItem,
@@ -209,9 +209,12 @@ const Intergration = () => {
             dataIndex: item.key,
             key: item.key,
             width: 200,
-            render: (_: unknown, record: TableDataItem) => (
-              <>{getEnumValueUnit(target, record[item.key])}</>
-            ),
+            render: (_: unknown, record: TableDataItem) => {
+              const color = getEnumColor(target, record[item.key]);
+              return (
+                <><span style={{ color: color }}>{getEnumValueUnit(target, record[item.key])}</span></>
+              )
+            },
           };
         });
         const originColumns = deepClone(columns);

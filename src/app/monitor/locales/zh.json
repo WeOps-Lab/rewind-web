@@ -136,6 +136,7 @@
       "iftotalInOctets": "设备每秒接收总流量",
       "iftotalOutOctets": "设备每秒发送总流量",
       "http_success.rate": "拨测成功率",
+      "http_code": "HTTP响应状态码",
       "ping_response_time": "平均响应时间",
       "ping_error_response_code": "PIng状态",
       "http_duration": "HTTP响应时间",
@@ -382,7 +383,8 @@
       "address": "地址",
       "addressDes": "接入地址",
       "commonPortDes": "与设备进行通信的端口",
-      "commonHostDes": "与设备进行通信的主机"
+      "commonHostDes": "与设备进行通信的主机",
+      "color": "颜色"
     }
   }
 }

@@ -453,6 +453,7 @@ const INDEX_CONFIG = [
     tableDiaplay: [
       { type: 'enum', key: 'http_success.rate' },
       { type: 'value', key: 'http_duration' },
+      { type: 'enum', key: 'http_code' },
     ],
   },
   {

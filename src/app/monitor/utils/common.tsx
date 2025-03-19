@@ -309,6 +309,17 @@ export const getEnumValue = (metric: MetricItem, id: number | string) => {
     : (+id).toFixed(2);
 };
 
+// 根据指标枚举获取颜色值
+export const getEnumColor = (metric: MetricItem, id: number | string) => {
+  const { unit: input = '', } = metric || {};
+  if (isStringArray(input)) {
+    return (
+      JSON.parse(input).find((item: ListItem) => item.id === +id)?.color || ''
+    );
+  }
+  return '';
+};
+
 // 根据指标枚举获取值+单位
 export const getEnumValueUnit = (metric: MetricItem, id: number | string) => {
   const { unit: input = '', name } = metric || {};

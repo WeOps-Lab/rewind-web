@@ -15,7 +15,9 @@ import {
   Select,
   Cascader,
   InputNumber,
+  ColorPicker
 } from 'antd';
+import { AggregationColor } from 'antd/es/color-picker/color';
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
@@ -59,7 +61,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
     ]);
     const [instanceIdKeys, setInstanceIdKeys] = useState<(string | null)[]>([]);
     const [enumList, setEnumList] = useState<EnumItem[]>([
-      { id: null, name: null },
+      { id: null, name: null, color: null },
     ]);
 
     useImperativeHandle(ref, () => ({
@@ -74,7 +76,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
             formData.type = 'metric';
             setDimensions([{ name: '' }]);
             setInstanceIdKeys([null]);
-            setEnumList([{ name: null, id: null }]);
+            setEnumList([{ name: null, id: null, color: null }]);
           } else {
             setDimensions(
               formData.dimensions?.length ? formData.dimensions : [{ name: '' }]
@@ -95,7 +97,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
           setGroupForm(formData);
         } catch {
           setGroupForm(formData);
-          setEnumList([{ name: null, id: null }]);
+          setEnumList([{ name: null, id: null, color: null }]);
         }
       },
     }));
@@ -158,7 +160,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
 
     const addEnumItem = () => {
       const _enumList = deepClone(enumList);
-      _enumList.push({ name: null, id: null });
+      _enumList.push({ name: null, id: null, color: null });
       setEnumList(_enumList);
     };
 
@@ -225,6 +227,12 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
       setEnumList(_enumList);
     };
 
+    const handleEnumColorChange = (value: AggregationColor, index: number) => {
+      const _enumList = deepClone(enumList);
+      _enumList[index].color = value.toHexString();
+      setEnumList(_enumList);
+    }
+
     const deleteDimensiontem = (index: number) => {
       const _dimensions = deepClone(dimensions);
       _dimensions.splice(index, 1);
@@ -246,7 +254,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
     return (
       <div>
         <OperateModal
-          width={600}
+          width={700}
           title={title}
           visible={groupVisible}
           onCancel={handleCancel}
@@ -414,8 +422,11 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
                           <span className="w-[160px]">
                             {t('monitor.intergrations.originalValue')}
                           </span>
-                          <span className="w-[160px]">
+                          <span className="w-[160px] ml-2">
                             {t('monitor.intergrations.mappedValue')}
+                          </span>
+                          <span className="w-[160px] ml-2">
+                            {t('monitor.intergrations.color')}
                           </span>
                         </div>
                       </li>
@@ -440,10 +451,18 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
                               placeholder={t(
                                 'monitor.intergrations.mappedValue'
                               )}
-                              className="w-[160px]"
+                              className="w-[160px] ml-2"
                               value={item.name as string}
                               onChange={(e) => {
                                 handleEnumNameChange(e, index);
+                              }}
+                            />
+                            <ColorPicker
+                              className="w-[160px] ml-2"
+                              value={(item.color ? item.color as string : "#000000")}
+                              showText
+                              onChange={(value) => {
+                                handleEnumColorChange(value, index)
                               }}
                             />
                           </div>
