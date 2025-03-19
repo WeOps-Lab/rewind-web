@@ -266,6 +266,10 @@ html:not(.dark) body {
   z-index: 10000;
 }
 
+.font-mini {
+  font-size: 10px;
+}
+
 @keyframes rt {
   100% {
       transform: rotate(360deg);
