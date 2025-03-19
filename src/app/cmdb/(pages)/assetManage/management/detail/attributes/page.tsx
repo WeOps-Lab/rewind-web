@@ -36,6 +36,11 @@ const Attributes = () => {
   const [tableData, setTableData] = useState<any[]>([]);
   const columns: TableColumnsType = [
     {
+      title: 'ID',
+      dataIndex: 'attr_id',
+      key: 'attr_id',
+    },
+    {
       title: t('name'),
       dataIndex: 'attr_name',
       key: 'attr_name',

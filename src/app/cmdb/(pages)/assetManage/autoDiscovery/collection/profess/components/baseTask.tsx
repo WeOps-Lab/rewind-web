@@ -434,7 +434,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
           )}
         </div>
 
-        <div className="flex justify-end space-x-4 mr-6">
+        <div className="flex justify-start space-x-4 ml-6">
           {onTest && <Button onClick={onTest}>{t('Collection.test')}</Button>}
           <Button type="primary" htmlType="submit" loading={submitLoading}>
             {t('Collection.confirm')}

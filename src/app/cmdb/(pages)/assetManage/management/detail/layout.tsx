@@ -101,16 +101,18 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
         width={30}
         height={30}
       />
-      <div className="flex flex-col mr-[6px] min-w-[84px]">
+      <div className="flex flex-col mr-[6px] flex-1">
         <div
-          className={`text-[14px] font-[800] mb-[2px] ${attrLayoutStyle.ellipsisText}`}
+          className={`text-[14px] font-[800] mb-[2px] ${attrLayoutStyle.ellipsisText} break-all`}
         >
           {modelName}
         </div>
-        <div className="text-[var(--color-text-2)] text-[12px]">{modelId}</div>
+        <div className="text-[var(--color-text-2)] text-[12px] break-all">
+          {modelId}
+        </div>
       </div>
       {(isAdmin || !isPre) && (
-        <div className="self-start">
+        <div className="self-start w-[36px]">
           <PermissionWrapper requiredPermissions={['Edit']}>
             <EditTwoTone
               className="edit mr-[8px] text-[14px] cursor-pointer"

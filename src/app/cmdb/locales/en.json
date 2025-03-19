@@ -238,7 +238,8 @@
             "timeout": "Timeout",
             "writing": "Writing",
             "forceStop": "Force Stop",
-            "pendingApproval": "Pending Approval"
+            "pendingApproval": "Pending Approval",
+            "approval": "Approval"
         },
         "k8sTask": {
             "title": "Add Task",
@@ -280,7 +281,10 @@
             "delete": "Delete"
         },
         "taskDetail": {
-            "title": "Task Detail"
+            "title": "Task Detail",
+            "approval": "Approval Detail",
+            "approvalConfirm": "Approval Confirm",
+            "approvalSuccess": "Approval Success"
         }
     }
 }

@@ -484,6 +484,10 @@ const AssetData = () => {
           }, []);
         };
         setExpandedTreeKeys(getAllKeys(filtered));
+      } else {
+        setExpandedTreeKeys(
+          modelGroup.map((item) => `group:${item.classification_id}`)
+        );
       }
     },
     [modelGroup, filterTreeNodes]
@@ -554,7 +558,7 @@ const AssetData = () => {
           title: t('action'),
           key: 'action',
           dataIndex: 'action',
-          width: 180,
+          width: 200,
           fixed: 'right',
           render: (_: unknown, record: any) => (
             <>

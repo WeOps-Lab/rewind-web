@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Alert, Tabs } from 'antd';
+import { Alert, Tabs, Button, message, Modal } from 'antd';
 import CustomTable from '@/components/custom-table';
 import type { CollectTask } from '@/app/cmdb/types/autoDiscovery';
 import { TASK_DETAIL_CONFIG } from '@/app/cmdb/constants/professCollection';
@@ -12,6 +12,8 @@ import { useTranslation } from '@/utils/i18n';
 interface TaskDetailProps {
   task: CollectTask;
   modelId?: string;
+  onClose?: () => void;
+  onSuccess?: () => void;
 }
 
 interface TaskData {
@@ -26,15 +28,30 @@ interface TaskDetailData {
   relation: TaskData;
 }
 
-const TaskTable: React.FC<{
+interface TaskTableProps {
   type: string;
   taskId: number;
+  isApprove: boolean;
   columns: any[];
-}> = ({ type, taskId, columns }) => {
-  const { get } = useApiClient();
+  onClose?: () => void;
+  onSuccess?: () => void;
+}
+
+const TaskTable: React.FC<TaskTableProps> = ({
+  type,
+  taskId,
+  columns,
+  isApprove,
+  onClose,
+  onSuccess,
+}) => {
+  const { get, post } = useApiClient();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [allData, setAllData] = useState<any[]>([]);
   const [displayData, setDisplayData] = useState<any[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
@@ -83,25 +100,80 @@ const TaskTable: React.FC<{
     updateDisplayData(allData, newPagination.current, newPagination.pageSize);
   };
 
+  const handleApprove = async () => {
+    if (!selectedRowKeys.length) {
+      message.warning('请选择需要审批的数据');
+      return;
+    }
+
+    Modal.confirm({
+      title: t('Collection.taskDetail.approvalConfirm'),
+      content: `确定审批选中的 ${selectedRowKeys.length} 条数据吗？`,
+      okText: t('confirm'),
+      cancelText: t('cancel'),
+      centered: true,
+      onOk: async () => {
+        try {
+          await post(`/cmdb/api/collect/${taskId}/approval/`, {
+            instances: selectedRows,
+          });
+          message.success(t('Collection.taskDetail.approvalSuccess'));
+          onClose?.();
+          onSuccess?.();
+        } catch (error) {
+          console.error('Failed to approve:', error);
+        }
+      },
+    });
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[], rows: any[]) => {
+      setSelectedRowKeys(keys);
+      setSelectedRows(rows);
+    },
+  };
+
   return (
-    <CustomTable
-      size="middle"
-      columns={columns}
-      dataSource={displayData}
-      pagination={{
-        ...pagination,
-        showSizeChanger: true,
-        showTotal: (total) => `共 ${total} 条`,
-      }}
-      onChange={handleTableChange}
-      scroll={{ y: 'calc(100vh - 320px)' }}
-      rowKey={(record) => record.inst_name || record.name}
-      loading={loading}
-    />
+    <>
+      <CustomTable
+        size="middle"
+        columns={columns}
+        dataSource={displayData}
+        pagination={{
+          ...pagination,
+          showSizeChanger: true,
+          showTotal: (total) => `共 ${total} 条`,
+        }}
+        onChange={handleTableChange}
+        scroll={{ y: 'calc(100vh - 350px)' }}
+        rowKey={(record) => record.id || record.inst_name || record.name}
+        loading={loading}
+        rowSelection={isApprove ? rowSelection : undefined}
+      />
+      <div className="flex justify-start space-x-4">
+        {isApprove ? (
+          <>
+            <Button type="primary" onClick={handleApprove}>
+              {t('Collection.execStatus.approval')}
+            </Button>
+            <Button onClick={onClose}>{t('common.cancel')}</Button>
+          </>
+        ) : (
+          <Button onClick={onClose}>{t('common.close')}</Button>
+        )}
+      </div>
+    </>
   );
 };
 
-const TaskDetail: React.FC<TaskDetailProps> = ({ task, modelId }) => {
+const TaskDetail: React.FC<TaskDetailProps> = ({
+  task,
+  modelId,
+  onClose,
+  onSuccess,
+}) => {
   const { get } = useApiClient();
   const { t } = useTranslation();
   const [detailData, setDetailData] = useState<TaskDetailData>({
@@ -141,6 +213,8 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, modelId }) => {
     },
   };
 
+  const isApprove = task.input_method === 1 && !task.examine;
+
   const tabItems = Object.entries(TASK_DETAIL_CONFIG)
     .filter(([key]) => !(modelId === 'k8s' && key === 'relation'))
     .map(([key, config]) => {
@@ -159,7 +233,10 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, modelId }) => {
             <TaskTable
               type={key}
               taskId={task.id}
+              isApprove={isApprove}
               columns={[...config.columns, statusColumn]}
+              onClose={onClose}
+              onSuccess={onSuccess}
             />
           </div>
         ),

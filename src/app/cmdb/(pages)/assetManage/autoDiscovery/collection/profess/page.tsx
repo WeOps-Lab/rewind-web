@@ -425,13 +425,28 @@ const ProfessionalCollection: React.FC = () => {
           record.exec_status === EXEC_STATUS.WRITING;
         return (
           <div className="flex gap-3">
-            <Button
-              type="link"
-              size="small"
-              onClick={() => handleViewDetail(record)}
-            >
-              {t('Collection.table.detail')}
-            </Button>
+            {record.input_method && !record.examine ? (
+              <PermissionWrapper requiredPermissions={['Execute']}>
+                <Button
+                  type="link"
+                  size="small"
+                  disabled={executing}
+                  loading={executingTaskIds.includes(record.id)}
+                  onClick={() => handleApproval(record)}
+                >
+                  {t('Collection.execStatus.approval')}
+                </Button>
+              </PermissionWrapper>
+            ) : (
+              <Button
+                type="link"
+                size="small"
+                onClick={() => handleViewDetail(record)}
+              >
+                {t('Collection.table.detail')}
+              </Button>
+            )}
+
             <PermissionWrapper requiredPermissions={['Execute']}>
               <Button
                 type="link"
@@ -472,6 +487,11 @@ const ProfessionalCollection: React.FC = () => {
   ];
 
   const handleViewDetail = (record: CollectTask) => {
+    setCurrentTask(record);
+    setDetailVisible(true);
+  };
+
+  const handleApproval = async (record: CollectTask) => {
     setCurrentTask(record);
     setDetailVisible(true);
   };
@@ -586,7 +606,11 @@ const ProfessionalCollection: React.FC = () => {
       </Drawer>
 
       <Drawer
-        title={t('Collection.taskDetail.title')}
+        title={
+          currentTask?.input_method && !currentTask?.examine
+            ? t('Collection.taskDetail.approval')
+            : t('Collection.taskDetail.title')
+        }
         placement="right"
         width={750}
         onClose={() => setDetailVisible(false)}
@@ -597,6 +621,8 @@ const ProfessionalCollection: React.FC = () => {
             <TaskDetail
               task={currentTask}
               modelId={selectedRef.current.nodeId}
+              onClose={() => setDetailVisible(false)}
+              onSuccess={fetchData}
             />
           </div>
         )}

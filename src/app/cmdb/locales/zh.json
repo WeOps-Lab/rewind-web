@@ -235,7 +235,8 @@
             "timeout": "超时",
             "writing": "正在写入",
             "forceStop": "强制终止",
-            "pendingApproval": "待审批"
+            "pendingApproval": "待审批",
+            "approval": "审批"
         },
         "k8sTask": {
             "title": "添加任务",
@@ -277,7 +278,10 @@
             "delete": "删除"
         },
         "taskDetail": {
-            "title": "任务详情"
+            "title": "任务详情",
+            "approval": "审批详情",
+            "approvalConfirm": "审批确认",
+            "approvalSuccess": "审批成功"
         }
     }
 }

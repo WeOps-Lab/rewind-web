@@ -15,6 +15,9 @@ export interface CollectTask {
     updated_at: string;
     message: CollectTaskMessage;
     exec_time: string | null;
+    input_method: number;
+    examine: boolean
+
 }
 
 export interface TreeNode {

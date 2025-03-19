@@ -2,6 +2,7 @@ import { BUILD_IN_MODEL, CREDENTIAL_LIST } from '@/app/cmdb/constants/asset';
 import { getSvgIcon } from './utils';
 import { AttrFieldType } from '@/app/cmdb/types/assetManage';
 import { Tag, Select, Input, Cascader, DatePicker } from 'antd';
+import EllipsisWithTooltip from '@/components/ellipsis-with-tooltip';
 import UserAvatar from '@/app/cmdb/components/userAvatar';
 import {
   ModelIconItem,
@@ -144,9 +145,10 @@ export const getAssetColumns = (config: {
       title: attrName,
       dataIndex: attrId,
       key: attrId,
-      width: 120,
+      width: 180,
+      fixed: attrId === 'inst_name' ? 'left' : undefined,
       ellipsis: {
-        showTitle: true,
+        showTitle: false,
       },
     };
     switch (attrType) {
@@ -210,7 +212,12 @@ export const getAssetColumns = (config: {
       default:
         return {
           ...columnItem,
-          render: (_: unknown, record: any) => <>{record[attrId] || '--'}</>,
+          render: (_: unknown, record: any) => (
+            <EllipsisWithTooltip
+              className="whitespace-nowrap overflow-hidden text-ellipsis"
+              text={record[attrId] || '--'}
+            ></EllipsisWithTooltip>
+          ),
         };
     }
   });

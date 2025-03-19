@@ -34,8 +34,10 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
         height={30}
       />
       <div>
-        <div className="text-[14px] font-[800] mb-[2px] ">{modelName}</div>
-        <div className="w-[100px] text-[var(--color-text-2)] font-[400] text-[12px] hide-text">
+        <div className="text-[14px] font-[800] mb-[2px] break-all">
+          {modelName}
+        </div>
+        <div className="w-[100px] text-[var(--color-text-2)] font-[400] text-[12px] hide-text break-all">
           {instName}
         </div>
       </div>
