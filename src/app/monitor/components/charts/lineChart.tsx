@@ -30,7 +30,7 @@ interface LineChartProps {
   data: ChartData[];
   unit?: string;
   metric?: MetricItem;
-  threshold?: ThresholdField[]
+  threshold?: ThresholdField[];
   showDimensionFilter?: boolean;
   showDimensionTable?: boolean;
   allowSelect?: boolean;
@@ -147,7 +147,13 @@ const LineChart: React.FC<LineChartProps> = ({
 
   const renderYAxisTick = (props: any) => {
     const { x, y, payload } = props;
-    const label = String(payload.value);
+    let label = String(payload.value);
+    if (isStringArray(unit)) {
+      const unitName = JSON.parse(unit).find(
+        (item: ListItem) => item.id === +label
+      )?.name;
+      label = unitName || label;
+    }
     const maxLength = 6; // 设置标签的最大长度
     return (
       <text
@@ -188,35 +194,25 @@ const LineChart: React.FC<LineChartProps> = ({
                 tick={{ fill: 'var(--color-text-3)', fontSize: 14 }}
                 tickFormatter={(tick) => formatTime(tick, minTime, maxTime)}
               />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={renderYAxisTick}
-                tickFormatter={(tick) => {
-                  if (isStringArray(unit)) {
-                    const unitName = JSON.parse(unit).find(
-                      (item: ListItem) => item.id === tick
-                    )?.name;
-                    return unitName ? unitName : tick;
-                  }
-                  return tick;
-                }}
-              />
+              <YAxis axisLine={false} tickLine={false} tick={renderYAxisTick} />
 
-              {
-                threshold.map((item, index) => {
-                  return (
-                    <ReferenceLine
-                      key={index}
-                      y={`${item.value}`}
-                      isFront
-                      stroke={`${LEVEL_MAP[item.level]}`}
-                      strokeDasharray="12 3 3 3 3 3" >
-                      <Label value={`${item.value}`} fill={`${LEVEL_MAP[item.level]}`} position={{x:32,y:-5}}></Label>
-                    </ReferenceLine>
-                  )
-                })
-              }
+              {threshold.map((item, index) => {
+                return (
+                  <ReferenceLine
+                    key={index}
+                    y={`${item.value}`}
+                    isFront
+                    stroke={`${LEVEL_MAP[item.level]}`}
+                    strokeDasharray="12 3 3 3 3 3"
+                  >
+                    <Label
+                      value={`${item.value}`}
+                      fill={`${LEVEL_MAP[item.level]}`}
+                      position={{ x: 32, y: -5 }}
+                    ></Label>
+                  </ReferenceLine>
+                );
+              })}
 
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <Tooltip
