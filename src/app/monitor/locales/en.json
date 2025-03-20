@@ -194,7 +194,8 @@
       "reportTime": "Report Time",
       "metrics": "Metrics",
       "monitorView": "Monitoring View",
-      "alertList": "Alarm List"
+      "alertList": "Alarm List",
+      "viewDashboard": "View DashBoard"
     },
     "events": {
       "event": "Event",

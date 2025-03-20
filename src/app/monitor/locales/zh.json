@@ -194,7 +194,8 @@
       "reportTime": "上报时间",
       "metrics": "全量指标",
       "monitorView": "监控视图",
-      "alertList": "告警列表"
+      "alertList": "告警列表",
+      "viewDashboard": "查看仪表盘"
     },
     "events": {
       "event": "事件",
