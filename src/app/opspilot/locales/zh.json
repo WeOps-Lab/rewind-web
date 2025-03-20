@@ -188,6 +188,20 @@
       "copyFailed": "无法复制消息"
     }
   },
+  "tool": {
+    "name": "名称",
+    "label": "标签",
+    "description": "描述",
+    "mcpUrl": "MCP链接",
+    "general": "通用工具",
+    "search": "搜索工具",
+    "maintenance": "运维工具",
+    "media": "媒体工具",
+    "collaboration": "协作工具",
+    "other": "其他工具",
+    "addTool": "添加工具",
+    "deleteConfirm": "你确定要删除此工具吗？"
+  },
   "provider": {
     "menu": "供应商",
     "setting": "模型设置",

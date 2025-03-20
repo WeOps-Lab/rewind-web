@@ -188,6 +188,20 @@
       "copyFailed": "Could not copy message"
     }
   },
+  "tool": {
+    "name": "Name",
+    "label": "Label",
+    "description": "Description",
+    "mcpUrl": "MCP URL",
+    "general": "General Tools",
+    "search": "Search Tools",
+    "maintenance": "Maintenance Tools",
+    "media": "Media Tools",
+    "collaboration": "Collaboration Tools",
+    "other": "Other Tools",
+    "addTool": "Add Tool",
+    "deleteConfirm": "Are you sure you want to delete this tool?"
+  },
   "provider": {
     "menu": "Provider",
     "setting": "Model Setting",

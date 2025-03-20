@@ -4,7 +4,10 @@ export interface Tool {
   description: string;
   icon: string;
   team: string[];
-  tag: string[];
+  tags: string[];
+  tagList: string[];
+  is_build_in: boolean;
+  params: any;
 }
 
 export interface FormValues {
