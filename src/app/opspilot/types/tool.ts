@@ -21,3 +21,8 @@ export interface SelectTool {
   name: string;
   icon: string;
 }
+
+export interface TagOption {
+  value: string;
+  label: string;
+}
