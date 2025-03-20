@@ -65,7 +65,7 @@ const SelectorOperateModal: React.FC<OperateModalProps> = ({
   };
 
   const filteredOptions = options.filter((option) =>
-    option.name.toLowerCase().includes(searchTerm)
+    option.name?.toLowerCase().includes(searchTerm)
   );
 
   return (

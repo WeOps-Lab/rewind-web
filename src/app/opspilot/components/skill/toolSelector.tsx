@@ -29,7 +29,7 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ selectedToolIds, onChange }
     try {
       const data = await get('/model_provider_mgmt/skill_tools/');
       setTools(data.map((tool: { display_name: string; id: string; name: string, icon: string }) => ({
-        name: tool.display_name,
+        name: tool.name,
         id: tool.name,
         icon: tool.icon || 'duckduckgo1'
       })));

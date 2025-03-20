@@ -176,7 +176,7 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
               <Switch
                 size="small"
                 checked={configData.rerankModel}
-                onChange={(checked) => setConfigData(prevData => ({ ...prevData, rerankModel: checked, selectedRerankModel: checked ? prevData.selectedRerankModel : null }))}
+                onChange={(checked) => setConfigData(prevData => ({ ...prevData, rerankModel: checked, selectedRerankModel: null }))}
               />
             </div>
             <p className="text-xs mb-4 text-[var(--color-text-4)]">{t('knowledge.rerankModelDesc')}</p>
