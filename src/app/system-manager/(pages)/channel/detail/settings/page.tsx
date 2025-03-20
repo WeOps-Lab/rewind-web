@@ -156,7 +156,7 @@ const ChannelSettingsPage: React.FC = () => {
           onSearch={handleSearchChange}
         />
         <Button type="primary" className="mr-2" onClick={() => openChannelModal("add")}>
-          +{t("common.add")}
+          + {t("common.add")}
         </Button>
         <ChannelModal
           visible={isModalVisible}

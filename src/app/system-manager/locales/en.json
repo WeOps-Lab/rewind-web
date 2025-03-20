@@ -107,8 +107,8 @@
     "channel": {
       "email": "Email",
       "emailDesc": "The email channel supports the integration of various notification methods and the flexible configuration of different notification templates.",
-      "weCom": "WeCom",
-      "weComDesc": "The weCom channel supports the integration of various notification methods and the flexible configuration of different notification templates.",
+      "weCom": "Chat Group Helper",
+      "weComDesc": "The Chat Group Helper channel supports the integration of various notification methods and the flexible configuration of different notification templates.",
       "table": {
         "name": "NAME",
         "description": "DESCRIPTION"

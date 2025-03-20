@@ -37,7 +37,10 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
     try {
       const data = await getChannelDetail(id);
       setChannelData(data);
-      form.setFieldsValue(data.config);
+      form.setFieldsValue({
+        ...data,
+        ...data.config
+      });
     } catch {
       message.error(t('common.fetchFailed'));
     } finally {
@@ -157,7 +160,9 @@ const ChannelModal: React.FC<ChannelModalProps> = ({
       confirmLoading={confirmLoading}
     >
       {loading ? (
-        <Spin />
+        <div className="w-full flex items-center justify-center">
+          <Spin />
+        </div>
       ) : (
         <DynamicForm
           form={form}

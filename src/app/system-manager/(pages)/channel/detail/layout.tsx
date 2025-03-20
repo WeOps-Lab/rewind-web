@@ -36,7 +36,7 @@ const ChannelDetailLayout = ({ children }: { children: React.ReactNode }) => {
       desc: t('system.channel.emailDesc'),
       icon: 'youjian'
     },
-    enterprise_wechat: {
+    enterprise_wechat_bot: {
       title: t('system.channel.weCom'),
       desc: t('system.channel.weComDesc'),
       icon: 'qiwei2'

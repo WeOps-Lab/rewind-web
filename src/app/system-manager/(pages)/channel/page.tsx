@@ -17,7 +17,7 @@ const ChannelPage = () => {
       description: t('system.channel.emailDesc')
     },
     {
-      id: 'enterprise_wechat',
+      id: 'enterprise_wechat_bot',
       name: t('system.channel.weCom'),
       icon: 'qiwei2',
       description: t('system.channel.weComDesc')

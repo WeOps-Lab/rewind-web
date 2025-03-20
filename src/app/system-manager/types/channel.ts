@@ -8,7 +8,7 @@ export interface ChannelTemplate {
   channelObj: number;
 }
 
-export type ChannelType = 'email' | 'enterprise_wechat';
+export type ChannelType = 'email' | 'enterprise_wechat_bot';
 
 export interface Channel {
   id: string;
@@ -25,7 +25,7 @@ export interface ChannelTypeMap {
     desc: string;
     icon: string
   };
-  enterprise_wechat: {
+  enterprise_wechat_bot: {
     title: string;
     desc: string;
     icon: string
