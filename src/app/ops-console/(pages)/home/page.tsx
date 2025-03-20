@@ -24,8 +24,10 @@ const ControlPage = () => {
   const [isPopoverVisible, setIsPopoverVisible] = useState<boolean>(false);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [form] = Form.useForm();
+  const [overlayBgClass, setOverlayBgClass] = useState<string>('bg-[url(/app/console_bg.jpg)]');
 
   const isDemoEnv = process.env.NEXT_PUBLIC_IS_DEMO_ENV === 'true';
+  const theme = typeof window !== 'undefined' && localStorage.getItem('theme');
 
   useEffect(() => {
     const consoleContainer = document.querySelector(".console-container");
@@ -33,6 +35,10 @@ const ControlPage = () => {
       consoleContainer.parentElement.style.padding = "0";
     }
   }, []);
+
+  useEffect(() => {
+    setOverlayBgClass(theme === 'dark' ? 'bg-[url(/app/console_bg_dark.jpg)]' : 'bg-[url(/app/console_bg.jpg)]');
+  }, [theme]);
 
   const handleApplyDemoClick = () => {
     window.location.href = "https://www.canway.net/apply.html";
@@ -85,9 +91,8 @@ const ControlPage = () => {
   return (
     <>
       <div
-        className="relative w-full h-full flex flex-col p-12 console-container"
+        className={`relative w-full h-full flex flex-col p-12 console-container ${overlayBgClass}`}
         style={{
-          backgroundImage: `url('/app/console_bg.jpg')`,
           backgroundSize: "contain",
           backgroundPosition: "top",
           minHeight: "calc(100vh - 58px)",
