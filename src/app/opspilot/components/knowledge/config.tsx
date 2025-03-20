@@ -77,8 +77,8 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
         <label className="block text-sm font-medium mb-1 w-32">{t('knowledge.retrievalSetting')}</label>
         <div className="flex-1">
           <div className="p-4 pb-0 border rounded-md mb-4">
-            <div className="flex items-center mb-2 justify-between">
-              <h3 className="font-semibold">{t('knowledge.textSearch')}</h3>
+            <div className="flex items-center mb-4 justify-between">
+              <h3 className="font-medium text-sm">{t('knowledge.textSearch')}</h3>
               <Switch
                 size="small"
                 checked={configData.selectedSearchTypes.includes('textSearch')}
@@ -86,7 +86,7 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
               />
 
             </div>
-            <p className="text-sm mb-4" style={{ 'color': 'var(--color-text-4)' }}>
+            <p className="text-xs mb-4 text-[var(--color-text-4)]">
               {t('knowledge.textSearchDesc')}
             </p>
             {configData.selectedSearchTypes.includes('textSearch') && (
@@ -120,15 +120,15 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
             )}
           </div>
           <div className="p-4 pb-0 border rounded-md mb-4">
-            <div className="flex items-center mb-2 justify-between">
-              <h3 className="font-semibold">{t('knowledge.vectorSearch')}</h3>
+            <div className="flex items-center mb-4 justify-between">
+              <h3 className="font-medium text-sm">{t('knowledge.vectorSearch')}</h3>
               <Switch
                 size="small"
                 checked={configData.selectedSearchTypes.includes('vectorSearch')}
                 onChange={() => handleSearchTypeChange('vectorSearch')}
               />
             </div>
-            <p className="text-sm mb-4" style={{ 'color': 'var(--color-text-4)' }}>
+            <p className="text-xs mb-4 text-[var(--color-text-4)]">
               {t('knowledge.vectorSearchDesc')}
             </p>
             {configData.selectedSearchTypes.includes('vectorSearch') && (
@@ -172,14 +172,14 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
           </div>
           <div className="p-4 pb-0 border rounded-md mb-4">
             <div className="flex items-center justify-between mb-4">
-              <label className="font-semibold">{t('knowledge.rerankModel')}</label>
+              <label className="font-medium text-sm">{t('knowledge.rerankModel')}</label>
               <Switch
                 size="small"
                 checked={configData.rerankModel}
                 onChange={(checked) => setConfigData(prevData => ({ ...prevData, rerankModel: checked, selectedRerankModel: checked ? prevData.selectedRerankModel : null }))}
               />
             </div>
-            <p className="text-sm mb-4" style={{ 'color': 'var(--color-text-4)' }}>{t('knowledge.rerankModelDesc')}</p>
+            <p className="text-xs mb-4 text-[var(--color-text-4)]">{t('knowledge.rerankModelDesc')}</p>
             {configData.rerankModel && (
               <div>
                 <div className="flex items-center justify-between mb-4">

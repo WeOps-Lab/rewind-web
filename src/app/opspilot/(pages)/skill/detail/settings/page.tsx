@@ -205,7 +205,7 @@ const SkillSettingsPage: React.FC = () => {
         </div>
       )}
       {!allLoading && (
-        <div className="flex justify-between space-x-4" style={{ height: 'calc(100vh - 235px)' }}>
+        <div className="flex justify-between space-x-4" style={{ height: 'calc(100vh - 220px)' }}>
           <div className='w-1/2 space-y-4 flex flex-col h-full'>
             <section className={`flex-1 ${styles.llmSection}`}>
               <div className={`border rounded-md mb-5 ${styles.llmContainer}`}>
@@ -293,14 +293,14 @@ const SkillSettingsPage: React.FC = () => {
                 <div className={`p-4 rounded-md pb-0 ${styles.contentWrapper}`}>
                   <Form labelCol={{flex: '0 0 80px'}} wrapperCol={{flex: '1'}}>
                     <div className="flex justify-between">
-                      <h3 className="text-base mb-4">{t('skill.chatHistory')}</h3>
+                      <h3 className="font-medium text-sm mb-4">{t('skill.chatHistory')}</h3>
                       <Switch
                         size="small"
                         className="ml-2"
                         checked={chatHistoryEnabled}
                         onChange={setChatHistoryEnabled}/>
                     </div>
-                    <p className="pb-4 text-[var(--color-text-4)">{t('skill.chatHistoryTip')}</p>
+                    <p className="pb-4 text-xs text-[var(--color-text-4)]">{t('skill.chatHistoryTip')}</p>
                     {chatHistoryEnabled && (
                       <div className="pb-4">
                         <Form.Item label={t('skill.quantity')}>
@@ -317,10 +317,10 @@ const SkillSettingsPage: React.FC = () => {
                 <div className={`p-4 rounded-md pb-0 ${styles.contentWrapper}`}>
                   <Form labelCol={{flex: '0 0 135px'}} wrapperCol={{flex: '1'}}>
                     <div className="flex justify-between">
-                      <h3 className="text-base mb-4">{t('skill.rag')}</h3>
+                      <h3 className="font-medium text-sm mb-4">{t('skill.rag')}</h3>
                       <Switch size="small" className="ml-2" checked={ragEnabled} onChange={setRagEnabled}/>
                     </div>
-                    <p className="pb-4 text-[var(--color-text-4)">{t('skill.ragTip')}</p>
+                    <p className="pb-4 text-xs text-[var(--color-text-4)]">{t('skill.ragTip')}</p>
                     {ragEnabled && (
                       <div className="pb-2">
                         <Form.Item label={t('skill.ragSource')}>
@@ -342,10 +342,10 @@ const SkillSettingsPage: React.FC = () => {
                 <div className={`p-4 rounded-md pb-0 ${styles.contentWrapper}`}>
                   <Form labelCol={{flex: '0 0 135px'}} wrapperCol={{flex: '1'}}>
                     <div className="flex justify-between">
-                      <h3 className="text-base mb-4">{t('skill.tool')}</h3>
+                      <h3 className="font-medium text-sm mb-4">{t('skill.tool')}</h3>
                       <Switch size="small" className="ml-2" checked={showToolEnabled} onChange={changeToolEnable} />
                     </div>
-                    <p className="pb-4 text-[var(--color-text-4)">{t('skill.toolTip')}</p>
+                    <p className="pb-4 text-xs text-[var(--color-text-4)]">{t('skill.toolTip')}</p>
                     {showToolEnabled && (<ToolSelector selectedToolIds={selectedTools} onChange={setSelectedTools} />)}
                   </Form>
                 </div>

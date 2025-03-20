@@ -63,8 +63,8 @@ const SelectSourceModal: React.FC<SelectSourceModalProps> = ({ defaultSelected, 
             className={`${styles['radioItem']} ${selectedType === option.value ? styles['radioItemSelected'] : ''}`}
           >
             <div>
-              <h3 className="text-base">{option.title}</h3>
-              <p>{option.subTitle}</p>
+              <h3 className="text-sm">{option.title}</h3>
+              <p className="mt-2 text-xs text-[var(--color-text-4)]">{option.subTitle}</p>
             </div>
           </Radio>
         ))}
