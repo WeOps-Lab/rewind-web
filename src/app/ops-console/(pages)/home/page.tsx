@@ -104,7 +104,7 @@ const ControlPage = () => {
       <div
         className={`relative w-full h-full flex flex-col p-12 console-container ${overlayBgClass}`}
         style={{
-          backgroundSize: "contain",
+          backgroundSize: "cover",
           backgroundPosition: "top",
           minHeight: "calc(100vh - 58px)",
         }}
