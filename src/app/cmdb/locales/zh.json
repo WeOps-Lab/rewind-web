@@ -19,6 +19,7 @@
     "cancel": "取消",
     "group": "分组",
     "information": "信息",
+    "systemBuiltIn": "系统内置",
     "id": "ID",
     "name": "名称",
     "required": "必填",
@@ -91,7 +92,6 @@
         "train": "训练",
         "batchTrain": "批量训练",
         "done": "完成",
-        "batchDelete": "批量删除",
         "cancel": "取消",
         "confirm": "确认",
         "uploadText": "点击或拖动文件到此处上传",
@@ -133,8 +133,7 @@
         "useThemeError": "useTheme必须在ThemeProvider内使用。",
         "selectAll": "全选",
         "clear": "清空",
-        "selected": "已选择",
-        "items": "条目"
+        "selected": "已选择"
     },
     "cutomTable": {
         "fieldSetting": "列表字段设置"

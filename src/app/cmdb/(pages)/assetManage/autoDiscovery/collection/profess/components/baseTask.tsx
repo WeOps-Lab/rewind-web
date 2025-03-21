@@ -10,17 +10,22 @@ import React, {
 import FieldModal from '@/app/cmdb/(pages)/assetData/list/fieldModal';
 import useApiClient from '@/utils/request';
 import styles from '../index.module.scss';
+import CustomTable from '@/components/custom-table';
 import IpRangeInput from '@/app/cmdb/components/ipInput';
 import { useCommon } from '@/app/cmdb/context/common';
 import { FieldModalRef } from '@/app/cmdb/types/assetManage';
 import { useTranslation } from '@/utils/i18n';
-import { CYCLE_OPTIONS } from '@/app/cmdb/constants/professCollection';
+import {
+  CYCLE_OPTIONS,
+  NETWORK_DEVICE_OPTIONS,
+  createTaskValidationRules,
+} from '@/app/cmdb/constants/professCollection';
 import {
   CaretRightOutlined,
   QuestionCircleOutlined,
   PlusOutlined,
+  DownOutlined,
 } from '@ant-design/icons';
-import { createTaskValidationRules } from '@/app/cmdb/constants/professCollection';
 import {
   Form,
   Radio,
@@ -32,14 +37,16 @@ import {
   Input,
   Button,
   Select,
-  Table,
+  Dropdown,
+  Drawer,
 } from 'antd';
 
 interface TableItem {
-  key: string;
-  ip: string;
-  status: string;
+  _id?: string;
+  model_id?: string;
+  model_name?: string;
 }
+
 interface BaseTaskFormProps {
   children?: React.ReactNode;
   nodeId?: string;
@@ -59,6 +66,11 @@ interface BaseTaskFormProps {
 export interface BaseTaskRef {
   instOptions: { label: string; value: string; [key: string]: any }[];
   accessPoints: { label: string; value: string; [key: string]: any }[];
+  selectedData: TableItem[];
+  ipRange: string[];
+  collectionType: string;
+  setSelectedData: (data: TableItem[]) => void;
+  initIpRange: (range: string[]) => void;
 }
 
 const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
@@ -93,35 +105,132 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
     const [instOptions, setOptions] = useState<
       { label: string; value: string }[]
     >([]);
-    const [IpRange] = useState([]);
+    const [ipRange, setIpRange] = useState<string[]>([]);
     const [collectionType, setCollectionType] = useState('asset');
-    const [data] = useState<TableItem[]>([
-      {
-        key: '1',
-        ip: '192.168.1.1',
-        status: '正常',
-      },
-      {
-        key: '2',
-        ip: '192.168.1.2',
-        status: '异常',
-      },
-    ]);
+    const [selectedData, setSelectedData] = useState<TableItem[]>([]);
     const [accessPoints, setAccessPoints] = useState<
       { label: string; value: string }[]
     >([]);
     const [accessPointLoading, setAccessPointLoading] = useState(false);
+    const [instVisible, setInstVisible] = useState(false);
+    const [relateType, setRelateType] = useState('');
+    const [selectedRows, setSelectedRows] = useState<any[]>([]);
+    const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+    const [displaySelectedKeys, setDisplaySelectedKeys] = useState<React.Key[]>(
+      []
+    );
+    const [instData, setInstData] = useState<any[]>([]);
+    const [instLoading, setInstLoading] = useState(false);
+    const dropdownItems = {
+      items: NETWORK_DEVICE_OPTIONS,
+    };
 
-    const columns = [
+    const instColumns = [
       {
-        title: 'IP',
-        dataIndex: 'ip',
-        key: 'ip',
+        title: '实例名',
+        dataIndex: 'inst_name',
+        key: 'inst_name',
+        render: (text: any) => text || '--',
       },
       {
-        title: 'Status',
-        dataIndex: 'status',
-        key: 'status',
+        title: '管理IP',
+        dataIndex: 'ip',
+        key: 'ip',
+        render: (text: any) => text || '--',
+      },
+    ];
+
+    useEffect(() => {
+      if (selectedData.length && instData.length) {
+        const selectedInsts = instData.filter((item) =>
+          selectedData.some((d) => d._id === item._id)
+        );
+        setSelectedRows(selectedInsts);
+        setSelectedKeys(selectedInsts.map((item) => item._id));
+      }
+    }, [selectedData, instData]);
+
+    const fetchInstData = async (modelId: string) => {
+      try {
+        setInstLoading(true);
+        const res = await post('/cmdb/api/instance/search/', {
+          model_id: modelId,
+          page: 1,
+          page_size: 10000,
+        });
+        setInstData(res.insts || []);
+      } catch (error) {
+        console.error('Failed to fetch instances:', error);
+      } finally {
+        setInstLoading(false);
+      }
+    };
+
+    const handleMenuClick = ({ key }: { key: string }) => {
+      setRelateType(key);
+      setInstVisible(true);
+      fetchInstData(key);
+
+      const data = instData.filter((item) =>
+        selectedData.some((d) => d._id === item._id)
+      );
+      setSelectedRows(data);
+      setSelectedKeys(data.map((item) => item._id));
+    };
+
+    const handleRowSelect = (
+      selectedRowKeys: React.Key[],
+      selectedRows: any[]
+    ) => {
+      setSelectedKeys(selectedRowKeys);
+      setSelectedRows(selectedRows);
+    };
+
+    const handleDrawerClose = () => {
+      setInstVisible(false);
+      setSelectedKeys([]);
+      setSelectedRows([]);
+    };
+
+    const handleDrawerConfirm = () => {
+      setInstVisible(false);
+      setSelectedData(selectedRows.map((item) => item));
+    };
+
+    const handleDeleteRow = (record: TableItem) => {
+      setSelectedData((prev) => prev.filter((item) => item._id !== record._id));
+    };
+
+    const handleBatchDelete = () => {
+      if (displaySelectedKeys.length === 0) {
+        return;
+      }
+      setSelectedData((prev) =>
+        prev.filter((item: any) => !displaySelectedKeys.includes(item._id))
+      );
+      setDisplaySelectedKeys([]);
+    };
+
+    const assetColumns = [
+      {
+        title: t('name'),
+        dataIndex: 'inst_name',
+        key: 'inst_name',
+        render: (text: any, record: any) => record.inst_name || '--',
+      },
+      {
+        title: t('action'),
+        key: 'action',
+        width: 120,
+        render: (_: any, record: TableItem) => (
+          <Button
+            type="link"
+            size="small"
+            onClick={() => handleDeleteRow(record)}
+          >
+            {t('delete')}
+          </Button>
+        ),
       },
     ];
 
@@ -138,7 +247,10 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       fetchAccessPoints();
     }, []);
 
-    const onIpChange = () => {};
+    const onIpChange = (value: string[]) => {
+      setIpRange(value);
+      form.setFieldValue('ipRange', value);
+    };
 
     const fetchOptions = async () => {
       try {
@@ -203,9 +315,21 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       }
     };
 
+    const initIpRange = (ipRange: string[]) => {
+      setIpRange(ipRange);
+      if (ipRange.length) {
+        setCollectionType('ip');
+      }
+    };
+
     useImperativeHandle(ref, () => ({
       instOptions,
       accessPoints,
+      selectedData,
+      collectionType,
+      setSelectedData: (data: TableItem[]) => setSelectedData(data),
+      initIpRange: (range: string[]) => initIpRange(range),
+      ipRange: ipRange,
     }));
 
     return (
@@ -214,179 +338,185 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
           <div className={styles.sectionTitle}>
             {t('Collection.baseSetting')}
           </div>
-
-          <Form.Item
-            name="taskName"
-            label={t('Collection.taskNameLabel')}
-            rules={rules.taskName}
-          >
-            <Input
-              className="w-[420px]"
-              placeholder={t('Collection.taskNamePlaceholder')}
-            />
-          </Form.Item>
-
-          {/* 扫描周期 */}
-          <Form.Item
-            label={t('Collection.cycle')}
-            name="cycle"
-            rules={rules.cycle}
-          >
-            <Radio.Group>
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <Radio value={CYCLE_OPTIONS.DAILY}>
-                    {t('Collection.dailyAt')}
-                    <Form.Item
-                      name="dailyTime"
-                      noStyle
-                      dependencies={['cycle']}
-                      rules={rules.dailyTime}
-                    >
-                      <TimePicker
-                        className="w-40 ml-2"
-                        format="HH:mm"
-                        placeholder={t('Collection.selectTime')}
-                      />
-                    </Form.Item>
-                  </Radio>
-                </div>
-                <div className="flex items-center">
-                  <Radio value={CYCLE_OPTIONS.INTERVAL}>
-                    <Space>
-                      {t('Collection.everyMinute')}
-                      <Form.Item
-                        name="intervalValue"
-                        noStyle
-                        dependencies={['cycle']}
-                        rules={rules.intervalValue}
-                      >
-                        <InputNumber
-                          className="w-20"
-                          min={5}
-                          placeholder={t('common.inputMsg')}
-                        />
-                      </Form.Item>
-                      {t('Collection.executeInterval')}
-                    </Space>
-                  </Radio>
-                </div>
-                <Radio value={CYCLE_OPTIONS.ONCE}>
-                  {t('Collection.executeOnce')}
-                </Radio>
-              </div>
-            </Radio.Group>
-          </Form.Item>
-
-          {/* 录入方式-暂时隐藏 */}
-          {/* {nodeId !== 'k8s' && (
+          <div className="mr-4">
             <Form.Item
-              name="enterType"
-              rules={rules.enterType}
-              required
-              label={
-                <Space>
-                  {t('Collection.enterType')}
-                  <Tooltip title={t('Collection.enterTypeTooltip')}>
-                    <QuestionCircleOutlined className=" text-gray-400" />
-                  </Tooltip>
-                </Space>
-              }
+              name="taskName"
+              label={t('Collection.taskNameLabel')}
+              rules={rules.taskName}
+            >
+              <Input placeholder={t('Collection.taskNamePlaceholder')} />
+            </Form.Item>
+
+            {/* 扫描周期 */}
+            <Form.Item
+              label={t('Collection.cycle')}
+              name="cycle"
+              rules={rules.cycle}
             >
               <Radio.Group>
-                <Radio value={ENTER_TYPE.AUTOMATIC}>
-                  {t('Collection.automatic')}
-                </Radio>
-                <Radio value={ENTER_TYPE.APPROVAL}>
-                  {t('Collection.approvalRequired')}
-                </Radio>
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <Radio value={CYCLE_OPTIONS.DAILY}>
+                      {t('Collection.dailyAt')}
+                      <Form.Item
+                        name="dailyTime"
+                        noStyle
+                        dependencies={['cycle']}
+                        rules={rules.dailyTime}
+                      >
+                        <TimePicker
+                          className="w-40 ml-2"
+                          format="HH:mm"
+                          placeholder={t('Collection.selectTime')}
+                        />
+                      </Form.Item>
+                    </Radio>
+                  </div>
+                  <div className="flex items-center">
+                    <Radio value={CYCLE_OPTIONS.INTERVAL}>
+                      <Space>
+                        {t('Collection.everyMinute')}
+                        <Form.Item
+                          name="intervalValue"
+                          noStyle
+                          dependencies={['cycle']}
+                          rules={rules.intervalValue}
+                        >
+                          <InputNumber
+                            className="w-20"
+                            min={5}
+                            placeholder={t('common.inputMsg')}
+                          />
+                        </Form.Item>
+                        {t('Collection.executeInterval')}
+                      </Space>
+                    </Radio>
+                  </div>
+                  <Radio value={CYCLE_OPTIONS.ONCE}>
+                    {t('Collection.executeOnce')}
+                  </Radio>
+                </div>
               </Radio.Group>
             </Form.Item>
-          )} */}
 
-          {/* ip选择 */}
-          {nodeId === 'network' && (
-            <div className="mb-6 ml-8">
-              <Radio.Group
-                value={collectionType}
-                onChange={(e) => setCollectionType(e.target.value)}
-              >
-                <Radio value="ip">{t('Collection.chooseIp')}</Radio>
-                <Radio value="asset">{t('Collection.chooseAsset')}</Radio>
-              </Radio.Group>
-              {collectionType === 'ip' && (
-                <div className="mt-6 mb-6">
-                  <Space>
-                    <Button type="primary">{t('common.select')}</Button>
-                    <Button>{t('delete')}</Button>
-                  </Space>
-                  <Table
-                    columns={columns}
-                    dataSource={data}
-                    pagination={false}
-                    className="mt-4 mb-4"
+            {/* 实例选择 */}
+            {nodeId === 'vmware' && (
+              <Form.Item label={instPlaceholder} required>
+                <Space>
+                  <Form.Item name="instId" rules={rules.instId} noStyle>
+                    <Select
+                      style={{ width: '420px' }}
+                      placeholder={instPlaceholder}
+                      options={instOptions}
+                      loading={instOptLoading}
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.label ?? '')
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                    />
+                  </Form.Item>
+                  <Button
+                    type="default"
+                    icon={<PlusOutlined />}
+                    onClick={showFieldModal}
                   />
-                </div>
-              )}
-            </div>
-          )}
+                </Space>
+              </Form.Item>
+            )}
 
-          {/* 实例选择 */}
-          <Form.Item label={instPlaceholder} required>
-            <Space>
-              <Form.Item name="instId" rules={rules.instId} noStyle>
+            {/* ip选择 */}
+            {nodeId === 'network' && (
+              <>
+                <Radio.Group
+                  value={collectionType}
+                  className="ml-8 mb-6"
+                  onChange={(e) => setCollectionType(e.target.value)}
+                >
+                  <Radio value="ip">{t('Collection.chooseIp')}</Radio>
+                  <Radio value="asset">{t('Collection.chooseAsset')}</Radio>
+                </Radio.Group>
+
+                {collectionType === 'ip' ? (
+                  <>
+                    {/* IP范围 */}
+                    <Form.Item
+                      label={t('Collection.ipRange')}
+                      name="ipRange"
+                      required
+                      rules={[
+                        {
+                          required: true,
+                          message:
+                            t('common.inputMsg') + t('Collection.ipRange'),
+                        },
+                      ]}
+                    >
+                      <IpRangeInput value={ipRange} onChange={onIpChange} />
+                    </Form.Item>
+                  </>
+                ) : (
+                  /* 实例选择 */
+                  <Form.Item label={instPlaceholder} required>
+                    <Space>
+                      <Dropdown
+                        menu={{ ...dropdownItems, onClick: handleMenuClick }}
+                      >
+                        <Button type="primary">
+                          {t('common.select')} <DownOutlined />
+                        </Button>
+                      </Dropdown>
+                      <Button
+                        onClick={handleBatchDelete}
+                        disabled={displaySelectedKeys.length === 0}
+                      >
+                        {t('batchDelete')}
+                      </Button>
+                    </Space>
+                    <CustomTable
+                      columns={assetColumns}
+                      dataSource={selectedData}
+                      pagination={false}
+                      className="mt-4"
+                      size="middle"
+                      rowKey="_id"
+                      rowSelection={{
+                        selectedRowKeys: displaySelectedKeys,
+                        onChange: (selectedRowKeys) => {
+                          setDisplaySelectedKeys(selectedRowKeys);
+                        },
+                      }}
+                    />
+                  </Form.Item>
+                )}
+              </>
+            )}
+
+            {/* 接入点 */}
+            {nodeId !== 'k8s' && (
+              <Form.Item
+                label={t('Collection.accessPoint')}
+                name="accessPointId"
+                required
+                rules={[
+                  {
+                    required: true,
+                    message:
+                      t('common.selectMsg') + t('Collection.accessPoint'),
+                  },
+                ]}
+              >
                 <Select
-                  style={{ width: '380px' }}
-                  placeholder={instPlaceholder}
-                  options={instOptions}
-                  loading={instOptLoading}
-                  showSearch
-                  filterOption={(input, option) =>
-                    (option?.label ?? '')
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
+                  placeholder={
+                    t('common.selectMsg') + t('Collection.accessPoint')
                   }
+                  options={accessPoints}
+                  loading={accessPointLoading}
                 />
               </Form.Item>
-              <Button
-                type="default"
-                icon={<PlusOutlined />}
-                onClick={showFieldModal}
-              />
-            </Space>
-          </Form.Item>
-
-          {/* IP范围 */}
-          {nodeId === 'network' && (
-            <Form.Item label={t('Collection.ipRange')} name="ipRange" required>
-              <IpRangeInput value={IpRange} onChange={onIpChange} />
-            </Form.Item>
-          )}
-
-          {/* 接入点 */}
-          {nodeId !== 'k8s' && (
-            <Form.Item
-              label={t('Collection.accessPoint')}
-              name="accessPointId"
-              required
-              rules={[
-                {
-                  required: true,
-                  message: t('common.selectMsg') + t('Collection.accessPoint'),
-                },
-              ]}
-            >
-              <Select
-                style={{ width: '420px' }}
-                placeholder={
-                  t('common.selectMsg') + t('Collection.accessPoint')
-                }
-                options={accessPoints}
-                loading={accessPointLoading}
-              />
-            </Form.Item>
-          )}
-
+            )}
+          </div>
           {children}
 
           {showAdvanced && (
@@ -431,7 +561,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
           )}
         </div>
 
-        <div className="flex justify-start space-x-4 ml-6">
+        <div className={`${styles.taskFooter} space-x-4`}>
           {onTest && <Button onClick={onTest}>{t('Collection.test')}</Button>}
           <Button type="primary" htmlType="submit" loading={submitLoading}>
             {t('Collection.confirm')}
@@ -447,6 +577,43 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
           organizationList={organizationList}
           onSuccess={fetchOptions}
         />
+
+        <Drawer
+          title={`选择${dropdownItems.items.find((item) => item.key === relateType)?.label || '资产'}`}
+          width={620}
+          open={instVisible}
+          onClose={handleDrawerClose}
+          footer={
+            <div style={{ textAlign: 'left' }}>
+              <Space>
+                <Button type="primary" onClick={handleDrawerConfirm}>
+                  {t('Collection.confirm')}
+                </Button>
+                <Button onClick={handleDrawerClose}>
+                  {t('Collection.cancel')}
+                </Button>
+              </Space>
+            </div>
+          }
+        >
+          <CustomTable
+            columns={instColumns}
+            dataSource={instData}
+            rowKey="_id"
+            pagination={{ pageSize: 10 }}
+            scroll={{ y: 400 }}
+            size="middle"
+            loading={instLoading}
+            rowSelection={{
+              type: 'checkbox',
+              selectedRowKeys: selectedKeys,
+              onChange: handleRowSelect,
+              getCheckboxProps: () => ({
+                disabled: false,
+              }),
+            }}
+          />
+        </Drawer>
       </>
     );
   }

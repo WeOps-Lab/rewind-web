@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Alert, Tabs, Button, message, Modal } from 'antd';
+import { Alert, Tabs, Button, message, Modal, Spin } from 'antd';
 import CustomTable from '@/components/custom-table';
 import type { CollectTask } from '@/app/cmdb/types/autoDiscovery';
 import { TASK_DETAIL_CONFIG } from '@/app/cmdb/constants/professCollection';
@@ -35,20 +35,19 @@ interface TaskTableProps {
   columns: any[];
   onClose?: () => void;
   onSuccess?: () => void;
+  data: any[];
 }
 
 const TaskTable: React.FC<TaskTableProps> = ({
-  type,
   taskId,
   columns,
   isApprove,
   onClose,
   onSuccess,
+  data,
 }) => {
-  const { get, post } = useApiClient();
+  const { post } = useApiClient();
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-  const [allData, setAllData] = useState<any[]>([]);
   const [displayData, setDisplayData] = useState<any[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
@@ -58,26 +57,15 @@ const TaskTable: React.FC<TaskTableProps> = ({
     total: 0,
   });
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const response = await get(`/cmdb/api/collect/${taskId}/info/`);
-      const data = response as TaskDetailData;
-      const typeData =
-        type === 'offline' ? data.delete : data[type as keyof TaskDetailData];
-      const listData = typeData?.data || [];
-      setAllData(listData);
-      updateDisplayData(listData, pagination.current, pagination.pageSize);
+  useEffect(() => {
+    if (data?.length) {
+      updateDisplayData(data, pagination.current, pagination.pageSize);
       setPagination((prev) => ({
         ...prev,
-        total: listData.length,
+        total: data.length,
       }));
-    } catch (error) {
-      console.error('Failed to fetch task detail:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [data]);
 
   const updateDisplayData = (
     data: any[],
@@ -89,15 +77,13 @@ const TaskTable: React.FC<TaskTableProps> = ({
     setDisplayData(data.slice(start, end));
   };
 
-  useEffect(() => {
-    if (taskId) {
-      fetchData();
-    }
-  }, [taskId]);
-
   const handleTableChange = (newPagination: any) => {
-    setPagination({ ...newPagination, total: allData.length });
-    updateDisplayData(allData, newPagination.current, newPagination.pageSize);
+    setPagination({ ...newPagination, total: data?.length || 0 });
+    updateDisplayData(
+      data || [],
+      newPagination.current,
+      newPagination.pageSize
+    );
   };
 
   const handleApprove = async () => {
@@ -149,7 +135,6 @@ const TaskTable: React.FC<TaskTableProps> = ({
         onChange={handleTableChange}
         scroll={{ y: 'calc(100vh - 350px)' }}
         rowKey={(record) => record.id || record.inst_name || record.name}
-        loading={loading}
         rowSelection={isApprove ? rowSelection : undefined}
       />
       <div className="flex justify-start space-x-4">
@@ -176,6 +161,10 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
 }) => {
   const { get } = useApiClient();
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const [associationMap, setAssociationMap] = useState<Record<string, string>>(
+    {}
+  );
   const [detailData, setDetailData] = useState<TaskDetailData>({
     add: { data: [], count: 0 },
     update: { data: [], count: 0 },
@@ -186,19 +175,42 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   useEffect(() => {
     const fetchDetailData = async () => {
       try {
+        setLoading(true);
         const response = await get(`/cmdb/api/collect/${task.id}/info/`);
         setDetailData(response as TaskDetailData);
       } catch (error) {
         console.error('Failed to fetch task detail data:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDetailData();
   }, [task.id]);
 
+  useEffect(() => {
+    const fetchAssociationTypes = async () => {
+      try {
+        const response = await get('/cmdb/api/model/model_association_type');
+        const associationMap = response.reduce(
+          (acc: Record<string, string>, item: any) => {
+            acc[item.asst_id] = item.asst_name;
+            return acc;
+          },
+          {}
+        );
+        setAssociationMap(associationMap);
+      } catch (error) {
+        console.error('Failed to fetch association types:', error);
+      }
+    };
+
+    fetchAssociationTypes();
+  }, []);
+
   const statusColumn = {
     title: '状态',
     dataIndex: '_status',
-    width: 120,
+    width: 100,
     render: (status: string) => {
       if (status === 'success') {
         return (
@@ -215,10 +227,27 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
 
   const isApprove = task.input_method === 1 && !task.examine;
 
+  const processColumns = (columns: any[]) => {
+    return columns.map((col) => ({
+      ...col,
+      render: (text: any) => {
+        if (col.dataIndex === 'asst_id') {
+          return <span>{associationMap[text] || '--'}</span>;
+        }
+        return <span>{text || '--'}</span>;
+      },
+    }));
+  };
+
   const tabItems = Object.entries(TASK_DETAIL_CONFIG)
     .filter(([key]) => !(modelId === 'k8s' && key === 'relation'))
     .map(([key, config]) => {
       const count = detailData[key as keyof TaskDetailData]?.count || 0;
+      const typeData =
+        key === 'offline'
+          ? detailData.delete
+          : detailData[key as keyof TaskDetailData];
+
       return {
         key,
         label: `${config.label} (${count})`,
@@ -230,14 +259,17 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
               showIcon
               className="mb-4"
             />
-            <TaskTable
-              type={key}
-              taskId={task.id}
-              isApprove={isApprove}
-              columns={[...config.columns, statusColumn]}
-              onClose={onClose}
-              onSuccess={onSuccess}
-            />
+            <Spin spinning={loading}>
+              <TaskTable
+                type={key}
+                taskId={task.id}
+                isApprove={isApprove}
+                columns={[...processColumns(config.columns), statusColumn]}
+                onClose={onClose}
+                onSuccess={onSuccess}
+                data={typeData?.data || []}
+              />
+            </Spin>
           </div>
         ),
       };

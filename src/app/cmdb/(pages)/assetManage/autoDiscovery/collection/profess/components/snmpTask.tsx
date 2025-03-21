@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { CaretRightOutlined } from '@ant-design/icons';
 import BaseTaskForm, { BaseTaskRef } from './baseTask';
 import styles from '../index.module.scss';
+import { CaretRightOutlined } from '@ant-design/icons';
+import { useLocale } from '@/context/locale';
 import { useTranslation } from '@/utils/i18n';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { TreeNode } from '@/app/cmdb/types/autoDiscovery';
@@ -31,8 +32,9 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
 }) => {
   const { t } = useTranslation();
   const baseRef = useRef<BaseTaskRef>(null);
-  const [snmpVersion, setSnmpVersion] = useState('V2');
+  const [snmpVersion, setSnmpVersion] = useState('v2');
   const [securityLevel, setSecurityLevel] = useState('authNoPriv');
+  const localeContext = useLocale();
 
   const {
     form,
@@ -48,28 +50,47 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
     onSuccess,
     onClose,
     formatValues: (values) => {
-      const instance = baseRef.current?.instOptions.find(
-        (item: any) => item.value === values.instId
-      );
+      const instance = baseRef.current?.selectedData;
+      const collectionType = baseRef.current?.collectionType;
+      const version = values.version;
+      const ipRange = values.ipRange?.length ? values.ipRange : undefined;
       const driverType = selectedNode.tabItems?.find(
         (item) => item.id === modelId
       )?.type;
+
+      const accessPoint = baseRef.current?.accessPoints.find(
+        (item: any) => item.value === values.accessPointId
+      );
+
+      const credential: any = {
+        version,
+        snmp_port: values.snmp_port,
+        community: version !== 'v3' ? values.community : undefined,
+      };
+      if (version === 'v3') {
+        credential.level = values.level;
+        credential.username = values.username;
+        credential.integrity = values.integrity;
+        credential.authkey = values.authkey;
+        if (values.level === 'authPriv') {
+          credential.privacy = values.privacy;
+          credential.privkey = values.privkey;
+        }
+      }
       return {
         name: values.taskName,
-        instances: instance?.origin && [instance.origin],
+        credential,
         input_method: values.enterType === ENTER_TYPE.APPROVAL ? 1 : 0,
-        access_point: values.accessPoint || {},
+        access_point: accessPoint?.origin && [accessPoint.origin],
         timeout: values.timeout || 600,
         scan_cycle: formatCycleValue(values),
         model_id: modelId,
         driver_type: driverType,
         task_type: 'snmp',
-        credential: {
-          username: values.username,
-          password: values.password,
-          port: values.port,
-          ssl: values.sslVerify,
-        },
+        accessPointId: values.access_point?.[0]?.id,
+        ...(collectionType === 'ip'
+          ? { ip_range: ipRange.join('-') }
+          : { instances: instance || [] }),
       };
     },
   });
@@ -83,7 +104,20 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
     const initForm = async () => {
       if (editId) {
         const values = await fetchTaskDetail(editId);
-        form.setFieldsValue(values);
+        const ipRange = values.ip_range?.split('-');
+        setSnmpVersion(values.credential.version);
+        setSecurityLevel(values.credential.level);
+        if (values.ip_range?.length) {
+          baseRef.current?.initIpRange(ipRange);
+        } else {
+          baseRef.current?.setSelectedData(values.instances || []);
+        }
+        form.setFieldsValue({
+          ipRange,
+          ...values,
+          ...values.credential,
+          accessPointId: values.access_point?.[0]?.id,
+        });
       } else {
         form.setFieldsValue(SNMP_FORM_INITIAL_VALUES);
       }
@@ -96,7 +130,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
       <Form
         form={form}
         layout="horizontal"
-        labelCol={{ span: 6 }}
+        labelCol={{ span: localeContext.locale === 'en' ? 6 : 5 }}
         onFinish={onFinish}
         initialValues={SNMP_FORM_INITIAL_VALUES}
       >
@@ -106,7 +140,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
           modelId={modelId}
           onClose={onClose}
           submitLoading={submitLoading}
-          instPlaceholder={`${t('common.select')}${t('Collection.SNMPTask.chooseSNMP')}`}
+          instPlaceholder={`${t('Collection.chooseAsset')}`}
           timeoutProps={{
             min: 0,
             defaultValue: 600,
@@ -133,35 +167,29 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
             >
               <Form.Item
                 label={t('Collection.SNMPTask.version')}
-                name="snmpVersion"
+                name="version"
                 rules={rules.snmpVersion}
                 required
               >
                 <Select value={snmpVersion} onChange={setSnmpVersion}>
-                  <Select.Option value="V2">V2</Select.Option>
-                  <Select.Option value="V2C">V2C</Select.Option>
-                  <Select.Option value="V3">V3</Select.Option>
+                  <Select.Option value="v2">V2</Select.Option>
+                  <Select.Option value="v2c">V2C</Select.Option>
+                  <Select.Option value="v3">V3</Select.Option>
                 </Select>
               </Form.Item>
 
               <Form.Item
-                name="port"
                 label={t('Collection.SNMPTask.port')}
+                name="snmp_port"
                 rules={rules.port}
               >
-                <InputNumber
-                  min={1}
-                  max={65535}
-                  placeholder={t('common.inputMsg')}
-                  className="w-32"
-                  defaultValue={161}
-                />
+                <InputNumber min={1} max={65535} className="w-32" />
               </Form.Item>
 
-              {(snmpVersion === 'V2' || snmpVersion === 'V2C') && (
+              {snmpVersion !== 'v3' && (
                 <Form.Item
                   label={t('Collection.SNMPTask.communityString')}
-                  name="communityString"
+                  name="community"
                   rules={rules.communityString}
                   required
                 >
@@ -169,47 +197,46 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
                 </Form.Item>
               )}
 
-              {snmpVersion === 'V3' && (
+              {snmpVersion === 'v3' && (
                 <>
                   <Form.Item
                     label={t('Collection.SNMPTask.securityLevel')}
-                    name="securityLevel"
-                    required
+                    name="level"
+                    rules={[{ required: true }]}
+                    initialValue="authPriv"
                   >
-                    <Select value={securityLevel} onChange={setSecurityLevel}>
+                    <Select onChange={setSecurityLevel}>
                       <Select.Option value="authNoPriv">
-                        authNoPriv
+                        认证不加密
                       </Select.Option>
-                      <Select.Option value="authPriv">authPriv</Select.Option>
+                      <Select.Option value="authPriv">认证加密</Select.Option>
                     </Select>
                   </Form.Item>
 
                   <Form.Item
                     label={t('Collection.SNMPTask.userName')}
-                    name="userName"
-                    rules={rules.userName}
-                    required
+                    name="username"
+                    rules={[{ required: true }]}
                   >
                     <Input placeholder={t('common.inputMsg')} />
                   </Form.Item>
 
                   <Form.Item
                     label={t('Collection.SNMPTask.authPassword')}
-                    name="authPassword"
-                    rules={rules.authPassword}
-                    required
+                    name="authkey"
+                    rules={[{ required: true }]}
                   >
                     <Input.Password placeholder={t('common.inputMsg')} />
                   </Form.Item>
 
                   <Form.Item
                     label={t('Collection.SNMPTask.hashAlgorithm')}
-                    name="hashAlgorithm"
-                    required
+                    name="integrity"
+                    rules={[{ required: true }]}
                   >
-                    <Select defaultValue="MD5">
-                      <Select.Option value="MD5">MD5</Select.Option>
-                      <Select.Option value="SHA">SHA</Select.Option>
+                    <Select>
+                      <Select.Option value="sha">SHA</Select.Option>
+                      <Select.Option value="md5">MD5</Select.Option>
                     </Select>
                   </Form.Item>
 
@@ -217,20 +244,20 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
                     <>
                       <Form.Item
                         label={t('Collection.SNMPTask.encryptAlgorithm')}
-                        name="encryptionAlgorithm"
-                        required
+                        name="privacy"
+                        rules={[{ required: true }]}
+                        initialValue="aes"
                       >
-                        <Select defaultValue="AES">
-                          <Select.Option value="AES">AES</Select.Option>
-                          <Select.Option value="DES">DES</Select.Option>
+                        <Select>
+                          <Select.Option value="aes">AES</Select.Option>
+                          <Select.Option value="des">DES</Select.Option>
                         </Select>
                       </Form.Item>
 
                       <Form.Item
                         label={t('Collection.SNMPTask.encryptKey')}
-                        name="encryptKey"
-                        rules={rules.encryptKey}
-                        required
+                        name="privkey"
+                        rules={[{ required: true }]}
                       >
                         <Input.Password placeholder={t('common.inputMsg')} />
                       </Form.Item>

@@ -59,3 +59,13 @@
     padding-top: 0;
   }
 }
+
+.taskFooter {
+    display: flex;
+    justify-content: start;
+    position: absolute;
+    bottom: -50px;
+    border-top: var(--color-border) solid 1px;
+    padding-top: 8px;
+    width: 100%;
+}

@@ -109,12 +109,12 @@ export const SNMP_FORM_INITIAL_VALUES = {
   instId: undefined,
   cycle: CYCLE_OPTIONS.ONCE,
   enterType: ENTER_TYPE.AUTOMATIC,
-  snmpVersion: 'V2',
-  port: '161',
+  version: 'v2',
+  snmp_port: '161',
   timeout: 60,
-  securityLevel: 'authNoPriv',
-  hashAlgorithm: 'MD5',
-  encryptionAlgorithm: 'AES',
+  level: 'authNoPriv',
+  integrity: 'sha',
+  privacy: 'aes',
 };
 
 export const validateCycleTime = (
@@ -138,7 +138,7 @@ export interface TabConfig {
   columns: {
     title: string;
     dataIndex: string;
-    width: number;
+      width?: number;
   }[];
 }
 interface ValidationContext {
@@ -258,8 +258,8 @@ export const createTaskValidationRules = (context: ValidationContext) => {
       communityString: [
         {
           validator: (_: any, value: any) => {
-            const version = context.form.getFieldValue('snmpVersion');
-            if (['V2', 'V2C'].includes(version) && !value) {
+            const version = context.form.getFieldValue('version');
+            if (['v2', 'v2C'].includes(version) && !value) {
               return Promise.reject(
                 new Error(
                   `${t('common.inputMsg')}${t('Collection.SNMPTask.communityString')}`
@@ -273,8 +273,8 @@ export const createTaskValidationRules = (context: ValidationContext) => {
       userName: [
         {
           validator: (_: any, value: any) => {
-            const version = context.form.getFieldValue('snmpVersion');
-            if (version === 'V3' && !value) {
+            const version = context.form.getFieldValue('version');
+            if (version === 'v3' && !value) {
               return Promise.reject(
                 new Error(
                   `${t('common.inputMsg')}${t('Collection.SNMPTask.userName')}`
@@ -289,7 +289,7 @@ export const createTaskValidationRules = (context: ValidationContext) => {
         {
           validator: (_: any, value: any) => {
             const version = context.form.getFieldValue('snmpVersion');
-            if (version === 'V3' && !value) {
+            if (version === 'v3' && !value) {
               return Promise.reject(
                 new Error(
                   `${t('common.inputMsg')}${t('Collection.SNMPTask.authPassword')}`
@@ -303,9 +303,9 @@ export const createTaskValidationRules = (context: ValidationContext) => {
       encryptKey: [
         {
           validator: (_: any, value: any) => {
-            const version = context.form.getFieldValue('snmpVersion');
-            const securityLevel = context.form.getFieldValue('securityLevel');
-            if (version === 'V3' && securityLevel === 'authPriv' && !value) {
+            const version = context.form.getFieldValue('version');
+            const securityLevel = context.form.getFieldValue('level');
+            if (version === 'v3' && securityLevel === 'authPriv' && !value) {
               return Promise.reject(
                 new Error(
                   `${t('common.inputMsg')}${t('Collection.SNMPTask.encryptKey')}`
@@ -350,8 +350,11 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
     message: '注：展示任务执行后，新创建的资产关联情况，自动更新至在资产记录。',
     alertType: 'warning',
     columns: [
-      { title: '源对象类型', dataIndex: 'type', width: 180 },
-      { title: '源实例', dataIndex: 'inst_name', width: 260 },
+      { title: '源对象类型', dataIndex: 'src_model_id', width: 180 },
+      { title: '源实例', dataIndex: 'src_inst_name', width: 260 },
+      { title: '关联关系', dataIndex: 'asst_id', width: 120 },
+      { title: '目标对象类型', dataIndex: 'dst_model_id', width: 180 },
+      { title: '目标实例', dataIndex: 'dst_inst_name', width: 260 },
     ],
   },
   delete: {
@@ -366,3 +369,24 @@ export const TASK_DETAIL_CONFIG: Record<string, TabConfig> = {
     ],
   },
 };
+
+export const NETWORK_DEVICE_OPTIONS = [
+  {
+    key: 'switch',
+    label: '交换机',
+  },
+  {
+    key: 'router',
+    label: '路由器',
+  },
+  {
+    key: 'firewall',
+    label: '防火墙',
+  },
+  {
+    key: 'loadbalance',
+    label: '负载均衡',
+  },
+]
+
+

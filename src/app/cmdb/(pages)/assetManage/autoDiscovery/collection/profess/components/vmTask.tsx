@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import BaseTaskForm, { BaseTaskRef } from './baseTask';
 import styles from '../index.module.scss';
+import { useLocale } from '@/context/locale';
 import { useTranslation } from '@/utils/i18n';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { CaretRightOutlined } from '@ant-design/icons';
@@ -31,6 +32,7 @@ const VMTask: React.FC<VMTaskFormProps> = ({
 }) => {
   const { t } = useTranslation();
   const baseRef = useRef<BaseTaskRef>(null);
+  const localeContext = useLocale();
 
   const {
     form,
@@ -109,7 +111,7 @@ const VMTask: React.FC<VMTaskFormProps> = ({
       <Form
         form={form}
         layout="horizontal"
-        labelCol={{ span: 6 }}
+        labelCol={{ span: localeContext.locale === 'en' ? 6 : 5 }}
         onFinish={onFinish}
         initialValues={VM_FORM_INITIAL_VALUES}
       >

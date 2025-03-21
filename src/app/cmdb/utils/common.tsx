@@ -257,9 +257,9 @@ export const getFieldItem = (config: {
         return (
           <Select>
             {[
-              { id: 1, name: 'Yes' },
-              { id: 0, name: 'No' },
-            ].map((opt) => (
+              { id: true, name: 'Yes' },
+              { id: false, name: 'No' },
+            ].map((opt: any) => (
               <Select.Option key={opt.id} value={opt.id}>
                 {opt.name}
               </Select.Option>

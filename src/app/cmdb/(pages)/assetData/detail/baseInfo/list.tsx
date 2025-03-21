@@ -35,6 +35,7 @@ const InfoList: React.FC<AssetDataFieldProps> = ({
   const { patch } = useApiClient();
   const searchParams = useSearchParams();
   const instId: string = searchParams.get('inst_id') || '';
+  const builtinAttr = ['auto_collect', 'collect_time', 'collect_task'];
 
   useEffect(() => {
     setAttrList(propertyList);
@@ -261,11 +262,38 @@ const InfoList: React.FC<AssetDataFieldProps> = ({
         <Panel header={t('information')} key="information">
           <Descriptions
             bordered
-            items={fieldList?.filter((item) => item.key !== 'organization')}
+            items={fieldList?.filter(
+              (item: any) =>
+                ![...builtinAttr, 'organization'].includes(item.key)
+            )}
             column={2}
           />
         </Panel>
       </Collapse>
+      {fieldList?.filter((item: any) => builtinAttr.includes(item.key))
+        ?.length ? (
+          <Collapse
+            bordered={false}
+            className={informationList.list}
+            defaultActiveKey="information"
+            accordion
+            expandIcon={({ isActive }) => (
+              <CaretRightOutlined rotate={isActive ? 90 : 0} />
+            )}
+          >
+            <Panel header={t('information')} key="information">
+              <Descriptions
+                bordered
+                items={fieldList?.filter((item: any) =>
+                  builtinAttr.includes(item.key)
+                )}
+                column={2}
+              />
+            </Panel>
+          </Collapse>
+        ) : (
+          ''
+        )}
     </div>
   );
 };

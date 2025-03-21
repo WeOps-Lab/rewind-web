@@ -19,6 +19,7 @@
     "cancel": "Cancel",
     "group": "Group",
     "information": "Information",
+    "systemBuiltIn": "System Built-in",
     "id": "ID",
     "name": "Name",
     "required": "Required",
@@ -91,7 +92,6 @@
       "train": "Train",
       "batchTrain": "Batch Train",
       "done": "Done",
-      "batchDelete": "Batch Delete",
       "cancel": "Cancel",
       "confirm": "Confirm",
       "uploadText": "Click or drag files here to upload",
@@ -133,8 +133,7 @@
       "useThemeError": "useTheme must be used within a ThemeProvider",
       "selectAll": "Select All",
       "clear": "clear",
-      "selected": "selected",
-      "items": "item(s)"
+      "selected": "selected"
     },
     "cutomTable": {
       "fieldSetting": "List field settings"

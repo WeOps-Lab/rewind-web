@@ -100,10 +100,12 @@ const ProfessionalCollection: React.FC = () => {
     }),
   });
 
-  const fetchData = async () => {
+  const fetchData = async (showLoading = true) => {
     try {
       if (!selectedRef.current.nodeId) return;
-      setTableLoading(true);
+      if (showLoading) {
+        setTableLoading(true);
+      }
       const params = getParams();
       const data = await get('/cmdb/api/collect/search/', { params });
       setTableData(data.items || []);
@@ -114,7 +116,9 @@ const ProfessionalCollection: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch table data:', error);
     } finally {
-      setTableLoading(false);
+      if (showLoading) {
+        setTableLoading(false);
+      }
       resetTimer();
     }
   };
@@ -123,7 +127,7 @@ const ProfessionalCollection: React.FC = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
-    timerRef.current = setTimeout(fetchData, 10 * 1000);
+    timerRef.current = setTimeout(() => fetchData(false), 10 * 1000);
   };
 
   useEffect(() => {
