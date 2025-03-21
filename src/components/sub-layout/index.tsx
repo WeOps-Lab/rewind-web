@@ -85,7 +85,7 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   };
 
   return (
-    <div className={`flex w-full h-full ${sideMenuStyle.sideMenuLayout} ${(intro && topSection) ? 'grow' : 'flex-col'}`}>
+    <div className={`flex w-full h-full text-sm ${sideMenuStyle.sideMenuLayout} ${(intro && topSection) ? 'grow' : 'flex-col'}`}>
       {layoutType === 'sideMenu' ? (
         <>
           {(!intro && topSection) && (

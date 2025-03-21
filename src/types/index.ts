@@ -39,11 +39,14 @@ export interface Group {
 }
 
 export interface UserInfoContextType {
+  loading: boolean;
   roles: string[];
   groups: Group[];
   selectedGroup: Group | null;
   flatGroups: Group[];
   isSuperUser: boolean;
+  isFirstLogin: boolean;
+  userId: string;
   setSelectedGroup: (group: Group) => void;
 }
 
@@ -80,6 +83,7 @@ export interface EntityListProps<T> {
   filterOptions?: Option[];
   filter?: boolean;
   filterLoading?: boolean;
+  operateSection?: React.ReactNode;
   menuActions?: (item: T) => React.ReactNode;
   singleAction?: (item: T) => { text: string, onClick: (item: T) => void };
   openModal?: (item?: T) => void;

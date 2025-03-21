@@ -9,20 +9,26 @@ const UserInfoContext = createContext<UserInfoContextType | undefined>(undefined
 export const UserInfoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { get } = useApiClient();
   const [selectedGroup, setSelectedGroupState] = useState<Group | null>(null);
+  const [userId, setUserId] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
   const [roles, setRoles] = useState<string[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [flatGroups, setFlatGroups] = useState<Group[]>([]);
   const [isSuperUser, setIsSuperUser] = useState<boolean>(true);
+  const [isFirstLogin, setIsFirstLogin] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchLoginInfo = async () => {
+      setLoading(true);
       try {
         const data = await get('/core/api/login_info/');
-        const { group_list: groupList, roles, is_superuser } = data;
+        const { group_list: groupList, roles, is_superuser, is_first_login, user_id } = data;
 
         setGroups(groupList);
         setRoles(roles);
         setIsSuperUser(is_superuser);
+        setIsFirstLogin(is_first_login);
+        setUserId(user_id);
 
         if (groupList?.length) {
           const flattenedGroups = convertTreeDataToGroupOptions(groupList);
@@ -36,6 +42,8 @@ export const UserInfoProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       } catch (err) {
         console.error('Failed to fetch login_info:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -48,7 +56,7 @@ export const UserInfoProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <UserInfoContext.Provider value={{ roles, groups, selectedGroup, flatGroups, isSuperUser, setSelectedGroup }}>
+    <UserInfoContext.Provider value={{ loading, roles, groups, selectedGroup, flatGroups, isSuperUser, isFirstLogin, userId, setSelectedGroup }}>
       {children}
     </UserInfoContext.Provider>
   );

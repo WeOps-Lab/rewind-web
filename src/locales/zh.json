@@ -77,6 +77,8 @@
     "notFound": "找不到您要查找的页面。",
     "backToHome": "返回首页",
     "noPermission": "您没有权限访问此页面",
+    "preview": "预览",
+    "download": "下载",
     "timeSelector": {
       "15Minutes": "最近15分钟",
       "30Minutes": "最近30分钟",

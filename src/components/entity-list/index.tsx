@@ -12,10 +12,11 @@ const EntityList = <T,>({
   data,
   loading,
   singleActionType = 'icon',
-  searchSize = 'large',
+  searchSize = 'middle',
   filterOptions = [],
   filter = false,
   filterLoading = false,
+  operateSection,
   menuActions,
   singleAction,
   openModal,
@@ -45,7 +46,7 @@ const EntityList = <T,>({
   }, [data, searchTerm]);
 
   const renderCard = useCallback((item: T) => {
-    const { id, name, description, icon, tag } = item as any;
+    const { id, name, description, icon, tagList } = item as any;
     const singleButtonAction = singleAction ? singleAction(item) : null;
     const isSingleButtonAction = singleButtonAction && singleActionType === 'button';
     const isSingleIconAction = singleActionType === 'icon' && singleButtonAction;
@@ -82,19 +83,19 @@ const EntityList = <T,>({
             <Icon type={icon} className="text-4xl" />
           </div>
           <div className="ml-2">
-            <h3 className="font-semibold truncate text-base" title={name}>
+            <h3 className="font-semibold truncate text-sm" title={name}>
               {name}
             </h3>
           </div>
         </div>
-        <div className="h-[66px]">
+        <div className="h-[50px]">
           <p
-            className={`mt-3 text-sm max-h-[66px] ${(isSingleButtonAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
+            className={`text-xs mt-3 text-sm max-h-[66px] ${(isSingleButtonAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
         </div>
-        {tag && tag.length > 0 && (
+        {tagList && tagList.length > 0 && (
           <div className="mt-2">
-            {tag.map((t: any, idx: number) => (
-              <Tag key={idx} className="mr-1">
+            {tagList.map((t: any, idx: number) => (
+              <Tag key={idx} className="mr-1 mb-1 font-mini">
                 {t}
               </Tag>
             ))}
@@ -102,6 +103,7 @@ const EntityList = <T,>({
         )}
         {isSingleButtonAction && (
           <Button
+            size="small"
             type="primary"
             className={`w-[92%] absolute bottom-2 left-1/2 transform -translate-x-1/2 ${hoveredCard === id ? '' : 'hidden'}`}
             onClick={(e) => {
@@ -137,10 +139,11 @@ const EntityList = <T,>({
             allowClear
             enterButton
             placeholder={`${t('common.search')}...`}
-            style={{width: '350px'}}
+            className="w-60"
             onSearch={handleSearch}
           />
         </Space.Compact>
+        {operateSection && <>{operateSection}</>}
       </div>
       {loading ? (
         <div className="min-h-[300px] flex items-center justify-center">
