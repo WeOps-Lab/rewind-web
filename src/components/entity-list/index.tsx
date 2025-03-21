@@ -95,7 +95,7 @@ const EntityList = <T,>({
         {tagList && tagList.length > 0 && (
           <div className="mt-2">
             {tagList.map((t: any, idx: number) => (
-              <Tag key={idx} className="mr-1 font-mini">
+              <Tag key={idx} className="mr-1 mb-1 font-mini">
                 {t}
               </Tag>
             ))}
