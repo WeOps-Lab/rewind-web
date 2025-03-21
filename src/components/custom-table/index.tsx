@@ -228,6 +228,7 @@ const CustomTable = <T extends object>({
       </div>)}
       {fieldSetting.showSetting ? (
         <SettingFilled
+          style={{ top: size === 'small' ? 12 : size === 'middle' ? 16 : 20 }}
           className={customTableStyle.setting}
           onClick={showFieldSetting}
         />

@@ -23,10 +23,16 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  
+  @mixin scrollContent {
+    height: calc(54vh - 160px); ;
+    overflow-y: auto;
+  }
 
   .rightSide {
     background: var(--color-fill-1);
     overflow-y: auto;
+    @include scrollContent;
 
     .fieldItem {
       background: var(--color-bg-1);
@@ -70,6 +76,7 @@
   }
 
   .leftSide {
+    @include scrollContent;
     .fieldLabel {
       @include hide-text;
       width: 130px;
