@@ -42,7 +42,7 @@ const ToolListPage: React.FC = () => {
 
       const tools = data.map((tool: any) => ({
         ...tool,
-        icon: tool.icon || 'duckduckgo1',
+        icon: tool.icon || 'gongjuji',
         tags: tool.tags,
         tagList: tool.tags.map((key: string) => t(`tool.${key}`))
       }));
@@ -64,6 +64,7 @@ const ToolListPage: React.FC = () => {
           setConfirmLoading(true);
           const queryParams = {
             ...values,
+            icon: 'gongjuji',
             params: {
               name: values.name,
               url: values.url
