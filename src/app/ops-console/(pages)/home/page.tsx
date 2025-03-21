@@ -1,13 +1,17 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Button, Popover, Skeleton, Form, message, Input } from 'antd';
+import { Button, Popover, Skeleton, Form, message, Input, Tag } from 'antd';
 import dayjs from 'dayjs';
 import Icon from '@/components/icon';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { useClientData } from '@/context/client';
-import { useUserInfoContext } from '@/context/userInfo';
+import { useTheme } from '@/context/theme';
+import { useLocale } from '@/context/locale';
+import { CLIENT_TAGS_MAP } from '@/app/ops-console/constants/client';
 import OperateModal from '@/components/operate-modal'
+import { useUserInfoContext } from '@/context/userInfo';
+
 
 interface CardData {
   name: string;
@@ -24,24 +28,31 @@ const ControlPage = () => {
   const [isPopoverVisible, setIsPopoverVisible] = useState<boolean>(false);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [form] = Form.useForm();
+  const { themeName } = useTheme();
+  const { locale } = useLocale();
   const [overlayBgClass, setOverlayBgClass] = useState<string>('bg-[url(/app/console_bg.jpg)]');
+  const colorOptions = ['blue', 'geekblue', 'purple'];
 
   const isDemoEnv = process.env.NEXT_PUBLIC_IS_DEMO_ENV === 'true';
-  const theme = typeof window !== 'undefined' && localStorage.getItem('theme');
+  const zhlocale = locale === 'zh-CN';
 
   useEffect(() => {
-    const consoleContainer = document.querySelector(".console-container");
+    const consoleContainer = document.querySelector('.console-container');
     if (consoleContainer?.parentElement) {
-      consoleContainer.parentElement.style.padding = "0";
+      consoleContainer.parentElement.style.padding = '0';
     }
   }, []);
 
   useEffect(() => {
-    setOverlayBgClass(theme === 'dark' ? 'bg-[url(/app/console_bg_dark.jpg)]' : 'bg-[url(/app/console_bg.jpg)]');
-  }, [theme]);
+    setOverlayBgClass(themeName === 'dark' ? 'bg-[url(/app/console_bg_dark.jpg)]' : 'bg-[url(/app/console_bg.jpg)]');
+  }, [themeName]);
+
+  const getRandomColor = () => {
+    return colorOptions[Math.floor(Math.random() * colorOptions.length)];
+  }
 
   const handleApplyDemoClick = () => {
-    window.location.href = "https://www.canway.net/apply.html";
+    window.open('https://www.canway.net/apply.html', '_blank');
   };
 
   const handleContactUsClick = () => {
@@ -68,7 +79,7 @@ const ControlPage = () => {
   );
 
   const handleCardClick = (url: string) => {
-    window.open(url, "_blank");
+    window.open(url, '_blank');
   };
 
   const handleOk = async () => {
@@ -110,11 +121,11 @@ const ControlPage = () => {
               <div className="absolute right-4 top-4 flex flex-col text-sm">
                 <div
                   onClick={handleApplyDemoClick}
-                  className="bg-gradient-to-b from-blue-500 tracking-[3px] to-indigo-600 text-white rounded-3xl py-1 shadow-md w-[32px] flex items-center justify-center mb-2 cursor-pointer"
-                  style={{
+                  className={`bg-gradient-to-b from-blue-500 tracking-[3px] to-indigo-600 text-white rounded-3xl shadow-md flex items-center justify-center mb-2 cursor-pointer py-1 ${zhlocale ? 'w-[32px]' : 'px-1'}`}
+                  style={zhlocale ? {
                     writingMode: "vertical-rl",
                     textOrientation: "upright",
-                  }}
+                  } : {}}
                 >
                   {t('opsConsole.freeApply')}
                 </div>
@@ -127,13 +138,13 @@ const ControlPage = () => {
                 >
                   <div
                     onClick={handleContactUsClick}
-                    className="bg-white text-[var(--color-primary)] tracking-[3px]  rounded-3xl shadow-md w-[32px] py-1 flex items-center justify-center cursor-pointer"
-                    style={{
+                    className={`bg-gradient-to-b from-blue-500 tracking-[3px] to-indigo-600 text-white rounded-3xl shadow-md flex items-center justify-center mb-2 cursor-pointer py-1 ${zhlocale ? 'w-[32px]' : 'px-1'}`}
+                    style={zhlocale ? {
                       writingMode: "vertical-rl",
                       textOrientation: "upright",
-                    }}
+                    } : {}}
                   >
-                    <Icon type="lianxiwomen1" className="mb-1" />
+                    <Icon type="lianxiwomen1" className={`${zhlocale ? 'mb-1' : 'mr-1'}`} />
                     {t('opsConsole.contactUs')}
                   </div>
                 </Popover>
@@ -156,7 +167,7 @@ const ControlPage = () => {
             clientData.filter(cardData => cardData.client_id !== "ops-console").map((cardData: CardData, index: number) => (
               <div
                 key={index}
-                className="bg-[var(--color-bg)] p-4 rounded shadow-md flex flex-col justify-between relative h-[230px]"
+                className="bg-[var(--color-bg)] p-4 rounded shadow-md flex flex-col justify-between relative h-[190px]"
                 onClick={() => handleCardClick(cardData.url)}
               >
                 <div className="absolute top-6 right-4">
@@ -173,14 +184,18 @@ const ControlPage = () => {
                   </Button>
                 </div>
                 <div className="flex flex-col items-start">
-                  <Icon type={cardData.client_id} className="text-6xl mb-2" />
-                  <h2 className="text-xl font-bold mb-2">{cardData.name}</h2>
-                  <div className="flex items-center text-xs mb-2 bg-[var(--color-bg-active)] p-1 rounded">
-                    <Icon
-                      type="shezhi"
-                      className="w-6 h-6 mr-1 text-[var(--color-primary)]"
-                    />
-                    <span className="text-[var(--color-text-3)]">50/100</span>
+                  <div className="flex items-center mb-2">
+                    <Icon type={cardData.client_id} className="text-6xl mb-2 mr-2" />
+                    <h2 className="text-xl font-bold mb-2">{cardData.name}</h2>
+                  </div>
+                  <div className="flex items-center flex-wrap">
+                    {
+                      CLIENT_TAGS_MAP[cardData.client_id]?.map((tag: string) => (
+                        <Tag key={tag} color={getRandomColor()} className="mb-1 mr-1 font-mini">
+                          {t(`opsConsole.${tag}`)}
+                        </Tag>
+                      ))
+                    }
                   </div>
                 </div>
                 <p
@@ -213,10 +228,10 @@ const ControlPage = () => {
             name="group_name"
             label={t('opsConsole.group')}
             rules={[
-              { required: true, message: `${t('common.inputMsg')}${('opsConsole.group')}` }
+              { required: true, message: `${t('common.inputMsg')}${t('opsConsole.group')}` }
             ]}
           >
-            <Input placeholder={`${t('common.inputMsg')}${('opsConsole.group')}`} />
+            <Input placeholder={`${t('common.inputMsg')}${t('opsConsole.group')}`} />
           </Form.Item>
         </Form>
       </OperateModal>
