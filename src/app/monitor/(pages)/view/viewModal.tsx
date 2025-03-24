@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Button, Tabs } from 'antd';
 import OperateDrawer from '@/app/monitor/components/operate-drawer';
 import { ModalRef, TabItem } from '@/app/monitor/types';
-import { ChartProps, ViewModalProps, ObectItem } from '@/app/monitor/types/monitor';
+import {
+  ChartProps,
+  ViewModalProps,
+  ObectItem,
+} from '@/app/monitor/types/monitor';
 import { useTranslation } from '@/utils/i18n';
 import MonitorView from './monitorView';
 import MonitorAlarm from './monitorAlarm';
@@ -24,10 +28,10 @@ const ViewModal = forwardRef<ModalRef, ViewModalProps>(
         label: t('monitor.views.monitorView'),
         key: 'monitorView',
       },
-      //   {
-      //     label: t('monitor.views.alertList'),
-      //     key: 'alertList',
-      //   },
+      {
+        label: t('monitor.views.alertList'),
+        key: 'alertList',
+      },
     ];
     const [currentTab, setCurrentTab] = useState<string>('monitorView');
     const rightSlot = (
@@ -38,7 +42,7 @@ const ViewModal = forwardRef<ModalRef, ViewModalProps>(
       >
         {t('monitor.views.viewDashboard')}
       </Button>
-    )
+    );
 
     useImperativeHandle(ref, () => ({
       showModal: ({ title, form }) => {
@@ -60,7 +64,9 @@ const ViewModal = forwardRef<ModalRef, ViewModalProps>(
     };
 
     const linkToDetial = () => {
-      const monitorItem = objects.find((item: ObectItem) => item.id === monitorObject);
+      const monitorItem = objects.find(
+        (item: ObectItem) => item.id === monitorObject
+      );
       const row: any = {
         monitorObjId: monitorObject || '',
         name: monitorName,
@@ -72,7 +78,7 @@ const ViewModal = forwardRef<ModalRef, ViewModalProps>(
       const params = new URLSearchParams(row);
       const targetUrl = `/monitor/view/detail?${params.toString()}`;
       router.push(targetUrl);
-    }
+    };
 
     return (
       <div>
@@ -88,7 +94,12 @@ const ViewModal = forwardRef<ModalRef, ViewModalProps>(
             </div>
           }
         >
-          <Tabs activeKey={currentTab} items={tabs} onChange={changeTab} tabBarExtraContent={rightSlot} />
+          <Tabs
+            activeKey={currentTab}
+            items={tabs}
+            onChange={changeTab}
+            tabBarExtraContent={rightSlot}
+          />
           {currentTab === 'monitorView' ? (
             <MonitorView
               monitorObject={monitorObject}

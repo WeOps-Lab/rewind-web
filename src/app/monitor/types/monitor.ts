@@ -293,6 +293,12 @@ export interface ViewModalProps {
   objects?: ObectItem[];
 }
 
+export interface ViewListProps {
+  objectId: React.Key;
+  objects: ObectItem[];
+  showTab?: boolean;
+}
+
 export interface IntergrationMonitoredObject {
   key: string;
   node_ids: string | string[] | null;
