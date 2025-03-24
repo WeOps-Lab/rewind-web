@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Empty } from 'antd';
+import { Empty, Tooltip as Tip } from 'antd';
 import {
   XAxis,
   YAxis,
@@ -22,15 +22,17 @@ import chartLineStyle from './index.module.scss';
 import dayjs, { Dayjs } from 'dayjs';
 import DimensionFilter from './dimensionFilter';
 import DimensionTable from './dimensionTable';
-import { ChartData, ListItem } from '@/app/monitor/types';
+import { ChartData, ListItem, TableDataItem } from '@/app/monitor/types';
 import { MetricItem, ThresholdField } from '@/app/monitor/types/monitor';
 import { LEVEL_MAP } from '@/app/monitor/constants/monitor';
+import useApiClient from '@/utils/request';
 
 interface LineChartProps {
   data: ChartData[];
   unit?: string;
   metric?: MetricItem;
   threshold?: ThresholdField[];
+  formID?: number,
   showDimensionFilter?: boolean;
   showDimensionTable?: boolean;
   allowSelect?: boolean;
@@ -61,11 +63,13 @@ const LineChart: React.FC<LineChartProps> = ({
   showDimensionFilter = false,
   metric = {},
   threshold = [],
+  formID = null,
   allowSelect = true,
   showDimensionTable = false,
   onXRangeChange,
 }) => {
   const { formatTime } = useFormatTime();
+  const { get } = useApiClient();
   const [startX, setStartX] = useState<number | null>(null);
   const [endX, setEndX] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -73,6 +77,7 @@ const LineChart: React.FC<LineChartProps> = ({
   const [visibleAreas, setVisibleAreas] = useState<string[]>([]);
   const [details, setDetails] = useState<Record<string, any>>({});
   const [hasDimension, setHasDimension] = useState<boolean>(false);
+  const [boxItems, setBoxItems] = useState<TableDataItem[]>([]);
   // 获取数据中的最小和最大时间
   const times = data.map((d) => d.time);
   const minTime = +new Date(Math.min(...times));
@@ -81,6 +86,7 @@ const LineChart: React.FC<LineChartProps> = ({
   useEffect(() => {
     const chartKeys = getChartAreaKeys(data);
     const chartDetails = getDetails(data);
+    if (data.length) getEvent();
     setHasDimension(
       !Object.values(chartDetails || {}).every((item) => !item.length)
     );
@@ -94,6 +100,10 @@ const LineChart: React.FC<LineChartProps> = ({
       ];
     });
   }, [data]);
+
+  useEffect(() => {
+    getEvent()
+  }, [formID]);
 
   useEffect(() => {
     if (!allowSelect) return;
@@ -172,8 +182,63 @@ const LineChart: React.FC<LineChartProps> = ({
     );
   };
 
+  const getEvent = async () => {
+    if (!formID) return;
+    try {
+      const _data = await get(`monitor/api/monitor_event/query/${formID}`, {
+        params: {
+          page: 1,
+          page_size: -1
+        }
+      });
+      const time_intervals: TableDataItem[] = _data.results?.filter((item: any) => {
+        const times = timeToSecond(item.created_at);
+        if (times >= minTime && times <= maxTime) return true;
+        return false;
+      })
+      const intervals = Math.ceil((maxTime - minTime) / 60);
+      const lengths = intervals >= 120 ? 24 : Math.ceil(intervals / 5);
+      const step = Math.ceil(_data.results?.length / lengths);
+      setBoxItems(handleCutArray(cutArray(time_intervals.reverse(), step)));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const cutArray = (array: TableDataItem[], subLength: number) => {
+    let index = 0;
+    const newArr = [];
+    while (index < array.length) {
+      newArr.push(array.slice(index, index += subLength));
+    }
+    return newArr;
+  }
+
+  // 对分割的列表进行数据处理
+  const handleCutArray = (array: TableDataItem[]) => {
+    if (!array) return [];
+    const test = array.map((item) => {
+      return item.sort((prev: TableDataItem, next: TableDataItem) => {
+        let flag = null;
+        if (prev.value > next.value) {
+          flag = 1;
+        } else if (prev.value < next.value) {
+          flag = -1;
+        } else {
+          flag = timeToSecond(prev.created_at) > timeToSecond(next.created_at) ? 1 : -1;
+        }
+        return flag;
+      }).pop();
+    });
+    return test;
+  }
+
+  const timeToSecond = (time: string) => {
+    return Math.floor(new Date(time).getTime() / 1000);
+  };
+
   return (
-    <div className="flex w-full h-full">
+    <div className={`flex w-full h-full ${showDimensionFilter || showDimensionTable ? 'flex-row' : 'flex-col'}`}>
       {!!data.length ? (
         <>
           <ResponsiveContainer className={chartLineStyle.chart}>
@@ -181,7 +246,7 @@ const LineChart: React.FC<LineChartProps> = ({
               data={data}
               margin={{
                 top: 10,
-                right: 0,
+                right: formID ? 20 : 0,
                 left: 0,
                 bottom: 0,
               }}
@@ -208,7 +273,7 @@ const LineChart: React.FC<LineChartProps> = ({
                     <Label
                       value={`${item.value}`}
                       fill={`${LEVEL_MAP[item.level]}`}
-                      position={{ x: 32, y: -5 }}
+                      position="right"
                     ></Label>
                   </ReferenceLine>
                 );
@@ -249,6 +314,15 @@ const LineChart: React.FC<LineChartProps> = ({
               )}
             </AreaChart>
           </ResponsiveContainer>
+          {formID && <div className="flex w-[100%] pl-14 pr-[15px] justify-between">
+            {boxItems?.map((item, index) => {
+              return (
+                <Tip key={index} title={`${formatTime(Date.parse(item.created_at) / 1000, minTime, maxTime)} ${item.value}`}>
+                  <span className="flex-1 mr-1 h-2" style={{ backgroundColor: LEVEL_MAP[item.level] as string }}></span>
+                </Tip>
+              )
+            })}
+          </div>}
           {showDimensionFilter && hasDimension && (
             <DimensionFilter
               data={data}

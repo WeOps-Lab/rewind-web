@@ -68,14 +68,14 @@ const DimensionFilter: React.FC<DimensionFilterProps> = ({
 
   const getTableColumns = () => {
     const _columns: ColumnItem[] = [
-      {
-        title: 'Avg',
-        dataIndex: 'avgValue',
-        key: 'avgValue',
-        width: 70,
-        ellipsis: true,
-        render: (_, { avgValue }) => <>{(avgValue || 0).toFixed(2)}</>,
-      },
+      // {
+      //   title: 'Avg',
+      //   dataIndex: 'avgValue',
+      //   key: 'avgValue',
+      //   width: 70,
+      //   ellipsis: true,
+      //   render: (_, { avgValue }) => <>{(avgValue || 0).toFixed(2)}</>,
+      // },
       {
         title: 'Min',
         dataIndex: 'minValue',
@@ -92,14 +92,14 @@ const DimensionFilter: React.FC<DimensionFilterProps> = ({
         ellipsis: true,
         render: (_, { maxValue }) => <>{(maxValue || 0).toFixed(2)}</>,
       },
-      {
-        title: 'Sum',
-        dataIndex: 'sumValue',
-        key: 'sumValue',
-        width: 70,
-        ellipsis: true,
-        render: (_, { sumValue }) => <>{(sumValue || 0).toFixed(2)}</>,
-      },
+      // {
+      //   title: 'Sum',
+      //   dataIndex: 'sumValue',
+      //   key: 'sumValue',
+      //   width: 70,
+      //   ellipsis: true,
+      //   render: (_, { sumValue }) => <>{(sumValue || 0).toFixed(2)}</>,
+      // },
       {
         title: 'Last',
         dataIndex: 'latestValue',
