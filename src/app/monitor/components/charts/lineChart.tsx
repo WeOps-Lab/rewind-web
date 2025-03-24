@@ -22,9 +22,8 @@ import chartLineStyle from './index.module.scss';
 import dayjs, { Dayjs } from 'dayjs';
 import DimensionFilter from './dimensionFilter';
 import DimensionTable from './dimensionTable';
-import { ChartData, ListItem } from '@/app/monitor/types';
+import { ChartData, ListItem, TableDataItem } from '@/app/monitor/types';
 import { MetricItem, ThresholdField } from '@/app/monitor/types/monitor';
-import { TableDataItem } from '@/app/monitor/types';
 import { LEVEL_MAP } from '@/app/monitor/constants/monitor';
 import useApiClient from '@/utils/request';
 
