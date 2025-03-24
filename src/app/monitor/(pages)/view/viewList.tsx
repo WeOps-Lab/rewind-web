@@ -59,6 +59,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
       dataIndex: 'time',
       key: 'time',
       width: 160,
+      sorter: (a: any, b: any) => a.time - b.time,
       render: (_, { time }) => (
         <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
       ),
@@ -179,6 +180,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
               dataIndex: item.key,
               key: item.key,
               width: 300,
+              sorter: (a: any, b: any) => a[item.key] - b[item.key],
               render: (_: unknown, record: TableDataItem) => (
                 <Progress
                   className="flex"
@@ -198,6 +200,9 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
             dataIndex: item.key,
             key: item.key,
             width: 200,
+            ...(item.type === 'value' ? {
+              sorter: (a: any, b: any) => a[item.key] - b[item.key],
+            } : {}),
             render: (_: unknown, record: TableDataItem) => {
               const color = getEnumColor(target, record[item.key]);
               return (
