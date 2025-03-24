@@ -89,6 +89,7 @@ const Alert: React.FC<ViewModalProps> = ({
       dataIndex: 'title',
       key: 'title',
       width: 120,
+      ellipsis: true,
       render: (_, record) => <>{record.content || '--'}</>,
     },
     {
@@ -195,6 +196,7 @@ const Alert: React.FC<ViewModalProps> = ({
 
   const getParams = () => {
     return {
+      monitor_instance_id: form.instance_id,
       content: searchText,
       page: pagination.current,
       page_size: pagination.pageSize,
