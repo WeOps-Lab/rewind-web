@@ -247,7 +247,7 @@ const LineChart: React.FC<LineChartProps> = ({
               data={data}
               margin={{
                 top: 10,
-                right: 20,
+                right: formID ? 20 : 0,
                 left: 0,
                 bottom: 0,
               }}
@@ -274,9 +274,7 @@ const LineChart: React.FC<LineChartProps> = ({
                     <Label
                       value={`${item.value}`}
                       fill={`${LEVEL_MAP[item.level]}`}
-                      // position={{ x:700, y: -5 }}
-                      position="insideTopRight"
-                      offset={-15}
+                      position="right"
                     ></Label>
                   </ReferenceLine>
                 );
