@@ -66,8 +66,8 @@ const QuotaUsage: React.FC = () => {
         />
       </div>
       <section
-        className="bg-[var(--color-bg)] p-4 rounded-md flex"
-        style={{ height: 'calc(100vh - 235px)' }}
+        className="bg-[var(--color-bg)] p-4 rounded-md flex overflow-auto"
+        style={{ height: 'calc(100vh - 240px)' }}
       >
         <div className="flex-1">
           {loading ? (

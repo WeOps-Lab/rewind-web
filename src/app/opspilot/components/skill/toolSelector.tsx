@@ -31,7 +31,7 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ selectedToolIds, onChange }
       setTools(data.map((tool: { display_name: string; id: string; name: string, icon: string }) => ({
         name: tool.name,
         id: tool.name,
-        icon: tool.icon || 'duckduckgo1'
+        icon: tool.icon || 'gongjuji'
       })));
     } catch (error) {
       console.error(t('common.fetchFailed'), error);

@@ -16,27 +16,27 @@ export const getFormFields = (t: ReturnType<typeof useTranslation>['t'], groups:
       options: [
         {
           value: 'search',
-          label: t('tool.search')
+          label: `${t('tool.search')} ${t('tool.title')}`
         },
         {
           value: 'general',
-          label: t('tool.general')
+          label: `${t('tool.general')} ${t('tool.title')}`
         },
         {
           value: 'maintenance',
-          label: t('tool.maintenance')
+          label: `${t('tool.maintenance')} ${t('tool.title')}`
         },
         {
           value: 'media',
-          label: t('tool.media')
+          label: `${t('tool.media')} ${t('tool.title')}`
         },
         {
           value: 'collaboration',
-          label: t('tool.collaboration')
+          label: `${t('tool.collaboration')} ${t('tool.title')}`
         },
         {
           value: 'other',
-          label: t('tool.other')
+          label: `${t('tool.other')} ${t('tool.title')}`
         }
       ],
       mode: 'multiple',
