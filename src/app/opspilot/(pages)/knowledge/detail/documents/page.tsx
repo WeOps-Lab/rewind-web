@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input, Button, Modal, message, Tag, Tabs, Tooltip, Dropdown, Menu, Space } from 'antd';
-import { PlusOutlined, DeleteOutlined, TrademarkOutlined, SyncOutlined, DownOutlined, MoreOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, TrademarkOutlined, SyncOutlined, DownOutlined } from '@ant-design/icons';
 import { useAuth } from '@/context/auth';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
@@ -13,6 +13,7 @@ import PermissionWrapper from '@/components/permission';
 import SelectSourceModal from './selectSourceModal';
 import { TableData } from '@/app/opspilot/types/knowledge'
 import styles from '@/app/opspilot/styles/common.module.scss'
+import ActionButtons from '@/app/opspilot/components/knowledge/actionButtons';
 
 const { confirm } = Modal;
 const { TabPane } = Tabs;
@@ -110,70 +111,15 @@ const DocumentsPage: React.FC = () => {
       title: t('knowledge.documents.actions'),
       key: 'action',
       render: (_, record) => (
-        <>
-          <Button
-            type='link'
-            className='mr-[10px]'
-            disabled={[0, 4].includes(record.train_status)}
-            onClick={() => handleFile(record, 'preview')}
-          >
-            {t('common.preview')}
-          </Button>
-          <Button
-            type='link'
-            className='mr-[10px]'
-            disabled={[0, 4].includes(record.train_status)}
-            onClick={() => handleFile(record, 'download')}
-          >
-            {t('common.download')}
-          </Button>
-
-          <Dropdown
-            overlay={
-              <Menu className={styles.menuContainer}>
-                <Menu.Item key="set">
-                  <PermissionWrapper requiredPermissions={['Set']}>
-                    <Button
-                      type='link'
-                      disabled={[0, 4].includes(record.train_status)}
-                      onClick={() => handleSetClick(record.id)}
-                    >
-                      {t('common.set')}
-                    </Button>
-                  </PermissionWrapper>
-                </Menu.Item>
-
-                <Menu.Item key="train">
-                  <PermissionWrapper requiredPermissions={['Train']}>
-                    <Button
-                      type='link'
-                      onClick={() => handleTrain([record.id])}
-                      loading={singleTrainLoading[record.id.toString()]}
-                      disabled={[0, 4].includes(record.train_status)}
-                    >
-                      {t('common.train')}
-                    </Button>
-                  </PermissionWrapper>
-                </Menu.Item>
-
-                <Menu.Item key="delete">
-                  <PermissionWrapper requiredPermissions={['Delete']}>
-                    <Button
-                      type='link'
-                      onClick={() => handleDelete([record.id])}
-                      disabled={[0, 4].includes(record.train_status)}
-                    >
-                      {t('common.delete')}
-                    </Button>
-                  </PermissionWrapper>
-                </Menu.Item>
-              </Menu>
-            }
-            trigger={['click']}
-          >
-            <MoreOutlined />
-          </Dropdown>
-        </>
+        <ActionButtons
+          record={record}
+          isFile={activeTabKey === 'file'}
+          singleTrainLoading={singleTrainLoading}
+          onTrain={handleTrain}
+          onDelete={handleDelete}
+          onSet={handleSetClick}
+          onFileAction={handleFile}
+        />
       ),
     }
   ];
