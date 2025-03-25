@@ -9,8 +9,8 @@ const NotPermissionPage = () => {
   return (
     <div className="flex items-center justify-center text-center w-[850px] m-auto">
       <div className="w-1/2 flex flex-col items-start">
-        <h1 className="text-[22px] md:text-[calc(4rem+2vw)] font-mono uppercase font-bold">403</h1>
-        <p className="text-base text-[var(--color-text-3)] mb-10">
+        <h1 className="text-[22px] md:text-[calc(4rem+2vw)] font-mono uppercase font-bold contents">403</h1>
+        <p className="text-base text-[var(--color-text-3)] mb-10 mt-6">
           {t('common.noPermission')}
         </p>
         <Link legacyBehavior href="/" passHref>

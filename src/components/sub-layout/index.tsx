@@ -19,6 +19,7 @@ interface WithSideMenuLayoutProps {
   showSideMenu?: boolean;
   layoutType?: 'sideMenu' | 'segmented';
   taskProgressComponent?: React.ReactNode;
+  pagePathName?: string;
 }
 
 const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
@@ -31,9 +32,11 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   showSideMenu = true,
   layoutType = 'sideMenu',
   taskProgressComponent,
+  pagePathName
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
+  const curRouterName = usePathname();
+  const pathname = pagePathName ?? curRouterName;
   const { menus } = usePermissions();
   const [selectedKey, setSelectedKey] = useState<string>(pathname);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
@@ -66,8 +69,15 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   }, [updateMenuItems]);
 
   useEffect(() => {
-    setSelectedKey(pathname);
-  }, [pathname]);
+    let urlKey: string | undefined = curRouterName;
+    if (pagePathName) {
+      urlKey = menuItems.find(
+        (menu) => menu.url && curRouterName.startsWith(menu.url)
+      )?.url;
+    }
+    setSelectedKey(urlKey as string);
+  }, [curRouterName, menuItems]);
+
 
   const handleSegmentChange = (key: string | number) => {
     router.push(key as string);
@@ -75,30 +85,37 @@ const WithSideMenuLayout: React.FC<WithSideMenuLayoutProps> = ({
   };
 
   return (
-    <div className={`flex grow w-full h-full ${sideMenuStyle.sideMenuLayout}`}>
+    <div className={`flex w-full h-full text-sm ${sideMenuStyle.sideMenuLayout} ${(intro && topSection) ? 'grow' : 'flex-col'}`}>
       {layoutType === 'sideMenu' ? (
         <>
-          {showSideMenu && menuItems.length > 0 && (
-            <SideMenu
-              menuItems={menuItems}
-              showBackButton={showBackButton}
-              showProgress={showProgress}
-              taskProgressComponent={taskProgressComponent}
-              onBackButtonClick={onBackButtonClick}
-            >
-              {intro}
-            </SideMenu>
-          )}
-          <section className="flex-1 flex flex-col overflow-hidden">
-            {topSection && (
-              <div className={`mb-4 w-full rounded-md ${sideMenuStyle.sectionContainer}`}>
-                {topSection}
-              </div>
-            )}
-            <div className={`p-4 flex-1 rounded-md overflow-auto ${sideMenuStyle.sectionContainer} ${sideMenuStyle.sectionContext}`}>
-              {children}
+          {(!intro && topSection) && (
+            <div className="mb-4 w-full rounded-md">
+              {topSection}
             </div>
-          </section>
+          )}
+          <div className="w-full flex grow flex-1 h-full">
+            {showSideMenu && menuItems.length > 0 && (
+              <SideMenu
+                menuItems={menuItems}
+                showBackButton={showBackButton}
+                showProgress={showProgress}
+                taskProgressComponent={taskProgressComponent}
+                onBackButtonClick={onBackButtonClick}
+              >
+                {intro}
+              </SideMenu>
+            )}
+            <section className="flex-1 flex flex-col overflow-hidden">
+              {(intro && topSection) && (
+                <div className={`mb-4 w-full rounded-md ${sideMenuStyle.sectionContainer}`}>
+                  {topSection}
+                </div>
+              )}
+              <div className={`p-4 flex-1 rounded-md overflow-auto ${sideMenuStyle.sectionContainer} ${sideMenuStyle.sectionContext}`}>
+                {children}
+              </div>
+            </section>
+          </div>
         </>
       ) : (
         <div className={`flex flex-col w-full h-full ${sideMenuStyle.segmented}`}>

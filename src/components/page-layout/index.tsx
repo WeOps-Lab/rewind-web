@@ -15,7 +15,7 @@ const CustomLayout: React.FC<CustomLayoutProps> = ({ topSection, leftSection, ri
       <div
         className={`flex w-full overflow-hidden ${topSection ? 'mt-4' : ''}`}
         style={{
-          height: height || (topSection ? 'calc(100vh - 195px)' : 'calc(100vh - 105px)'),
+          height: height || (topSection ? 'calc(100vh - 185px)' : 'calc(100vh - 105px)'),
         }}
       >
         {leftSection && (

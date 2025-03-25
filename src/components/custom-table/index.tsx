@@ -1,20 +1,29 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Table, TableProps, Pagination } from 'antd';
-import { SettingFilled } from '@ant-design/icons';
+import { SettingFilled, HolderOutlined } from '@ant-design/icons';
 import customTableStyle from './index.module.scss';
 import FieldSettingModal from './fieldSettingModal';
-import { ColumnItem } from '@/types/index';
-import { TableCurrentDataSource } from 'antd/es/table/interface';
+import { ColumnItem, GroupFieldItem } from '@/types/index';
+import { TableCurrentDataSource, FilterValue, SorterResult } from 'antd/es/table/interface';
+import { cloneDeep } from 'lodash';
 
 interface CustomTableProps<T>
   extends Omit<TableProps<T>, 'bordered' | 'fieldSetting' | 'onSelectFields'> {
   bordered?: boolean;
+  size?: 'small' | 'middle' | 'large';
   fieldSetting?: {
     showSetting: boolean;
     displayFieldKeys: string[];
     choosableFields: ColumnItem[];
+    groupFields?: GroupFieldItem[];
   };
   onSelectFields?: (fields: string[]) => void;
+  rowDraggable?: boolean;
+  onRowDragEnd?: (
+    targetTableData: TableProps<T>['dataSource'],
+    sourceIndex: number,
+    targetIndex: number
+  ) => void;
 }
 
 interface FieldRef {
@@ -23,6 +32,7 @@ interface FieldRef {
 
 const CustomTable = <T extends object>({
   bordered = false,
+  size = "middle",
   fieldSetting = {
     showSetting: false,
     displayFieldKeys: [],
@@ -33,10 +43,17 @@ const CustomTable = <T extends object>({
   scroll,
   pagination,
   onChange,
+  rowDraggable = false,
+  onRowDragEnd,
   ...TableProps
 }: CustomTableProps<T>) => {
   const fieldRef = useRef<FieldRef>(null);
   const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [filters, setFilters] = useState<Record<string, FilterValue | null>>({});
+  const [sorter, setSorter] = useState<SorterResult<T> | SorterResult<T>[]>({});
+  const [extra, setExtra] = useState<TableCurrentDataSource<T>>();
 
   useEffect(() => {
     const updateTableHeight = () => {
@@ -50,6 +67,24 @@ const CustomTable = <T extends object>({
       window.removeEventListener('resize', updateTableHeight);
     };
   }, [scroll]);
+
+  const renderColumns = useCallback(() => {
+    if (rowDraggable)
+      return [
+        {
+          key: 'sort',
+          align: 'center',
+          width: 30,
+          title: '',
+          dataIndex: 'sort',
+          render: () => (
+            <HolderOutlined className="font-[800] text-[16px] mr-[6px] cursor-move" />
+          ),
+        },
+        ...(TableProps.columns || []),
+      ];
+    return TableProps.columns;
+  }, [TableProps.columns, rowDraggable]);
 
   const parseCalcY = (value: string): number => {
     if (!pagination) return 0;
@@ -84,7 +119,7 @@ const CustomTable = <T extends object>({
     return total + PAGE_HEIGHT + TABLE_HEADER_HEIGHT;
   };
 
-  const showFeildSetting = () => {
+  const showFieldSetting = () => {
     fieldRef.current?.showModal();
   };
 
@@ -95,9 +130,70 @@ const CustomTable = <T extends object>({
     onChange &&
       onChange(
         { current, pageSize },
-        {}, // filters
-        [], // sorter
-        {} as TableCurrentDataSource<T> // extra
+        filters,
+        sorter,
+        extra as TableCurrentDataSource<T>
+      );
+  };
+
+  const handleDragStart = (index: number) => () => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver =
+    (index: number) => (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setHoveredIndex(index);
+    };
+
+  const handleDrop =
+    (index: number) => (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const sourceIndex = draggedIndex;
+      const targetIndex = index;
+      setDraggedIndex(null);
+      setHoveredIndex(null);
+
+      if (
+        sourceIndex !== null &&
+        targetIndex !== null &&
+        sourceIndex !== targetIndex
+      ) {
+        const targetTableData = cloneDeep(TableProps.dataSource) as T[];
+        const [movedItem] = targetTableData.splice(sourceIndex, 1);
+        targetTableData.splice(targetIndex, 0, movedItem);
+        onRowDragEnd?.(targetTableData, targetIndex, sourceIndex);
+      }
+    };
+
+  const renderRow = (index: number) => {
+    return {
+      index,
+      draggable: rowDraggable,
+      onDragStart: handleDragStart(index),
+      onDragOver: handleDragOver(index),
+      onDrop: handleDrop(index),
+    };
+  };
+
+  const handleTableChange = (
+    filters: Record<string, FilterValue | null>,
+    sorter: SorterResult<T> | SorterResult<T>[],
+    extra: TableCurrentDataSource<T>
+  ) => {
+    setFilters(filters);
+    setSorter(sorter);
+    setExtra(extra);
+    onChange &&
+      onChange(
+        {
+          total: pagination ? pagination.total : 0,
+          current: pagination ? pagination.current : 1,
+          pageSize: pagination ? pagination.pageSize : 20,
+        },
+        filters,
+        sorter,
+        extra
       );
   };
 
@@ -106,11 +202,20 @@ const CustomTable = <T extends object>({
       className={`relative ${customTableStyle.customTable}`}
       style={{ height: tableHeight ? `${tableHeight}px` : 'auto' }}>
       <Table
+        size={size}
         bordered={bordered}
         scroll={scroll}
         loading={loading}
         pagination={false}
+        rowClassName={(record, index) =>
+          hoveredIndex === index ? 'bg-[var(--ant-table-row-hover-bg)]' : ''
+        }
+        onRow={(record, index) => renderRow(index!)}
         {...TableProps}
+        columns={renderColumns() as TableProps<T>['columns']}
+        onChange={(pageConfig, filters, sorter, extra) =>
+          handleTableChange(filters, sorter, extra)
+        }
       />
       {pagination && !loading && !!pagination.total && (<div className="absolute right-0 bottom-0 flex justify-end">
         <Pagination
@@ -123,14 +228,16 @@ const CustomTable = <T extends object>({
       </div>)}
       {fieldSetting.showSetting ? (
         <SettingFilled
+          style={{ top: size === 'small' ? 12 : size === 'middle' ? 16 : 20 }}
           className={customTableStyle.setting}
-          onClick={showFeildSetting}
+          onClick={showFieldSetting}
         />
       ) : null}
       <FieldSettingModal
         ref={fieldRef}
         choosableFields={fieldSetting.choosableFields || []}
         displayFieldKeys={fieldSetting.displayFieldKeys}
+        groupFields={fieldSetting.groupFields}
         onConfirm={onSelectFields}
       />
     </div>

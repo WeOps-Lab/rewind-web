@@ -75,6 +75,8 @@
 
   --color-primary-bg: var(--color-bg);
   --color-modal-header-color: #f5f8ff;
+  --color-bg-image-gradient-1: #e3e8ff;
+  --color-bg-image-gradient-2: #f9fafb;
 
   --ant-dropdown-padding-block: 5px;
   --ant-popover-inner-padding: 12px;
@@ -127,6 +129,8 @@
 
   --color-primary-bg: var(--color-secondary);
   --color-modal-header-color: var(--color-bg-2);
+  --color-bg-image-gradient-1: #2e313a;
+  --color-bg-image-gradient-2: #161719;
 }
 
 body {
@@ -260,6 +264,10 @@ html:not(.dark) body {
 
 .ant-dropdown {
   z-index: 10000;
+}
+
+.font-mini {
+  font-size: 10px;
 }
 
 @keyframes rt {

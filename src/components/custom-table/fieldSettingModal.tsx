@@ -6,7 +6,7 @@ import type { CheckboxProps } from 'antd';
 import fieldSettingModalStyle from './index.module.scss';
 import { HolderOutlined, CloseOutlined } from '@ant-design/icons';
 import { cloneDeep } from 'lodash';
-import { ColumnItem } from '@/types/index';
+import { ColumnItem, GroupFieldItem } from '@/types/index';
 
 interface DragItem {
   index: number;
@@ -17,6 +17,7 @@ interface FieldModalProps {
   onConfirm: (fieldKeys: string[]) => void;
   choosableFields: ColumnItem[];
   displayFieldKeys: string[];
+  groupFields?: GroupFieldItem[];
 }
 
 export interface FieldModalRef {
@@ -24,14 +25,14 @@ export interface FieldModalRef {
 }
 
 const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
-  ({ onConfirm, choosableFields, displayFieldKeys }, ref) => {
+  ({ onConfirm, choosableFields, displayFieldKeys, groupFields }, ref) => {
     const { t } = useTranslation();
     const [title, setTitle] = useState<string>('');
     const [visible, setVisible] = useState<boolean>(false);
     const [checkedFields, setCheckedFields] = useState<string[]>(
       choosableFields.map((field) => field.key)
     );
-    const [dragFields, setDragFields] = useState(choosableFields);
+    const [dragFields, setDragFields] = useState<ColumnItem[]>([]);
     const [dragItem, setDragItem] = useState<DragItem | null>(null);
     const [dragOverItem, setDragOverItem] = useState<DragItem | null>(null);
     const checkAll = choosableFields.length === checkedFields.length;
@@ -58,11 +59,14 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
     // 单选
     const handleCheckboxChange = (checkedValues: string[]) => {
       setCheckedFields(checkedValues);
-      setDragFields(
-        choosableFields.filter((item: ColumnItem) =>
-          checkedValues.includes(item.key)
-        )
-      );
+      const fields: ColumnItem[] = [];
+      checkedValues.forEach((key) => {
+        const target = choosableFields.find((field) => field.key === key);
+        if (target) {
+          fields.push(target);
+        }
+      });
+      setDragFields(fields);
     };
 
     // 清空某项
@@ -114,10 +118,28 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
       setDragFields(newItems);
     };
 
+    const renderCheckBox = (fields: ColumnItem[]) => {
+      return fields.map((field) => (
+        <Checkbox
+          className="w-[160px] mb-[10px]"
+          key={field.key}
+          value={field.key}
+        >
+          <span
+            title={field.title}
+            className={fieldSettingModalStyle.fieldLabel}
+          >
+            {field.title}
+          </span>
+        </Checkbox>
+      ));
+    };
+
     return (
       <OperateModal
         visible={visible}
         title={title}
+        width={600}
         onCancel={handleCancel}
         footer={
           <div>
@@ -134,10 +156,12 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
         }
       >
         <div className={`${fieldSettingModalStyle.settingFields} flex`}>
-          <div className="w-1/2 p-4 border-r">
+          <div
+            className={`${fieldSettingModalStyle.leftSide} w-2/3 p-4 border-r`}
+          >
             <div>
               <Checkbox
-                className="mb-[20px]"
+                className="mb-[10px]"
                 indeterminate={indeterminate}
                 onChange={onCheckAllChange}
                 checked={checkAll}
@@ -145,21 +169,30 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
                 {t('common.selectAll')}
               </Checkbox>
             </div>
-            <Checkbox.Group
-              value={checkedFields}
-              onChange={handleCheckboxChange}
-            >
-              <div className="flex flex-col space-y-2">
-                {choosableFields.map((field) => (
-                  <Checkbox key={field.key} value={field.key}>
-                    {field.title}
-                  </Checkbox>
-                ))}
-              </div>
-            </Checkbox.Group>
+            <div className={fieldSettingModalStyle.scrollContent}>
+              <Checkbox.Group
+                value={checkedFields}
+                onChange={handleCheckboxChange}
+              >
+                {groupFields?.length ? (
+                  groupFields.map((item) => (
+                    <div key={item.key}>
+                      <div className="font-bold mb-[10px]">{item.title}</div>
+                      <div className="flex items-center flex-wrap">
+                        {renderCheckBox(item.child)}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center flex-wrap">
+                    {renderCheckBox(choosableFields)}
+                  </div>
+                )}
+              </Checkbox.Group>
+            </div>
           </div>
           {/* 右侧拖拽列表 */}
-          <div className={`${fieldSettingModalStyle.rightSide} w-1/2 p-4`}>
+          <div className={`${fieldSettingModalStyle.rightSide} w-1/3 p-4`}>
             <div className="flex justify-between items-center">
               <span>
                 {t('common.selected')}(
@@ -172,7 +205,7 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
                 {t('common.clear')}
               </Button>
             </div>
-            <div className="mt-4">
+            <div className={`mt-2 ${fieldSettingModalStyle.scrollContent}`}>
               {dragFields
                 .filter((field) => checkedFields.includes(field.key))
                 .map((field, index) => (
@@ -197,7 +230,12 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
                     <HolderOutlined
                       className={`mr-[4px] ${fieldSettingModalStyle.dragTrigger}`}
                     />
-                    {field.title}
+                    <span
+                      className={fieldSettingModalStyle.dragLabel}
+                      title={field.title}
+                    >
+                      {field.title}
+                    </span>
                     <CloseOutlined
                       className={fieldSettingModalStyle.clearItem}
                       onClick={() => clearCheckedItem(field.key)}
