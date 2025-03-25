@@ -1,7 +1,7 @@
 {
   "zh": [
     {
-      "title": "机器人",
+      "title": "工作台",
       "icon": "jiqiren2",
       "url": "/opspilot/studio",
       "name": "bot_list",
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "title": "技能",
+      "title": "智能体",
       "icon": "weibiaoti3",
       "url": "/opspilot/skill",
       "name": "skill_list",
@@ -121,7 +121,7 @@
       "name": "tool_list"
     },
     {
-      "title": "提供",
+      "title": "模型",
       "icon": "moxing2",
       "url": "/opspilot/provider",
       "name": "provide_list"
@@ -187,7 +187,7 @@
       ]
     },
     {
-      "title": "Skill",
+      "title": "Agentix",
       "icon": "weibiaoti3",
       "url": "/opspilot/skill",
       "name": "skill_list",
@@ -281,7 +281,7 @@
       "name": "tool_list"
     },
     {
-      "title": "Provider",
+      "title": "Model",
       "icon": "moxing2",
       "url": "/opspilot/provider",
       "name": "provide_list"

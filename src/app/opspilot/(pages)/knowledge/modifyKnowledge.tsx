@@ -87,7 +87,7 @@ const ModifyKnowledgeModal: React.FC<ModifyKnowledgeModalProps> = ({ visible, on
     <>
       <OperateModal
         visible={visible}
-        title={initialValues ? t('knowledge.edit') : t('knowledge.add')}
+        title={initialValues ? t('common.edit') : t('common.add')}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
         onCancel={onCancel}

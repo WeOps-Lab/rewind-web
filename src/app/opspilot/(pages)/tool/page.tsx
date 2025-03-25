@@ -174,7 +174,7 @@ const ToolListPage: React.FC = () => {
         changeFilter={changeFilter}
       />
       <OperateModal
-        title={selectedTool ? `${t('common.edit')}${selectedTool.name}` : `${t('tool.addTool')}`}
+        title={selectedTool ? `${t('common.edit')}` : `${t('common.add')}`}
         visible={isModalVisible}
         confirmLoading={confirmLoading}
         onOk={handleOk}

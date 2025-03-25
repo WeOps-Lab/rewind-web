@@ -46,7 +46,7 @@ const GenericModifyModal: React.FC<GenericModifyModalProps> = ({ visible, onCanc
   return (
     <OperateModal
       visible={visible}
-      title={initialValues ? t(`${formType}.edit`) : t(`${formType}.add`)}
+      title={initialValues ? t('common.edit') : t('common.add')}
       okText={t('common.confirm')}
       cancelText={t('common.cancel')}
       onCancel={onCancel}
