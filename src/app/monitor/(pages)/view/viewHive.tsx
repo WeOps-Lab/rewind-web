@@ -1,52 +1,149 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
-import { Input } from 'antd';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
-import { ViewListProps } from '@/app/monitor/types/monitor';
-import { Pagination, TableDataItem } from '@/app/monitor/types';
+import { MetricItem, ViewListProps } from '@/app/monitor/types/monitor';
+import { Pagination, TableDataItem, HexagonData } from '@/app/monitor/types';
 import TimeSelector from '@/components/time-selector';
 import HexGridChart from '@/app/monitor/components/charts/hexgrid';
+import { EditOutlined } from '@ant-design/icons';
+import {
+  getK8SData,
+  getEnumColor,
+  getEnumValueUnit,
+} from '@/app/monitor/utils/common';
+import { INDEX_CONFIG } from '@/app/monitor/constants/monitor';
+import { Select, Spin } from 'antd';
+import { ListItem } from '@/types';
+const { Option } = Select;
+
+const HEXAGON_AREA = 6400; // 格子的面积
 
 const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
-  const { get, isLoading } = useApiClient();
+  const { get, post, isLoading } = useApiClient();
   const { t } = useTranslation();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const [searchText, setSearchText] = useState<string>('');
+  const hexGridRef = useRef<HTMLDivElement>(null);
+  const isFetchingRef = useRef<boolean>(false); // 用于标记是否正在加载数据
   const [tableLoading, setTableLoading] = useState<boolean>(false);
-  const [chartData, setChartData] = useState<TableDataItem[]>([]);
+  const [chartData, setChartData] = useState<HexagonData[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     current: 1,
     total: 0,
-    pageSize: 20,
+    pageSize: 60, // 默认值
   });
   const [frequence, setFrequence] = useState<number>(0);
+  const [queryData, setQueryData] = useState<any[]>([]);
+  const [mertics, setMertics] = useState<MetricItem[]>([]);
+  const [colony, setColony] = useState<string | null>(null);
+  const [namespace, setNameSpace] = useState<string | null>(null);
+  const [workload, setWorkload] = useState<string | null>(null);
+  const [node, setNode] = useState<string | null>(null);
+  const [queryMetric, setQueryMetric] = useState<string | null>(null);
 
+  const namespaceList = useMemo(() => {
+    if (queryData.length && colony) {
+      return queryData.find((item) => item.id === colony)?.child || [];
+    }
+    return [];
+  }, [colony, queryData]);
+
+  const workloadList = useMemo(() => {
+    if (namespaceList.length && namespace) {
+      return (
+        (
+          namespaceList.find((item: ListItem) => item.id === namespace)
+            ?.child || []
+        ).filter((item: ListItem) => item.id === 'workload')[0]?.child || []
+      );
+    }
+    return [];
+  }, [namespaceList, namespace]);
+
+  const nodeList = useMemo(() => {
+    if (namespaceList.length && namespace) {
+      return (
+        (
+          namespaceList.find((item: ListItem) => item.id === namespace)
+            ?.child || []
+        ).filter((item: ListItem) => item.id === 'node')[0]?.child || []
+      );
+    }
+    return [];
+  }, [namespaceList, namespace]);
+
+  const metricList = useMemo(() => {
+    if (objectId && objects?.length && mertics?.length) {
+      const objName = objects.find((item) => item.id === objectId)?.name;
+      if (objName) {
+        const filterMetrics =
+          INDEX_CONFIG.find((item) => item.name === objName)?.tableDiaplay ||
+          [];
+        return mertics.filter((metric) =>
+          filterMetrics.find((item) => item.key === metric.name)
+        );
+      }
+    }
+    return [];
+  }, [mertics]);
+
+  const isPod = useMemo(() => {
+    return objects.find((item) => item.id === objectId)?.name === 'Pod';
+  }, [objects, objectId]);
+
+  // 动态设置 pageSize
+  useEffect(() => {
+    const updatePageSize = () => {
+      if (!hexGridRef.current) return;
+      const viewportWidth = hexGridRef.current.clientWidth - 44;
+      const viewportHeight = hexGridRef.current.clientHeight;
+      const calculatedPageSize = Math.floor(
+        (viewportWidth * viewportHeight) / HEXAGON_AREA
+      );
+      setPagination((prev: Pagination) => ({
+        ...prev,
+        pageSize: calculatedPageSize,
+      }));
+    };
+    updatePageSize();
+    window.addEventListener('resize', updatePageSize);
+    return () => {
+      window.removeEventListener('resize', updatePageSize);
+    };
+  }, []);
+
+  // 页面初始化请求
   useEffect(() => {
     if (isLoading) return;
     if (objectId && objects?.length) {
-      setChartData([]);
-      setPagination((prev: Pagination) => ({
-        ...prev,
-        current: 1,
-      }));
-      getInitData();
+      const objName = objects.find((item) => item.id === objectId)?.name;
+      if (objName) {
+        getInitData(objName);
+      }
     }
   }, [objectId, objects, isLoading]);
 
+  // 条件过滤请求
   useEffect(() => {
     if (objectId && objects?.length && !isLoading) {
       onRefresh();
     }
-  }, [pagination.current, pagination.pageSize]);
+  }, [colony, namespace, workload, node]);
 
+  // 更新与销毁定时器
   useEffect(() => {
     if (!frequence) {
       clearTimer();
       return;
     }
     timerRef.current = setInterval(() => {
-      getAssetInsts(objectId, 'timer');
+      getAssetInsts('timer');
     }, frequence);
     return () => {
       clearTimer();
@@ -54,35 +151,140 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   }, [
     frequence,
     objectId,
+    colony,
+    namespace,
+    workload,
+    node,
     pagination.current,
     pagination.pageSize,
-    searchText,
   ]);
 
-  const getInitData = async () => {
-    const params = {
+  // 加载更多节流
+  useEffect(() => {
+    if (!tableLoading) {
+      isFetchingRef.current = false;
+    }
+  }, [tableLoading]);
+
+  const handleScroll = useCallback(() => {
+    if (!hexGridRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = hexGridRef.current;
+    // 判断是否接近底部
+    if (
+      scrollTop + clientHeight >= scrollHeight - 10 &&
+      !tableLoading &&
+      !isFetchingRef.current
+    ) {
+      if (
+        pagination.current * pagination.pageSize < pagination.total &&
+        chartData.length < pagination.total
+      ) {
+        isFetchingRef.current = true; // 设置标志位，表示正在加载
+        setPagination((prev) => ({
+          ...prev,
+          current: prev.current + 1,
+        }));
+        getAssetInsts('more');
+      }
+    }
+  }, [pagination, chartData]);
+
+  const handleColonyChange = (id: string) => {
+    setColony(id);
+    setNameSpace(null);
+    setWorkload(null);
+    setNode(null);
+    setChartData([]);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
+  const handleNameSpaceChange = (id: string) => {
+    setNameSpace(id);
+    setWorkload(null);
+    setNode(null);
+    setChartData([]);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
+  const handleWorkloadChange = (id: string) => {
+    setWorkload(id);
+    setChartData([]);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
+  const handleNodeChange = (id: string) => {
+    setNode(id);
+    setChartData([]);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
+  const handleQueryMetricChange = (id: string) => {
+    setQueryMetric(id);
+  };
+
+  const getParams = () => {
+    return {
       page: pagination.current,
       page_size: pagination.pageSize,
       add_metrics: true,
-      name: searchText,
+      name: '',
+      vm_params: {
+        instance_id: colony || '',
+        namespace: namespace || '',
+        node: node || '',
+        created_by_kind: workload || '',
+        created_by_name:
+          workloadList.find(
+            (item: TableDataItem) => item.created_by_kind === workload
+          )?.created_by_name || '',
+      },
     };
+  };
+
+  const getInitData = async (name: string) => {
+    const params = getParams();
     const objParams = {
       monitor_object_id: objectId,
     };
-
-    const getInstList = get(`/monitor/api/monitor_instance/${objectId}/list/`, {
-      params,
-    });
-    const getMetrics = get('/monitor/api/metrics/', {
-      params: objParams,
-    });
-    const getPlugins = get('/monitor/api/monitor_plugin/', {
-      params: objParams,
-    });
+    const getInstList = post(
+      `/monitor/api/monitor_instance/${objectId}/search/`,
+      params
+    );
+    const getQueryParams = get(
+      `/monitor/api/monitor_instance/query_params_enum/${name}/`,
+      {
+        params: objParams,
+      }
+    );
     setTableLoading(true);
     try {
-      const res = await Promise.all([getInstList, getMetrics, getPlugins]);
-      console.log(res, tableLoading, chartData);
+      const metricsData = await get('/monitor/api/metrics/', {
+        params: objParams,
+      });
+      setMertics(metricsData || []);
+      const res = await Promise.all([getInstList, getQueryParams]);
+      const k8sQuery = res[1];
+      const queryForm = isPod
+        ? getK8SData(k8sQuery || {})
+        : (k8sQuery || []).map((item: string) => ({ id: item, child: [] }));
+      setQueryData(queryForm);
+      setChartData(dealChartData(res[0]?.results || [], metricsData));
+      setPagination((prev: Pagination) => ({
+        ...prev,
+        total: res[0]?.count || 0,
+      }));
     } catch (error) {
       console.log(error);
     } finally {
@@ -90,34 +292,62 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     }
   };
 
+  const dealChartData = (data: TableDataItem, metricsData = metricList) => {
+    const chartList = data.map((item: TableDataItem) => {
+      const metricName = isPod ? 'pod_status' : 'node_status_condition';
+      const tagetMerticItem = metricsData.find(
+        (item) => item.name === metricName
+      );
+      if (tagetMerticItem) {
+        return {
+          name: '',
+          description: (
+            <>
+              <div>{item.instance_name}</div>
+              {`${tagetMerticItem.display_name}: ${getEnumValueUnit(tagetMerticItem, item[metricName])}`}
+            </>
+          ),
+          fill:
+            getEnumColor(tagetMerticItem, item[metricName]) ||
+            'var(--color-primary)',
+        };
+      }
+      return {
+        name: '',
+        description: item.instance_name,
+        fill: 'var(--color-primary)',
+      };
+    });
+    return chartList;
+  };
+
   const clearTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = null;
   };
 
-  const getAssetInsts = async (objectId: React.Key, type?: string) => {
-    const params = {
-      page: pagination.current,
-      page_size: pagination.pageSize,
-      add_metrics: true,
-      name: searchText,
-    };
-    if (type === 'clear') {
-      params.name = '';
+  const getAssetInsts = async (type?: string) => {
+    const params = getParams();
+    if (type === 'refresh') {
+      params.page = 1;
+    }
+    if (type === 'more') {
+      params.page = params.page + 1;
     }
     try {
       setTableLoading(type !== 'timer');
-      const data = await get(
-        `/monitor/api/monitor_instance/${objectId}/list/`,
-        {
-          params,
-        }
+      const data = await post(
+        `/monitor/api/monitor_instance/${objectId}/search/`,
+        params
       );
-      setChartData(data.results || []);
+      const chartList = dealChartData(data.results || []);
       setPagination((prev: Pagination) => ({
         ...prev,
         total: data.count || 0,
       }));
+      setChartData((prev: any) =>
+        type === 'more' ? [...prev, ...chartList] : chartList
+      );
     } finally {
       setTableLoading(false);
     }
@@ -128,953 +358,115 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   };
 
   const onRefresh = () => {
-    getAssetInsts(objectId);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+    setChartData([]);
+    getAssetInsts('refresh');
   };
-
-  const clearText = () => {
-    setSearchText('');
-    getAssetInsts(objectId, 'clear');
-  };
-
-  const onLoadMore = ()=>{
-    console.log(123)
-  }
 
   return (
     <div className="w-full h-[calc(100vh-216px)]">
-      <div className="flex justify-between mb-[10px]">
-        <div className="flex items-center">
-          <Input
+      <div className="flex justify-between flex-wrap">
+        <div className="flex items-center mb-[20px]">
+          <span className="text-[14px] mr-[10px]">
+            {t('monitor.views.filterOptions')}
+          </span>
+          <Select
+            value={colony}
             allowClear
-            className="w-[320px]"
-            placeholder={t('common.searchPlaceHolder')}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            onPressEnter={onRefresh}
-            onClear={clearText}
-          ></Input>
+            style={{ width: 120 }}
+            placeholder={t('monitor.views.colony')}
+            onChange={handleColonyChange}
+          >
+            {queryData.map((item) => (
+              <Option key={item.id} value={item.id}>
+                {item.id}
+              </Option>
+            ))}
+          </Select>
+          {isPod && (
+            <>
+              <Select
+                value={namespace}
+                allowClear
+                className="mx-[10px]"
+                style={{ width: 120 }}
+                placeholder={t('monitor.views.namespace')}
+                onChange={handleNameSpaceChange}
+              >
+                {namespaceList.map((item: ListItem) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.id}
+                  </Option>
+                ))}
+              </Select>
+              <Select
+                value={workload}
+                allowClear
+                className="mr-[10px]"
+                style={{ width: 120 }}
+                placeholder={t('monitor.views.workload')}
+                onChange={handleWorkloadChange}
+              >
+                {workloadList.map((item: TableDataItem, index: number) => (
+                  <Option key={index} value={item.created_by_kind}>
+                    {item.created_by_name}
+                  </Option>
+                ))}
+              </Select>
+              <Select
+                value={node}
+                allowClear
+                style={{ width: 120 }}
+                placeholder={t('monitor.views.node')}
+                onChange={handleNodeChange}
+              >
+                {nodeList.map((item: string, index: number) => (
+                  <Option key={index} value={item}>
+                    {item}
+                  </Option>
+                ))}
+              </Select>
+            </>
+          )}
         </div>
-        <TimeSelector
-          onlyRefresh
-          onFrequenceChange={onFrequenceChange}
-          onRefresh={onRefresh}
-        />
+        <div className="flex items-center mb-[20px]">
+          <div className="mr-[10px]">
+            <span className="text-[14px] mr-[10px]">
+              {t('monitor.views.displayIndicators')}
+            </span>
+            <Select
+              value={queryMetric}
+              style={{ width: 120 }}
+              placeholder={t('monitor.views.editIndicators')}
+              onChange={handleQueryMetricChange}
+            >
+              {metricList.map((item: MetricItem, index: number) => (
+                <Option key={index} value={item.name}>
+                  {item.display_name}
+                </Option>
+              ))}
+            </Select>
+            <EditOutlined className="ml-[10px] cursor-pointer" />
+          </div>
+          <TimeSelector
+            onlyRefresh
+            onFrequenceChange={onFrequenceChange}
+            onRefresh={onRefresh}
+          />
+        </div>
       </div>
-      <HexGridChart
-        data={[
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 2',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 3',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 4',
-            description: '这是六边形 2 的详细描述。',
-            fill: '#2196F3',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-          {
-            name: 'Hex 1',
-            description: '这是六边形 1 的详细描述。',
-            fill: '#4CAF50',
-          },
-        ]}
-        onLoadMore={onLoadMore}
-      ></HexGridChart>
+      <div
+        className="w-full h-full overflow-hidden overflow-y-auto"
+        ref={hexGridRef}
+        onScroll={handleScroll}
+      >
+        <Spin spinning={tableLoading} className="w-full h-full">
+          <HexGridChart data={chartData}></HexGridChart>
+        </Spin>
+      </div>
     </div>
   );
 };

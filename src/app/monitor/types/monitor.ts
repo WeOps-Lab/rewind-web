@@ -333,3 +333,7 @@ export interface ChannelItem {
   id: number;
   name: string;
 }
+export interface NodeWorkload {
+  created_by_kind: string;
+  created_by_name: string;
+}

@@ -1,8 +1,7 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Segmented } from 'antd';
-// import { ApartmentOutlined, BarsOutlined } from '@ant-design/icons';
-import { BarsOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, BarsOutlined } from '@ant-design/icons';
 import useApiClient from '@/utils/request';
 import { deepClone } from '@/app/monitor/utils/common';
 import { ObectItem } from '@/app/monitor/types/monitor';
@@ -96,7 +95,7 @@ const Intergration = () => {
             className="mb-[16px]"
             options={[
               { value: 'list', icon: <BarsOutlined /> },
-              //   { value: 'view', icon: <ApartmentOutlined /> },
+              { value: 'view', icon: <ApartmentOutlined /> },
             ]}
             value={displayType}
             onChange={onDisplayTypeChange}

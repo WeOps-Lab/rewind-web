@@ -195,7 +195,14 @@
       "metrics": "Metrics",
       "monitorView": "Monitoring View",
       "alertList": "Alarm List",
-      "viewDashboard": "View DashBoard"
+      "viewDashboard": "View DashBoard",
+      "colony": "Colony",
+      "namespace": "Namespace",
+      "workload": "Workload",
+      "node": "Node",
+      "filterOptions": "Filter options",
+      "displayIndicators": "Displayed indicators",
+      "editIndicators": "Click to edit"
     },
     "events": {
       "event": "Event",

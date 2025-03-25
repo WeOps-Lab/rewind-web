@@ -195,7 +195,14 @@
       "metrics": "全量指标",
       "monitorView": "监控视图",
       "alertList": "告警列表",
-      "viewDashboard": "查看仪表盘"
+      "viewDashboard": "查看仪表盘",
+      "colony": "集群",
+      "namespace": "命名空间",
+      "workload": "工作负载",
+      "node": "节点",
+      "filterOptions": "过滤项",
+      "displayIndicators": "展示指标",
+      "editIndicators": "点击编辑"
     },
     "events": {
       "event": "事件",

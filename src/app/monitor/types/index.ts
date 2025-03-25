@@ -126,3 +126,9 @@ export interface ViewQueryKeyValuePairs {
 export interface ModalProps {
   onSuccess: () => void;
 }
+
+export interface HexagonData {
+  name: string;
+  description: React.ReactNode | string;
+  fill: string;
+}

@@ -13,6 +13,7 @@ import {
   MetricItem,
   ChartDataItem,
   ChartProps,
+  NodeWorkload,
 } from '@/app/monitor/types/monitor';
 import { UNIT_LIST, APPOINT_METRIC_IDS } from '@/app/monitor/constants/monitor';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
@@ -311,7 +312,7 @@ export const getEnumValue = (metric: MetricItem, id: number | string) => {
 
 // 根据指标枚举获取颜色值
 export const getEnumColor = (metric: MetricItem, id: number | string) => {
-  const { unit: input = '', } = metric || {};
+  const { unit: input = '' } = metric || {};
   if (isStringArray(input)) {
     return (
       JSON.parse(input).find((item: ListItem) => item.id === +id)?.color || ''
@@ -470,4 +471,34 @@ export const findTreeParentKey = (
   };
   loop(treeData, null); // 初始父节点为 null
   return parentKey;
+};
+
+export const getK8SData = (
+  data: Record<
+    string,
+    Record<string, { node: string[]; workload: NodeWorkload[] }>
+  >
+) => {
+  let result = [];
+  try {
+    result = Object.entries(data).map(([key, value]) => ({
+      id: key,
+      child: Object.entries(value).map(([innerKey, innerValue]) => ({
+        id: innerKey,
+        child: [
+          {
+            id: 'node',
+            child: innerValue.node,
+          },
+          {
+            id: 'workload',
+            child: innerValue.workload,
+          },
+        ],
+      })),
+    }));
+  } catch {
+    return [];
+  }
+  return result;
 };

@@ -6,19 +6,13 @@ import React, {
   useMemo,
 } from 'react';
 import { Tooltip } from 'antd';
-
-interface HexagonData {
-  name: string;
-  description: string;
-  fill: string;
-}
+import { HexagonData } from '@/app/monitor/types';
 
 interface HexGridProps {
   data: HexagonData[];
-  onLoadMore?: () => void;
 }
 
-const HexGrid: React.FC<HexGridProps> = ({ data, onLoadMore }) => {
+const HexGrid: React.FC<HexGridProps> = ({ data }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hexPerRow, setHexPerRow] = useState(0); // 每行六边形数量
 
@@ -30,15 +24,6 @@ const HexGrid: React.FC<HexGridProps> = ({ data, onLoadMore }) => {
     setHexPerRow(Math.floor(containerWidth / hexWidth));
   }, []);
 
-  // 处理滚动加载
-  const handleScroll = useCallback(() => {
-    if (!containerRef.current || !onLoadMore) return;
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    if (scrollHeight - scrollTop - clientHeight < 20) {
-      onLoadMore();
-    }
-  }, [onLoadMore]);
-
   // 监听容器大小变化
   useEffect(() => {
     const container = containerRef.current;
@@ -48,12 +33,10 @@ const HexGrid: React.FC<HexGridProps> = ({ data, onLoadMore }) => {
       calculateItemsPerRow();
     });
     resizeObserver.observe(container);
-    container.addEventListener('scroll', handleScroll);
     return () => {
       resizeObserver.disconnect();
-      container.removeEventListener('scroll', handleScroll);
     };
-  }, [calculateItemsPerRow, handleScroll]);
+  }, [calculateItemsPerRow]);
 
   // 使用 useMemo 缓存 getRows 的结果，避免重复计算
   const rows = useMemo(() => {
@@ -69,7 +52,7 @@ const HexGrid: React.FC<HexGridProps> = ({ data, onLoadMore }) => {
   // 渲染六边形组件
   const renderHexagon = (hex: HexagonData, index: number) => {
     return (
-      <Tooltip key={index} title={<div>{hex.description}</div>} placement="top">
+      <Tooltip key={index} title={hex.description} placement="top">
         <div
           className="w-[80px] h-[80px] flex justify-center items-center"
           style={{
@@ -89,10 +72,7 @@ const HexGrid: React.FC<HexGridProps> = ({ data, onLoadMore }) => {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="overflow-hidden overflow-y-auto h-full flex flex-col items-center pt-2"
-    >
+    <div ref={containerRef} className="h-full flex flex-col items-center pt-2">
       {rows.map((row, rowIndex) => (
         <div
           key={rowIndex}
