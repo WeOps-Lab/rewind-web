@@ -8,10 +8,11 @@ import React, {
 } from 'react';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
-import { MetricItem, ViewListProps } from '@/app/monitor/types/monitor';
-import { Pagination, TableDataItem, HexagonData } from '@/app/monitor/types';
+import { MetricItem, ViewListProps, NodeThresholdColor } from '@/app/monitor/types/monitor';
+import { Pagination, TableDataItem, HexagonData, ModalRef } from '@/app/monitor/types';
 import TimeSelector from '@/components/time-selector';
 import HexGridChart from '@/app/monitor/components/charts/hexgrid';
+import HiveModal from './hiveModal';
 import { EditOutlined } from '@ant-design/icons';
 import {
   getK8SData,
@@ -29,6 +30,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   const { get, post, isLoading } = useApiClient();
   const { t } = useTranslation();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const modalRef = useRef<ModalRef>(null);
   const hexGridRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef<boolean>(false); // 用于标记是否正在加载数据
   const [tableLoading, setTableLoading] = useState<boolean>(false);
@@ -46,6 +48,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   const [workload, setWorkload] = useState<string | null>(null);
   const [node, setNode] = useState<string | null>(null);
   const [queryMetric, setQueryMetric] = useState<string | null>(null);
+  const [hexColor,setHexColor] = useState<NodeThresholdColor[]>([]);
 
   const namespaceList = useMemo(() => {
     if (queryData.length && colony) {
@@ -366,6 +369,21 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     getAssetInsts('refresh');
   };
 
+  const openHiveModal = () => {
+    console.log(metricList);
+    modalRef.current?.showModal({
+      type: '',
+      title: '',
+      form: metricList,
+    });
+  }
+
+  const onConfirm = (metric:string, colors: any) => {
+    setQueryMetric(metric);
+    setHexColor(colors);
+    console.log(hexColor)
+  }
+
   return (
     <div className="w-full h-[calc(100vh-216px)]">
       <div className="flex justify-between flex-wrap">
@@ -438,8 +456,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
               {t('monitor.views.displayIndicators')}
             </span>
             <Select
+              className='text-center'
+              disabled
               value={queryMetric}
               style={{ width: 120 }}
+              suffixIcon={null}
               placeholder={t('monitor.views.editIndicators')}
               onChange={handleQueryMetricChange}
             >
@@ -449,7 +470,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
                 </Option>
               ))}
             </Select>
-            <EditOutlined className="ml-[10px] cursor-pointer" />
+            <EditOutlined className="ml-[10px] cursor-pointer" onClick={openHiveModal} />
           </div>
           <TimeSelector
             onlyRefresh
@@ -467,6 +488,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
           <HexGridChart data={chartData}></HexGridChart>
         </Spin>
       </div>
+      <HiveModal ref={modalRef} onConfirm={onConfirm}/>
     </div>
   );
 };

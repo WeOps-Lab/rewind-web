@@ -254,6 +254,7 @@
       "setFrequency": "请选择检测频率，指示多长时间收集一次监控数据。",
       "algorithm": "算法",
       "threshold": "阈值",
+      "thresholdColor": "阈值配色",
       "setThreshold": "根据监控指标的阈值水平检测值",
       "whenResultIs": "当结果是",
       "recoveryCondition": "当连续",

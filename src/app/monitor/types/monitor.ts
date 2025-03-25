@@ -337,3 +337,9 @@ export interface NodeWorkload {
   created_by_kind: string;
   created_by_name: string;
 }
+
+export interface NodeThresholdColor {
+  name: string,
+  value: number,
+  color: string
+}

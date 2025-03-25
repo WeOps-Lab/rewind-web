@@ -64,6 +64,14 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
         <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
       ),
     },
+    // {
+    //   title: t('monitor.intergrations.reportingStatus'),
+    //   dataIndex: 'status',
+    //   key: 'status',
+    //   width: 160,
+    //   filters: [],
+    //   render: (_, record) => (<>{record?.status ? record.status : '--'}</>),
+    // },
     {
       title: t('common.action'),
       key: 'action',
@@ -338,7 +346,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
         loading={tableLoading}
         rowKey="instance_id"
         fieldSetting={{
-          showSetting: false,
+          showSetting: true,
           displayFieldKeys: [
             'elasticsearch_fs_total_available_in_bytes',
             'instance_name',
