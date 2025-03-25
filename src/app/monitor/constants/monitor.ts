@@ -1303,6 +1303,26 @@ const INDEX_CONFIG = [
       { type: 'value', key: 'redis_instantaneous_ops_per_sec' },
     ],
   },
+  {
+    name: 'Storage',
+    id: 30,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'iftotalInOctets' },
+      { type: 'value', key: 'iftotalOutOctets' },
+      { type: 'value', key: 'sysUpTime' },
+    ],
+  },
+  {
+    name: 'Hardware Server',
+    id: 31,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'iftotalInOctets' },
+      { type: 'value', key: 'iftotalOutOctets' },
+      { type: 'value', key: 'sysUpTime' },
+    ],
+  },
 ];
 
 const SCHEDULE_UNIT_MAP: UnitMap = {
