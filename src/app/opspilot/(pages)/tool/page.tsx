@@ -16,7 +16,7 @@ import styles from '@/app/opspilot/styles/common.module.scss';
 const ToolListPage: React.FC = () => {
   const { useForm } = Form;
   const { t } = useTranslation();
-  const { get, patch, post, del } = useApiClient();
+  const { get, put, post, del } = useApiClient();
   const { groups, selectedGroup } = useUserInfoContext();
   const formFields = getFormFields(t, groups);
   const [loading, setLoading] = useState<boolean>(false);
@@ -73,7 +73,7 @@ const ToolListPage: React.FC = () => {
           if (!selectedTool?.id) {
             await post('/model_provider_mgmt/skill_tools/', queryParams)
           } else {
-            await patch(`/model_provider_mgmt/skill_tools/${selectedTool.id}/`, queryParams);
+            await put(`/model_provider_mgmt/skill_tools/${selectedTool.id}/`, queryParams);
           }
           form.resetFields();
           setIsModalVisible(false);
