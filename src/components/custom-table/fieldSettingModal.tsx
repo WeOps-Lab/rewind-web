@@ -121,7 +121,7 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
     const renderCheckBox = (fields: ColumnItem[]) => {
       return fields.map((field) => (
         <Checkbox
-          className="w-[166px] mb-[10px]"
+          className="w-[160px] mb-[10px]"
           key={field.key}
           value={field.key}
         >
@@ -169,25 +169,27 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
                 {t('common.selectAll')}
               </Checkbox>
             </div>
-            <Checkbox.Group
-              value={checkedFields}
-              onChange={handleCheckboxChange}
-            >
-              {groupFields?.length ? (
-                groupFields.map((item) => (
-                  <div key={item.key}>
-                    <div className="font-bold mb-[10px]">{item.title}</div>
-                    <div className="flex items-center flex-wrap">
-                      {renderCheckBox(item.child)}
+            <div className={fieldSettingModalStyle.scrollContent}>
+              <Checkbox.Group
+                value={checkedFields}
+                onChange={handleCheckboxChange}
+              >
+                {groupFields?.length ? (
+                  groupFields.map((item) => (
+                    <div key={item.key}>
+                      <div className="font-bold mb-[10px]">{item.title}</div>
+                      <div className="flex items-center flex-wrap">
+                        {renderCheckBox(item.child)}
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="flex items-center flex-wrap">
+                    {renderCheckBox(choosableFields)}
                   </div>
-                ))
-              ) : (
-                <div className="flex items-center flex-wrap">
-                  {renderCheckBox(choosableFields)}
-                </div>
-              )}
-            </Checkbox.Group>
+                )}
+              </Checkbox.Group>
+            </div>
           </div>
           {/* 右侧拖拽列表 */}
           <div className={`${fieldSettingModalStyle.rightSide} w-1/3 p-4`}>
@@ -203,7 +205,7 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
                 {t('common.clear')}
               </Button>
             </div>
-            <div className="mt-4">
+            <div className={`mt-2 ${fieldSettingModalStyle.scrollContent}`}>
               {dragFields
                 .filter((field) => checkedFields.includes(field.key))
                 .map((field, index) => (
