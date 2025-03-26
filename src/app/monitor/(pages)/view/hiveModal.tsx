@@ -28,25 +28,22 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
     const [title, setTitle] = useState<string>('');
     const [visible, setVisible] = useState<boolean>(false);
     const [hiveConfig, setHiveConfig] = useState<any>(null);
-    const [queryMetric, setQueryMetric] = useState<string | null>();
-    const [thresholdColors, setThresholdColors] = useState<NodeThresholdColor[]>([
-      { name: 'unavailable', value: 70, color: '#ff4d4f' },
-      { name: 'inactive', value: 30, color: '#faad14' },
-      { name: 'normal', value: 0, color: '#52c41a' },
-    ]);
-
+    const [selected, setSelected] = useState<string | null>();
+    const [colorList, setColorList] = useState<NodeThresholdColor[]>([]);
     useImperativeHandle(ref, () => ({
-      showModal: ({ title, form }) => {
+      showModal: ({ title, form, query, color }) => {
         // 开启弹窗的交互
         setVisible(true);
         setTitle(title);
+        setSelected(query);
         setHiveConfig(form);
+        setColorList(color);
       },
     }));
 
     const handleSubmit = () => {
       console.log(hiveConfig);
-      onConfirm(queryMetric,thresholdColors);
+      onConfirm(selected, colorList);
       setVisible(false);
     }
 
@@ -62,22 +59,32 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
       console.log('Failed:', errorInfo);
     };
 
-    const handleQueryMetricChange = (id: string) => {
-      setQueryMetric(id);
+    const handleSelectedChange = (id: string) => {
+      setSelected(id);
     };
 
     const onChange = (value: number, index: number) => {
-      const list = cloneDeep(thresholdColors);
+      const list = cloneDeep(colorList);
       list[index].value = value;
-      setThresholdColors(list);
-      console.log(list)
+      setColorList(list);
     };
 
     const handleEnumColorChange = (value: AggregationColor, index: number) => {
-      const list = cloneDeep(thresholdColors);
+      const list = cloneDeep(colorList);
       list[index].color = value.toHexString();
-      setThresholdColors(list);
-      console.log(list)
+      setColorList(list);
+    };
+
+    const addInputNumber = (item: NodeThresholdColor, index: number) => {
+      const _colorList = cloneDeep(colorList);
+      _colorList.splice(index, 0, item);
+      setColorList(_colorList);
+    };
+
+    const delInputNumber = (index: number) => {
+      const _colorList = cloneDeep(colorList);
+      _colorList.splice(index, 1);
+      setColorList(_colorList);
     }
 
     return (
@@ -113,15 +120,15 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
           >
             <Form.Item<any>
               label={t('monitor.views.displayIndicators')}
-              name="username"
+              name="metricName"
               rules={[{ required: true, message: 'Please input your username!' }]}
             >
               <Select
-                className='text-center w-[160px] '
-                value={queryMetric}
-                suffixIcon={null}
+                className='w-[160px]'
+                defaultValue={selected}
+                value={selected}
                 placeholder="请选择"
-                onChange={handleQueryMetricChange}
+                onChange={handleSelectedChange}
               >
                 {hiveConfig?.map((item: MetricItem, index: number) => (
                   <Option key={index} value={item.name}>
@@ -133,13 +140,13 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
 
             <Form.Item<any>
               label={t('monitor.events.thresholdColor')}
-              name="password"
-              rules={[{ required: true, message: 'Please input your password!' }]}
+              name="colorSelect"
+              rules={[{ required: true, message: t('common.inputRequired') }]}
             >
               <div className='flex justify-center flex-col'>
-                {thresholdColors?.map((item, index) => {
+                {colorList?.map((item, index) => {
                   return (
-                    <div className='flex justify-start items-center mb-2' key={item.value}>
+                    <div className='flex justify-start items-center mb-2' key={index}>
                       <ColorPicker
                         className="ml-2 mr-2 h-4"
                         size='small'
@@ -149,9 +156,9 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
                         }}
                       />
                       <InputNumber value={item.value} className='w-[60%] mr-2' min={0} max={100} onChange={(value) => onChange(value as number, index)} />
-                      <Button className='mr-2' icon={<PlusOutlined />} />
+                      <Button className='mr-2' icon={<PlusOutlined />} onClick={() => addInputNumber(item, index)} />
                       {!!index && (
-                        <Button icon={<MinusOutlined />} />
+                        <Button icon={<MinusOutlined />} onClick={() => delInputNumber(index)} />
                       )}
                     </div>
                   )

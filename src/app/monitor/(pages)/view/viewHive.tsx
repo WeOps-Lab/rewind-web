@@ -48,7 +48,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   const [workload, setWorkload] = useState<string | null>(null);
   const [node, setNode] = useState<string | null>(null);
   const [queryMetric, setQueryMetric] = useState<string | null>(null);
-  const [hexColor,setHexColor] = useState<NodeThresholdColor[]>([]);
+  const [hexColor, setHexColor] = useState<NodeThresholdColor[]>([
+    { name: 'unavailable', value: 70, color: '#ec1212' },
+    { name: 'inactive', value: 30, color: '#faad14' },
+    { name: 'normal', value: 0, color: '#10e433' },
+  ]);
 
   const namespaceList = useMemo(() => {
     if (queryData.length && colony) {
@@ -82,6 +86,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   }, [namespaceList, namespace]);
 
   const metricList = useMemo(() => {
+    console.log(mertics)
     if (objectId && objects?.length && mertics?.length) {
       const objName = objects.find((item) => item.id === objectId)?.name;
       if (objName) {
@@ -124,6 +129,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   // 页面初始化请求
   useEffect(() => {
     if (isLoading) return;
+    setQueryMetric(isPod ? 'pod_status' : 'node_status_condition');
     if (objectId && objects?.length) {
       const objName = objects.find((item) => item.id === objectId)?.name;
       if (objName) {
@@ -168,6 +174,10 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
       isFetchingRef.current = false;
     }
   }, [tableLoading]);
+
+  useEffect(() => {
+    onRefresh();
+  },[hexColor, queryMetric]);
 
   const handleScroll = useCallback(() => {
     if (!hexGridRef.current) return;
@@ -257,6 +267,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   };
 
   const getInitData = async (name: string) => {
+    console.log('init data')
     const params = getParams();
     const objParams = {
       monitor_object_id: objectId,
@@ -296,8 +307,9 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   };
 
   const dealChartData = (data: TableDataItem, metricsData = metricList) => {
+    console.log(metricsData)
     const chartList = data.map((item: TableDataItem) => {
-      const metricName = isPod ? 'pod_status' : 'node_status_condition';
+      const metricName = queryMetric || (isPod ? 'pod_status' : 'node_status_condition');
       const tagetMerticItem = metricsData.find(
         (item) => item.name === metricName
       );
@@ -312,7 +324,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
           ),
           fill:
             getEnumColor(tagetMerticItem, item[metricName]) ||
-            'var(--color-primary)',
+            handleHexColor(item[metricName]),
         };
       }
       return {
@@ -323,6 +335,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     });
     return chartList;
   };
+
+  const handleHexColor = (value:any) => {
+    const item = hexColor.find((item) => value >= item.value);
+    return item?.color || 'var(--color-primary)';
+  }
 
   const clearTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -370,18 +387,18 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   };
 
   const openHiveModal = () => {
-    console.log(metricList);
     modalRef.current?.showModal({
       type: '',
       title: '',
       form: metricList,
+      query: queryMetric,
+      color: hexColor
     });
   }
 
-  const onConfirm = (metric:string, colors: any) => {
+  const onConfirm = (metric: string, colors: any) => {
     setQueryMetric(metric);
     setHexColor(colors);
-    console.log(hexColor)
   }
 
   return (
@@ -488,7 +505,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
           <HexGridChart data={chartData}></HexGridChart>
         </Spin>
       </div>
-      <HiveModal ref={modalRef} onConfirm={onConfirm}/>
+      <HiveModal ref={modalRef} onConfirm={onConfirm} />
     </div>
   );
 };
