@@ -230,14 +230,14 @@ const Attributes = () => {
                 icon={<PlusOutlined />}
                 onClick={() => showAttrModal('add')}
               >
-                {t('add')}
+                {t('common.addNew')}
               </Button>
             </PermissionWrapper>
           </div>
         </div>
         <CustomTable
           size="middle"
-          scroll={{ y: 'calc(100vh - 340px)' }}
+          scroll={{ y: 'calc(100vh - 430px)' }}
           columns={columns}
           dataSource={tableData}
           pagination={pagination}

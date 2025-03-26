@@ -270,30 +270,29 @@ const InfoList: React.FC<AssetDataFieldProps> = ({
           />
         </Panel>
       </Collapse>
-      {fieldList?.filter((item: any) => builtinAttr.includes(item.key))
-        ?.length ? (
-          <Collapse
-            bordered={false}
-            className={informationList.list}
-            defaultActiveKey="information"
-            accordion
-            expandIcon={({ isActive }) => (
-              <CaretRightOutlined rotate={isActive ? 90 : 0} />
-            )}
-          >
-            <Panel header={t('information')} key="information">
-              <Descriptions
-                bordered
-                items={fieldList?.filter((item: any) =>
-                  builtinAttr.includes(item.key)
-                )}
-                column={2}
-              />
-            </Panel>
-          </Collapse>
-        ) : (
-          ''
-        )}
+      {fieldList?.filter((el: any) => builtinAttr.includes(el.key))?.length ? (
+        <Collapse
+          bordered={false}
+          className={informationList.list}
+          defaultActiveKey="systemBuiltIn"
+          accordion
+          expandIcon={({ isActive }) => (
+            <CaretRightOutlined rotate={isActive ? 90 : 0} />
+          )}
+        >
+          <Panel header={t('systemBuiltIn')} key="systemBuiltIn">
+            <Descriptions
+              bordered
+              items={fieldList?.filter((item: any) =>
+                builtinAttr.includes(item.key)
+              )}
+              column={2}
+            />
+          </Panel>
+        </Collapse>
+      ) : (
+        ''
+      )}
     </div>
   );
 };

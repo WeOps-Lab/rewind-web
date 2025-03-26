@@ -260,7 +260,7 @@ const Associations = () => {
                 icon={<PlusOutlined />}
                 onClick={() => showAssoModal('add')}
               >
-                {t('add')}
+                {t('common.addNew')}
               </Button>
             </PermissionWrapper>
           </div>

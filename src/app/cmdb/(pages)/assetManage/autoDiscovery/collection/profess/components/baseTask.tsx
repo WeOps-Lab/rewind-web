@@ -39,6 +39,7 @@ import {
   Select,
   Dropdown,
   Drawer,
+  Cascader,
 } from 'antd';
 
 interface TableItem {
@@ -71,6 +72,7 @@ export interface BaseTaskRef {
   collectionType: string;
   setSelectedData: (data: TableItem[]) => void;
   initIpRange: (range: string[]) => void;
+  organization: string[];
 }
 
 const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
@@ -106,7 +108,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       { label: string; value: string }[]
     >([]);
     const [ipRange, setIpRange] = useState<string[]>([]);
-    const [collectionType, setCollectionType] = useState('asset');
+    const [collectionType, setCollectionType] = useState('ip');
     const [selectedData, setSelectedData] = useState<TableItem[]>([]);
     const [accessPoints, setAccessPoints] = useState<
       { label: string; value: string }[]
@@ -121,6 +123,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
     );
     const [instData, setInstData] = useState<any[]>([]);
     const [instLoading, setInstLoading] = useState(false);
+    const [ipRangeOrg, setIpRangeOrg] = useState<string[]>([]);
     const dropdownItems = {
       items: NETWORK_DEVICE_OPTIONS,
     };
@@ -239,10 +242,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       [t, form]
     );
 
-    const initRef = useRef(false);
     useEffect(() => {
-      if (initRef.current) return;
-      initRef.current = true;
       fetchOptions();
       fetchAccessPoints();
     }, []);
@@ -317,9 +317,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
 
     const initIpRange = (ipRange: string[]) => {
       setIpRange(ipRange);
-      if (ipRange.length) {
-        setCollectionType('ip');
-      }
+      setCollectionType(ipRange.length ? 'ip' : 'asset');
     };
 
     useImperativeHandle(ref, () => ({
@@ -327,9 +325,10 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       accessPoints,
       selectedData,
       collectionType,
+      ipRange: ipRange,
+      organization: ipRangeOrg,
       setSelectedData: (data: TableItem[]) => setSelectedData(data),
       initIpRange: (range: string[]) => initIpRange(range),
-      ipRange: ipRange,
     }));
 
     return (
@@ -400,7 +399,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
             </Form.Item>
 
             {/* 实例选择 */}
-            {nodeId === 'vmware' && (
+            {['vmware', 'k8s'].includes(nodeId as string) && (
               <Form.Item label={instPlaceholder} required>
                 <Space>
                   <Form.Item name="instId" rules={rules.instId} noStyle>
@@ -454,6 +453,23 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
                       ]}
                     >
                       <IpRangeInput value={ipRange} onChange={onIpChange} />
+                    </Form.Item>
+                    <Form.Item
+                      label={t('organization')}
+                      name="organization"
+                      rules={[
+                        {
+                          required: true,
+                          message: t('common.inputMsg') + t('organization'),
+                        },
+                      ]}
+                    >
+                      <Cascader
+                        placeholder={t('Model.selectOrganazationPlaceholder')}
+                        options={organizationList}
+                        value={ipRangeOrg}
+                        onChange={(value) => setIpRangeOrg(value)}
+                      />
                     </Form.Item>
                   </>
                 ) : (

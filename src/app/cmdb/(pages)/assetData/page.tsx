@@ -153,7 +153,7 @@ const AssetData = () => {
   const addInstItems: MenuProps['items'] = [
     {
       key: '1',
-      label: <a onClick={() => showAttrModal('add')}>{t('add')}</a>,
+      label: <a onClick={() => showAttrModal('add')}>{t('common.add')}</a>,
     },
     {
       key: '2',
@@ -386,7 +386,7 @@ const AssetData = () => {
   };
 
   const showAttrModal = (type: string, row = {}) => {
-    const title = type === 'add' ? t('add') : t('edit');
+    const title = type === 'add' ? t('common.addNew') : t('edit');
     fieldRef.current?.showModal({
       title,
       type,
@@ -682,7 +682,7 @@ const AssetData = () => {
                   arrow
                 >
                   <Button icon={<PlusOutlined />} type="primary">
-                    {t('add')}
+                    {t('common.addNew')}
                   </Button>
                 </Dropdown>
               </PermissionWrapper>

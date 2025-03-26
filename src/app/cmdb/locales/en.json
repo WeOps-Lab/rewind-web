@@ -135,9 +135,6 @@
       "clear": "clear",
       "selected": "selected"
     },
-    "cutomTable": {
-      "fieldSetting": "List field settings"
-    },
     "Model": {
       "addModel": "Add Model",
       "editModel": "Edit Model",
@@ -285,5 +282,21 @@
             "approvalConfirm": "Approval Confirm",
             "approvalSuccess": "Approval Success"
         }
+    },
+    "OidLibrary": {
+        "title": "SOID Library",
+        "description": "You can enhance the automatic collection capabilities of network devices by managing device sysObjectID mapping relationships.",
+        "newMapping": "New Mapping",
+        "Mapping": "Mapping",
+        "model": "Model",
+        "brand": "Brand",
+        "deviceType": "Device Type",
+        "operateSuccess": "Operation Successful",
+        "operateFailed": "Operation Failed",
+        "loadTypeFailed": "Failed to load device types",
+        "scanFeatureTitle": "Scan Feature",
+        "soidTitle": "SOID Library",
+        "soidMessage": "You can expand the automatic discovery capability of network devices by managing the mapping relationship of device sysObject IDs",
+        "scanFeatureMessage": "You can determine the type of asset being scanned by setting recognition rules."
     }
 }

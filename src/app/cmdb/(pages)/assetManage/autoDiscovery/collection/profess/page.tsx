@@ -57,12 +57,13 @@ const ProfessionalCollection: React.FC = () => {
   const [tableLoading, setTableLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [executingTaskIds, setExecutingTaskIds] = useState<number[]>([]);
+  const tableCountRef = useRef<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const stateRef = useRef({
     searchText: '',
     pagination: {
       current: 1,
-      pageSize: 10,
+      pageSize: 20,
       total: 0,
     },
     currentExecStatus: undefined as ExecStatusType | undefined,
@@ -109,6 +110,7 @@ const ProfessionalCollection: React.FC = () => {
       const params = getParams();
       const data = await get('/cmdb/api/collect/search/', { params });
       setTableData(data.items || []);
+      tableCountRef.current = data.items.length || 0;
       setPaginationUI((prev) => ({
         ...prev,
         total: data.count || 0,
@@ -169,10 +171,7 @@ const ProfessionalCollection: React.FC = () => {
     }
   };
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
     fetchTreeData();
   }, []);
 
@@ -275,6 +274,14 @@ const ProfessionalCollection: React.FC = () => {
         try {
           await del(`/cmdb/api/collect/${record.id}/`);
           message.success(t('successfullyDeleted'));
+          const currentPage = stateRef.current.pagination.current;
+          if (currentPage > 1 && tableCountRef.current === 1) {
+            stateRef.current.pagination.current = currentPage - 1;
+            setPaginationUI((prev) => ({
+              ...prev,
+              current: currentPage - 1,
+            }));
+          }
           fetchData();
         } catch (error) {
           console.error('Failed to delete task:', error);
@@ -580,11 +587,15 @@ const ProfessionalCollection: React.FC = () => {
         </div>
         <div className="bg-white rounded-lg shadow-sm flex-1 overflow-auto">
           <CustomTable
+            loading={tableLoading}
             key={selectedRef.current.nodeId}
             size="middle"
+            rowKey="id"
             columns={currentColumns}
             dataSource={tableData}
             scroll={{ y: 'calc(100vh - 510px)' }}
+            onSelectFields={onSelectFields}
+            onChange={handleTableChange}
             pagination={{
               ...paginationUI,
               showSizeChanger: true,
@@ -598,10 +609,6 @@ const ProfessionalCollection: React.FC = () => {
                   item.key !== 'action' && 'dataIndex' in item
               ),
             }}
-            onSelectFields={onSelectFields}
-            onChange={handleTableChange}
-            rowKey="id"
-            loading={tableLoading}
           />
         </div>
       </div>

@@ -35,23 +35,34 @@ const IpInput: React.FC<IpInputProps> = ({ value = ['', ''], onChange }) => {
   ]);
 
   const inputRefs = useRef<(InputRef | null)[]>([]);
+  const prevValueRef = useRef(value);
 
   useEffect(() => {
-    if (value?.length) {
+    if (
+      value?.length &&
+      (value[0] !== prevValueRef.current[0] ||
+        value[1] !== prevValueRef.current[1])
+    ) {
       const beginIp = value[0].split('.');
       const endIp = value[1].split('.');
-      const updatedBeginIpAddress = beginIpAddress.map((item, index) => ({
-        ...item,
-        value: beginIp[index] || '',
-      }));
-      const updatedEndIpAddress = endIpAddress.map((item, index) => ({
-        ...item,
-        value: endIp[index] || '',
-      }));
-      setBeginIpAddress(updatedBeginIpAddress);
-      setEndIpAddress(updatedEndIpAddress);
+
+      setBeginIpAddress((prev) =>
+        prev.map((item, index) => ({
+          ...item,
+          value: beginIp[index] || '',
+        }))
+      );
+
+      setEndIpAddress((prev) =>
+        prev.map((item, index) => ({
+          ...item,
+          value: endIp[index] || '',
+        }))
+      );
+
+      prevValueRef.current = value;
     }
-  }, []);
+  }, [value]);
 
   const validateIpRange = useCallback((beginIp: string, endIp: string) => {
     const ipToNumber = (ip: string) =>

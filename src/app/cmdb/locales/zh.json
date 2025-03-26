@@ -31,7 +31,6 @@
     "action": "操作",
     "edit": "编辑",
     "delete": "删除",
-    "add": "添加",
     "detail": "详情",
     "seeMore": "更多",
     "export": "导出",
@@ -68,6 +67,7 @@
     "batchEdit": "批量编辑",
     "searchTxt": "搜索",
     "searchTitle": "资产搜索",
+    "assetSearchTxt": "请输入关键词",
     "menu": {
         "log": "日志",
         "assetManage": "模型管理",
@@ -135,9 +135,6 @@
         "clear": "清空",
         "selected": "已选择"
     },
-    "cutomTable": {
-        "fieldSetting": "列表字段设置"
-    },
     "Model": {
         "addModel": "新增模型",
         "editModel": "编辑模型",
@@ -178,7 +175,6 @@
         "selectInstance": "选择实例",
         "credentialManagement": "凭据管理",
         "AssociationManagement": "关联管理",
-        "assetSearchTxt": "请输入关键词...",
         "selectOrganazationPlaceholder": "选择一个组织",
         "confirmAndAssociate": "确认并关联",
         "searchHistory": "搜索历史"
@@ -282,5 +278,21 @@
             "approvalConfirm": "审批确认",
             "approvalSuccess": "审批成功"
         }
+    },
+    "OidLibrary": {
+        "title": "SOID库",
+        "description": "您可以通过管理设备sysObjectID的映射关系，扩充网络设备自动采集的能力。",
+        "newMapping": "新增映射",
+        "Mapping": "映射",
+        "model": "型号",
+        "brand": "品牌",
+        "deviceType": "设备类型",
+        "operateSuccess": "操作成功",
+        "operateFailed": "操作失败",
+        "loadTypeFailed": "加载设备类型失败",
+        "scanFeatureTitle": "扫描特征",
+        "soidTitle": "SOID库",
+        "soidMessage": "您可以通过管理设备sysObjectID的映射关系，扩充网络设备自动发现的能力",
+        "scanFeatureMessage": "您可以通过设置识别规则，判断扫描的资产类型。"
     }
 }

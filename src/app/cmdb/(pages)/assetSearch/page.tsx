@@ -342,7 +342,7 @@ const AssetSearch = () => {
               value={searchText}
               allowClear
               size="large"
-              placeholder={t('Model.assetSearchTxt')}
+              placeholder={t('assetSearchTxt')}
               enterButton={
                 <div
                   className={assetSearchStyle.searchBtn}
@@ -387,7 +387,7 @@ const AssetSearch = () => {
               className={assetSearchStyle.input}
               value={searchText}
               allowClear
-              placeholder={t('Model.assetSearchTxt')}
+              placeholder={t('assetSearchTxt')}
               enterButton={
                 <div
                   className={assetSearchStyle.searchBtn}

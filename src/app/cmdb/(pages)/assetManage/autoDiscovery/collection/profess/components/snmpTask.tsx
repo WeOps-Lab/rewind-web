@@ -51,7 +51,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
     onClose,
     formatValues: (values) => {
       const instance = baseRef.current?.selectedData;
-      const collectionType = baseRef.current?.collectionType;
+      const collectType = baseRef.current?.collectionType;
       const version = values.version;
       const ipRange = values.ipRange?.length ? values.ipRange : undefined;
       const driverType = selectedNode.tabItems?.find(
@@ -88,9 +88,12 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
         driver_type: driverType,
         task_type: 'snmp',
         accessPointId: values.access_point?.[0]?.id,
-        ...(collectionType === 'ip'
-          ? { ip_range: ipRange.join('-') }
-          : { instances: instance || [] }),
+        ...(collectType === 'ip' ? {
+          ip_range: ipRange.join('-'),
+          params: {
+            organization: [values.organization?.[0]],
+          },
+        } : { instances: instance || [] }),
       };
     },
   });
@@ -116,6 +119,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
           ipRange,
           ...values,
           ...values.credential,
+          organization: values.params?.organization,
           accessPointId: values.access_point?.[0]?.id,
         });
       } else {
