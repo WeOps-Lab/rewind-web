@@ -86,7 +86,7 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
       if (
         colorList.some((item) => {
           return Object.values(item).some((tex) => {
-            return (tex != 0) && !tex;
+            return (tex !== 0) && !tex;
           });
         })
       ) {
