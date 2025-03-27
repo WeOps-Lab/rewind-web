@@ -29,6 +29,7 @@ import {
   CollectTask,
   TreeNode,
   CollectTaskMessage,
+  ModelItem,
 } from '@/app/cmdb/types/autoDiscovery';
 
 type ExtendedColumnItem = ColumnType<CollectTask> & {
@@ -319,14 +320,21 @@ const ProfessionalCollection: React.FC = () => {
 
   const getTaskContent = () => {
     if (!selectedRef.current.node) return null;
+    
+    const modelItem = selectedRef.current.node.tabItems?.find(
+      (item) => item.id === activeTab
+    );
+    
+    if (!modelItem) return null;
 
     const props = {
       onClose: closeDrawer,
       onSuccess: fetchData,
       selectedNode: selectedRef.current.node,
-      modelId: activeTab || selectedRef.current.nodeId,
+      modelItem: modelItem as ModelItem,
       editId: editingId,
     };
+
     if (selectedRef.current.nodeId === 'k8s') {
       return <K8sTask {...props} />;
     } else if (selectedRef.current.nodeId === 'network') {
@@ -568,7 +576,7 @@ const ProfessionalCollection: React.FC = () => {
           <Input
             placeholder={t('Collection.inputTaskPlaceholder')}
             prefix={<SearchOutlined className="text-gray-400" />}
-            className="max-w-md"
+            className={'w-72'}
             allowClear
             value={searchTextUI}
             onChange={handleSearchChange}

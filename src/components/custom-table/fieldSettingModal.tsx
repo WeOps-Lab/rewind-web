@@ -42,7 +42,7 @@ const FieldSettingModal = forwardRef<FieldModalRef, FieldModalProps>(
     useImperativeHandle(ref, () => ({
       showModal: () => {
         // 开启弹窗的交互
-        setTitle(t('cutomTable.fieldSetting'));
+        setTitle(t('fieldSetting'));
         handleCheckboxChange(displayFieldKeys);
         setVisible(true);
       },

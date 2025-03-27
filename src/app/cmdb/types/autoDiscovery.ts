@@ -29,6 +29,14 @@ export interface TreeNode {
     tabItems?: TreeNode[];
 }
 
+export interface ModelItem {
+    id: string;
+    key: string;
+    name: string;
+    task_type?: string;
+    tabItems?: TreeNode[];
+};
+
 export interface BaseTaskFormProps {
   children?: React.ReactNode;
   showAdvanced?: boolean;

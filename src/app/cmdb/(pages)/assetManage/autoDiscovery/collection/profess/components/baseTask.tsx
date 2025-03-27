@@ -15,6 +15,7 @@ import IpRangeInput from '@/app/cmdb/components/ipInput';
 import { useCommon } from '@/app/cmdb/context/common';
 import { FieldModalRef } from '@/app/cmdb/types/assetManage';
 import { useTranslation } from '@/utils/i18n';
+import { ModelItem } from '@/app/cmdb/types/autoDiscovery';
 import {
   CYCLE_OPTIONS,
   NETWORK_DEVICE_OPTIONS,
@@ -52,7 +53,7 @@ interface BaseTaskFormProps {
   children?: React.ReactNode;
   nodeId?: string;
   showAdvanced?: boolean;
-  modelId: string;
+  modelItem: ModelItem;
   submitLoading?: boolean;
   instPlaceholder?: string;
   timeoutProps?: {
@@ -70,9 +71,8 @@ export interface BaseTaskRef {
   selectedData: TableItem[];
   ipRange: string[];
   collectionType: string;
-  setSelectedData: (data: TableItem[]) => void;
-  initIpRange: (range: string[]) => void;
   organization: string[];
+  initCollectionType: (value: any, type: string) => void;
 }
 
 const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
@@ -82,7 +82,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       showAdvanced = true,
       nodeId,
       submitLoading,
-      modelId,
+      modelItem,
       timeoutProps = {
         min: 0,
         defaultValue: 600,
@@ -94,6 +94,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
     },
     ref
   ) => {
+    const { id: modelId } = modelItem;
     const { t } = useTranslation();
     const { post, get } = useApiClient();
     const form = Form.useFormInstance();
@@ -124,6 +125,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
     const [instData, setInstData] = useState<any[]>([]);
     const [instLoading, setInstLoading] = useState(false);
     const [ipRangeOrg, setIpRangeOrg] = useState<string[]>([]);
+    const [selectedInstIds, setSelectedInstIds] = useState<number[]>([]);
     const dropdownItems = {
       items: NETWORK_DEVICE_OPTIONS,
     };
@@ -137,8 +139,8 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       },
       {
         title: '管理IP',
-        dataIndex: 'ip',
-        key: 'ip',
+        dataIndex: 'ip_addr',
+        key: 'ip_addr',
         render: (text: any) => text || '--',
       },
     ];
@@ -198,19 +200,26 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
     const handleDrawerConfirm = () => {
       setInstVisible(false);
       setSelectedData(selectedRows.map((item) => item));
+      form.setFieldValue('assetInst', selectedRows); 
     };
 
     const handleDeleteRow = (record: TableItem) => {
-      setSelectedData((prev) => prev.filter((item) => item._id !== record._id));
+      const newSelectedData = selectedData.filter(
+        (item: any) => item._id !== record._id
+      );
+      setSelectedData(newSelectedData);
+      form.setFieldValue('assetInst', newSelectedData); 
     };
 
     const handleBatchDelete = () => {
       if (displaySelectedKeys.length === 0) {
         return;
       }
-      setSelectedData((prev) =>
-        prev.filter((item: any) => !displaySelectedKeys.includes(item._id))
+      const newSelectedData = selectedData.filter(
+        (item: any) => !displaySelectedKeys.includes(item._id)
       );
+      setSelectedData(newSelectedData);
+      form.setFieldValue('assetInst', newSelectedData); 
       setDisplaySelectedKeys([]);
     };
 
@@ -243,8 +252,13 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
     );
 
     useEffect(() => {
-      fetchOptions();
-      fetchAccessPoints();
+      const init = async () => {
+        const selectedInstIds = await fetchSelectedInstances();
+        setSelectedInstIds(selectedInstIds);
+        fetchOptions(selectedInstIds);
+        fetchAccessPoints();
+      };
+      init();
     }, []);
 
     const onIpChange = (value: string[]) => {
@@ -252,7 +266,20 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       form.setFieldValue('ipRange', value);
     };
 
-    const fetchOptions = async () => {
+    const fetchSelectedInstances = async () => {
+      try {
+        const res = await get('/cmdb/api/collect/model_instances/', {
+          params: {
+            task_type: modelItem.task_type
+          }
+        });
+        return res.map((item: any) => item.id)
+      } catch (error) {
+        console.error('获取已选择实例失败:', error);
+      }
+    };
+
+    const fetchOptions = async (instIds: number[] = []) => {
       try {
         setOptLoading(true);
         const data = await post('/cmdb/api/instance/search/', {
@@ -260,11 +287,15 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
           page: 1,
           page_size: 10000,
         });
+        const currentInstId = form.getFieldValue('instId');
         setOptions(
           data.insts.map((item: any) => ({
             label: item.inst_name,
             value: item._id,
             origin: item,
+            disabled: (instIds.length ? instIds : selectedInstIds)
+              .filter(id => id !== currentInstId)
+              .includes(item._id)
           }))
         );
       } catch (error) {
@@ -315,9 +346,14 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       }
     };
 
-    const initIpRange = (ipRange: string[]) => {
-      setIpRange(ipRange);
-      setCollectionType(ipRange.length ? 'ip' : 'asset');
+    const initCollectionType = (value: any, type: string) => {
+      if (type === 'ip') {
+        setIpRange(ipRange);
+      } else {
+        setSelectedData(value || []);
+        form.setFieldValue('assetInst', value || []); 
+      }
+      setCollectionType(type);
     };
 
     useImperativeHandle(ref, () => ({
@@ -327,8 +363,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
       collectionType,
       ipRange: ipRange,
       organization: ipRangeOrg,
-      setSelectedData: (data: TableItem[]) => setSelectedData(data),
-      initIpRange: (range: string[]) => initIpRange(range),
+      initCollectionType: (value: any, type: string) => initCollectionType(value, type),
     }));
 
     return (
@@ -473,37 +508,45 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
                     </Form.Item>
                   </>
                 ) : (
-                  /* 实例选择 */
-                  <Form.Item label={instPlaceholder} required>
-                    <Space>
-                      <Dropdown
-                        menu={{ ...dropdownItems, onClick: handleMenuClick }}
-                      >
-                        <Button type="primary">
-                          {t('common.select')} <DownOutlined />
+                  /* 选择资产 */
+                  <Form.Item 
+                    name="assetInst" 
+                    label={instPlaceholder} 
+                    required
+                    rules={rules.assetInst}
+                    trigger="onChange"
+                  >
+                    <div>
+                      <Space>
+                        <Dropdown
+                          menu={{ ...dropdownItems, onClick: handleMenuClick }}
+                        >
+                          <Button type="primary">
+                            {t('common.select')} <DownOutlined />
+                          </Button>
+                        </Dropdown>
+                        <Button
+                          onClick={handleBatchDelete}
+                          disabled={displaySelectedKeys.length === 0}
+                        >
+                          {t('batchDelete')}
                         </Button>
-                      </Dropdown>
-                      <Button
-                        onClick={handleBatchDelete}
-                        disabled={displaySelectedKeys.length === 0}
-                      >
-                        {t('batchDelete')}
-                      </Button>
-                    </Space>
-                    <CustomTable
-                      columns={assetColumns}
-                      dataSource={selectedData}
-                      pagination={false}
-                      className="mt-4"
-                      size="middle"
-                      rowKey="_id"
-                      rowSelection={{
-                        selectedRowKeys: displaySelectedKeys,
-                        onChange: (selectedRowKeys) => {
-                          setDisplaySelectedKeys(selectedRowKeys);
-                        },
-                      }}
-                    />
+                      </Space>
+                      <CustomTable
+                        columns={assetColumns}
+                        dataSource={selectedData}
+                        pagination={false}
+                        className="mt-4"
+                        size="middle"
+                        rowKey="_id"
+                        rowSelection={{
+                          selectedRowKeys: displaySelectedKeys,
+                          onChange: (selectedRowKeys) => {
+                            setDisplaySelectedKeys(selectedRowKeys);
+                          },
+                        }}
+                      />
+                    </div>
                   </Form.Item>
                 )}
               </>
@@ -568,7 +611,6 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
                   <InputNumber
                     className="w-28"
                     min={timeoutProps.min}
-                    defaultValue={timeoutProps.defaultValue}
                     addonAfter={timeoutProps.addonAfter}
                   />
                 </Form.Item>
@@ -591,7 +633,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
           ref={fieldRef}
           userList={userList}
           organizationList={organizationList}
-          onSuccess={fetchOptions}
+          onSuccess={() => fetchOptions()}
         />
 
         <Drawer

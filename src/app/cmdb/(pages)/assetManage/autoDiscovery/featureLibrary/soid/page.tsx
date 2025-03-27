@@ -7,7 +7,7 @@ import useApiClient from '@/utils/request';
 import CustomTable from '@/components/custom-table';
 import PermissionWrapper from '@/components/permission';
 import { NETWORK_DEVICE_OPTIONS } from '@/app/cmdb/constants/professCollection';
-import { Button, Input, Select, Modal, message } from 'antd';
+import { Button, Input, Select, Modal, message, Space } from 'antd';
 import { useTranslation } from '@/utils/i18n';
 
 const { Option } = Select;
@@ -245,7 +245,7 @@ const OidLibrary: React.FC = () => {
     <div className="oid-library-container">
       <div className="nav-box flex justify-between mb-[20px]">
         <div className={`flex items-center ${styles.wrapper}`}>
-          <Input.Group compact>
+          <Space.Compact>
             <Select
               value={filterType}
               style={{ width: 90 }}
@@ -266,7 +266,7 @@ const OidLibrary: React.FC = () => {
               onClear={handleFilterClear}
               className="!rounded-l-none"
             />
-          </Input.Group>
+          </Space.Compact>
         </div>
         <Button type="primary" onClick={() => operateMap('add')}>
           {t('OidLibrary.newMapping')}

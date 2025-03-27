@@ -7,8 +7,9 @@ import { useLocale } from '@/context/locale';
 import { useTranslation } from '@/utils/i18n';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { CaretRightOutlined } from '@ant-design/icons';
-import { TreeNode } from '@/app/cmdb/types/autoDiscovery';
+import { TreeNode, ModelItem } from '@/app/cmdb/types/autoDiscovery';
 import { Form, Spin, Input, Switch, Collapse, InputNumber } from 'antd';
+
 import {
   ENTER_TYPE,
   VM_FORM_INITIAL_VALUES,
@@ -19,7 +20,7 @@ interface VMTaskFormProps {
   onClose: () => void;
   onSuccess?: () => void;
   selectedNode: TreeNode;
-  modelId: string;
+  modelItem: ModelItem;
   editId?: number | null;
 }
 
@@ -27,12 +28,13 @@ const VMTask: React.FC<VMTaskFormProps> = ({
   onClose,
   onSuccess,
   selectedNode,
-  modelId,
+  modelItem,
   editId,
 }) => {
   const { t } = useTranslation();
   const baseRef = useRef<BaseTaskRef>(null);
   const localeContext = useLocale();
+  const { id: modelId } = modelItem;
 
   const {
     form,
@@ -67,7 +69,7 @@ const VMTask: React.FC<VMTaskFormProps> = ({
         scan_cycle: formatCycleValue(values),
         model_id: modelId,
         driver_type: driverType,
-        task_type: 'vm',
+        task_type: modelItem.task_type,
         credential: {
           username: values.username,
           password: values.password,
@@ -118,7 +120,7 @@ const VMTask: React.FC<VMTaskFormProps> = ({
         <BaseTaskForm
           ref={baseRef}
           nodeId={selectedNode.id}
-          modelId={modelId}
+          modelItem={modelItem}
           onClose={onClose}
           submitLoading={submitLoading}
           instPlaceholder={`${t('common.select')}${t('Collection.VMTask.chooseVCenter')}`}

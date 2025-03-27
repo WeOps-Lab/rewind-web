@@ -7,13 +7,13 @@ import { useTranslation } from '@/utils/i18n';
 import { Form, Spin } from 'antd';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { K8S_FORM_INITIAL_VALUES } from '@/app/cmdb/constants/professCollection';
-import { TreeNode } from '@/app/cmdb/types/autoDiscovery';
+import { TreeNode, ModelItem } from '@/app/cmdb/types/autoDiscovery';
 
 interface K8sTaskFormProps {
   onClose: () => void;
   onSuccess?: () => void;
   selectedNode: TreeNode;
-  modelId: string;
+  modelItem: ModelItem;
   editId?: number | null;
 }
 
@@ -21,12 +21,13 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
   onClose,
   onSuccess,
   selectedNode,
-  modelId,
+  modelItem,
   editId,
 }) => {
   const { t } = useTranslation();
   const baseRef = useRef<BaseTaskRef>(null);
   const localeContext = useLocale();
+  const { id: modelId } = modelItem;
 
   const {
     form,
@@ -56,7 +57,7 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
         driver_type: driverType,
         scan_cycle: formatCycleValue(values),
         model_id: modelId,
-        task_type: 'k8s',
+        task_type: modelItem.task_type,
         input_method: 0,
         ip_range: '',
         params: {},
@@ -88,7 +89,7 @@ const K8sTaskForm: React.FC<K8sTaskFormProps> = ({
         <BaseTaskForm
           ref={baseRef}
           nodeId={selectedNode.id}
-          modelId={modelId}
+          modelItem={modelItem}
           onClose={onClose}
           submitLoading={submitLoading}
           instPlaceholder={`${t('common.select')}${t('Collection.k8sTask.selectK8S')}`}

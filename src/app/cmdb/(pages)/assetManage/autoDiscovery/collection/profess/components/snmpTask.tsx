@@ -7,7 +7,7 @@ import { CaretRightOutlined } from '@ant-design/icons';
 import { useLocale } from '@/context/locale';
 import { useTranslation } from '@/utils/i18n';
 import { useTaskForm } from '../hooks/useTaskForm';
-import { TreeNode } from '@/app/cmdb/types/autoDiscovery';
+import { TreeNode, ModelItem } from '@/app/cmdb/types/autoDiscovery';
 import {
   ENTER_TYPE,
   SNMP_FORM_INITIAL_VALUES,
@@ -19,7 +19,7 @@ interface SNMPTaskFormProps {
   onClose: () => void;
   onSuccess?: () => void;
   selectedNode: TreeNode;
-  modelId: string;
+  modelItem: ModelItem;
   editId?: number | null;
 }
 
@@ -27,7 +27,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
   onClose,
   onSuccess,
   selectedNode,
-  modelId,
+  modelItem,
   editId,
 }) => {
   const { t } = useTranslation();
@@ -35,6 +35,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
   const [snmpVersion, setSnmpVersion] = useState('v2');
   const [securityLevel, setSecurityLevel] = useState('authNoPriv');
   const localeContext = useLocale();
+  const { id: modelId } = modelItem;
 
   const {
     form,
@@ -86,7 +87,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
         scan_cycle: formatCycleValue(values),
         model_id: modelId,
         driver_type: driverType,
-        task_type: 'snmp',
+        task_type: modelItem.task_type,
         accessPointId: values.access_point?.[0]?.id,
         ...(collectType === 'ip' ? {
           ip_range: ipRange.join('-'),
@@ -111,9 +112,9 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
         setSnmpVersion(values.credential.version);
         setSecurityLevel(values.credential.level);
         if (values.ip_range?.length) {
-          baseRef.current?.initIpRange(ipRange);
+          baseRef.current?.initCollectionType(ipRange, 'ip');
         } else {
-          baseRef.current?.setSelectedData(values.instances || []);
+          baseRef.current?.initCollectionType(values.instances, 'asset');
         }
         form.setFieldsValue({
           ipRange,
@@ -141,7 +142,7 @@ const SNMPTask: React.FC<SNMPTaskFormProps> = ({
         <BaseTaskForm
           ref={baseRef}
           nodeId={selectedNode.id}
-          modelId={modelId}
+          modelItem={modelItem}
           onClose={onClose}
           submitLoading={submitLoading}
           instPlaceholder={`${t('Collection.chooseAsset')}`}

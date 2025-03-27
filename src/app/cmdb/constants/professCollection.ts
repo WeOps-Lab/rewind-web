@@ -144,7 +144,7 @@ export interface TabConfig {
 interface ValidationContext {
   form: any;
   t: (key: string) => string;
-  taskType?: 'k8s' | 'vm' | 'snmp';
+  taskType?: string;
 }
 
 const baseValidators = {
@@ -179,7 +179,7 @@ const cycleValidators = (context: ValidationContext) => ({
 });
 
 export const createTaskValidationRules = (context: ValidationContext) => {
-  const { t, taskType } = context;
+  const { t, form, taskType } = context;
 
   const baseRules = {
     taskName: [
@@ -199,6 +199,17 @@ export const createTaskValidationRules = (context: ValidationContext) => {
       ),
     ],
     ...cycleValidators(context),
+    assetInst: [
+      {
+        validator: () => {
+          const selectedData = form.getFieldValue('assetInst');
+          if (!selectedData?.length) {
+            return Promise.reject(new Error(t('common.selectMsg')));
+          }
+          return Promise.resolve();
+        }
+      }
+    ],
   };
 
   if (taskType === 'vm') {
