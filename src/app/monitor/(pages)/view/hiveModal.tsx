@@ -60,7 +60,7 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
     const onChange = (value: number, index: number) => {
       const list = cloneDeep(colorList);
       list[index].value = value;
-      setColorList(list);
+      setColorList(list.sort((a, b) => b.value - a.value));
     };
 
     const handleEnumColorChange = (value: AggregationColor, index: number) => {
@@ -84,12 +84,13 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
     // 自定义验证枚举列表
     const validateColorList = async () => {
       if (
-        colorList.length &&
         colorList.some((item) => {
-          return Object.values(item).some((tex) => !tex && tex < 0);
+          return Object.values(item).some((tex) => {
+            return (tex != 0) && !tex;
+          });
         })
       ) {
-        return Promise.reject(new Error(t('monitor.events.valueValidate')));
+        return Promise.reject(new Error(t('common.inputRequired')));
       }
       return Promise.resolve();
     };
