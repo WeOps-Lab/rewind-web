@@ -186,8 +186,8 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     }
   }, [colony, namespace, workload, node]);
 
-  const getColoumnAndData = async () => {
-    const params = {
+  const getParams = () => {
+    return {
       page: pagination.current,
       page_size: pagination.pageSize,
       add_metrics: true,
@@ -202,7 +202,11 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
             (item: TableDataItem) => item.created_by_kind === workload
           )?.created_by_name || '',
       },
-    };
+    }
+  }
+
+  const getColoumnAndData = async () => {
+    const params = getParams();
     const objParams = {
       monitor_object_id: objectId,
     };
@@ -320,22 +324,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
   };
 
   const getAssetInsts = async (objectId: React.Key, type?: string) => {
-    const params = {
-      page: pagination.current,
-      page_size: pagination.pageSize,
-      add_metrics: true,
-      name: searchText,
-      vm_params: {
-        instance_id: colony || '',
-        namespace: namespace || '',
-        node: node || '',
-        created_by_kind: workload || '',
-        created_by_name:
-          workloadList.find(
-            (item: TableDataItem) => item.created_by_kind === workload
-          )?.created_by_name || '',
-      },
-    };
+    const params = getParams();
     if (type === 'clear') {
       params.name = '';
     }
@@ -534,7 +523,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
         loading={tableLoading}
         rowKey="instance_id"
         fieldSetting={{
-          showSetting: true,
+          showSetting: false,
           displayFieldKeys: [
             'elasticsearch_fs_total_available_in_bytes',
             'instance_name',

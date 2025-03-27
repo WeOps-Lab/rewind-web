@@ -20,7 +20,7 @@ const HexGrid: React.FC<HexGridProps> = ({ data }) => {
   const calculateItemsPerRow = useCallback(() => {
     if (!containerRef.current) return;
     const containerWidth = containerRef.current.clientWidth - 44;
-    const hexWidth = 110; // 六边形宽度（80px） + 间距（8px）
+    const hexWidth = 110; // 六边形宽度（104px） + 间距（6px）
     setHexPerRow(Math.floor(containerWidth / hexWidth));
   }, []);
 

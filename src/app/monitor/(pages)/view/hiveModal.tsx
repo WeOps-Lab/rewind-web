@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useRef } from 'react';
 import { ModalRef } from '@/app/monitor/types';
 import { MetricItem, NodeThresholdColor } from '@/app/monitor/types/monitor';
 import OperateModal from '@/components/operate-modal';
@@ -11,8 +11,8 @@ import {
   InputNumber,
   ColorPicker
 } from 'antd';
+import type { FormInstance } from 'antd';
 import { useTranslation } from '@/utils/i18n';
-import type { FormProps } from 'antd';
 import { AggregationColor } from 'antd/es/color-picker/color';
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import { cloneDeep } from 'lodash';
@@ -25,6 +25,7 @@ interface HiveModalProps {
 const HiveModal = forwardRef<ModalRef, HiveModalProps>(
   ({ onConfirm }, ref) => {
     const { t } = useTranslation();
+    const formRef = useRef<FormInstance>(null)
     const [title, setTitle] = useState<string>('');
     const [visible, setVisible] = useState<boolean>(false);
     const [hiveConfig, setHiveConfig] = useState<any>(null);
@@ -42,20 +43,14 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
     }));
 
     const handleSubmit = () => {
-      onConfirm(selected, colorList);
-      setVisible(false);
+      formRef.current?.validateFields().then(() => {
+        onConfirm(selected, colorList);
+        setVisible(false);
+      })
     }
 
     const handleCancel = () => {
       setVisible(false);
-    };
-
-    const onFinish: FormProps<any>['onFinish'] = (values) => {
-      console.log('Success:', values);
-    };
-
-    const onFinishFailed: FormProps<any>['onFinishFailed'] = (errorInfo) => {
-      console.log('Failed:', errorInfo);
     };
 
     const handleSelectedChange = (id: string) => {
@@ -84,7 +79,27 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
       const _colorList = cloneDeep(colorList);
       _colorList.splice(index, 1);
       setColorList(_colorList);
-    }
+    };
+
+    // 自定义验证枚举列表
+    const validateColorList = async () => {
+      if (
+        colorList.length &&
+        colorList.some((item) => {
+          return Object.values(item).some((tex) => !tex && tex < 0);
+        })
+      ) {
+        return Promise.reject(new Error(t('monitor.events.valueValidate')));
+      }
+      return Promise.resolve();
+    };
+
+    const validateSelectedList = async () => {
+      if (!selected) {
+        return Promise.reject(new Error(t('monitor.events.conditionValidate')));
+      }
+      return Promise.resolve();
+    };
 
     return (
       <>
@@ -96,7 +111,6 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
           footer={
             <div>
               <Button
-                // disabled={!checkedFields.length}
                 className="mr-[10px]"
                 type="primary"
                 onClick={handleSubmit}
@@ -108,25 +122,24 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
           }
         >
           <Form
+            ref={formRef}
             name="basic"
-            labelCol={{ span: 6 }}
-            wrapperCol={{ span: 16 }}
+            wrapperCol={{ span: 24 }}
             style={{ maxWidth: 500 }}
+            layout="vertical"
             initialValues={{ remember: true }}
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
             autoComplete="off"
           >
             <Form.Item<any>
               label={t('monitor.views.displayIndicators')}
-              name="metricName"
-              rules={[{ required: true, message: 'Please input your username!' }]}
+              name="selected"
+              rules={[{ required: true, validator: validateSelectedList }]}
             >
               <Select
                 className='w-[160px]'
                 defaultValue={selected}
                 value={selected}
-                placeholder="请选择"
+                placeholder={t('common.selectMsg')}
                 onChange={handleSelectedChange}
               >
                 {hiveConfig?.map((item: MetricItem, index: number) => (
@@ -140,10 +153,10 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
             <Form.Item<any>
               label={t('monitor.events.thresholdColor')}
               name="colorSelect"
-              rules={[{ required: true, message: t('common.inputRequired') }]}
+              rules={[{ required: true, validator: validateColorList }]}
             >
               <div className='flex justify-center flex-col'>
-                {colorList?.map((item, index) => {
+                {(colorList || []).map((item, index) => {
                   return (
                     <div className='flex justify-start items-center mb-2' key={index}>
                       <ColorPicker

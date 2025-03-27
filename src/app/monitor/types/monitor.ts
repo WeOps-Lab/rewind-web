@@ -339,7 +339,13 @@ export interface NodeWorkload {
 }
 
 export interface NodeThresholdColor {
-  name: string,
   value: number,
   color: string
+}
+
+export interface ChartDataConfig {
+  data: TableDataItem,
+  metricsData: MetricItem[],
+  hexColor: NodeThresholdColor[],
+  queryMetric: string
 }

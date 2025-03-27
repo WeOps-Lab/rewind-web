@@ -8,7 +8,12 @@ import React, {
 } from 'react';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
-import { MetricItem, ViewListProps, NodeThresholdColor } from '@/app/monitor/types/monitor';
+import { 
+  MetricItem, 
+  ViewListProps, 
+  NodeThresholdColor, 
+  ChartDataConfig 
+} from '@/app/monitor/types/monitor';
 import { Pagination, TableDataItem, HexagonData, ModalRef } from '@/app/monitor/types';
 import TimeSelector from '@/components/time-selector';
 import HexGridChart from '@/app/monitor/components/charts/hexgrid';
@@ -49,9 +54,9 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   const [node, setNode] = useState<string | null>(null);
   const [queryMetric, setQueryMetric] = useState<string | null>(null);
   const [hexColor, setHexColor] = useState<NodeThresholdColor[]>([
-    { name: 'unavailable', value: 70, color: '#ec1212' },
-    { name: 'inactive', value: 30, color: '#faad14' },
-    { name: 'normal', value: 0, color: '#10e433' },
+    { value: 70, color: '#ec1212' },
+    { value: 30, color: '#faad14' },
+    { value: 0, color: '#10e433' },
   ]);
 
   const namespaceList = useMemo(() => {
@@ -128,7 +133,6 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   // 页面初始化请求
   useEffect(() => {
     if (isLoading) return;
-    setQueryMetric(isPod ? 'pod_status' : 'node_status_condition');
     if (objectId && objects?.length) {
       const objName = objects.find((item) => item.id === objectId)?.name;
       if (objName) {
@@ -295,8 +299,14 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
       const queryForm = isPod
         ? getK8SData(k8sQuery || {})
         : (k8sQuery || []).map((item: string) => ({ id: item, child: [] }));
+      const chartConfig = {
+        data: res[0]?.results || [],
+        metricsData,
+        hexColor,
+        queryMetric: queryMetric as string
+      }
       setQueryData(queryForm);
-      setChartData(dealChartData(res[0]?.results || [], metricsData, hexColor, queryMetric as string));
+      setChartData(dealChartData(chartConfig));
       setPagination((prev: Pagination) => ({
         ...prev,
         total: res[0]?.count || 0,
@@ -308,7 +318,13 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     }
   };
 
-  const dealChartData = (data: TableDataItem, metricsData = metricList, hexColor: NodeThresholdColor[], queryMetric: string) => {
+  const dealChartData = (chartConfig: ChartDataConfig) => {
+    const {
+      data,
+      metricsData = metricList,
+      hexColor,
+      queryMetric,
+    } = chartConfig;
     const chartList = data.map((item: TableDataItem) => {
       const metricName = queryMetric || (isPod ? 'pod_status' : 'node_status_condition');
       const tagetMerticItem = metricsData.find(
@@ -324,8 +340,10 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
             </>
           ),
           fill:
-            getEnumColor(tagetMerticItem, item[metricName]) ||
-            handleHexColor(item[metricName], hexColor),
+            queryMetric ?
+              handleHexColor(item[metricName], hexColor) :
+              handleFillColor(tagetMerticItem, item[metricName])
+          ,
         };
       }
       return {
@@ -336,6 +354,14 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     });
     return chartList;
   };
+
+  const handleFillColor = (item: MetricItem, id: number | string) => {
+    const color = getEnumColor(item, id);
+    if (!color) {
+      return 'var(--color-primary)';
+    }
+    return color;
+  }
 
   const handleHexColor = (value: any, colors: NodeThresholdColor[]) => {
     const item = colors.find((item) => value >= item.value);
@@ -369,7 +395,13 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
         `/monitor/api/monitor_instance/${objectId}/search/`,
         params
       );
-      const chartList = dealChartData(data.results || [], metricList, hexColor, queryMetric as string);
+      const chartConfig = {
+        data: data.results || [],
+        metricsData: metricList,
+        hexColor,
+        queryMetric: queryMetric as string
+      };
+      const chartList = dealChartData(chartConfig);
       setPagination((prev: Pagination) => ({
         ...prev,
         total: data.count || 0,
