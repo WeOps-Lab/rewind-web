@@ -67,14 +67,14 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
         <>{time ? convertToLocalizedTime(new Date(time * 1000) + '') : '--'}</>
       ),
     },
-    // {
-    //   title: t('monitor.intergrations.reportingStatus'),
-    //   dataIndex: 'status',
-    //   key: 'status',
-    //   width: 160,
-    //   filters: [],
-    //   render: (_, record) => (<>{record?.status ? record.status : '--'}</>),
-    // },
+    {
+      title: t('monitor.intergrations.reportingStatus'),
+      dataIndex: 'status',
+      key: 'status',
+      width: 160,
+      // filters: [],
+      render: (_, record) => (<>{record?.status ? t(`monitor.intergrations.${record.status}`) : '--'}</>),
+    },
     {
       title: t('common.action'),
       key: 'action',
@@ -179,12 +179,29 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     searchText,
   ]);
 
+  // 条件过滤请求
+  useEffect(() => {
+    if (objectId && objects?.length && !isLoading) {
+      onRefresh();
+    }
+  }, [colony, namespace, workload, node]);
+
   const getColoumnAndData = async () => {
     const params = {
       page: pagination.current,
       page_size: pagination.pageSize,
       add_metrics: true,
       name: searchText,
+      vm_params: {
+        instance_id: colony || '',
+        namespace: namespace || '',
+        node: node || '',
+        created_by_kind: workload || '',
+        created_by_name:
+          workloadList.find(
+            (item: TableDataItem) => item.created_by_kind === workload
+          )?.created_by_name || '',
+      },
     };
     const objParams = {
       monitor_object_id: objectId,
@@ -308,6 +325,16 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
       page_size: pagination.pageSize,
       add_metrics: true,
       name: searchText,
+      vm_params: {
+        instance_id: colony || '',
+        namespace: namespace || '',
+        node: node || '',
+        created_by_kind: workload || '',
+        created_by_name:
+          workloadList.find(
+            (item: TableDataItem) => item.created_by_kind === workload
+          )?.created_by_name || '',
+      },
     };
     if (type === 'clear') {
       params.name = '';
@@ -375,7 +402,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     setNameSpace(null);
     setWorkload(null);
     setNode(null);
-    // setChartData([]);
+    setTableData([]);
     setPagination((prev: Pagination) => ({
       ...prev,
       current: 1,
@@ -386,7 +413,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     setNameSpace(id);
     setWorkload(null);
     setNode(null);
-    // setChartData([]);
+    setTableData([]);
     setPagination((prev: Pagination) => ({
       ...prev,
       current: 1,
@@ -395,7 +422,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
 
   const handleWorkloadChange = (id: string) => {
     setWorkload(id);
-    // setChartData([]);
+    setTableData([]);
     setPagination((prev: Pagination) => ({
       ...prev,
       current: 1,
@@ -404,7 +431,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
 
   const handleNodeChange = (id: string) => {
     setNode(id);
-    // setChartData([]);
+    setTableData([]);
     setPagination((prev: Pagination) => ({
       ...prev,
       current: 1,

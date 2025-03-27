@@ -86,7 +86,6 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   }, [namespaceList, namespace]);
 
   const metricList = useMemo(() => {
-    console.log(mertics)
     if (objectId && objects?.length && mertics?.length) {
       const objName = objects.find((item) => item.id === objectId)?.name;
       if (objName) {
@@ -152,7 +151,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
       return;
     }
     timerRef.current = setInterval(() => {
-      getAssetInsts('timer');
+      getAssetInsts('timer', {
+        hexColor,
+        queryMetric,
+        metricList,
+      });
     }, frequence);
     return () => {
       clearTimer();
@@ -175,10 +178,6 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     }
   }, [tableLoading]);
 
-  useEffect(() => {
-    onRefresh();
-  },[hexColor, queryMetric]);
-
   const handleScroll = useCallback(() => {
     if (!hexGridRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = hexGridRef.current;
@@ -197,7 +196,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
           ...prev,
           current: prev.current + 1,
         }));
-        getAssetInsts('more');
+        getAssetInsts('more', {
+          hexColor,
+          queryMetric,
+          metricList,
+        });
       }
     }
   }, [pagination, chartData]);
@@ -267,7 +270,6 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   };
 
   const getInitData = async (name: string) => {
-    console.log('init data')
     const params = getParams();
     const objParams = {
       monitor_object_id: objectId,
@@ -294,7 +296,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
         ? getK8SData(k8sQuery || {})
         : (k8sQuery || []).map((item: string) => ({ id: item, child: [] }));
       setQueryData(queryForm);
-      setChartData(dealChartData(res[0]?.results || [], metricsData));
+      setChartData(dealChartData(res[0]?.results || [], metricsData, hexColor, queryMetric as string));
       setPagination((prev: Pagination) => ({
         ...prev,
         total: res[0]?.count || 0,
@@ -306,8 +308,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     }
   };
 
-  const dealChartData = (data: TableDataItem, metricsData = metricList) => {
-    console.log(metricsData)
+  const dealChartData = (data: TableDataItem, metricsData = metricList, hexColor: NodeThresholdColor[], queryMetric: string) => {
     const chartList = data.map((item: TableDataItem) => {
       const metricName = queryMetric || (isPod ? 'pod_status' : 'node_status_condition');
       const tagetMerticItem = metricsData.find(
@@ -324,7 +325,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
           ),
           fill:
             getEnumColor(tagetMerticItem, item[metricName]) ||
-            handleHexColor(item[metricName]),
+            handleHexColor(item[metricName], hexColor),
         };
       }
       return {
@@ -336,8 +337,8 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     return chartList;
   };
 
-  const handleHexColor = (value:any) => {
-    const item = hexColor.find((item) => value >= item.value);
+  const handleHexColor = (value: any, colors: NodeThresholdColor[]) => {
+    const item = colors.find((item) => value >= item.value);
     return item?.color || 'var(--color-primary)';
   }
 
@@ -346,7 +347,15 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     timerRef.current = null;
   };
 
-  const getAssetInsts = async (type?: string) => {
+  const getAssetInsts = async (type: string, {
+    hexColor,
+    queryMetric,
+    metricList,
+  }: {
+    hexColor: NodeThresholdColor[],
+    queryMetric: string | null,
+    metricList: MetricItem[]
+  }) => {
     const params = getParams();
     if (type === 'refresh') {
       params.page = 1;
@@ -360,7 +369,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
         `/monitor/api/monitor_instance/${objectId}/search/`,
         params
       );
-      const chartList = dealChartData(data.results || []);
+      const chartList = dealChartData(data.results || [], metricList, hexColor, queryMetric as string);
       setPagination((prev: Pagination) => ({
         ...prev,
         total: data.count || 0,
@@ -383,7 +392,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
       current: 1,
     }));
     setChartData([]);
-    getAssetInsts('refresh');
+    getAssetInsts('refresh', {
+      hexColor,
+      queryMetric,
+      metricList,
+    });
   };
 
   const openHiveModal = () => {
@@ -397,6 +410,16 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   }
 
   const onConfirm = (metric: string, colors: any) => {
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+    setChartData([]);
+    getAssetInsts('refresh', {
+      hexColor: colors,
+      queryMetric: metric,
+      metricList
+    });
     setQueryMetric(metric);
     setHexColor(colors);
   }

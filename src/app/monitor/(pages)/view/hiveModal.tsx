@@ -42,7 +42,6 @@ const HiveModal = forwardRef<ModalRef, HiveModalProps>(
     }));
 
     const handleSubmit = () => {
-      console.log(hiveConfig);
       onConfirm(selected, colorList);
       setVisible(false);
     }
