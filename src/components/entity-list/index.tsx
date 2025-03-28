@@ -88,10 +88,6 @@ const EntityList = <T,>({
             </h3>
           </div>
         </div>
-        <div className="h-[50px]">
-          <p
-            className={`text-xs mt-3 text-sm max-h-[66px] ${(isSingleButtonAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
-        </div>
         {tagList && tagList.length > 0 && (
           <div className="mt-2">
             {tagList.map((t: any, idx: number) => (
@@ -101,6 +97,10 @@ const EntityList = <T,>({
             ))}
           </div>
         )}
+        <div className="h-[50px]">
+          <p
+            className={`text-xs mt-3 text-sm max-h-[66px] ${(isSingleButtonAction && hoveredCard === id) ? 'line-clamp-2' : 'line-clamp-3'} ${styles.desc}`}>{description}</p>
+        </div>
         {isSingleButtonAction && (
           <Button
             size="small"
@@ -128,7 +128,7 @@ const EntityList = <T,>({
             placeholder={`${t('common.select')}...`}
             mode="multiple"
             maxTagCount="responsive"
-            className="w-[170px]"
+            className="w-[80px]"
             options={filterOptions}
             disabled={filterLoading}
             loading={filterLoading}

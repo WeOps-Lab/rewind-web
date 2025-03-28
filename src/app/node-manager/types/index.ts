@@ -12,6 +12,7 @@ interface ModalSuccess {
 interface ModalConfig {
   type: string;
   form?: TableDataItem;
+  title?: string,
   key?: string;
   ids?: string[];
   selectedsystem?: string;
