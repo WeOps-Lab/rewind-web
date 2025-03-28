@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash';
 interface CustomTableProps<T>
   extends Omit<TableProps<T>, 'bordered' | 'fieldSetting' | 'onSelectFields'> {
   bordered?: boolean;
+  size?: 'small' | 'middle' | 'large';
   fieldSetting?: {
     showSetting: boolean;
     displayFieldKeys: string[];
@@ -31,6 +32,7 @@ interface FieldRef {
 
 const CustomTable = <T extends object>({
   bordered = false,
+  size = "middle",
   fieldSetting = {
     showSetting: false,
     displayFieldKeys: [],
@@ -200,6 +202,7 @@ const CustomTable = <T extends object>({
       className={`relative ${customTableStyle.customTable}`}
       style={{ height: tableHeight ? `${tableHeight}px` : 'auto' }}>
       <Table
+        size={size}
         bordered={bordered}
         scroll={scroll}
         loading={loading}
@@ -225,6 +228,7 @@ const CustomTable = <T extends object>({
       </div>)}
       {fieldSetting.showSetting ? (
         <SettingFilled
+          style={{ top: size === 'small' ? 12 : size === 'middle' ? 16 : 20 }}
           className={customTableStyle.setting}
           onClick={showFieldSetting}
         />

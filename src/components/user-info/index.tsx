@@ -37,6 +37,7 @@ const UserInfo: React.FC = () => {
   const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const isConsole = process.env.NEXT_PUBLIC_IS_OPS_CONSOLE === 'true';
   const username = session?.username || 'Test';
 
   const federatedLogout = useCallback(async () => {
@@ -75,48 +76,58 @@ const UserInfo: React.FC = () => {
     }
   }, [flatGroups, pathname, router, setSelectedGroup]);
 
-  const dropdownItems: MenuProps['items'] = useMemo(() => [
-    {
-      key: 'themeSwitch',
-      label: <ThemeSwitcher />
-    },
-    {
-      key: 'version',
-      label: (
-        <div className="w-full flex justify-between items-center">
-          <span>{t('common.version')}</span>
-          <span className="text-xs text-[var(--color-text-4)]">3.1.0</span>
-        </div>
-      )
-    },
-    { type: 'divider' },
-    {
-      key: 'groups',
-      label: (
-        <div className="w-full flex justify-between items-center">
-          <span>{t('common.group')}</span>
-          <span className="text-xs text-[var(--color-text-4)]">{selectedGroup?.name}</span>
-        </div>
-      ),
-      children: flatGroups.map(group => ({
-        key: group.id,
-        label: (
-          <GroupItem
-            id={group.id}
-            name={group.name}
-            isSelected={selectedGroup?.name === group.name}
-            onClick={handleChangeGroup}
-          />
-        ),
-      })),
-    },
-    { type: 'divider' },
-    {
+  const dropdownItems: MenuProps['items'] = useMemo(() => {
+    const items: MenuProps['items'] = [
+      {
+        key: 'themeSwitch',
+        label: <ThemeSwitcher />,
+      },
+    ];
+
+    if (!isConsole) {
+      items.push(
+        {
+          key: 'version',
+          label: (
+            <div className="w-full flex justify-between items-center">
+              <span>{t('common.version')}</span>
+              <span className="text-xs text-[var(--color-text-4)]">3.1.0</span>
+            </div>
+          ),
+        },
+        { type: 'divider' },
+        {
+          key: 'groups',
+          label: (
+            <div className="w-full flex justify-between items-center">
+              <span>{t('common.group')}</span>
+              <span className="text-xs text-[var(--color-text-4)]">{selectedGroup?.name}</span>
+            </div>
+          ),
+          children: flatGroups.map((group) => ({
+            key: group.id,
+            label: (
+              <GroupItem
+                id={group.id}
+                name={group.name}
+                isSelected={selectedGroup?.name === group.name}
+                onClick={handleChangeGroup}
+              />
+            ),
+          })),
+        },
+        { type: 'divider' }
+      );
+    }
+
+    items.push({
       key: 'logout',
       label: t('common.logout'),
-      disabled: isLoading
-    },
-  ], [t, selectedGroup, flatGroups, handleChangeGroup, isLoading]);
+      disabled: isLoading,
+    });
+
+    return items;
+  }, [t, selectedGroup, flatGroups, handleChangeGroup, isLoading, isConsole]);
 
   const handleMenuClick = ({ key }: any) => {
     if (key === 'version') setVersionVisible(true);

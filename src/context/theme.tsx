@@ -11,15 +11,18 @@ import { dayjsLocales } from '@/constants/dayjsLocales';
 
 const ThemeContext = createContext<{
   theme: ThemeConfig;
+  themeName: string;
   setTheme: (isDark: boolean) => void;
     } | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState(lightTheme);
+  const [themeName, setThemeName] = useState<string>('light');
   const [locale, setLocale] = useState(locales.en);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setThemeName(savedTheme);
     if (savedTheme === 'dark') {
       setTheme(darkTheme);
       document.documentElement.classList.add('dark');
@@ -41,12 +44,14 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const changeTheme = (isDark: boolean) => {
     const newTheme = isDark ? darkTheme : lightTheme;
     setTheme(newTheme);
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    const name = isDark ? 'dark' : 'light';
+    setThemeName(name);
+    localStorage.setItem('theme', name);
     document.documentElement.classList.toggle('dark', isDark);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: changeTheme }}>
+    <ThemeContext.Provider value={{ theme, themeName, setTheme: changeTheme }}>
       <ConfigProvider theme={theme} locale={locale}>
         {children}
       </ConfigProvider>
