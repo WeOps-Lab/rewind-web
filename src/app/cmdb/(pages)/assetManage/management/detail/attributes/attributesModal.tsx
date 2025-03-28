@@ -217,14 +217,14 @@ const AttributesModal = forwardRef<AttrModalRef, AttrModalProps>(
               name="attr_id"
               rules={[{ required: true, message: t('required') }]}
             >
-              <Input />
+              <Input disabled={type === 'edit'} />
             </Form.Item>
             <Form.Item<AttrFieldType>
               label={t('type')}
               name="attr_type"
               rules={[{ required: true, message: t('required') }]}
             >
-              <Select>
+              <Select disabled={type === 'edit'}>
                 {attrTypeList.map((item) => {
                   return (
                     <Option value={item.id} key={item.id}>
@@ -326,7 +326,7 @@ const AttributesModal = forwardRef<AttrModalRef, AttrModalProps>(
               name="is_only"
               rules={[{ required: true, message: t('required') }]}
             >
-              <Radio.Group>
+              <Radio.Group disabled={type === 'edit'}>
                 <Radio value={true}>{t('yes')}</Radio>
                 <Radio value={false}>{t('no')}</Radio>
               </Radio.Group>

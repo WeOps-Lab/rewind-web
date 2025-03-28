@@ -118,7 +118,6 @@ const Attributes = () => {
               disabled={!isAdmin && record.is_pre}
               onClick={() =>
                 showDeleteConfirm({
-                  model_id: record.model_id,
                   attr_id: record.attr_id,
                 })
               }
@@ -147,7 +146,7 @@ const Attributes = () => {
     });
   };
 
-  const showDeleteConfirm = (row = { model_id: '', attr_id: '' }) => {
+  const showDeleteConfirm = (row = { attr_id: '' }) => {
     confirm({
       title: t('deleteTitle'),
       content: t('deleteContent'),
@@ -155,7 +154,7 @@ const Attributes = () => {
       onOk() {
         return new Promise(async (resolve) => {
           try {
-            await del(`/cmdb/api/model/${row.model_id}/attr/${row.attr_id}/`);
+            await del(`/cmdb/api/model/${modelId}/attr/${row.attr_id}/`);
             message.success(t('successfullyDeleted'));
             if (pagination.current > 1 && tableData.length === 1) {
               pagination.current--;
