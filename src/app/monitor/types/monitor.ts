@@ -337,3 +337,15 @@ export interface NodeWorkload {
   created_by_kind: string;
   created_by_name: string;
 }
+
+export interface NodeThresholdColor {
+  value: number,
+  color: string
+}
+
+export interface ChartDataConfig {
+  data: TableDataItem,
+  metricsData: MetricItem[],
+  hexColor: NodeThresholdColor[],
+  queryMetric: string
+}

@@ -1311,6 +1311,9 @@ const INDEX_CONFIG = [
       { type: 'value', key: 'iftotalInOctets' },
       { type: 'value', key: 'iftotalOutOctets' },
       { type: 'value', key: 'sysUpTime' },
+      { type: 'enum', key: 'ipmi_power_watts' },
+      { type: 'value', key: 'ipmi_temperature_celsius' },
+      { type: 'value', key: 'ipmi_voltage_volts' },
     ],
   },
   {
@@ -1321,7 +1324,49 @@ const INDEX_CONFIG = [
       { type: 'value', key: 'iftotalInOctets' },
       { type: 'value', key: 'iftotalOutOctets' },
       { type: 'value', key: 'sysUpTime' },
+      { type: 'enum', key: 'ipmi_power_watts' },
+      { type: 'value', key: 'ipmi_temperature_celsius' },
+      { type: 'value', key: 'ipmi_voltage_volts' },
     ],
+  },
+  {
+    name: 'vCenter',
+    id: 32,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'vmware_esxi_count' },
+      { type: 'value', key: 'vmware_datastore_count' },
+      { type: 'value', key: 'vmware_vm_count' },
+    ]
+  },
+  {
+    name: 'ESXI',
+    id: 33,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'esxi_cpu_usage_average_gauge' },
+      { type: 'value', key: 'esxi_mem_usage_average_gauge' },
+      { type: 'value', key: 'esxi_disk_read_average_gauge' },
+    ]
+  },
+  {
+    name: 'DataStorage',
+    id: 34,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'data_storage_disk_used_average_gauge' },
+      { type: 'enum', key: 'data_storage_store_accessible_gauge' },
+    ]
+  },
+  {
+    name: 'VM',
+    id: 35,
+    dashboardDisplay: [],
+    tableDiaplay: [
+      { type: 'value', key: 'vm_cpu_usage_average_gauge' },
+      { type: 'value', key: 'vm_mem_usage_average_gauge' },
+      { type: 'value', key: 'vm_disk_io_usage_gauge' },
+    ]
   },
 ];
 

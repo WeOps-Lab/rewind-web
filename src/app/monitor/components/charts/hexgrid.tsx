@@ -20,7 +20,7 @@ const HexGrid: React.FC<HexGridProps> = ({ data }) => {
   const calculateItemsPerRow = useCallback(() => {
     if (!containerRef.current) return;
     const containerWidth = containerRef.current.clientWidth - 44;
-    const hexWidth = 88; // 六边形宽度（80px） + 间距（8px）
+    const hexWidth = 110; // 六边形宽度（104px） + 间距（6px）
     setHexPerRow(Math.floor(containerWidth / hexWidth));
   }, []);
 
@@ -54,14 +54,14 @@ const HexGrid: React.FC<HexGridProps> = ({ data }) => {
     return (
       <Tooltip key={index} title={hex.description} placement="top">
         <div
-          className="w-[80px] h-[80px] flex justify-center items-center"
+          className="w-[104px] h-[80px] flex justify-center items-center"
           style={{
             clipPath:
               'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
             backgroundColor: hex.fill,
             color: 'white',
             fontWeight: 'bold',
-            margin: '4px',
+            margin: '2px 2px 0px 2px',
             transform: 'scale(1, 1.3)',
           }}
         >
@@ -72,11 +72,11 @@ const HexGrid: React.FC<HexGridProps> = ({ data }) => {
   };
 
   return (
-    <div ref={containerRef} className="h-full flex flex-col items-center pt-2">
+    <div ref={containerRef} className="h-full flex flex-col items-center pt-3">
       {rows.map((row, rowIndex) => (
         <div
           key={rowIndex}
-          className={`flex self-start ${rowIndex % 2 === 1 ? 'ml-[44px]' : ''}`}
+          className={`flex self-start ${rowIndex % 2 === 1 ? 'ml-[53px]' : ''}`}
         >
           {row.map((hex, index) => renderHexagon(hex, index))}
         </div>

@@ -8,10 +8,16 @@ import React, {
 } from 'react';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
-import { MetricItem, ViewListProps } from '@/app/monitor/types/monitor';
-import { Pagination, TableDataItem, HexagonData } from '@/app/monitor/types';
+import { 
+  MetricItem, 
+  ViewListProps, 
+  NodeThresholdColor, 
+  ChartDataConfig 
+} from '@/app/monitor/types/monitor';
+import { Pagination, TableDataItem, HexagonData, ModalRef } from '@/app/monitor/types';
 import TimeSelector from '@/components/time-selector';
 import HexGridChart from '@/app/monitor/components/charts/hexgrid';
+import HiveModal from './hiveModal';
 import { EditOutlined } from '@ant-design/icons';
 import {
   getK8SData,
@@ -29,6 +35,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   const { get, post, isLoading } = useApiClient();
   const { t } = useTranslation();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const modalRef = useRef<ModalRef>(null);
   const hexGridRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef<boolean>(false); // 用于标记是否正在加载数据
   const [tableLoading, setTableLoading] = useState<boolean>(false);
@@ -46,6 +53,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
   const [workload, setWorkload] = useState<string | null>(null);
   const [node, setNode] = useState<string | null>(null);
   const [queryMetric, setQueryMetric] = useState<string | null>(null);
+  const [hexColor, setHexColor] = useState<NodeThresholdColor[]>([
+    { value: 70, color: '#ec1212' },
+    { value: 30, color: '#faad14' },
+    { value: 0, color: '#10e433' },
+  ]);
 
   const namespaceList = useMemo(() => {
     if (queryData.length && colony) {
@@ -143,7 +155,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
       return;
     }
     timerRef.current = setInterval(() => {
-      getAssetInsts('timer');
+      getAssetInsts('timer', {
+        hexColor,
+        queryMetric,
+        metricList,
+      });
     }, frequence);
     return () => {
       clearTimer();
@@ -184,7 +200,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
           ...prev,
           current: prev.current + 1,
         }));
-        getAssetInsts('more');
+        getAssetInsts('more', {
+          hexColor,
+          queryMetric,
+          metricList,
+        });
       }
     }
   }, [pagination, chartData]);
@@ -279,8 +299,14 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
       const queryForm = isPod
         ? getK8SData(k8sQuery || {})
         : (k8sQuery || []).map((item: string) => ({ id: item, child: [] }));
+      const chartConfig = {
+        data: res[0]?.results || [],
+        metricsData,
+        hexColor,
+        queryMetric: queryMetric as string
+      }
       setQueryData(queryForm);
-      setChartData(dealChartData(res[0]?.results || [], metricsData));
+      setChartData(dealChartData(chartConfig));
       setPagination((prev: Pagination) => ({
         ...prev,
         total: res[0]?.count || 0,
@@ -292,9 +318,15 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     }
   };
 
-  const dealChartData = (data: TableDataItem, metricsData = metricList) => {
+  const dealChartData = (chartConfig: ChartDataConfig) => {
+    const {
+      data,
+      metricsData = metricList,
+      hexColor,
+      queryMetric,
+    } = chartConfig;
     const chartList = data.map((item: TableDataItem) => {
-      const metricName = isPod ? 'pod_status' : 'node_status_condition';
+      const metricName = queryMetric || (isPod ? 'pod_status' : 'node_status_condition');
       const tagetMerticItem = metricsData.find(
         (item) => item.name === metricName
       );
@@ -308,8 +340,10 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
             </>
           ),
           fill:
-            getEnumColor(tagetMerticItem, item[metricName]) ||
-            'var(--color-primary)',
+            queryMetric ?
+              handleHexColor(item[metricName], hexColor) :
+              handleFillColor(tagetMerticItem, item[metricName])
+          ,
         };
       }
       return {
@@ -321,12 +355,33 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
     return chartList;
   };
 
+  const handleFillColor = (item: MetricItem, id: number | string) => {
+    const color = getEnumColor(item, id);
+    if (!color) {
+      return 'var(--color-primary)';
+    }
+    return color;
+  }
+
+  const handleHexColor = (value: any, colors: NodeThresholdColor[]) => {
+    const item = colors.find((item) => value >= item.value);
+    return item?.color || 'var(--color-primary)';
+  }
+
   const clearTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = null;
   };
 
-  const getAssetInsts = async (type?: string) => {
+  const getAssetInsts = async (type: string, {
+    hexColor,
+    queryMetric,
+    metricList,
+  }: {
+    hexColor: NodeThresholdColor[],
+    queryMetric: string | null,
+    metricList: MetricItem[]
+  }) => {
     const params = getParams();
     if (type === 'refresh') {
       params.page = 1;
@@ -340,7 +395,13 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
         `/monitor/api/monitor_instance/${objectId}/search/`,
         params
       );
-      const chartList = dealChartData(data.results || []);
+      const chartConfig = {
+        data: data.results || [],
+        metricsData: metricList,
+        hexColor,
+        queryMetric: queryMetric as string
+      };
+      const chartList = dealChartData(chartConfig);
       setPagination((prev: Pagination) => ({
         ...prev,
         total: data.count || 0,
@@ -363,8 +424,37 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
       current: 1,
     }));
     setChartData([]);
-    getAssetInsts('refresh');
+    getAssetInsts('refresh', {
+      hexColor,
+      queryMetric,
+      metricList,
+    });
   };
+
+  const openHiveModal = () => {
+    modalRef.current?.showModal({
+      type: '',
+      title: '',
+      form: metricList,
+      query: queryMetric,
+      color: hexColor
+    });
+  }
+
+  const onConfirm = (metric: string, colors: any) => {
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+    setChartData([]);
+    getAssetInsts('refresh', {
+      hexColor: colors,
+      queryMetric: metric,
+      metricList
+    });
+    setQueryMetric(metric);
+    setHexColor(colors);
+  }
 
   return (
     <div className="w-full h-[calc(100vh-216px)]">
@@ -438,8 +528,11 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
               {t('monitor.views.displayIndicators')}
             </span>
             <Select
+              className='text-center'
+              disabled
               value={queryMetric}
               style={{ width: 120 }}
+              suffixIcon={null}
               placeholder={t('monitor.views.editIndicators')}
               onChange={handleQueryMetricChange}
             >
@@ -449,7 +542,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
                 </Option>
               ))}
             </Select>
-            <EditOutlined className="ml-[10px] cursor-pointer" />
+            <EditOutlined className="ml-[10px] cursor-pointer" onClick={openHiveModal} />
           </div>
           <TimeSelector
             onlyRefresh
@@ -467,6 +560,7 @@ const ViewHive: React.FC<ViewListProps> = ({ objects, objectId }) => {
           <HexGridChart data={chartData}></HexGridChart>
         </Spin>
       </div>
+      <HiveModal ref={modalRef} onConfirm={onConfirm} />
     </div>
   );
 };

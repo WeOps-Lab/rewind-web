@@ -1,12 +1,13 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
-import { Input, Button, Progress } from 'antd';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { Input, Button, Progress, Select } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import {
   deepClone,
   getEnumValueUnit,
   getEnumColor,
+  getK8SData,
 } from '@/app/monitor/utils/common';
 import { useRouter } from 'next/navigation';
 import {
@@ -28,6 +29,8 @@ import TimeSelector from '@/components/time-selector';
 import { INDEX_CONFIG } from '@/app/monitor/constants/monitor';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import Permission from '@/components/permission';
+import { ListItem } from '@/types';
+const { Option } = Select;
 
 const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
   const { get, isLoading } = useApiClient();
@@ -65,6 +68,14 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
       ),
     },
     {
+      title: t('monitor.intergrations.reportingStatus'),
+      dataIndex: 'status',
+      key: 'status',
+      width: 160,
+      // filters: [],
+      render: (_, record) => (<>{record?.status ? t(`monitor.intergrations.${record.status}`) : '--'}</>),
+    },
+    {
       title: t('common.action'),
       key: 'action',
       dataIndex: 'action',
@@ -90,6 +101,46 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
   ];
   const [tableColumn, setTableColumn] = useState<ColumnItem[]>(columns);
   const [metrics, setMetrics] = useState<MetricItem[]>([]);
+  const [namespace, setNameSpace] = useState<string | null>(null);
+  const [workload, setWorkload] = useState<string | null>(null);
+  const [node, setNode] = useState<string | null>(null);
+  const [colony, setColony] = useState<string | null>(null);
+  const [queryData, setQueryData] = useState<any[]>([]);
+
+  const isPod = useMemo(() => {
+    return objects.find((item) => item.id === objectId)?.name === 'Pod';
+  }, [objects, objectId]);
+
+  const namespaceList = useMemo(() => {
+    if (queryData.length && colony) {
+      return queryData.find((item) => item.id === colony)?.child || [];
+    }
+    return [];
+  }, [colony, queryData]);
+
+  const workloadList = useMemo(() => {
+    if (namespaceList.length && namespace) {
+      return (
+        (
+          namespaceList.find((item: ListItem) => item.id === namespace)
+            ?.child || []
+        ).filter((item: ListItem) => item.id === 'workload')[0]?.child || []
+      );
+    }
+    return [];
+  }, [namespaceList, namespace]);
+
+  const nodeList = useMemo(() => {
+    if (namespaceList.length && namespace) {
+      return (
+        (
+          namespaceList.find((item: ListItem) => item.id === namespace)
+            ?.child || []
+        ).filter((item: ListItem) => item.id === 'node')[0]?.child || []
+      );
+    }
+    return [];
+  }, [namespaceList, namespace]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -128,20 +179,48 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     searchText,
   ]);
 
-  const getColoumnAndData = async () => {
-    const params = {
+  // 条件过滤请求
+  useEffect(() => {
+    if (objectId && objects?.length && !isLoading) {
+      onRefresh();
+    }
+  }, [colony, namespace, workload, node]);
+
+  const getParams = () => {
+    return {
       page: pagination.current,
       page_size: pagination.pageSize,
       add_metrics: true,
       name: searchText,
-    };
+      vm_params: {
+        instance_id: colony || '',
+        namespace: namespace || '',
+        node: node || '',
+        created_by_kind: workload || '',
+        created_by_name:
+          workloadList.find(
+            (item: TableDataItem) => item.created_by_kind === workload
+          )?.created_by_name || '',
+      },
+    }
+  }
+
+  const getColoumnAndData = async () => {
+    const params = getParams();
     const objParams = {
       monitor_object_id: objectId,
     };
+    const objName = objects.find((item) => item.id === objectId)?.name;
 
     const getInstList = get(`/monitor/api/monitor_instance/${objectId}/list/`, {
       params,
     });
+    const getQueryParams = get(
+      `/monitor/api/monitor_instance/query_params_enum/${objName}/`,
+      {
+        params: objParams,
+      }
+    );
     const getMetrics = get('/monitor/api/metrics/', {
       params: objParams,
     });
@@ -150,7 +229,12 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     });
     setTableLoading(true);
     try {
-      const res = await Promise.all([getInstList, getMetrics, getPlugins]);
+      const res = await Promise.all([getInstList, getMetrics, getPlugins, getQueryParams]);
+      const k8sQuery = res[3];
+      const queryForm = isPod
+        ? getK8SData(k8sQuery || {})
+        : (k8sQuery || []).map((item: string) => ({ id: item, child: [] }));
+      setQueryData(queryForm);
       const _plugins = res[2].map((item: IntergrationItem) => ({
         label: COLLECT_TYPE_MAP[item.name || ''],
         value: item.id,
@@ -240,12 +324,7 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
   };
 
   const getAssetInsts = async (objectId: React.Key, type?: string) => {
-    const params = {
-      page: pagination.current,
-      page_size: pagination.pageSize,
-      add_metrics: true,
-      name: searchText,
-    };
+    const params = getParams();
     if (type === 'clear') {
       params.name = '';
     }
@@ -307,13 +386,54 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     console.log(fields);
   };
 
+  const handleColonyChange = (id: string) => {
+    setColony(id);
+    setNameSpace(null);
+    setWorkload(null);
+    setNode(null);
+    setTableData([]);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
+  const handleNameSpaceChange = (id: string) => {
+    setNameSpace(id);
+    setWorkload(null);
+    setNode(null);
+    setTableData([]);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
+  const handleWorkloadChange = (id: string) => {
+    setWorkload(id);
+    setTableData([]);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
+  const handleNodeChange = (id: string) => {
+    setNode(id);
+    setTableData([]);
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
   return (
     <div className="w-full">
       <div className="flex justify-between mb-[10px]">
         <div className="flex items-center">
           <Input
             allowClear
-            className="w-[320px]"
+            className={showTab ? 'w-[240px]' : 'w-[320px]'}
             placeholder={t('common.searchPlaceHolder')}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -321,6 +441,71 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
             onClear={clearText}
           ></Input>
         </div>
+        {showTab && (
+          <div>
+            <span className="text-[14px] mr-[10px]">
+              {t('monitor.views.filterOptions')}
+            </span>
+            <Select
+              value={colony}
+              allowClear
+              style={{ width: 120 }}
+              placeholder={t('monitor.views.colony')}
+              onChange={handleColonyChange}
+            >
+              {queryData.map((item) => (
+                <Option key={item.id} value={item.id}>
+                  {item.id}
+                </Option>
+              ))}
+            </Select>
+            {isPod && (
+              <>
+                <Select
+                  value={namespace}
+                  allowClear
+                  className="mx-[10px]"
+                  style={{ width: 120 }}
+                  placeholder={t('monitor.views.namespace')}
+                  onChange={handleNameSpaceChange}
+                >
+                  {namespaceList.map((item: ListItem) => (
+                    <Option key={item.id} value={item.id}>
+                      {item.id}
+                    </Option>
+                  ))}
+                </Select>
+                <Select
+                  value={workload}
+                  allowClear
+                  className="mr-[10px]"
+                  style={{ width: 120 }}
+                  placeholder={t('monitor.views.workload')}
+                  onChange={handleWorkloadChange}
+                >
+                  {workloadList.map((item: TableDataItem, index: number) => (
+                    <Option key={index} value={item.created_by_kind}>
+                      {item.created_by_name}
+                    </Option>
+                  ))}
+                </Select>
+                <Select
+                  value={node}
+                  allowClear
+                  style={{ width: 120 }}
+                  placeholder={t('monitor.views.node')}
+                  onChange={handleNodeChange}
+                >
+                  {nodeList.map((item: string, index: number) => (
+                    <Option key={index} value={item}>
+                      {item}
+                    </Option>
+                  ))}
+                </Select>
+              </>
+            )}
+          </div>
+        )}
         <TimeSelector
           onlyRefresh
           onFrequenceChange={onFrequenceChange}
