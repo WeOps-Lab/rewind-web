@@ -15,7 +15,8 @@ import {
   Select,
   Cascader,
   InputNumber,
-  ColorPicker
+  ColorPicker,
+  theme,
 } from 'antd';
 import { AggregationColor } from 'antd/es/color-picker/color';
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons';
@@ -29,6 +30,8 @@ import {
   EnumItem,
 } from '@/app/monitor/types/monitor';
 import { useTranslation } from '@/utils/i18n';
+import type { ColorPickerProps } from 'antd';
+import { generate, green, presetPalettes, red } from '@ant-design/colors';
 import { deepClone, findCascaderPath } from '@/app/monitor/utils/common';
 import { UNIT_LIST } from '@/app/monitor/constants/monitor';
 const { Option } = Select;
@@ -40,10 +43,26 @@ interface ModalProps {
   pluginId: number;
 }
 
+type Presets = Required<ColorPickerProps>['presets'][number];
+
+const genPresets = (presets = presetPalettes) => {
+  return Object.entries(presets).map<Presets>(([label, colors]) => ({
+    label,
+    colors,
+    key: label,
+  }));
+};
+
 const MetricModal = forwardRef<ModalRef, ModalProps>(
   ({ onSuccess, groupList, monitorObject, pluginId }, ref) => {
     const { post, put } = useApiClient();
     const { t } = useTranslation();
+    const { token } = theme.useToken();
+    const presets = genPresets({
+      primary: generate(token.colorPrimary),
+      red,
+      green,
+    });
     const formRef = useRef<FormInstance>(null);
     const unitList = useRef<CascaderItem[]>(
       deepClone(UNIT_LIST).map((item: CascaderItem) => ({
@@ -231,7 +250,7 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
       const _enumList = deepClone(enumList);
       _enumList[index].color = value.toHexString();
       setEnumList(_enumList);
-    }
+    };
 
     const deleteDimensiontem = (index: number) => {
       const _dimensions = deepClone(dimensions);
@@ -459,10 +478,14 @@ const MetricModal = forwardRef<ModalRef, ModalProps>(
                             />
                             <ColorPicker
                               className="w-[160px] ml-2"
-                              value={(item.color ? item.color as string : "#000000")}
+                              value={
+                                item.color ? (item.color as string) : '#000000'
+                              }
                               showText
+                              presets={presets}
+                              placement="bottom"
                               onChange={(value) => {
-                                handleEnumColorChange(value, index)
+                                handleEnumColorChange(value, index);
                               }}
                             />
                           </div>

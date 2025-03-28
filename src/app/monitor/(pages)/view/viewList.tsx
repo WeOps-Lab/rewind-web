@@ -73,7 +73,11 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
       key: 'status',
       width: 160,
       // filters: [],
-      render: (_, record) => (<>{record?.status ? t(`monitor.intergrations.${record.status}`) : '--'}</>),
+      render: (_, record) => (
+        <>
+          {record?.status ? t(`monitor.intergrations.${record.status}`) : '--'}
+        </>
+      ),
     },
     {
       title: t('common.action'),
@@ -202,8 +206,8 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
             (item: TableDataItem) => item.created_by_kind === workload
           )?.created_by_name || '',
       },
-    }
-  }
+    };
+  };
 
   const getColoumnAndData = async () => {
     const params = getParams();
@@ -229,7 +233,12 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     });
     setTableLoading(true);
     try {
-      const res = await Promise.all([getInstList, getMetrics, getPlugins, getQueryParams]);
+      const res = await Promise.all([
+        getInstList,
+        getMetrics,
+        getPlugins,
+        getQueryParams,
+      ]);
       const k8sQuery = res[3];
       const queryForm = isPod
         ? getK8SData(k8sQuery || {})
@@ -431,9 +440,74 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
     <div className="w-full">
       <div className="flex justify-between mb-[10px]">
         <div className="flex items-center">
+          {showTab && (
+            <div>
+              <span className="text-[14px] mr-[10px]">
+                {t('monitor.views.filterOptions')}
+              </span>
+              <Select
+                value={colony}
+                allowClear
+                style={{ width: 120 }}
+                placeholder={t('monitor.views.colony')}
+                onChange={handleColonyChange}
+              >
+                {queryData.map((item) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.id}
+                  </Option>
+                ))}
+              </Select>
+              {isPod && (
+                <>
+                  <Select
+                    value={namespace}
+                    allowClear
+                    className="mx-[10px]"
+                    style={{ width: 120 }}
+                    placeholder={t('monitor.views.namespace')}
+                    onChange={handleNameSpaceChange}
+                  >
+                    {namespaceList.map((item: ListItem) => (
+                      <Option key={item.id} value={item.id}>
+                        {item.id}
+                      </Option>
+                    ))}
+                  </Select>
+                  <Select
+                    value={workload}
+                    allowClear
+                    className="mr-[10px]"
+                    style={{ width: 120 }}
+                    placeholder={t('monitor.views.workload')}
+                    onChange={handleWorkloadChange}
+                  >
+                    {workloadList.map((item: TableDataItem, index: number) => (
+                      <Option key={index} value={item.created_by_kind}>
+                        {item.created_by_name}
+                      </Option>
+                    ))}
+                  </Select>
+                  <Select
+                    value={node}
+                    allowClear
+                    style={{ width: 120 }}
+                    placeholder={t('monitor.views.node')}
+                    onChange={handleNodeChange}
+                  >
+                    {nodeList.map((item: string, index: number) => (
+                      <Option key={index} value={item}>
+                        {item}
+                      </Option>
+                    ))}
+                  </Select>
+                </>
+              )}
+            </div>
+          )}
           <Input
             allowClear
-            className={showTab ? 'w-[240px]' : 'w-[320px]'}
+            className="w-[240px] ml-[8px]"
             placeholder={t('common.searchPlaceHolder')}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -441,71 +515,6 @@ const ViewList: React.FC<ViewListProps> = ({ objects, objectId, showTab }) => {
             onClear={clearText}
           ></Input>
         </div>
-        {showTab && (
-          <div>
-            <span className="text-[14px] mr-[10px]">
-              {t('monitor.views.filterOptions')}
-            </span>
-            <Select
-              value={colony}
-              allowClear
-              style={{ width: 120 }}
-              placeholder={t('monitor.views.colony')}
-              onChange={handleColonyChange}
-            >
-              {queryData.map((item) => (
-                <Option key={item.id} value={item.id}>
-                  {item.id}
-                </Option>
-              ))}
-            </Select>
-            {isPod && (
-              <>
-                <Select
-                  value={namespace}
-                  allowClear
-                  className="mx-[10px]"
-                  style={{ width: 120 }}
-                  placeholder={t('monitor.views.namespace')}
-                  onChange={handleNameSpaceChange}
-                >
-                  {namespaceList.map((item: ListItem) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.id}
-                    </Option>
-                  ))}
-                </Select>
-                <Select
-                  value={workload}
-                  allowClear
-                  className="mr-[10px]"
-                  style={{ width: 120 }}
-                  placeholder={t('monitor.views.workload')}
-                  onChange={handleWorkloadChange}
-                >
-                  {workloadList.map((item: TableDataItem, index: number) => (
-                    <Option key={index} value={item.created_by_kind}>
-                      {item.created_by_name}
-                    </Option>
-                  ))}
-                </Select>
-                <Select
-                  value={node}
-                  allowClear
-                  style={{ width: 120 }}
-                  placeholder={t('monitor.views.node')}
-                  onChange={handleNodeChange}
-                >
-                  {nodeList.map((item: string, index: number) => (
-                    <Option key={index} value={item}>
-                      {item}
-                    </Option>
-                  ))}
-                </Select>
-              </>
-            )}
-          </div>
-        )}
         <TimeSelector
           onlyRefresh
           onFrequenceChange={onFrequenceChange}
