@@ -10,6 +10,7 @@ import { useTranslation } from "@/utils/i18n";
 import type { collectorItem } from "@/app/node-manager/types/collector";
 import CollectorModal from "./collectorModal";
 import { ModalRef } from "@/app/node-manager/types";
+import { Option } from "@/types";
 
 const Collector = () => {
 
@@ -17,46 +18,41 @@ const Collector = () => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
   const { getCollectorlist } = useApiCollector();
-  const formRef = useRef<ModalRef>(null);
+  const modalRef = useRef<ModalRef>(null);
   const [value, setValue] = useState<string | number>();
   const [cards, setCards] = useState<collectorItem[]>([]);
-  const items = [
+  const [selected, setSelected] = useState<string[]>([]);
+  const [options, setOptions] = useState<Option[]>([]);
+  const menuItem = [
     {
-      key: '1', label: (
-        <div className="w-full flex justify-between items-center">
-          <span className="text-xs text-[var(--color-text-4)]">{t('common.edit')}</span>
-        </div>
-      ), 
-      disabled: true
+      key: 'edit',
+      title: 'edit',
+      config: {
+        title: 'editCollector', type: 'edit'
+      }
     },
     {
-      key: '2', label: (
-        <div className="w-full flex justify-between items-center">
-          <span className="text-xs text-[var(--color-text-4)]">{t('common.edit')}</span>
-        </div>
-      )
-    },
-    {
-      key: '3', label: (
-        <div className="w-full flex justify-between items-center">
-          <span className="text-xs text-[var(--color-text-4)]">{t('common.edit')}</span>
-        </div>
-      )
-    },
+      key: 'upload',
+      title: 'uploadPackge',
+      config: {
+        title: 'uploadPackge', type: 'upload'
+      }
+    }
   ];
-  const filterOptions = [
-    { value: 'jack', label: 'Jack' },
-    { value: 'lucy', label: 'Lucy' },
-    { value: 'Yiminghe', label: 'yiminghe' },
-    { value: 'disabled', label: 'Disabled', disabled: true },
+  const titleItem = [
+    {
+      label: `${t('node-manager.cloudregion.node.controller')}(${cards.length})`,
+      value: 'controller',
+    },
+    {
+      label: `${t('node-manager.cloudregion.node.collector')}(${cards.length})`,
+      value: 'collector',
+    }
   ]
-  const menuActions = () => (
-    <Menu items={items} />
-  );
 
   useEffect(() => {
     if (!isLoading) {
-      fetchCollectorlist()
+      fetchCollectorlist();
     }
   }, [isLoading])
 
@@ -64,32 +60,88 @@ const Collector = () => {
     router.push(`/node-manager/collector/detail?id=${item.id}`);
   };
 
-  const fetchCollectorlist = (value?: string) => {
+  const fetchCollectorlist = (value?: string, selected?: string[]) => {
     getCollectorlist({ search: value }).then((res) => {
-      const tempdata = res.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        description: item.introduction,
-        icon: 'caijiqizongshu',
-        tagList: [item.node_operating_system]
-      }))
+      const _options: Option[] = []
+      let tempdata = res.map((item: any) => {
+        _options.push({ value: item.node_operating_system, label: item.node_operating_system });
+        return ({
+          id: item.id,
+          name: item.name,
+          description: item.introduction,
+          icon: 'caijiqizongshu',
+          tagList: [item.node_operating_system]
+        })
+      });
+      if(selected?.length) {
+        tempdata = tempdata.filter((item: any) => {
+          return item.tagList.every((tag: string) => selected?.includes(tag));
+        });
+      }
+      console.log(tempdata);
       setCards(tempdata);
-      setValue(`All(${tempdata.length})`)
+      setValue(`${t('node-manager.cloudregion.controller')}(${tempdata.length})`);
+      setOptions(_options);
     })
+  };
+
+  const openModal = (config: any) => {
+    modalRef.current?.showModal({
+      title: config?.title,
+      type: config?.type,
+      form: config?.form
+    })
+  };
+
+  const handleSubmit = () => {
+    console.log('success');
   }
+
+  const menuActions = (value: any) => {
+    return (<Menu>
+      {menuItem.map((item) =>
+        <Menu.Item
+          key={item.title}
+          onClick={() => openModal({ ...item.config, form: value })}>{t(`node-manager.cloudregion.Configuration.${item.title}`)}
+        </Menu.Item>
+      )}
+    </Menu>)
+  };
+
+  const changeFilter = (selected: string[]) => {
+    fetchCollectorlist('', selected);
+    setSelected(selected);
+  };
+
+  const ifOpenAddModal = () => {
+    if(value === 'collector') {
+      return {
+        openModal: () => openModal({title: 'add', type: 'add'})
+      }
+    }
+    return {}
+  }
+
 
   return (
     <div className={`${collectorstyle.collection}`}>
       {/* 顶部的提示信息 */}
       <Segmented
         className="custom-tabs"
-        options={[`All(${cards.length})`, `Elastic(${cards.length})`]}
+        options={titleItem}
         value={value}
         onChange={setValue}
       />
       {/* 卡片的渲染 */}
-      <EntityList data={cards} loading={false} menuActions={menuActions} filter filterOptions={filterOptions} onSearch={(value: string) => { fetchCollectorlist(value) }} onCardClick={(item: collectorItem) => navigateToCollectorDetail(item)}></EntityList>
-      <CollectorModal ref={formRef} />
+      <EntityList
+        data={cards}
+        loading={false}
+        menuActions={(value) => menuActions(value)}
+        filter filterOptions={options} changeFilter={changeFilter}
+        {...ifOpenAddModal()}
+        onSearch={(value: string) => { fetchCollectorlist(value, selected) }}
+        onCardClick={(item: collectorItem) => navigateToCollectorDetail(item)}></EntityList>
+      <CollectorModal ref={modalRef} handleSubmit={handleSubmit}  />
     </div>
   );
 }

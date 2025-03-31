@@ -40,6 +40,7 @@
         "start": "开启采集器",
         "restart": "重启采集器",
         "stop": "停止采集器",
+        "controller": "控制器",
         "config": "配置",
         "btntext1": "如果您没有所需的配置文件，请单击",
         "btntext2": "这里",
@@ -55,6 +56,7 @@
       },
       "Configuration": {
         "name": "姓名",
+        "edit": "编辑",
         "Collector": "采集器",
         "System": "操作系统",
         "count": "节点总数",
@@ -71,13 +73,17 @@
         "variable": "变量",
         "description": "描述",
         "parameterdes": "参数说明",
-        "varconfig": "这些变量可用于配置中"
+        "varconfig": "这些变量可用于配置中",
+        "editCollector": "编辑采集器",
+        "uploadPackge": "上传包",
+        "version": "版本",
+        "importFile": "导入文件"
       },
       "variable": {
         "Name": "名字",
         "Value": "数值",
         "Desc": "描述",
-        "name": "名字",
+        "name": "名称",
         "value": "数值",
         "desc": "描述",
         "deletevariable": "删除变量",

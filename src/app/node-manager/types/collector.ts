@@ -17,5 +17,5 @@ export interface collectorItem {
   name: string;
   description: string;
   icon: string;
-  tag: string[];
+  tagList: string[];
 }
