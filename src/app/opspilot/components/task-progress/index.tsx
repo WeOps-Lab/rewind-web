@@ -15,7 +15,7 @@ const TaskProgress: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const { get } = useApiClient();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams ? searchParams.get('id') : null;
 
   useEffect(() => {
     const params = {
