@@ -11,6 +11,9 @@ const CONFIG = {
   defaultHeight: 80,
   maxExpandedLevel: 3,
   childNodeVerticalGap: 80,
+  minVerticalGap: 100,
+  maxVerticalGap: 150,
+  nodeRatioThreshold: 0.5,
 };
 
 export const InitNode: React.FC<TopoDataProps> = ({
@@ -26,7 +29,6 @@ export const InitNode: React.FC<TopoDataProps> = ({
       const dstResult: any = topoData.dst_result;
       const srcData = transformData(srcResult, true);
       const dstData = transformData(dstResult, false);
-      // 合并srcData.nodes和dstData.nodes的第一个节点的children
       const srcFirstNode = srcData?.nodes?.[0];
       const dstFirstNode = dstData?.nodes?.[0];
       if (srcFirstNode && dstFirstNode) {
@@ -84,7 +86,6 @@ export const InitNode: React.FC<TopoDataProps> = ({
       },
     });
 
-    // 处理子节点的显示/隐藏
     const processChildren = (children: NodeData[], level: number) => {
       children.forEach((child: NodeData) => {
         const childNode = graph?.getCellById(child._id.toString());
@@ -92,7 +93,6 @@ export const InitNode: React.FC<TopoDataProps> = ({
           const childData = childNode.getData();
           const isSrcNode = childData.isSrc;
           if ((isSrcBtn && isSrcNode) || (!isSrcBtn && !isSrcNode)) {
-            // 收起时递归处理所有子孙节点
             if (isExpanded) {
               childNode.setData({ expanded: false });
               childNode.hide();
@@ -100,7 +100,6 @@ export const InitNode: React.FC<TopoDataProps> = ({
                 processChildren(childData.children, level + 1);
               }
             } else {
-              // 展开时只显示直接子节点
               if (level === 1) {
                 childNode.show();
               }
@@ -140,7 +139,6 @@ export const InitNode: React.FC<TopoDataProps> = ({
     return modelList.find((item) => item.model_id === id)?.model_name || '--';
   };
 
-  // 计算节点的展开按钮路径
   const getExpandBtnPath = (hasChild: boolean, isExpanded: boolean) => {
     if (!hasChild) return 'M 3 6 L 9 6 M 1 1 L 11 1 L 11 11 L 1 11 Z';
     return isExpanded
@@ -148,7 +146,6 @@ export const InitNode: React.FC<TopoDataProps> = ({
       : 'M 3 6 L 9 6 M 6 3 L 6 9 M 1 1 L 11 1 L 11 11 L 1 11 Z';
   };
 
-  // 收集层级信息
   const collectLevelInfo = (
     node: NodeData,
     parentId: string | null,
@@ -175,7 +172,6 @@ export const InitNode: React.FC<TopoDataProps> = ({
     }
   };
 
-  // 计算节点位置
   const calculateNodePosition = (
     levelNodes: {
       [key: number]: Array<{
@@ -192,52 +188,60 @@ export const InitNode: React.FC<TopoDataProps> = ({
     const rootId = levelNodes[1][0].id;
     nodePositions[rootId] = { x: 0, y: 0 };
 
-    // 处理第2-3层节点
-    for (let level = 2; level <= 3; level++) {
-      if (levelNodes[level]) {
-        const currentLevelNodes = levelNodes[level];
-        const startY = -(currentLevelNodes.length - 1) * CONFIG.verticalGap / 2;
-        
+    const maxLevel = Math.max(...Object.keys(levelNodes).map(Number));
+    for (let level = 2; level <= maxLevel; level++) {
+      if (!levelNodes[level]) continue;
+
+      const currentLevelNodes = levelNodes[level];
+      const parentLevelNodes = levelNodes[level - 1] || [];
+      const nodeRatio = currentLevelNodes.length / (parentLevelNodes.length || 1);
+
+      const nodeCount = currentLevelNodes.length;
+      const verticalGap = Math.max(
+        CONFIG.minVerticalGap,
+        Math.min(CONFIG.maxVerticalGap, CONFIG.verticalGap / Math.sqrt(nodeCount))
+      );
+
+      if (nodeRatio < CONFIG.nodeRatioThreshold && level > 2) {
+        const nodesByParent: { [parentId: string]: typeof currentLevelNodes } = {};
+        currentLevelNodes.forEach(node => {
+          if (!node.parentId) return;
+          if (!nodesByParent[node.parentId]) {
+            nodesByParent[node.parentId] = [];
+          }
+          nodesByParent[node.parentId].push(node);
+        });
+
+        Object.entries(nodesByParent).forEach(([parentId, children]) => {
+          const parentPos = nodePositions[parentId];
+          if (!parentPos) return;
+
+          const totalHeight = (children.length - 1) * verticalGap;
+          const startY = parentPos.y - totalHeight / 2;
+
+          children.forEach((child, index) => {
+            nodePositions[child.id] = {
+              x: isSrc 
+                ? parentPos.x - CONFIG.horizontalGap
+                : parentPos.x + CONFIG.horizontalGap,
+              y: startY + index * verticalGap
+            };
+          });
+        });
+      } else {
+        const totalHeight = (nodeCount - 1) * verticalGap;
+        const startY = -totalHeight / 2;
+
         currentLevelNodes.forEach((nodeInfo, index) => {
           nodePositions[nodeInfo.id] = {
             x: isSrc ? -CONFIG.horizontalGap * (level - 1) : CONFIG.horizontalGap * (level - 1),
-            y: startY + index * CONFIG.verticalGap,
+            y: startY + index * verticalGap,
           };
         });
       }
     }
-    // 处理第四层及以上的节点，以父节点为中心展开
-    const maxLevel = Math.max(...Object.keys(levelNodes).map(Number));
-    for (let level = 4; level <= maxLevel; level++) {
-      const currentLevelNodes = levelNodes[level];
-      if (!currentLevelNodes) continue;
-
-      currentLevelNodes.forEach((nodeInfo) => {
-        if (!nodeInfo.parentId) return;
-        
-        const parentPosition = nodePositions[nodeInfo.parentId];
-        if (!parentPosition) return;
-
-        // 获取同父节点的所有子节点
-        const siblings = currentLevelNodes.filter(n => n.parentId === nodeInfo.parentId);
-        const siblingIndex = siblings.findIndex(n => n.id === nodeInfo.id);
-        const totalSiblings = siblings.length;
-        
-        // 计算以父节点为中心的垂直偏移
-        const totalHeight = (totalSiblings - 1) * CONFIG.childNodeVerticalGap;
-        const startY = parentPosition.y - totalHeight / 2;
-        
-        nodePositions[nodeInfo.id] = {
-          x: isSrc 
-            ? parentPosition.x - CONFIG.horizontalGap
-            : parentPosition.x + CONFIG.horizontalGap,
-          y: startY + siblingIndex * CONFIG.childNodeVerticalGap,
-        };
-      });
-    }
   };
 
-  // 创建节点和边
   const createNodesAndEdges = (
     node: NodeData,
     parentId: string | null,
@@ -350,10 +354,8 @@ export const InitNode: React.FC<TopoDataProps> = ({
     const nodes: any[] = [];
     const edges: any[] = [];
 
-    // 存储节点位置信息
     const nodePositions: { [key: string]: { x: number; y: number } } = {};
 
-    // 存储每层节点信息
     const levelNodes: {
       [key: number]: Array<{
         id: string;
