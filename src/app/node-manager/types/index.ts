@@ -11,6 +11,7 @@ interface ModalSuccess {
 //调用弹窗接口传入的类型
 interface ModalConfig {
   type: string;
+  title?: string;
   form?: TableDataItem;
   key?: string;
   ids?: string[];
@@ -50,6 +51,11 @@ interface DropDownItem {
   label: string;
 }
 
+interface SegmentedItem {
+  label: string;
+  value: string;
+}
+
 export type {
   TableDataItem,
   ModalSuccess,
@@ -58,4 +64,5 @@ export type {
   OptionItem,
   Collectorcardprops,
   DropDownItem,
+  SegmentedItem,
 };

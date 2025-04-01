@@ -109,6 +109,19 @@ interface CloudregioncardProps {
   [key: string]: any;
 }
 
+interface ControllerInstallFields {
+  id?: number;
+  install_type?: number;
+  node_id?: number;
+  sidecar_version?: string;
+  executor_version: string;
+}
+
+interface ControllerInstallProps {
+  cancel: () => void;
+  config?: any;
+}
+
 export type {
   ConfigHookParams,
   VariableProps,
@@ -123,4 +136,6 @@ export type {
   VarSourceItem,
   VarResItem,
   CloudregioncardProps,
+  ControllerInstallFields,
+  ControllerInstallProps,
 };
