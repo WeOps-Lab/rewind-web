@@ -40,7 +40,6 @@
         "start": "Start Collector",
         "restart": "Restart Collector",
         "stop": "Stop Collector",
-        "controller": "Controller",
         "config": "Configuration",
         "btntext1": "If you do not have the configuration file you need, please click",
         "btntext2": "here",
@@ -56,7 +55,6 @@
       },
       "Configuration": {
         "name": "NAME",
-        "edit": "Edit",
         "Collector": "COLLECTOR",
         "System": "OPERATING SYSTEM",
         "count": "NODE COUNT",
@@ -73,11 +71,7 @@
         "variable": "VARIABLE",
         "description": "DESCRIPTION",
         "parameterdes": "Parameter description",
-        "varconfig": "These variables are available in the configuration",
-        "editCollector": "Edit Collector",
-        "uploadPackge": "Upload Packge",
-        "version": "Version",
-        "importFile": "Import File"
+        "varconfig": "These variables are available in the configuration"
       },
       "variable": {
         "Name": "NAME",
@@ -93,7 +87,19 @@
     },
     "collector": {
       "title": "Overview",
-      "desc": "Introduce each collector, including basic information, usage scenarios, and collected data."
+      "edit": "Edit",
+      "delete": "Delete",
+      "collector": "Collector",
+      "controller": "Controller",
+      "desc": "Introduce each collector, including basic information, usage scenarios, and collected data.",
+      "editCollector": "Edit Collector",
+      "uploadPackge": "Upload Packge",
+      "version": "Version",
+      "importFile": "Import File",
+      "addCollector": "Add Collector",
+      "deleteCollector": "Delete Collector",
+      "deleteInfo": "Are you sure to delete this Collector?",
+      "single": "Single choice Windows/Linux"
     }
   }
 }

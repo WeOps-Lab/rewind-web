@@ -51,6 +51,12 @@ interface DropDownItem {
   label: string;
 }
 
+interface Pagination {
+  current: number;
+  total: number;
+  pageSize: number;
+}
+
 export type {
   TableDataItem,
   ModalSuccess,
@@ -59,4 +65,5 @@ export type {
   OptionItem,
   Collectorcardprops,
   DropDownItem,
+  Pagination,
 };

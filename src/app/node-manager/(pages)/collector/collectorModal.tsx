@@ -1,11 +1,12 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react"
 import { ModalRef } from "@/app/node-manager/types";
-import { Form, Button, Input, Select, Upload, message } from "antd";
+import { Form, Button, Input, Select, Upload, message, Popconfirm } from "antd";
 import { CloudUploadOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { FormInstance } from "antd/lib";
 import { useTranslation } from "@/utils/i18n";
 import OperateModal from "@/components/operate-modal";
+import useApiCollector from "@/app/node-manager/api/collector";
 const { TextArea } = Input;
 const { Dragger } = Upload;
 
@@ -15,6 +16,7 @@ interface ModalConfig {
 
 const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref) => {
   const { t } = useTranslation();
+  const { addCollector } = useApiCollector();
   const formRef = useRef<FormInstance>(null);
   const [title, setTitle] = useState<string>('');
   const [type, setType] = useState<string>('');
@@ -22,6 +24,8 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
   const [formData, setFormData] = useState<any>(null);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [initValue, setInitValue] = useState<any>({ system: 'single', name: '', description: '' });
+  //需要二次弹窗确定的类型
+  const Popconfirmarr = ["delete"];
 
   useImperativeHandle(ref, () => ({
     showModal: ({ type, form, title }) => {
@@ -30,7 +34,7 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
       setType(type);
       setFormData(form);
       setVisible(true);
-      if (type === 'edit') setInitValue(
+      if (type === 'edit' || type === 'delete') setInitValue(
         { system: 'single', name: form?.name, description: form?.description }
       );
     }
@@ -41,13 +45,25 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
   };
 
   const onSubmit = () => {
+    if (Popconfirmarr.includes(type)) {
+      return
+    }
     console.log(formData);
     setConfirmLoading(true);
     formRef.current?.validateFields().then((values) => {
-      console.log(values);
-    })
+      if (type === 'add') {
+        const { name, system, description } = values;
+        addCollector({
+          id: `${name}_${system}`,
+          name: name,
+          service_type: 'exec',
+          node_operating_system: system,
+          introduction: description
+        })
+        setVisible(false)
+      }
+    });
     setConfirmLoading(false);
-    setVisible(false)
     handleSubmit();
   };
 
@@ -94,24 +110,43 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
       return Promise.reject(new Error(t('common.inputRequired')));
     }
     return Promise.resolve();
+  };
+
+  //二次确认的弹窗
+  const deleteConfirm = () => {
+    formRef.current?.validateFields().then((values) => {
+      console.log(values);
+      setVisible(false);
+    })
   }
 
   return (
     <div>
       <OperateModal
-        title={t(`node-manager.cloudregion.Configuration.${title}`)}
+        title={t(`node-manager.collector.${title}`)}
         visible={visible}
         onCancel={handleCancel}
         footer={
           <div>
-            <Button
-              className="mr-[10px]"
-              type="primary"
-              loading={confirmLoading}
-              onClick={onSubmit}
-            >
-              {t('common.confirm')}
-            </Button>
+            {
+              Popconfirmarr.includes(type) ?
+                <Popconfirm
+                  title={t(`node-manager.collector.${type}`)}
+                  description={t(`node-manager.collector.${type}Info`)}
+                  okText={t("common.confirm")}
+                  cancelText={t("common.cancel")}
+                  onConfirm={deleteConfirm}
+                >
+                  <Button
+                    className="mr-[10px]"
+                    type="primary"
+                    danger
+                  >
+                    {t("common.delete")}
+                  </Button>
+                </Popconfirm>
+                : <Button type="primary" className="mr-[10px]" loading={confirmLoading} onClick={onSubmit}>{t('common.confirm')}</Button>
+            }
             <Button onClick={handleCancel}>{t('common.cancel')}</Button>
           </div>
         }
@@ -121,13 +156,13 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
           layout="vertical"
           initialValues={initValue}
         >
-          {(type === 'edit' || type === 'add') && (<>
+          {(['edit', 'add', 'delete'].includes(type)) && (<>
             <Form.Item<any>
               label={t('node-manager.cloudregion.variable.name')}
               name="name"
               rules={[{ required: true, validator: validateName }]}
             >
-              <Input />
+              <Input disabled={type === 'delete'} />
             </Form.Item>
             <Form.Item<any>
               label={t('node-manager.cloudregion.Configuration.system')}
@@ -135,8 +170,12 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
               rules={[{ required: true }]}
             >
               <Select
-                disabled
-                options={[{ value: 'single', label: '单选Windows/Linux' }]}>
+                disabled={type !== 'add'}
+                options={[
+                  { value: 'single', label: t('node-manager.collector.single') },
+                  { value: 'linux', label: 'linux' },
+                  { value: 'windows', label: 'windows' }
+                ]}>
               </Select>
             </Form.Item>
             <Form.Item<any>
@@ -144,19 +183,19 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
               name="description"
               rules={[{ required: true, validator: validateDescription }]}
             >
-              <TextArea />
+              <TextArea disabled={type === 'delete'} />
             </Form.Item>
           </>)}
           {type === 'upload' && (<>
             <Form.Item<any>
-              label={t('node-manager.cloudregion.Configuration.version')}
+              label={t('node-manager.collector.version')}
               name="version"
               rules={[{ required: true, validator: validdateVersion }]}
             >
               <Input />
             </Form.Item>
             <Form.Item<any>
-              label={t('node-manager.cloudregion.Configuration.importFile')}
+              label={t('node-manager.collector.importFile')}
               name="upload"
               rules={[{ required: true, validator: validateUpload }]}
             >
