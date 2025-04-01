@@ -42,6 +42,7 @@ import { useCommon } from '@/app/cmdb/context/common';
 import type { MenuProps } from 'antd';
 import { useRouter } from 'next/navigation';
 import PermissionWrapper from '@/components/permission';
+import EllipsisWithTooltip from '@/components/ellipsis-with-tooltip';
 
 interface ModelTabs {
   key: string;
@@ -113,6 +114,7 @@ const AssetData = () => {
   });
   const [treeSearchText, setTreeSearchText] = useState('');
   const [filteredTreeData, setFilteredTreeData] = useState<any[]>([]);
+  const [modelInstCount, setModelInstCount] = useState<Record<string, number>>({});
 
   const handleExport = async (keys: string[]) => {
     try {
@@ -196,11 +198,13 @@ const AssetData = () => {
 
   const getModelGroup = async () => {
     try {
-      const [modeldata, groupData, assoType] = await Promise.all([
+      const [modeldata, groupData, assoType, instCount] = await Promise.all([
         get('/cmdb/api/model/'),
         get('/cmdb/api/classification/'),
         get('/cmdb/api/model/model_association_type/'),
+        get('/cmdb/api/instance/model_inst_count/'),
       ]);
+      setModelInstCount(instCount);
       const groups = deepClone(groupData).map((item: GroupItem) => ({
         ...item,
         list: [],
@@ -432,20 +436,32 @@ const AssetData = () => {
     });
   };
 
+  const renderModelTitle = useCallback((modelName: string, modelId: string) => (
+    <div className='flex items-center'>
+      <EllipsisWithTooltip text={modelName} className={assetDataStyle.treeLabel} />
+      <span className="ml-1 text-gray-400">
+        ({modelInstCount[modelId] || 0})
+      </span>
+    </div>
+  ), [modelInstCount]);
+
   const filterTreeNodes = useCallback((nodes: any[], searchText: string) => {
     if (!searchText) return nodes;
 
     return nodes.reduce((filtered: any[], node) => {
-      const matchesSearch = node.title
+      const matchesSearch = node.content
         .toLowerCase()
         .includes(searchText.toLowerCase());
-
+        
       if (node.children) {
         const filteredChildren = filterTreeNodes(node.children, searchText);
         if (filteredChildren.length > 0 || matchesSearch) {
           filtered.push({
             ...node,
-            children: filteredChildren,
+            children: filteredChildren.map(child => ({
+              ...child,
+              title: renderModelTitle(child.content, child.key)
+            }))
           });
         }
       } else if (matchesSearch) {
@@ -454,7 +470,7 @@ const AssetData = () => {
 
       return filtered;
     }, []);
-  }, []);
+  }, [renderModelTitle]);
 
   const handleTreeSearch = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -463,9 +479,11 @@ const AssetData = () => {
 
       const treeData = modelGroup.map((group) => ({
         title: group.classification_name,
+        content: group.classification_name,
         key: `group:${group.classification_id}`,
         children: group.list.map((item) => ({
-          title: item.model_name,
+          content: item.model_name,
+          title: renderModelTitle(item.model_name, item.model_id),
           key: item.model_id,
         })),
       }));
@@ -498,12 +516,13 @@ const AssetData = () => {
       title: group.classification_name,
       key: `group:${group.classification_id}`,
       children: group.list.map((item) => ({
-        title: item.model_name,
+        content: item.model_name,
+        title: renderModelTitle(item.model_name, item.model_id),
         key: item.model_id,
       })),
     }));
     setFilteredTreeData(treeData);
-  }, [modelGroup]);
+  }, [modelGroup, renderModelTitle]);
 
   const onSelectUnified = (selectedKeys: React.Key[]) => {
     if (!selectedKeys.length) return;
