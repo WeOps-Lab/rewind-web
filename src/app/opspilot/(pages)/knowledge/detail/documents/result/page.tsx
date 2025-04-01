@@ -22,7 +22,7 @@ const DocsResultPage: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalItems, setTotalItems] = useState<number>(0);
   const searchParams = useSearchParams();
-  const id = searchParams.get('knowledgeId');
+  const id = searchParams ? searchParams.get('knowledgeId') : null;
   const { get } = useApiClient();
 
   const {

@@ -26,10 +26,10 @@ const DocumentsPage: React.FC = () => {
   const authContext = useAuth();
   const { convertToLocalizedTime } = useLocalizedTime();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
-  const name = searchParams.get('name');
-  const desc = searchParams.get('desc');
-  const type = searchParams.get('type');
+  const id = searchParams ? searchParams.get('id') : null;
+  const name = searchParams ? searchParams.get('name') : null;
+  const desc = searchParams ? searchParams.get('desc') : null;
+  const type = searchParams ? searchParams.get('type') : null;
   const [activeTabKey, setActiveTabKey] = useState<string>(type || 'file');
   const [searchText, setSearchText] = useState<string>('');
   const [pagination, setPagination] = useState<PaginationProps>({

@@ -18,10 +18,10 @@ const KnowledgeModifyPage = () => {
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const type = searchParams.get('type');
-  const id = searchParams.get('id');
-  const name = searchParams.get('name');
-  const desc = searchParams.get('desc');
+  const type = searchParams ? searchParams.get('type') : null;
+  const id = searchParams ? searchParams.get('id') : null;
+  const name = searchParams ? searchParams.get('name') : null;
+  const desc = searchParams ? searchParams.get('desc') : null;
   const { get, post } = useApiClient();
   const { saveConfig } = useSaveConfig();
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -40,8 +40,8 @@ const KnowledgeModifyPage = () => {
   const formRef = useRef<any>(null);
 
   useEffect(() => {
-    const configParam = searchParams.get('config');
-    const idParam = searchParams.get('documentId');
+    const configParam = searchParams ? searchParams.get('config') : null;
+    const idParam = searchParams ? searchParams.get('documentId') : null;
     if (idParam && configParam) {
       setCurrentStep(1);
       setIsUpdate(true);

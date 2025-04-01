@@ -24,7 +24,7 @@ const ChannelPage: React.FC = () => {
   const [currentChannelType, setCurrentChannelType] = useState<string>('');
   const [confirmLoading, setConfirmLoading] = useState(false);
   const searchParams = useSearchParams();
-  const botId = searchParams.get('id');
+  const botId = searchParams ? searchParams.get('id') : null;
 
   const IconMap: any = {
     enterprise_wechat: 'qiwei2',

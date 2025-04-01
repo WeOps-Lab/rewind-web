@@ -25,7 +25,7 @@ const InvocationLogsPage: React.FC = () => {
   const { t } = useTranslation();
   const { get } = useApiClient();
   const searchParams = useSearchParams();
-  const skillId = searchParams.get('id');
+  const skillId = searchParams ? searchParams.get('id') : null;
   const { convertToLocalizedTime } = useLocalizedTime();
   const [searchText, setSearchText] = useState('');
   const [data, setData] = useState<LogDetail[]>([]);

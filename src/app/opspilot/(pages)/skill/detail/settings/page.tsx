@@ -25,7 +25,7 @@ const SkillSettingsPage: React.FC = () => {
   const { t } = useTranslation();
   const { get, post, put } = useApiClient();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams ? searchParams.get('id') : null;
 
   const [temperature, setTemperature] = useState(0.7);
 

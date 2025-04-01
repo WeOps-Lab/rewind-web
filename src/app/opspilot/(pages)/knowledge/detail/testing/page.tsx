@@ -19,7 +19,7 @@ const { TextArea } = Input;
 const TestingPage: React.FC = () => {
   const { t } = useTranslation();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams ? searchParams.get('id') : null;
   const { post } = useApiClient();
   const { configData, setConfigData, loading: configLoading } = useFetchConfigData(id);
   const [searchText, setSearchText] = useState<string>('');

@@ -12,13 +12,13 @@ const KnowledgeDetailLayout = ({ children }: { children: React.ReactNode }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const id = searchParams.get('id');
-  const name = searchParams.get('name');
-  const desc = searchParams.get('desc');
+  const id = searchParams ? searchParams.get('id') : null;
+  const name = searchParams ? searchParams.get('name') : null;
+  const desc = searchParams ? searchParams.get('desc') : null;
 
 
   const handleBackButtonClick = () => {
-    const pathSegments = pathname.split('/').filter(Boolean);
+    const pathSegments = pathname ? pathname.split('/').filter(Boolean) : [];
     if (pathSegments.length >= 3) {
       if (pathSegments.length === 3) {
         router.push('/opspilot/studio');

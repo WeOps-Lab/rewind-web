@@ -16,9 +16,9 @@ const ChartComponent: React.FC = () => {
   const { get } = useApiClient();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams ? searchParams.get('id') : null;
 
-  const getLast7Days = () => {
+  const getLast7Days = (): [number, number] => {
     const end = new Date();
     const start = new Date();
     start.setDate(end.getDate() - 7);

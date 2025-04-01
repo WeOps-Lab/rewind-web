@@ -33,7 +33,7 @@ const StudioLogsPage: React.FC = () => {
   });
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
   const searchParams = useSearchParams();
-  const botId = searchParams.get('id');
+  const botId = searchParams ? searchParams.get('id') : null;
 
   const fetchLogs = useCallback(async (searchText = '', dates: number[] = [], page = 1, pageSize = 10, selectedChannels: string[] = []) => {
     setLoading(true);

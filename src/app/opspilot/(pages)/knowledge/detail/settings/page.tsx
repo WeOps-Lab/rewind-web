@@ -19,7 +19,7 @@ const SettingsPage: React.FC = () => {
   const [form] = Form.useForm();
   const { groups, loading: groupsLoading } = useGroups();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams ? searchParams.get('id') : null;
   const { formData, configData, setFormData, setConfigData, loading } = useFetchConfigData(id);
   const [confirmLoading, setConfirmLoading] = useState(false);
 

@@ -40,7 +40,7 @@ const StudioSettingsPage: React.FC = () => {
   const [enableSsl, setEnableSsl] = useState(false);
   const [online, setOnline] = useState(false);
   const searchParams = useSearchParams();
-  const botId = searchParams.get('id');
+  const botId = searchParams ? searchParams.get('id') : null;
 
   const IconMap: any = {
     enterprise_wechat: 'qiwei2',

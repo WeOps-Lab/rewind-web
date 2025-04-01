@@ -12,7 +12,7 @@ import XLSX from "xlsx";
 
 const PreviewPage: React.FC = () => {
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const id = searchParams?.get("id") || null;
   const authContext = useAuth();
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [fileType, setFileType] = useState<string | null>(null);
