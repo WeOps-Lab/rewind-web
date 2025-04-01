@@ -601,7 +601,7 @@ const ProfessionalCollection: React.FC = () => {
             rowKey="id"
             columns={currentColumns}
             dataSource={tableData}
-            scroll={{ y: 'calc(100vh - 510px)' }}
+            scroll={{ y: 'calc(100vh - 450px)' }}
             onSelectFields={onSelectFields}
             onChange={handleTableChange}
             pagination={{

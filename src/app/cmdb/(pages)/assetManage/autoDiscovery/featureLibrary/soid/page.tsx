@@ -280,7 +280,7 @@ const OidLibrary: React.FC = () => {
         dataSource={dataList}
         pagination={pagination}
         onChange={handleTableChange}
-        scroll={{ y: 'calc(100vh - 510px)' }}
+        scroll={{ y: 'calc(100vh - 450px)' }}
       />
       <OperateOid
         visible={operateVisible}

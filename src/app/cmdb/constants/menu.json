@@ -69,19 +69,13 @@
                     "name": "auto_discovery",
                     "children": [
                         {
-                            "title": "扫描",
-                            "icon": "shujumoxingguanli",
-                            "url": "/cmdb/assetManage/autoDiscovery/scan",
-                            "name": "discovery_scan"
-                        },
-                        {
                             "title": "采集",
                             "icon": "shujumoxingguanli",
                             "url": "/cmdb/assetManage/autoDiscovery/collection",
                             "name": "discovery_collection"
                         },
                         {
-                            "title": "特征库",
+                            "title": "SOID特征库",
                             "icon": "shujumoxingguanli",
                             "url": "/cmdb/assetManage/autoDiscovery/featureLibrary",
                             "name": "discovery_feature_library"
@@ -161,19 +155,13 @@
                     "name": "auto_discovery",
                     "children": [
                         {
-                            "title": "Scan",
-                            "icon": "shujumoxingguanli",
-                            "url": "/cmdb/assetManage/autoDiscovery/scan",
-                            "name": "discovery_scan"
-                        },
-                        {
                             "title": "Collection",
                             "icon": "shujumoxingguanli",
                             "url": "/cmdb/assetManage/autoDiscovery/collection",
                             "name": "discovery_collection"
                         },
                         {
-                            "title": "Feature library",
+                            "title": "SOID library",
                             "icon": "shujumoxingguanli",
                             "url": "/cmdb/assetManage/autoDiscovery/featureLibrary",
                             "name": "discovery_feature_library"
