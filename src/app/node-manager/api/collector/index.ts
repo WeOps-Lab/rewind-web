@@ -54,7 +54,7 @@ const useApiCollector = () => {
 
   // 添加采集器
   const addCollector = async (params: CollectorParams) => {
-    return await post('/node_mgmt/api/collector/', {...params})
+    return await post('/node_mgmt/api/collector/', params)
   };
 
   // 删除采集器
@@ -68,7 +68,7 @@ const useApiCollector = () => {
 
   // 编辑采集器
   const editCollecttor = async (params: CollectorParams) => {
-    return await put(`/node_mgmt/api/collector/${params.id}`, {...params});
+    return await put(`/node_mgmt/api/collector/${params.id}`, params);
   }
 
   return {

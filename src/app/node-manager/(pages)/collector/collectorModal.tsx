@@ -9,6 +9,14 @@ import OperateModal from "@/components/operate-modal";
 import useApiCollector from "@/app/node-manager/api/collector";
 const { TextArea } = Input;
 const { Dragger } = Upload;
+const initData = {
+  name: '',
+  system: '',
+  description: '',
+  service_type: '',
+  executable_path: '',
+  execute_parameters: '',
+}
 
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const { t } = useTranslation();
@@ -20,46 +28,32 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
   const [id, setId] = useState<string>('');
   const [visible, setVisible] = useState<boolean>(false);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    system: '',
-    description: '',
-    service_type: '',
-    executable_path: '',
-    execute_parameters: '',
-  })
+  const [formData, setFormData] = useState<TableDataItem>(initData);
   //需要二次弹窗确定的类型
   const Popconfirmarr = ["delete"];
 
   useImperativeHandle(ref, () => ({
     showModal: ({ type, form, title }) => {
-      const {
-        id,
-        name,
-        tagList,
-        description,
-        service_type,
-        executable_path,
-        execute_parameters } = form as TableDataItem;
-      const system = tagList?.length ? tagList[0] : 'windows';
-      setId(id as string);
+      console.log(type, form)
+      setId(form?.id as string);
       setType(type);
       setTitle(title as string);
-      setFormData({
-        name,
-        system,
-        description,
-        service_type,
-        executable_path,
-        execute_parameters,
-      })
+      setFormData(form as TableDataItem)
       setVisible(true);
       if (type === 'edit' || type === 'delete') {
-        console.log(type, form)
-        formRef.current?.setFieldsValue({
-          name,
-          system,
-          description
+        const { name, system, description } = form as TableDataItem;
+        setFormData({
+          ...form,
+          name: name,
+          system: system ? system : 'windows',
+          description: description ? description : '--'
+        });
+      } else {
+        setFormData({
+          ...form,
+          name: '',
+          system: 'windows',
+          description: ''
         });
       }
     }
@@ -67,9 +61,11 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
 
   useEffect(() => {
     formRef.current?.resetFields();
-  }, [formRef])
+    formRef.current?.setFieldsValue(formData);
+  }, [formRef, formData])
 
   const handleCancel = () => {
+    formRef.current?.resetFields();
     setVisible(false);
   };
 
@@ -79,49 +75,37 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
     }
     setConfirmLoading(true);
     formRef.current?.validateFields().then((values) => {
-      const {
-        name,
-        system,
-        description,
-      } = values;
+      const param = {
+        id: id ? id : `${values.name}_${values.system}`,
+        name: values.name,
+        service_type: formData.service_type ? formData.service_type : 'exec',
+        node_operating_system: values.system,
+        introduction: values.description,
+        executable_path: formData.executable_path ? formData.executable_path : 'text/',
+        execute_parameters: formData.execute_parameters ? formData.execute_parameters : 'text',
+      };
       if (type === 'add') {
-        addCollector({
-          id: `${name}_${system}`,
-          name: name,
-          service_type: 'exec',
-          node_operating_system: system,
-          introduction: description,
-          executable_path: 'text/',
-          execute_parameters: 'text'
-        }).then(() => {
+        addCollector(param).then(() => {
           setConfirmLoading(false);
           setVisible(false);
+          onSuccess();
         }).catch((e) => {
           console.log(e);
           setConfirmLoading(false);
         })
       } else if (type === 'edit') {
-        const { service_type,
-          executable_path,
-          execute_parameters, } = formData;
-        editCollecttor({
-          id,
-          name: name,
-          node_operating_system: system,
-          introduction: description,
-          service_type: service_type,
-          executable_path: executable_path,
-          execute_parameters: execute_parameters,
-        }).then(() => {
+        editCollecttor(param).then(() => {
           setConfirmLoading(false);
           setVisible(false);
+          onSuccess();
         }).catch((e) => {
           console.log(e);
           setConfirmLoading(false);
         })
       }
+    }).catch(()=>{
+      setConfirmLoading(false);
     });
-    onSuccess();
   };
 
   const props: UploadProps = {
@@ -139,27 +123,6 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
         message.error(`${info.file.name} file upload failed`);
       }
     }
-  };
-
-  const validateName = async (_: any, value: string) => {
-    if (!value) {
-      return Promise.reject(new Error(t('common.inputRequired')));
-    }
-    return Promise.resolve();
-  };
-
-  const validateDescription = async (_: any, value: string) => {
-    if (!value) {
-      return Promise.reject(new Error(t('common.inputRequired')));
-    }
-    return Promise.resolve();
-  };
-
-  const validdateVersion = async (_: any, value: string) => {
-    if (!value) {
-      return Promise.reject(new Error(t('common.inputRequired')));
-    }
-    return Promise.resolve();
   };
 
   const validateUpload = async (_: any, value: any) => {
@@ -228,14 +191,14 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
             <Form.Item<any>
               label={t('node-manager.cloudregion.variable.name')}
               name="name"
-              rules={[{ required: true, validator: validateName }]}
+              rules={[{ required: true, message: t('common.inputRequired') }]}
             >
               <Input disabled={type === 'delete'} />
             </Form.Item>
             <Form.Item<any>
               label={t('node-manager.cloudregion.Configuration.system')}
               name="system"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: t('common.inputRequired') }]}
             >
               <Select
                 disabled={type !== 'add'}
@@ -248,7 +211,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
             <Form.Item<any>
               label={t('node-manager.cloudregion.Configuration.description')}
               name="description"
-              rules={[{ required: true, validator: validateDescription }]}
+              rules={[{ required: true, message: t('common.inputRequired') }]}
             >
               <TextArea disabled={type === 'delete'} />
             </Form.Item>
@@ -257,7 +220,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
             <Form.Item<any>
               label={t('node-manager.collector.version')}
               name="version"
-              rules={[{ required: true, validator: validdateVersion }]}
+              rules={[{ required: true, message: t('common.inputRequired') }]}
             >
               <Input />
             </Form.Item>

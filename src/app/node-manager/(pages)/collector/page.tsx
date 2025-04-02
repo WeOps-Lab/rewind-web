@@ -10,6 +10,7 @@ import { useTranslation } from "@/utils/i18n";
 import type { CardItem } from "@/app/node-manager/types/collector";
 import CollectorModal from "./collectorModal";
 import { ModalRef } from "@/app/node-manager/types";
+import { useMenuItem } from "@/app/node-manager/constants/collector";
 import { Option } from "@/types";
 import { Button } from "antd/lib";
 
@@ -26,29 +27,7 @@ const Collector = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const menuItem = [
-    {
-      key: 'edit',
-      title: 'edit',
-      config: {
-        title: 'editCollector', type: 'edit'
-      }
-    },
-    {
-      key: 'upload',
-      title: 'uploadPackge',
-      config: {
-        title: 'uploadPackge', type: 'upload'
-      }
-    },
-    {
-      key: 'delete',
-      title: 'delete',
-      config: {
-        title: 'deleteCollector', type: 'delete'
-      }
-    }
-  ];
+  const menuItem = useMenuItem();
   const titleItem = [
     {
       label: `${t('node-manager.collector.controller')}(${controllerCount})`,
@@ -90,7 +69,7 @@ const Collector = () => {
         execute_parameters: item.execute_parameters,
         description: item.introduction || '--',
         icon: 'caijiqizongshu',
-        tagList: [item.node_operating_system || item.os]
+        system: item.node_operating_system || item.os
       })
     });
     if (selected?.length) {
@@ -108,19 +87,17 @@ const Collector = () => {
     }
     try {
       setLoading(true);
-      if (value === 'controller') {
-        getControllerList(params).then((res) => {
+      const flag = value === 'controller';
+      const request = flag ? getControllerList(params) : getCollectorlist(params);
+      request.then((res) => {
+        if(flag){
           setControllerCount(res.length);
-          handleResult(res, selected);
-          setLoading(false);
-        })
-      } else if (value === 'collector') {
-        getCollectorlist(params).then((res) => {
+        } else {
           setCollectorCount(res.length);
-          handleResult(res, selected);
-          setLoading(false);
-        });
-      }
+        }
+        handleResult(res, selected);
+        setLoading(false);
+      })
     } catch (error) {
       console.log(error)
     }

@@ -114,7 +114,6 @@
         "description": "描述",
         "parameterdes": "参数说明",
         "varconfig": "这些变量可用于配置中"
-        
       },
       "variable": {
         "name": "名字",
