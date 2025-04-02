@@ -33,7 +33,7 @@
       "name": "collector_list",
       "children": [
         {
-          "title": "概述",
+          "title": "包管理",
           "url": "/node-manager/collector/detail",
           "icon": "shezhi",
           "name": "collector_overview"

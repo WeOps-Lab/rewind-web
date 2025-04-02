@@ -125,7 +125,19 @@
     },
     "collector": {
       "title": "Overview",
-      "desc": "Introduce each collector, including basic information, usage scenarios, and collected data."
+      "edit": "Edit",
+      "delete": "Delete",
+      "collector": "Collector",
+      "controller": "Controller",
+      "desc": "Introduce each collector, including basic information, usage scenarios, and collected data.",
+      "editCollector": "Edit Collector",
+      "uploadPackge": "Upload Packge",
+      "version": "Version",
+      "importFile": "Import File",
+      "addCollector": "Add Collector",
+      "deleteCollector": "Delete Collector",
+      "deleteInfo": "Are you sure to delete this Collector?",
+      "single": "Single choice Windows/Linux"
     }
   }
 }

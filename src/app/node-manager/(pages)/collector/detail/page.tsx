@@ -17,6 +17,11 @@ const Collectordetail = () => {
     system: [],
     introduction: '',
   });
+  // const [pagination, setPagination] = useState<Pagination>({
+  //   current: 1,
+  //   total: 0,
+  //   pageSize: 20,
+  // });
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
