@@ -2,7 +2,6 @@
   "common": {
     "actions": "操作",
     "apply": "应用",
-    "Actions": "操作",
     "modifydelete": "批量删除",
     "variable": "变量",
     "configuration": "配置",
@@ -38,8 +37,6 @@
         "node": "节点",
         "desc": "节点管理主要用于在每个节点上安装探针,并通过探针管理各种类型的收集器。",
         "ip": "IP",
-        "System": "操作系统",
-        "Sidecar": "探针",
         "sidecar": "Sidecar",
         "restartSidecar": "重启Sidecar",
         "uninstallSidecar": "卸载Sidecar",
@@ -103,12 +100,9 @@
       },
       "Configuration": {
         "name": "姓名",
-        "Collector": "采集器",
-        "System": "操作系统",
-        "count": "节点总数",
-        "Name": "姓名",
         "system": "操作系统",
         "collector": "采集器",
+        "count": "节点总数",
         "ip": "IP",
         "sidecar": "探针",
         "modifydeltitle": "批量删除配置",
@@ -123,15 +117,11 @@
         
       },
       "variable": {
-        "Name": "名字",
-        "Value": "数值",
-        "Desc": "描述",
-        "name": "名称",
+        "name": "名字",
         "value": "数值",
         "desc": "描述",
         "deletevariable": "删除变量",
-        "deleteinfo": "您确定要删除此变量吗？",
-        "actions": "操作"
+        "deleteinfo": "您确定要删除此变量吗？"
       }
     },
     "collector": {

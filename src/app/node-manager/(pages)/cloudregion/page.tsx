@@ -8,8 +8,11 @@ import cloudregionstyle from './index.module.scss';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
-import EntityList from "@/components/entity-list/index";
-import type { cloudRegionItem, CloudregioncardProps } from "@/app/node-manager/types/cloudregion"
+import EntityList from '@/components/entity-list/index';
+import type {
+  cloudRegionItem,
+  CloudregioncardProps,
+} from '@/app/node-manager/types/cloudregion';
 
 const Cloudregion = () => {
   const cloudregionformRef = useRef<FormInstance>(null);
@@ -18,22 +21,31 @@ const Cloudregion = () => {
   const router = useRouter();
   const { isLoading } = useApiClient();
   const { getcloudlist, updatecloudintro } = useApiCloudRegion();
-  const [selectedRegion, setSelectedRegion] = useState<CloudregioncardProps | null>(null);
+  const [selectedRegion, setSelectedRegion] =
+    useState<CloudregioncardProps | null>(null);
   const [openeditcloudregion, setOpeneditcloudregion] = useState(false);
   const [clouditem, setClouditem] = useState<cloudRegionItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // 获取相关的接口
   const fetchCloudRegions = async () => {
-
-    getcloudlist().then((res) => {
-      setSelectedRegion(res[0]);
-      setClouditem([{
-        id: res[0].id,
-        name: res[0].name,
-        description: res[0]?.introduction as string,
-        icon: 'yunquyu'
-      }])
-    })
+    setLoading(true);
+    try {
+      const data = await getcloudlist();
+      if (data.length) {
+        setSelectedRegion(data[0]);
+        setClouditem([
+          {
+            id: data[0].id,
+            name: data[0].name,
+            description: data[0].introduction as string,
+            icon: 'yunquyu',
+          },
+        ]);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -55,20 +67,24 @@ const Cloudregion = () => {
 
   const handleFormOkClick = () => {
     const { cloudregion } = cloudregionformRef.current?.getFieldsValue();
-    updatecloudintro(cloudregion.id, { introduction: cloudregion.introduction }).then(() => {
+    updatecloudintro(cloudregion.id, {
+      introduction: cloudregion.introduction,
+    }).then(() => {
       fetchCloudRegions();
       message.success(t('common.updateSuccess'));
-    })
+    });
     setOpeneditcloudregion(false);
   };
 
   const handleEdit = () => {
-    setOpeneditcloudregion(true)
-  }
+    setOpeneditcloudregion(true);
+  };
 
   const navigateToNode = (item: cloudRegionItem) => {
-    router.push(`/node-manager/cloudregion/node?cloud_region_id=1&name=${item.name}`)
-  }
+    router.push(
+      `/node-manager/cloudregion/node?cloud_region_id=1&name=${item.name}`
+    );
+  };
   return (
     <div
       ref={divref}
@@ -76,14 +92,21 @@ const Cloudregion = () => {
     >
       <EntityList
         data={clouditem}
-        loading={false}
+        loading={loading}
         menuActions={() => {
-          return (<Menu>
-            <Menu.Item key="edit" onClick={() => handleEdit()}>{t('common.edit')}</Menu.Item>
-          </Menu>)
+          return (
+            <Menu>
+              <Menu.Item key="edit" onClick={() => handleEdit()}>
+                {t('common.edit')}
+              </Menu.Item>
+            </Menu>
+          );
         }}
-        openModal={() => { }}
-        onCardClick={(item: cloudRegionItem) => { navigateToNode(item) }} ></EntityList>
+        openModal={() => {}}
+        onCardClick={(item: cloudRegionItem) => {
+          navigateToNode(item);
+        }}
+      ></EntityList>
       {/* 编辑默认云区域弹窗 */}
       <OperateModal
         title={t('node-manager.cloudregion.editform.title')}

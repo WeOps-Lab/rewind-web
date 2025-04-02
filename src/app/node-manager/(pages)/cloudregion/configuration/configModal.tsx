@@ -329,7 +329,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
           <>
             <Form.Item
               name="name"
-              label={t('node-manager.cloudregion.Configuration.Name')}
+              label={t('node-manager.cloudregion.Configuration.name')}
               rules={[
                 {
                   required: true,

@@ -2,7 +2,6 @@
   "common": {
     "actions": "Actions",
     "apply": "Apply",
-    "Actions": "ACTIONS",
     "modifydelete": "Modify Delete",
     "variable": "Variable",
     "configuration": "Configuration",
@@ -38,8 +37,6 @@
         "node": "Node",
         "desc": "Node management is mainly used for the installation of sidecars on each node and managing various types of collectors through the sidecars.",
         "ip": "IP",
-        "System": "OPERATING SYSTEM",
-        "Sidecar": "SIDECAR",
         "sidecar": "Sidecar",
         "restartSidecar": "Restart Sidecar",
         "uninstallSidecar": "Uninstall Sidecar",
@@ -102,35 +99,28 @@
         "version": "Version"
       },
       "Configuration": {
-        "name": "NAME",
-        "Collector": "COLLECTOR",
-        "System": "OPERATING SYSTEM",
-        "count": "NODE COUNT",
-        "Name": "Name",
+        "name": "Name",
         "system": "Operating System",
         "collector": "Collector",
+        "count": "Node Count",
         "ip": "IP",
-        "sidecar": "SIDECAR",
+        "sidecar": "Sidecar",
         "modifydeltitle": "Modify Delete Configurations",
         "modifydelinfo": "Are you sure to delete this Configurations?",
         "deltitle": "Delete Configuration",
         "deleteinfo": "Are you sure to delete this Configuration?",
         "template": "Template",
-        "variable": "VARIABLE",
-        "description": "DESCRIPTION",
+        "variable": "Variable",
+        "description": "Description",
         "parameterdes": "Parameter description",
         "varconfig": "These variables are available in the configuration"
       },
       "variable": {
-        "Name": "NAME",
-        "Value": "VALUE",
-        "Desc": "DESCRIPTION",
         "name": "Name",
         "value": "Value",
         "desc": "Description",
         "deletevariable": "Delete Variable",
-        "deleteinfo": "Are you sure to delete this variable?",
-        "actions": "ACTIONS"
+        "deleteinfo": "Are you sure to delete this variable?"
       }
     },
     "collector": {

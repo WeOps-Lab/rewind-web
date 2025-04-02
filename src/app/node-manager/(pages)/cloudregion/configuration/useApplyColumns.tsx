@@ -14,7 +14,7 @@ export const useApplyColumns = ({
       dataIndex: "ip"
     },
     {
-      title: t('node-manager.cloudregion.Configuration.System'),
+      title: t('node-manager.cloudregion.Configuration.system'),
       dataIndex: "operatingsystem"
     },
     {
@@ -37,7 +37,7 @@ export const useApplyColumns = ({
       },
     },
     {
-      title: t('common.Actions'),
+      title: t('common.actions'),
       dataIndex: "key",
       fixed: "right",
       render: (key: string, sidecarinfo) => {
