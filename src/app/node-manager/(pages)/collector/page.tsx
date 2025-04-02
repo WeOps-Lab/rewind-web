@@ -60,7 +60,6 @@ const Collector = () => {
       if (system && !_options.find((option) => option.value === system)) {
         _options.push({ value: system, label: system });
       }
-
       return ({
         id: item.id,
         name: item.name,
@@ -69,7 +68,7 @@ const Collector = () => {
         execute_parameters: item.execute_parameters,
         description: item.introduction || '--',
         icon: 'caijiqizongshu',
-        system: item.node_operating_system || item.os
+        tagList: [item.node_operating_system || item.os]
       })
     });
     if (selected?.length) {
@@ -107,7 +106,8 @@ const Collector = () => {
     modalRef.current?.showModal({
       title: config?.title,
       type: config?.type,
-      form: config?.form
+      form: config?.form,
+      key: config?.key
     })
   };
 
@@ -120,11 +120,11 @@ const Collector = () => {
       onClick={(e) => e.domEvent.preventDefault()}
     >
       {menuItem.map((item) => {
-        if (value === 'controller' && item.key === 'delete') return;
+        if (value === 'controller' && ['delete', 'edit'].includes(item.key)) return;
         return (
           <Menu.Item
             key={item.title}
-            onClick={() => openModal({ ...item.config, form: data })}>{t(`node-manager.collector.${item.title}`)}
+            onClick={() => openModal({ ...item.config, form: data, key: value })}>{t(`node-manager.collector.${item.title}`)}
           </Menu.Item>
         )
       }
@@ -158,7 +158,6 @@ const Collector = () => {
         className="custom-tabs"
         options={titleItem}
         defaultValue='controller'
-        // value={value}
         onChange={(value) => setValue(value)}
       />
       <Button onClick={handleAddCollector}>添加采集器</Button>

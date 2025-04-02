@@ -7,6 +7,7 @@ import { FormInstance } from "antd/lib";
 import { useTranslation } from "@/utils/i18n";
 import OperateModal from "@/components/operate-modal";
 import useApiCollector from "@/app/node-manager/api/collector";
+import { cloneDeep } from "lodash";
 const { TextArea } = Input;
 const { Dragger } = Upload;
 const initData = {
@@ -23,39 +24,37 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
   const { addCollector, deleteCollector, editCollecttor } = useApiCollector();
   const formRef = useRef<FormInstance>(null);
   const [form] = Form.useForm();
-  const [title, setTitle] = useState<string>('');
-  const [type, setType] = useState<string>('');
+  const [title, setTitle] = useState<string>('editCollector');
+  const [type, setType] = useState<string>('edit');
   const [id, setId] = useState<string>('');
+  const [key, setKey] = useState<string>('');
   const [visible, setVisible] = useState<boolean>(false);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<TableDataItem>(initData);
+  const [fileList, setFileList] = useState<any>([]);
   //需要二次弹窗确定的类型
   const Popconfirmarr = ["delete"];
 
   useImperativeHandle(ref, () => ({
-    showModal: ({ type, form, title }) => {
+    showModal: ({ type, form, title, key }) => {
       console.log(type, form)
+      setKey(key as string);
       setId(form?.id as string);
       setType(type);
       setTitle(title as string);
-      setFormData(form as TableDataItem)
+      const info = cloneDeep(form) as TableDataItem;
       setVisible(true);
-      if (type === 'edit' || type === 'delete') {
-        const { name, system, description } = form as TableDataItem;
-        setFormData({
-          ...form,
-          name: name,
-          system: system ? system : 'windows',
-          description: description ? description : '--'
-        });
+      const { name, tagList, description } = form as TableDataItem;
+      if (type !== 'add') {
+        info.name = name || "";
+        info.system = tagList?.length ? tagList[0] : 'windows';
+        info.description = description || '--';
       } else {
-        setFormData({
-          ...form,
-          name: '',
-          system: 'windows',
-          description: ''
-        });
+        info.system = "windows";
+        info.name = "";
+        info.description = "";
       }
+      setFormData(info);
     }
   }));
 
@@ -69,6 +68,11 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
     setVisible(false);
   };
 
+  const errorCatch = (error: any) => {
+    message.error(error.code);
+    setConfirmLoading(false);
+  }
+
   const onSubmit = () => {
     if (Popconfirmarr.includes(type)) {
       return;
@@ -76,34 +80,41 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
     setConfirmLoading(true);
     formRef.current?.validateFields().then((values) => {
       const param = {
-        id: id ? id : `${values.name}_${values.system}`,
+        id: id || `${values.name}_${values.system}`,
         name: values.name,
-        service_type: formData.service_type ? formData.service_type : 'exec',
+        service_type: formData.service_type || 'exec',
         node_operating_system: values.system,
         introduction: values.description,
-        executable_path: formData.executable_path ? formData.executable_path : 'text/',
-        execute_parameters: formData.execute_parameters ? formData.execute_parameters : 'text',
+        executable_path: formData.executable_path || 'text/',
+        execute_parameters: formData.execute_parameters || 'text',
       };
       if (type === 'add') {
         addCollector(param).then(() => {
           setConfirmLoading(false);
           setVisible(false);
           onSuccess();
-        }).catch((e) => {
-          console.log(e);
-          setConfirmLoading(false);
-        })
+        }).catch(errorCatch)
       } else if (type === 'edit') {
         editCollecttor(param).then(() => {
           setConfirmLoading(false);
           setVisible(false);
           onSuccess();
-        }).catch((e) => {
-          console.log(e);
-          setConfirmLoading(false);
-        })
+        }).catch(errorCatch)
+      } else if (type === 'upload') {
+        console.log(formData, key, fileList);
+        // uploadPackage({
+        //   name: formData.name,
+        //   os: formData.system,
+        //   type: key,
+        //   version: values.version,
+        //   file: fileList[0]
+        // }).then((res) => {
+        //   console.log(res)
+        // });
+        setConfirmLoading(false);
+        setVisible(false);
       }
-    }).catch(()=>{
+    }).catch(() => {
       setConfirmLoading(false);
     });
   };
@@ -118,9 +129,11 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
         console.log(info.file, info.fileList)
       }
       if (status === 'done') {
-        message.success(`${info.file.name} file upload success`);
+        // message.success(`${info.file.name} file upload success`);
+        setFileList(info.fileList)
       } else if (status === 'error') {
-        message.error(`${info.file.name} file upload failed`);
+        // message.error(`${info.file.name} file upload failed`);
+        console.log('error');
       }
     }
   };
@@ -142,18 +155,26 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
           setVisible(false);
           onSuccess();
         })
-        .catch((e) => {
-          console.log(e);
+        .catch((error) => {
+          message.error(error.code);
           setConfirmLoading(false);
         })
     })
-  }
+  };
+
+  const normFile = (e: any) => {
+    console.log('Upload event:', e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
 
   return (
     <div>
       <OperateModal
         title={t(`node-manager.collector.${title}`)}
-        visible={visible}
+        open={visible}
         onCancel={handleCancel}
         footer={
           <div>
@@ -189,7 +210,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
         >
           {(['edit', 'add', 'delete'].includes(type)) && (<>
             <Form.Item<any>
-              label={t('node-manager.cloudregion.variable.name')}
+              label={t('common.name')}
               name="name"
               rules={[{ required: true, message: t('common.inputRequired') }]}
             >
@@ -203,8 +224,8 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
               <Select
                 disabled={type !== 'add'}
                 options={[
-                  { value: 'linux', label: 'linux' },
-                  { value: 'windows', label: 'windows' }
+                  { value: 'linux', label: 'Linux' },
+                  { value: 'windows', label: 'Windows' }
                 ]}>
               </Select>
             </Form.Item>
@@ -227,6 +248,8 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
             <Form.Item<any>
               label={t('node-manager.collector.importFile')}
               name="upload"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
               rules={[{ required: true, validator: validateUpload }]}
             >
               <Dragger {...props}>

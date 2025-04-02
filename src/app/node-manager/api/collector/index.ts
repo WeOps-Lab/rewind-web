@@ -10,6 +10,14 @@ interface CollectorParams {
   introduction?: string,
 }
 
+interface PackageParams {
+  os: string,
+  type: string,
+  name: string,
+  version: string,
+  file: File
+}
+
 const useApiCollector = () => {
   const { get, post, del, put } = useApiClient();
 
@@ -69,6 +77,12 @@ const useApiCollector = () => {
   // 编辑采集器
   const editCollecttor = async (params: CollectorParams) => {
     return await put(`/node_mgmt/api/collector/${params.id}`, params);
+  };
+
+  // 上传包
+  const uploadPackage = async (data: PackageParams) => {
+    return await post('/node_mgmt/api/package', data)
+    // return await get('/node_mgmt/api/node')
   }
 
   return {
@@ -76,7 +90,8 @@ const useApiCollector = () => {
     getControllerList,
     addCollector,
     deleteCollector,
-    editCollecttor
+    editCollecttor,
+    uploadPackage
   };
 };
 
