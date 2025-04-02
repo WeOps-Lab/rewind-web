@@ -67,7 +67,6 @@ const Collector = () => {
   }, [isLoading])
 
   useEffect(() => {
-    // setCards([]);
     fetchCollectorlist();
   }, [value])
 
@@ -86,6 +85,9 @@ const Collector = () => {
       return ({
         id: item.id,
         name: item.name,
+        service_type: item.service_type,
+        executable_path: item.executable_path,
+        execute_parameters: item.execute_parameters,
         description: item.introduction || '--',
         icon: 'caijiqizongshu',
         tagList: [item.node_operating_system || item.os]
@@ -101,16 +103,19 @@ const Collector = () => {
   }
 
   const fetchCollectorlist = (search?: string, selected?: string[]) => {
+    const params = {
+      name: search
+    }
     try {
       setLoading(true);
       if (value === 'controller') {
-        getControllerList({ name: search }).then((res) => {
+        getControllerList(params).then((res) => {
           setControllerCount(res.length);
           handleResult(res, selected);
           setLoading(false);
         })
       } else if (value === 'collector') {
-        getCollectorlist({ name: search }).then((res) => {
+        getCollectorlist(params).then((res) => {
           setCollectorCount(res.length);
           handleResult(res, selected);
           setLoading(false);
@@ -130,7 +135,7 @@ const Collector = () => {
   };
 
   const handleSubmit = () => {
-    console.log('success');
+    fetchCollectorlist();
   };
 
   const menuActions = (data: any) => {
@@ -138,7 +143,7 @@ const Collector = () => {
       onClick={(e) => e.domEvent.preventDefault()}
     >
       {menuItem.map((item) => {
-        if(value === 'controller' && item.key === 'delete') return;
+        if (value === 'controller' && item.key === 'delete') return;
         return (
           <Menu.Item
             key={item.title}
@@ -158,14 +163,14 @@ const Collector = () => {
   const ifOpenAddModal = () => {
     if (value === 'collector') {
       return {
-        openModal: () => openModal({ title: 'addCollector', type: 'add' })
+        openModal: () => openModal({ title: 'addCollector', type: 'add', form: {} })
       }
     }
     return {}
   };
 
   const handleAddCollector = () => {
-    openModal({ title: 'addCollector', type: 'add' })
+    openModal({ title: 'addCollector', type: 'add', form: {} })
   }
 
 
@@ -189,7 +194,7 @@ const Collector = () => {
         {...ifOpenAddModal()}
         onSearch={(search: string) => { fetchCollectorlist(search, selected) }}
         onCardClick={(item: CardItem) => navigateToCollectorDetail(item)}></EntityList>
-      <CollectorModal ref={modalRef} handleSubmit={handleSubmit} />
+      <CollectorModal ref={modalRef} onSuccess={handleSubmit} />
     </div>
   );
 }

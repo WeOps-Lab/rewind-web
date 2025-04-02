@@ -1,5 +1,5 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState } from "react"
-import { ModalRef } from "@/app/node-manager/types";
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { ModalRef, ModalSuccess, TableDataItem } from "@/app/node-manager/types";
 import { Form, Button, Input, Select, Upload, message, Popconfirm } from "antd";
 import { CloudUploadOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
@@ -10,35 +10,64 @@ import useApiCollector from "@/app/node-manager/api/collector";
 const { TextArea } = Input;
 const { Dragger } = Upload;
 
-interface ModalConfig {
-  [key: string]: any
-}
-
-const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref) => {
+const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const { t } = useTranslation();
-  const { addCollector } = useApiCollector();
+  const { addCollector, deleteCollector, editCollecttor } = useApiCollector();
   const formRef = useRef<FormInstance>(null);
+  const [form] = Form.useForm();
   const [title, setTitle] = useState<string>('');
   const [type, setType] = useState<string>('');
+  const [id, setId] = useState<string>('');
   const [visible, setVisible] = useState<boolean>(false);
-  const [formData, setFormData] = useState<any>(null);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
-  const [initValue, setInitValue] = useState<any>({ system: 'single', name: '', description: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    system: '',
+    description: '',
+    service_type: '',
+    executable_path: '',
+    execute_parameters: '',
+  })
   //需要二次弹窗确定的类型
   const Popconfirmarr = ["delete"];
 
   useImperativeHandle(ref, () => ({
     showModal: ({ type, form, title }) => {
-      console.log(type, form, title);
-      setTitle(title as string);
+      const {
+        id,
+        name,
+        tagList,
+        description,
+        service_type,
+        executable_path,
+        execute_parameters } = form as TableDataItem;
+      const system = tagList?.length ? tagList[0] : 'windows';
+      setId(id as string);
       setType(type);
-      setFormData(form);
+      setTitle(title as string);
+      setFormData({
+        name,
+        system,
+        description,
+        service_type,
+        executable_path,
+        execute_parameters,
+      })
       setVisible(true);
-      if (type === 'edit' || type === 'delete') setInitValue(
-        { system: 'single', name: form?.name, description: form?.description }
-      );
+      if (type === 'edit' || type === 'delete') {
+        console.log(type, form)
+        formRef.current?.setFieldsValue({
+          name,
+          system,
+          description
+        });
+      }
     }
   }));
+
+  useEffect(() => {
+    formRef.current?.resetFields();
+  }, [formRef])
 
   const handleCancel = () => {
     setVisible(false);
@@ -46,25 +75,51 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
 
   const onSubmit = () => {
     if (Popconfirmarr.includes(type)) {
-      return
+      return;
     }
-    console.log(formData);
     setConfirmLoading(true);
     formRef.current?.validateFields().then((values) => {
+      const {
+        name,
+        system,
+        description,
+      } = values;
       if (type === 'add') {
-        const { name, system, description } = values;
         addCollector({
           id: `${name}_${system}`,
           name: name,
           service_type: 'exec',
           node_operating_system: system,
           introduction: description
+        }).then(() => {
+          setConfirmLoading(false);
+          setVisible(false);
+        }).catch((e) => {
+          console.log(e);
+          setConfirmLoading(false);
         })
-        setVisible(false)
+      } else if (type === 'edit') {
+        const { service_type,
+          executable_path,
+          execute_parameters, } = formData;
+        editCollecttor({
+          id,
+          name: name,
+          node_operating_system: system,
+          introduction: description,
+          service_type: service_type,
+          executable_path: executable_path,
+          execute_parameters: execute_parameters,
+        }).then(() => {
+          setConfirmLoading(false);
+          setVisible(false);
+        }).catch((e) => {
+          console.log(e);
+          setConfirmLoading(false);
+        })
       }
     });
-    setConfirmLoading(false);
-    handleSubmit();
+    onSuccess();
   };
 
   const props: UploadProps = {
@@ -112,11 +167,20 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
     return Promise.resolve();
   };
 
-  //二次确认的弹窗
+  //删除确认的弹窗
   const deleteConfirm = () => {
-    formRef.current?.validateFields().then((values) => {
-      console.log(values);
-      setVisible(false);
+    setConfirmLoading(true);
+    formRef.current?.validateFields().then(() => {
+      deleteCollector({ id })
+        .then(() => {
+          setConfirmLoading(false);
+          setVisible(false);
+          onSuccess();
+        })
+        .catch((e) => {
+          console.log(e);
+          setConfirmLoading(false);
+        })
     })
   }
 
@@ -140,6 +204,7 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
                   <Button
                     className="mr-[10px]"
                     type="primary"
+                    loading={confirmLoading}
                     danger
                   >
                     {t("common.delete")}
@@ -153,8 +218,9 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
       >
         <Form
           ref={formRef}
+          form={form}
+          initialValues={formData}
           layout="vertical"
-          initialValues={initValue}
         >
           {(['edit', 'add', 'delete'].includes(type)) && (<>
             <Form.Item<any>
@@ -172,7 +238,6 @@ const CollectorModal = forwardRef<ModalRef, ModalConfig>(({ handleSubmit }, ref)
               <Select
                 disabled={type !== 'add'}
                 options={[
-                  { value: 'single', label: t('node-manager.collector.single') },
                   { value: 'linux', label: 'linux' },
                   { value: 'windows', label: 'windows' }
                 ]}>

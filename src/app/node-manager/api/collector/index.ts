@@ -1,7 +1,7 @@
 import useApiClient from '@/utils/request';
 
 const useApiCollector = () => {
-  const { get, post } = useApiClient();
+  const { get, post, del, put } = useApiClient();
 
   //获取采集器列表
   const getCollectorlist = async ({
@@ -69,12 +69,52 @@ const useApiCollector = () => {
       execute_parameters,
       introduction
     })
+  };
+
+  // 删除采集器
+  const deleteCollector = async ({
+    id
+  }: {
+    id: string
+  }) => {
+    return await del(`/node_mgmt/api/collector/${id}`)
+  };
+
+  // 编辑采集器
+  const editCollecttor = async ({
+    id,
+    name,
+    service_type,
+    executable_path,
+    execute_parameters,
+    node_operating_system,
+    introduction,
+  }: {
+    id: string,
+    name: string,
+    service_type: string,
+    executable_path: string,
+    execute_parameters: string,
+    node_operating_system: string,
+    introduction?: string,
+  }) => {
+    return await put(`/node_mgmt/api/collector/${id}`, {
+      id,
+      name,
+      service_type,
+      executable_path,
+      execute_parameters,
+      node_operating_system,
+      introduction
+    });
   }
 
   return {
     getCollectorlist,
     getControllerList,
-    addCollector
+    addCollector,
+    deleteCollector,
+    editCollecttor
   };
 };
 
