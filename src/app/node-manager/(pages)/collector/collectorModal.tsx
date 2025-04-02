@@ -90,7 +90,9 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
           name: name,
           service_type: 'exec',
           node_operating_system: system,
-          introduction: description
+          introduction: description,
+          executable_path: 'text/',
+          execute_parameters: 'text'
         }).then(() => {
           setConfirmLoading(false);
           setVisible(false);

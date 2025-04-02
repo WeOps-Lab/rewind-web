@@ -1,5 +1,15 @@
 import useApiClient from '@/utils/request';
 
+interface CollectorParams {
+  id: string,
+  name: string,
+  service_type: string,
+  executable_path: string,
+  execute_parameters: string,
+  node_operating_system: string,
+  introduction?: string,
+}
+
 const useApiCollector = () => {
   const { get, post, del, put } = useApiClient();
 
@@ -43,32 +53,8 @@ const useApiCollector = () => {
   };
 
   // 添加采集器
-  const addCollector = async ({
-    id,
-    name,
-    service_type,
-    node_operating_system,
-    executable_path = 'test/',
-    execute_parameters = 'test',
-    introduction = '',
-  }: {
-    id: string,
-    name: string,
-    service_type: string,
-    node_operating_system: string,
-    executable_path?: string,
-    execute_parameters?: string,
-    introduction?: string,
-  }) => {
-    return await post('/node_mgmt/api/collector/', {
-      id,
-      name,
-      service_type,
-      node_operating_system,
-      executable_path,
-      execute_parameters,
-      introduction
-    })
+  const addCollector = async (params: CollectorParams) => {
+    return await post('/node_mgmt/api/collector/', {...params})
   };
 
   // 删除采集器
@@ -81,32 +67,8 @@ const useApiCollector = () => {
   };
 
   // 编辑采集器
-  const editCollecttor = async ({
-    id,
-    name,
-    service_type,
-    executable_path,
-    execute_parameters,
-    node_operating_system,
-    introduction,
-  }: {
-    id: string,
-    name: string,
-    service_type: string,
-    executable_path: string,
-    execute_parameters: string,
-    node_operating_system: string,
-    introduction?: string,
-  }) => {
-    return await put(`/node_mgmt/api/collector/${id}`, {
-      id,
-      name,
-      service_type,
-      executable_path,
-      execute_parameters,
-      node_operating_system,
-      introduction
-    });
+  const editCollecttor = async (params: CollectorParams) => {
+    return await put(`/node_mgmt/api/collector/${params.id}`, {...params});
   }
 
   return {
