@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import attrLayoutStyle from './layout.module.scss';
 import { useTranslation } from '@/utils/i18n';
+import EllipsisWithTooltip from '@/components/ellipsis-with-tooltip';
 
 const AboutLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -37,9 +38,7 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="text-[14px] font-[800] mb-[2px] break-all">
           {modelName}
         </div>
-        <div className="w-[100px] text-[var(--color-text-2)] font-[400] text-[12px] hide-text break-all">
-          {instName}
-        </div>
+        <EllipsisWithTooltip text={instName} className="w-[124px] whitespace-nowrap overflow-hidden text-ellipsis" />
       </div>
     </header>
   );
