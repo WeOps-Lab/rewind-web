@@ -1,11 +1,5 @@
 interface TableDataItem {
   id?: string | number;
-  name?: string,
-  system?: string,
-  description?: string,
-  service_type?: string,
-  executable_path?: string,
-  execute_parameters?: string,
   [key: string]: any;
 }
 
