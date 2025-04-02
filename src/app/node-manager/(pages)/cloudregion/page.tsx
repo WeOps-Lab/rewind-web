@@ -126,7 +126,7 @@ const Cloudregion = () => {
           </Form.Item>
           <Form.Item
             name={['cloudregion', 'title']}
-            label={t('node-manager.cloudregion.editform.Name')}
+            label={t('common.name')}
           >
             <Input placeholder={selectedRegion?.name} disabled />
           </Form.Item>

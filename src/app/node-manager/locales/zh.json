@@ -24,13 +24,13 @@
     "successfulCopied": "复制成功！",
     "download": "下载",
     "successfulDownloaded": "下载成功！",
-    "operationSuccessful": "操作成功！"
+    "operationSuccessful": "操作成功！",
+    "name": "名称"
   },
   "node-manager": {
     "cloudregion": {
       "editform": {
         "title": "编辑云区域",
-        "Name": "名字",
         "Introduction": "简介"
       },
       "node": {
@@ -99,7 +99,6 @@
         "version": "版本号"
       },
       "Configuration": {
-        "name": "姓名",
         "system": "操作系统",
         "collector": "采集器",
         "count": "节点总数",
@@ -116,7 +115,6 @@
         "varconfig": "这些变量可用于配置中"
       },
       "variable": {
-        "name": "名字",
         "value": "数值",
         "desc": "描述",
         "deletevariable": "删除变量",

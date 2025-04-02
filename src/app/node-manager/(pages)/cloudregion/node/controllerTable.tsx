@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { Spin, Button, Modal } from 'antd';
+import { Spin, Button, Popconfirm } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { ModalRef, TableDataItem } from '@/app/node-manager/types';
@@ -16,7 +16,6 @@ import { cloneDeep } from 'lodash';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
 import InstallGuidance from './installGuidance';
-const { confirm } = Modal;
 
 const INFO_ITEM = {
   ip: null,
@@ -183,7 +182,7 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
   const getNodeList = async () => {
     try {
       setPageLoading(true);
-      const data = await getnodelist(cloudId as any, '');
+      const data = await getnodelist({ cloud_region_id: Number(cloudId) });
       if (!data.length) {
         setNodeList([
           {
@@ -197,25 +196,19 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
     }
   };
 
-  const goBack = () => {
-    confirm({
-      title: t('common.prompt'),
-      content: t('node-manager.cloudregion.node.installingTips'),
-      centered: true,
-      onOk() {
-        cancel();
-      },
-    });
-  };
-
   return (
     <Spin spinning={pageLoading} className="w-full">
       <div className={controllerInstallSyle.controllerInstall}>
         <div className={controllerInstallSyle.title}>
-          <ArrowLeftOutlined
-            className="text-[var(--color-primary)] text-[20px] cursor-pointer mr-[10px]"
-            onClick={goBack}
-          />
+          <Popconfirm
+            title={t('common.prompt')}
+            description={t('node-manager.cloudregion.node.installingTips')}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+            onConfirm={cancel}
+          >
+            <ArrowLeftOutlined className="text-[var(--color-primary)] text-[20px] cursor-pointer mr-[10px]" />
+          </Popconfirm>
           <span>
             {t(
               `node-manager.cloudregion.node.${isRemote ? 'autoInstall' : 'manuallyInstall'}`

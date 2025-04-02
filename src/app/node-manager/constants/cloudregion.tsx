@@ -115,11 +115,11 @@ const useSidecaritems = (): MenuProps['items'] => {
 const OPERATE_SYSTEMS: SegmentedItem[] = [
   {
     label: 'Windows',
-    value: 'Windows',
+    value: 'windows',
   },
   {
     label: 'Linux',
-    value: 'Linux',
+    value: 'linux',
   },
 ];
 

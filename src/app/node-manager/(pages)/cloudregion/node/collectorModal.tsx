@@ -62,7 +62,8 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const initPage = (type: string) => {
       console.log(selectedsystem);
       Promise.all([
-        type === 'installCollector' && getnodelist(Number(cloudid)),
+        type === 'installCollector' &&
+          getnodelist({ cloud_region_id: Number(cloudid) }),
         getconfiglist(Number(cloudid)),
       ])
         .then((res) => {

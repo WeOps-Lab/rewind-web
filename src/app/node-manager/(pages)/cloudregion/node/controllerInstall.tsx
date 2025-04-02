@@ -380,7 +380,7 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
   const getNodeList = async () => {
     try {
       setPageLoading(true);
-      const data = await getnodelist(cloudId as any, '');
+      const data = await getnodelist({ cloud_region_id: Number(cloudId) });
       if (!data.length) {
         setNodeList([
           {

@@ -24,7 +24,7 @@ export const useColumns = ({
       },
       {
         title: t('node-manager.cloudregion.node.system'),
-        dataIndex: 'operatingsystem',
+        dataIndex: 'operating_system',
       },
       {
         title: 'Sidecar',

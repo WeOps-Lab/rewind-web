@@ -13,7 +13,7 @@ export const useConfigColumns = ({
   const { deletecollector } = useApiCloudRegion();
   const columns: TableColumnsType<TableDataItem> = [
     {
-      title: t('node-manager.cloudregion.Configuration.name'),
+      title: t('common.name'),
       dataIndex: 'name',
       fixed: 'left',
       width: 300,

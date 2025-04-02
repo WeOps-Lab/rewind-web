@@ -19,9 +19,13 @@ const useApiCloudRegion = () => {
 
   //节点的模块
   //获取节点列表
-  const getnodelist = async (cloud_region_id: number, search?: string) => {
+  const getnodelist = async (params: {
+    cloud_region_id?: number;
+    name?: string;
+    operating_system?: string;
+  }) => {
     return await get('/node_mgmt/api/node/', {
-      params: { cloud_region_id, search },
+      params,
     });
   };
 

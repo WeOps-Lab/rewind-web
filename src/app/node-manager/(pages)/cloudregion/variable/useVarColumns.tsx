@@ -10,7 +10,7 @@ export const useVarColumns = ({
   const { t } = useTranslation();
   const columns: TableColumnsType<TableDataItem> = [
     {
-      title: t("node-manager.cloudregion.variable.name"),
+      title: t("common.name"),
       dataIndex: "name",
       render: (text: string) => <p>{text}</p>,
     },

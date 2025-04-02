@@ -44,9 +44,10 @@ const Node = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [showNodeTable, setShowNodeTable] = useState<boolean>(true);
+  const [searchText, setSearchText] = useState<string>('');
   const [showInstallController, setShowInstallController] =
     useState<boolean>(false);
-  const [system, setSystem] = useState<string>('Windows');
+  const [system, setSystem] = useState<string>('windows');
   const checkConfig = (row: TableDataItem) => {
     console.log(row);
   };
@@ -79,7 +80,7 @@ const Node = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      getNodelist();
+      getNodes();
     }
   }, [isLoading]);
 
@@ -94,7 +95,7 @@ const Node = () => {
           try {
             await del(`/monitor/api/monitor_policy/${params}/`);
             message.success(t('common.operationSuccessful'));
-            getNodelist();
+            getNodes();
           } finally {
             resolve(true);
           }
@@ -122,17 +123,13 @@ const Node = () => {
   };
 
   //选择相同的系统节点，判断是否禁用按钮
-  const onSelectChange = (
-    newSelectedRowKeys: React.Key[],
-    selectedRows: TableDataItem[]
-  ) => {
-    console.log(selectedRows);
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
-  const getCheckboxProps = (record: TableDataItem) => {
+  const getCheckboxProps = () => {
     return {
-      disabled: record ? false : true,
+      disabled: false,
     };
   };
 
@@ -143,72 +140,39 @@ const Node = () => {
   };
 
   const onSearch: SearchProps['onSearch'] = (value) => {
-    getNodelist(value);
+    setSearchText(value);
+    const params = getParams();
+    params.name = value;
+    getNodes(params);
   };
 
-  const updatenodelist = async () => {
-    setLoading(true);
-
-    try {
-      // 获取节点数据
-      const res = await getnodelist(Number(cloudid));
-      const newNodeList = res.map((item: any) => ({
-        key: item.id,
-        ip: item.ip,
-        operatingsystem:
-          item.operating_system.charAt(0).toUpperCase() +
-          item.operating_system.slice(1),
-        sidecar: !item.status?.status ? 'Running' : 'Error',
-        message: item.status.message,
-      }));
-      setNodelist(newNodeList);
-    } catch (error) {
-      console.error('Failed to update node list', error);
-    } finally {
-      setLoading(false); // 无论上述情况是否默认执行完成，此行均应恢复原逻辑状态置
-    }
+  const getParams = () => {
+    return {
+      name: searchText,
+      operating_system: system,
+      cloud_region_id: Number(cloudid),
+    };
   };
 
-  const getNodelist = async (search?: string) => {
+  const getNodes = async (params?: {
+    name?: string;
+    operating_system?: string;
+    cloud_region_id?: number;
+  }) => {
     setLoading(true);
-    const res = await getnodelist(Number(cloudid));
-    console.log(res, search);
+    const res = await getnodelist(params || getParams());
+    const data = res.map((item: TableDataItem) => ({
+      ...item,
+      key: item.id,
+      sidecar: 'Running',
+      nas_excutor: 'Running',
+    }));
     setLoading(false);
-    setNodelist([
-      //   {
-      //     key: 1,
-      //     ip: '10.10.22',
-      //     operatingsystem: 'Windows',
-      //     sidecar: 'Running',
-      //     nas_excutor: 'Error',
-      //     message: '123',
-      //   },
-      //   {
-      //     key: 2,
-      //     ip: '10.10.22',
-      //     operatingsystem: 'Windows',
-      //     sidecar: 'Running',
-      //     nas_excutor: 'Running',
-      //     message: '123',
-      //   },
-      //   {
-      //     key: 3,
-      //     ip: '10.10.22',
-      //     operatingsystem: 'Windows',
-      //     sidecar: 'Error',
-      //     nas_excutor: 'Running',
-      //     message: '123',
-      //   },
-    ]);
+    setNodelist(data);
   };
 
   const handleCollectorSuccess = async () => {
-    // 更新 table 的普通数据（主列表数据）
-    await getNodelist();
-    // 收集已经展开行的 key，再次更新这些展开行的数据
-
-    const res = await getnodelist(Number(cloudid));
-    console.log(res);
+    getNodes();
   };
 
   const handleInstallController = () => {
@@ -218,7 +182,9 @@ const Node = () => {
 
   const onSystemChange = (id: string) => {
     setSystem(id);
-    getNodelist();
+    const params = getParams();
+    params.operating_system = id;
+    getNodes(params);
   };
 
   return (
@@ -237,9 +203,14 @@ const Node = () => {
                   className="w-64 mr-[8px]"
                   placeholder={t('common.search')}
                   enterButton
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                   onSearch={onSearch}
                 />
-                <ReloadOutlined className="mr-[8px]" onClick={updatenodelist} />
+                <ReloadOutlined
+                  className="mr-[8px]"
+                  onClick={() => getNodes()}
+                />
                 <Button
                   type="primary"
                   className="mr-[8px]"

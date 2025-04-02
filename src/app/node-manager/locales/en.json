@@ -24,13 +24,13 @@
     "successfulCopied": "Copy successful !",
     "download": "download",
     "successfulDownloaded": "Download successful !",
-    "operationSuccessful": "Operation successful !"
+    "operationSuccessful": "Operation successful !",
+    "name": "Name"
   },
   "node-manager": {
     "cloudregion": {
       "editform": {
         "title": "Edit Cloud Region",
-        "Name": "Name",
         "Introduction": "Introduction"
       },
       "node": {
@@ -99,7 +99,6 @@
         "version": "Version"
       },
       "Configuration": {
-        "name": "Name",
         "system": "Operating System",
         "collector": "Collector",
         "count": "Node Count",
@@ -116,7 +115,6 @@
         "varconfig": "These variables are available in the configuration"
       },
       "variable": {
-        "name": "Name",
         "value": "Value",
         "desc": "Description",
         "deletevariable": "Delete Variable",

@@ -184,20 +184,22 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   };
 
   const onSearch: SearchProps['onSearch'] = (value) => {
-    getnodelist(Number(cloudid), value).then((res) => {
-      const data = res.map((item: nodeItemtRes) => {
-        return {
-          key: item.id,
-          ip: item.ip,
-          operatingsystem: item.operating_system,
-          sidecar: !item.status.status ? 'Error' : 'Running',
-        };
-      });
-      const tempdata = data.filter(
-        (item: mappedNodeItem) => item.operatingsystem === selectedsystem
-      );
-      setApplydata(tempdata);
-    });
+    getnodelist({ cloud_region_id: Number(cloudid), name: value }).then(
+      (res) => {
+        const data = res.map((item: nodeItemtRes) => {
+          return {
+            key: item.id,
+            ip: item.ip,
+            operatingsystem: item.operating_system,
+            sidecar: !item.status.status ? 'Error' : 'Running',
+          };
+        });
+        const tempdata = data.filter(
+          (item: mappedNodeItem) => item.operatingsystem === selectedsystem
+        );
+        setApplydata(tempdata);
+      }
+    );
   };
 
   //选择操作系统
@@ -227,7 +229,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
 
   //获取应用列表的数据表格
   const getApplydata = () => {
-    getnodelist(Number(cloudid)).then((res) => {
+    getnodelist({ cloud_region_id: Number(cloudid) }).then((res) => {
       const data = res.map((item: nodeItemtRes) => {
         return {
           key: item.id,
@@ -329,7 +331,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
           <>
             <Form.Item
               name="name"
-              label={t('node-manager.cloudregion.Configuration.name')}
+              label={t('common.name')}
               rules={[
                 {
                   required: true,

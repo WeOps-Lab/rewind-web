@@ -84,7 +84,7 @@ const VariableModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =>
       <Form ref={formRef} layout="vertical" colon={false}>
         <Form.Item
           name="name"
-          label={t("node-manager.cloudregion.variable.name")}
+          label={t("common.name")}
           rules={[
             {
               pattern: /^[A-Za-z0-9_]+$/,
