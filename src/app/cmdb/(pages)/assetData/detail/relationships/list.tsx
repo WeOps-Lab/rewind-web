@@ -154,6 +154,7 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
         model_id: linkModelId,
         classification_id: '',
         inst_id: row._id,
+        inst_name: row.inst_name,
       };
       const queryString = new URLSearchParams(params).toString();
       const url = `/cmdb/assetData/detail/baseInfo?${queryString}`;

@@ -16,6 +16,7 @@ import {
   DatePicker,
   Col,
   Row,
+  Checkbox,
 } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import { useTranslation } from '@/utils/i18n';
@@ -61,13 +62,14 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
     const [instanceData, setInstanceData] = useState<any>({});
     const [selectedRows, setSelectedRows] = useState<any[]>([]);
     const [modelId, setModelId] = useState<string>('');
+    const [enabledFields, setEnabledFields] = useState<Record<string, boolean>>({});
     const [form] = Form.useForm();
     const { t } = useTranslation();
     const { post } = useApiClient();
-    const { RangePicker } = DatePicker;
 
     useEffect(() => {
       if (groupVisible) {
+        setEnabledFields({});
         form.resetFields();
         form.setFieldsValue(instanceData);
       }
@@ -101,13 +103,8 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
         } else {
           for (const key in forms) {
             const target = attrList.find((item) => item.attr_id === key);
-            if (
-              target?.attr_type === 'time' &&
-              forms[key].every((item: string) => !!item)
-            ) {
-              forms[key] = forms[key].map((date: string) =>
-                dayjs(date, 'YYYY-MM-DD HH:mm:ss')
-              );
+            if (target?.attr_type === 'time' && forms[key]) {
+              forms[key] = dayjs(forms[key], 'YYYY-MM-DD HH:mm:ss');
             }
           }
         }
@@ -115,14 +112,118 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
       },
     }));
 
+    const handleFieldToggle = (fieldId: string, enabled: boolean) => {
+      setEnabledFields(prev => ({
+        ...prev,
+        [fieldId]: enabled
+      }));
+      
+      if (!enabled) {
+        form.setFieldValue(fieldId, undefined);
+      }
+    };
+
+    const renderFormLabel = (item: AttrFieldType) => {
+      return (
+        <div className="flex items-center">
+          {type === 'batchEdit' && item.editable && item.attr_id !== 'inst_name' && (
+            <Checkbox
+              checked={enabledFields[item.attr_id]}
+              onChange={(e) => handleFieldToggle(item.attr_id, e.target.checked)}
+            />
+          )}
+          <span className="ml-2">{item.attr_name}</span>
+          {item.is_required && type !== 'batchEdit' && (
+            <span className="text-[#ff4d4f] ml-1">*</span>
+          )}
+        </div>
+      );
+    };
+
+    const renderFormField = (item: AttrFieldType) => {
+      const isEditable = type !== 'batchEdit' || enabledFields[item.attr_id];
+      const baseDisabled = !item.editable && type !== 'add';
+      const fieldDisabled = type === 'batchEdit' 
+        ? !isEditable 
+        : baseDisabled || (item.attr_id === 'inst_name' && type !== 'add');
+
+      const formField = (() => {
+        switch (item.attr_type) {
+          case 'user':
+            return (
+              <Select
+                showSearch
+                disabled={fieldDisabled}
+              >
+                {userList.map((opt) => (
+                  <Select.Option key={opt.id} value={opt.id}>
+                    {opt.username}
+                  </Select.Option>
+                ))}
+              </Select>
+            );
+          case 'enum':
+            return (
+              <Select
+                disabled={fieldDisabled}
+              >
+                {item.option?.map((opt) => (
+                  <Select.Option key={opt.id} value={opt.id}>
+                    {opt.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            );
+          case 'bool':
+            return (
+              <Select
+                disabled={fieldDisabled}
+              >
+                {[
+                  { id: 1, name: 'Yes' },
+                  { id: 0, name: 'No' },
+                ].map((opt) => (
+                  <Select.Option key={opt.id} value={opt.id}>
+                    {opt.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            );
+          case 'time':
+            return (
+              <DatePicker
+                showTime
+                disabled={fieldDisabled}
+                format="YYYY-MM-DD HH:mm:ss"
+                style={{ width: '100%' }}
+              />
+            );
+          case 'organization':
+            return (
+              <Cascader
+                showSearch
+                disabled={fieldDisabled}
+                options={organizationList}
+              />
+            );
+          default:
+            return (
+              <Input
+                disabled={fieldDisabled}
+              />
+            );
+        }
+      })();
+
+      return formField;
+    };
+
     const handleSubmit = (confirmType?: string) => {
       form.validateFields().then((values) => {
         for (const key in values) {
           const target = formItems.find((item) => item.attr_id === key);
           if (target?.attr_type === 'time' && values[key]) {
-            values[key] = values[key].map((date: any) =>
-              date.format('YYYY-MM-DD HH:mm:ss')
-            );
+            values[key] = values[key].format('YYYY-MM-DD HH:mm:ss');
           }
         }
         operateAttr(values, confirmType);
@@ -131,8 +232,22 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
 
     const operateAttr = async (params: AttrFieldType, confirmType?: string) => {
       try {
+        if (type === 'batchEdit') {
+          const hasEnabledFields = Object.values(enabledFields).some(enabled => enabled);
+          if (!hasEnabledFields) {
+            message.warning(t('common.inputMsg'));
+            return;
+          }
+        }
         setConfirmLoading(true);
-        const formData = params;
+        const formData = type === 'batchEdit'
+          ? Object.keys(params).reduce((acc, key) => {
+            if (enabledFields[key]) {
+              acc[key] = params[key];
+            }
+            return acc;
+          }, {} as any)
+          : params;
         const msg: string = t(
           type === 'add' ? 'successfullyAdded' : 'successfullyModified'
         );
@@ -179,8 +294,8 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
         <OperateModal
           title={title}
           subTitle={subTitle}
-          visible={groupVisible}
-          width={850}
+          open={groupVisible}
+          width={730}
           onCancel={handleCancel}
           footer={
             <div>
@@ -203,7 +318,7 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
             </div>
           }
         >
-          <Form form={form}>
+          <Form form={form} layout="vertical">
             <div className="font-[600] text-[var(--color-text-2)] text-[18px] pl-[12px] pb-[14px]">
               {t('group')}
             </div>
@@ -213,9 +328,12 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
                 .map((item) => (
                   <Col span={12} key={item.attr_id}>
                     <Form.Item
+                      className="mb-4"
                       name={item.attr_id}
-                      label={item.attr_name}
-                      labelCol={{ span: 8 }}
+                      label={renderFormLabel({
+                        ...item,
+                        attr_type: 'organization'
+                      })}
                       rules={[
                         {
                           required: item.is_required && type !== 'batchEdit',
@@ -223,11 +341,10 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
                         },
                       ]}
                     >
-                      <Cascader
-                        showSearch
-                        disabled={!item.editable && type !== 'add'}
-                        options={organizationList}
-                      />
+                      {renderFormField({
+                        ...item,
+                        attr_type: 'organization'
+                      })}
                     </Form.Item>
                   </Col>
                 ))}
@@ -241,9 +358,9 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
                 .map((item) => (
                   <Col span={12} key={item.attr_id}>
                     <Form.Item
+                      className="mb-4"
                       name={item.attr_id}
-                      label={item.attr_name}
-                      labelCol={{ span: 7 }}
+                      label={renderFormLabel(item)}
                       rules={[
                         {
                           required: item.is_required && type !== 'batchEdit',
@@ -251,68 +368,7 @@ const FieldMoadal = forwardRef<FieldModalRef, FieldModalProps>(
                         },
                       ]}
                     >
-                      {(() => {
-                        switch (item.attr_type) {
-                          case 'user':
-                            return (
-                              <Select
-                                showSearch
-                                disabled={!item.editable && type !== 'add'}
-                              >
-                                {userList.map((opt) => (
-                                  <Select.Option key={opt.id} value={opt.id}>
-                                    {opt.username}
-                                  </Select.Option>
-                                ))}
-                              </Select>
-                            );
-                          case 'enum':
-                            return (
-                              <Select
-                                disabled={!item.editable && type !== 'add'}
-                              >
-                                {item.option?.map((opt) => (
-                                  <Select.Option key={opt.id} value={opt.id}>
-                                    {opt.name}
-                                  </Select.Option>
-                                ))}
-                              </Select>
-                            );
-                          case 'bool':
-                            return (
-                              <Select
-                                disabled={!item.editable && type !== 'add'}
-                              >
-                                {[
-                                  { id: 1, name: 'Yes' },
-                                  { id: 0, name: 'No' },
-                                ].map((opt) => (
-                                  <Select.Option key={opt.id} value={opt.id}>
-                                    {opt.name}
-                                  </Select.Option>
-                                ))}
-                              </Select>
-                            );
-                          case 'time':
-                            return (
-                              <RangePicker
-                                showTime
-                                disabled={!item.editable && type !== 'add'}
-                                format="YYYY-MM-DD HH:mm:ss"
-                              />
-                            );
-                          default:
-                            return (
-                              <Input
-                                disabled={
-                                  (!item.editable && type !== 'add') ||
-                                  (type === 'batchEdit' &&
-                                    item.attr_id === 'inst_name')
-                                }
-                              />
-                            );
-                        }
-                      })()}
+                      {renderFormField(item)}
                     </Form.Item>
                   </Col>
                 ))}
