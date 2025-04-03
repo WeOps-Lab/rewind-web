@@ -1,42 +1,99 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import SubLayout from '@/components/sub-layout';
+import { Button, Popconfirm } from 'antd';
+import { ColumnItem } from '@/types';
 import Icon from '@/components/icon';
 import { useTranslation } from '@/utils/i18n';
-import useApiCollector from '@/app/node-manager/api/collector';
-import type { Collectorcardprops } from '@/app/node-manager/types/index';
 import { useRouter } from 'next/navigation';
+import CustomTable from '@/components/custom-table';
+import Permission from '@/components/permission';
+import SubLayout from '@/components/sub-layout';
+import useApiCollector from '@/app/node-manager/api/collector';
+import type { Collectorcardprops, Pagination, TableDataItem } from '@/app/node-manager/types/index';
 
 const Collectordetail = () => {
-  const { getCollectorlist } = useApiCollector();
-  const { t } = useTranslation();
   const router = useRouter();
+  const { t } = useTranslation();
+  const { getCollectorDetail, getPackageList, deletePackage } = useApiCollector();
   const [detaildata, setDetaildata] = useState<Collectorcardprops>({
     id: '',
     name: '',
     system: [],
     introduction: '',
   });
-  // const [pagination, setPagination] = useState<Pagination>({
-  //   current: 1,
-  //   total: 0,
-  //   pageSize: 20,
-  // });
+  const [pagination, setPagination] = useState<Pagination>({
+    current: 1,
+    total: 0,
+    pageSize: 20,
+  });
+  const [tableData, setTableData] = useState<TableDataItem[]>([]);
+  const [tableLoading, setTableLoading] = useState<boolean>(false);
+  const columns: ColumnItem[] = [
+    {
+      title: t('node-manager.collector.packageName'),
+      dataIndex: 'name',
+      key: 'name',
+      width: 120,
+      ellipsis: true,
+      render: (_, record) => <>{record.name || '--'}</>,
+    },
+    {
+      title: t('node-manager.collector.version'),
+      dataIndex: 'version',
+      key: 'version',
+      width: 120,
+      ellipsis: true,
+      render: (_, record) => <>{record.version || '--'}</>,
+    },
+    {
+      title: t('node-manager.collector.updatedBy'),
+      dataIndex: 'updated_by',
+      key: 'updated_by',
+      width: 120,
+      ellipsis: true,
+      render: (_, record) => <>{record.updated_by || '--'}</>,
+    },
+    {
+      title: t('node-manager.collector.updatedAt'),
+      dataIndex: 'updated_at',
+      key: 'updated_at',
+      width: 120,
+      ellipsis: true,
+      render: (_, record) => <>{record.updated_at || '--'}</>,
+    },
+    {
+      title: t('common.actions'),
+      key: 'action',
+      dataIndex: 'action',
+      width: 120,
+      fixed: 'right',
+      render: (_, record) => (
+        <>
+          <Permission requiredPermissions={['Operate']}>
+            <Popconfirm
+              title={t(`node-manager.collector.delete`)}
+              description={t(`node-manager.collector.deleteInfo`)}
+              okText={t("common.confirm")}
+              cancelText={t("common.cancel")}
+              onConfirm={() => {
+                deletePackage(record?.id)
+              }}
+            >
+              <Button
+                type="link"
+                disabled={record.status !== 'new'}
+              >
+                {t('common.delete')}
+              </Button>
+            </Popconfirm>
+          </Permission>
+        </>
+      ),
+    },
+  ];
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const id = searchParams.get('id');
-    if (typeof id === 'string') {
-      getCollectorlist({ search: id }).then((res) => {
-        const tempdata = {
-          id: res[0].id,
-          name: res[0].name,
-          system: [res[0].node_operating_system],
-          introduction: res[0].introduction,
-        };
-        setDetaildata(tempdata);
-      });
-    }
+    getTableData();
   }, []);
 
   //顶部的组件
@@ -67,6 +124,40 @@ const Collectordetail = () => {
     );
   };
 
+  const getTableData = async () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const id = searchParams.get('id');
+    if (typeof id === 'string') {
+      try {
+        setTableLoading(true);
+        const getDetail = getCollectorDetail({ id: id });
+        const getPackage = getPackageList();
+        const res = await Promise.all([getDetail, getPackage]);
+        const collectorInfo = res[0];
+        const packageInfo = res[1];
+        setDetaildata({
+          id: collectorInfo.id,
+          name: collectorInfo.name,
+          system: [collectorInfo.node_operating_system],
+          introduction: collectorInfo.introduction
+        });
+        setTableData(packageInfo || []);
+        setTableLoading(false);
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
+  }
+
+  const handleTableChange = () => {
+
+  }
+
   return (
     <div className="w-full h-full">
       <SubLayout
@@ -77,25 +168,15 @@ const Collectordetail = () => {
           router.push('/node-manager/collector/');
         }}
       >
-        <div className="w-full h-full">
-          <div>文档介绍的位置</div>
-          <div>
-            <div>
-              {detaildata.system && detaildata.system[0]
-                ? detaildata.system[0]
-                : '未知系统'}
-            </div>
-            <div>Linux的介绍</div>
-          </div>
-          <div className="mt-[20px]">
-            <div>conntrack</div>
-            <div>{detaildata.introduction}</div>
-          </div>
-          <div className="mt-[20px]">
-            <div>Summary</div>
-            <div>Summary的介绍</div>
-          </div>
-        </div>
+        <CustomTable
+          scroll={{ y: 'calc(100vh - 440px)', x: 'calc(100vw - 320px)' }}
+          columns={columns}
+          dataSource={tableData}
+          pagination={pagination}
+          loading={tableLoading}
+          rowKey="id"
+          onChange={handleTableChange}
+        />
       </SubLayout>
     </div>
   );

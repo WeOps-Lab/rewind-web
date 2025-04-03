@@ -15,6 +15,7 @@ interface PackageParams {
   type: string,
   name: string,
   version: string,
+  object: string,
   file: File
 }
 
@@ -38,6 +39,15 @@ const useApiCollector = () => {
     return await get('/node_mgmt/api/collector/', {
       params: { search, node_operating_system, name, page, page_size },
     });
+  };
+
+  // 获取采集器详情
+  const getCollectorDetail = async ({
+    id
+  }: {
+    id: string
+  }) => {
+    return await get(`/node_mgmt/api/collector/${id}`);
   };
 
   // 获取控制器列表
@@ -79,19 +89,31 @@ const useApiCollector = () => {
     return await put(`/node_mgmt/api/collector/${params.id}`, params);
   };
 
+  // 获取包列表
+  const getPackageList = async () => {
+    return await get('/node_mgmt/api/package');
+  }
+
   // 上传包
   const uploadPackage = async (data: PackageParams) => {
     return await post('/node_mgmt/api/package', data)
-    // return await get('/node_mgmt/api/node')
-  }
+  };
+
+  // 删除包
+  const deletePackage = async (id: number) => {
+    return await del(`/node_mgmt/api/package/${id}`);
+  };
 
   return {
     getCollectorlist,
+    getCollectorDetail,
     getControllerList,
     addCollector,
     deleteCollector,
     editCollecttor,
-    uploadPackage
+    uploadPackage,
+    getPackageList,
+    deletePackage
   };
 };
 

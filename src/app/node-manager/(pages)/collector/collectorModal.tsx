@@ -21,7 +21,12 @@ const initData = {
 
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const { t } = useTranslation();
-  const { addCollector, deleteCollector, editCollecttor } = useApiCollector();
+  const {
+    // uploadPackage,
+    addCollector,
+    deleteCollector,
+    editCollecttor,
+  } = useApiCollector();
   const formRef = useRef<FormInstance>(null);
   const [form] = Form.useForm();
   const [title, setTitle] = useState<string>('editCollector');
@@ -101,41 +106,51 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
           onSuccess();
         }).catch(errorCatch)
       } else if (type === 'upload') {
-        console.log(formData, key, fileList);
-        // uploadPackage({
-        //   name: formData.name,
-        //   os: formData.system,
-        //   type: key,
-        //   version: values.version,
-        //   file: fileList[0]
-        // }).then((res) => {
-        //   console.log(res)
-        // });
-        setConfirmLoading(false);
-        setVisible(false);
+        handleUpload(values);
       }
     }).catch(() => {
       setConfirmLoading(false);
     });
   };
 
+  const handleChange: UploadProps['onChange'] = ({ fileList }) => {
+    setFileList(fileList);
+  };
+
+  const handleUpload = async (values: any) => {
+    const file = fileList.length ? fileList[0] : '';
+    if (file) {
+      // const fd = new FormData();
+      // fd.append('file',file.originFileObj);
+      const params = {
+        name: formData.name,
+        os: formData.system,
+        type: key,
+        version: values.version,
+        object: JSON.stringify({
+          name: formData.name
+        }),
+        file: file.originFileObj
+      };
+      // Object.entries(params).forEach(([k,v]) => {
+      //   fd.append(k,v);
+      // });
+      // uploadPackage(params).then((res) => {
+      //   console.log(res)
+      // });
+      console.log(values,params);
+      setConfirmLoading(false);
+      setVisible(false);
+    }
+  }
+
   const props: UploadProps = {
     name: 'file',
     multiple: false,
-    action: '',
-    onChange(info) {
-      const { status } = info.file;
-      if (status !== 'uploading') {
-        console.log(info.file, info.fileList)
-      }
-      if (status === 'done') {
-        // message.success(`${info.file.name} file upload success`);
-        setFileList(info.fileList)
-      } else if (status === 'error') {
-        // message.error(`${info.file.name} file upload failed`);
-        console.log('error');
-      }
-    }
+    maxCount: 1,
+    fileList: fileList,
+    onChange: handleChange,
+    beforeUpload: () => false
   };
 
   const validateUpload = async (_: any, value: any) => {

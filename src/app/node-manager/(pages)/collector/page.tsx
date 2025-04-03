@@ -25,6 +25,7 @@ const Collector = () => {
   const [controllerCount, setControllerCount] = useState<number>(0);
   const [collectorCount, setCollectorCount] = useState<number>(0);
   const [selected, setSelected] = useState<string[]>([]);
+  const [search, setSearch] = useState<string>('');
   const [options, setOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const menuItem = useMenuItem();
@@ -46,7 +47,7 @@ const Collector = () => {
   }, [isLoading])
 
   useEffect(() => {
-    fetchCollectorlist();
+    fetchCollectorlist(search,selected);
   }, [value])
 
   const navigateToCollectorDetail = (item: CardItem) => {
@@ -148,8 +149,12 @@ const Collector = () => {
 
   const handleAddCollector = () => {
     openModal({ title: 'addCollector', type: 'add', form: {} })
-  }
+  };
 
+  const onSearch = (search:string) => {
+    setSearch(search);
+    fetchCollectorlist(search, selected);
+  };
 
   return (
     <div className={`${collectorstyle.collection}`}>
@@ -168,7 +173,7 @@ const Collector = () => {
         menuActions={(value) => menuActions(value)}
         filter filterOptions={options} changeFilter={changeFilter}
         {...ifOpenAddModal()}
-        onSearch={(search: string) => { fetchCollectorlist(search, selected) }}
+        onSearch={onSearch}
         onCardClick={(item: CardItem) => navigateToCollectorDetail(item)}></EntityList>
       <CollectorModal ref={modalRef} onSuccess={handleSubmit} />
     </div>
