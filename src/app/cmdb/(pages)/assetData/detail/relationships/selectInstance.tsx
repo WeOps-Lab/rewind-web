@@ -96,7 +96,7 @@ const SelectInstance = forwardRef<RelationInstanceRef, SelectInstanceProps>(
                 (item) => item.id === record._id
               );
               return (
-                <PermissionWrapper requiredPermissions={['Associate']}>
+                <PermissionWrapper requiredPermissions={['Add']}>
                   <Button
                     type="link"
                     onClick={() => handleRelate(record, isRelated)}

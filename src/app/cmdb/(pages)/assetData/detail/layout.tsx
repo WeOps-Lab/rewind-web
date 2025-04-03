@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { Spin } from 'antd';
-import WithSideMenuLayout from '@/components/sub-layout';
+import { RelationshipsProvider } from '@/app/cmdb/context/relationships';
+import SideMenuLayout, { WithSideMenuLayoutProps } from '../components/sub-layout';
 import { useRouter } from 'next/navigation';
 import { getIconUrl } from '@/app/cmdb/utils/common';
 import Image from 'next/image';
@@ -11,7 +12,7 @@ import attrLayoutStyle from './layout.module.scss';
 import { useTranslation } from '@/utils/i18n';
 import EllipsisWithTooltip from '@/components/ellipsis-with-tooltip';
 
-const AboutLayout = ({ children }: { children: React.ReactNode }) => {
+const LayoutContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pageLoading] = useState<boolean>(false);
@@ -35,26 +36,33 @@ const AboutLayout = ({ children }: { children: React.ReactNode }) => {
         height={30}
       />
       <div>
-        <div className="text-[14px] font-[800] mb-[2px] break-all">
-          {modelName}
-        </div>
-        <EllipsisWithTooltip text={instName} className="w-[124px] whitespace-nowrap overflow-hidden text-ellipsis" />
+        <EllipsisWithTooltip text={modelName} className="w-[128px] whitespace-nowrap overflow-hidden text-ellipsis text-[14px] font-[800] mb-[2px] break-all" />
+        <EllipsisWithTooltip text={instName} className="w-[128px] whitespace-nowrap overflow-hidden text-ellipsis break-all" />
       </div>
     </header>
   );
 
+  const layoutProps: WithSideMenuLayoutProps = {
+    children,
+    showBackButton: true,
+    onBackButtonClick: handleBackButtonClick,
+    intro,
+  };
+
   return (
     <div className={`flex flex-col ${attrLayoutStyle.attrLayout}`}>
       <Spin spinning={pageLoading}>
-        <WithSideMenuLayout
-          showBackButton={true}
-          onBackButtonClick={handleBackButtonClick}
-          intro={intro}
-        >
-          {children}
-        </WithSideMenuLayout>
+        <SideMenuLayout {...layoutProps} />
       </Spin>
     </div>
+  );
+};
+
+const AboutLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <RelationshipsProvider>
+      <LayoutContent>{children}</LayoutContent>
+    </RelationshipsProvider>
   );
 };
 

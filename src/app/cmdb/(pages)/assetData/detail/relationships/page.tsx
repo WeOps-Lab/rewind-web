@@ -4,12 +4,9 @@ import Icon from '@/components/icon';
 import {
   UserItem,
   Organization,
-  ModelItem,
-  AssoTypeItem,
   AssoListRef,
 } from '@/app/cmdb/types/assetManage';
 import { Segmented, Button, Spin } from 'antd';
-import useApiClient from '@/utils/request';
 import { GatewayOutlined } from '@ant-design/icons';
 import relationshipsStyle from './index.module.scss';
 import { useTranslation } from '@/utils/i18n';
@@ -18,47 +15,26 @@ import Topo from './topo';
 import { useCommon } from '@/app/cmdb/context/common';
 import { useSearchParams } from 'next/navigation';
 import PermissionWrapper from '@/components/permission';
+import { useRelationships } from '@/app/cmdb/context/relationships';
 
 const Ralationships = () => {
   const { t } = useTranslation();
-  const { get, isLoading } = useApiClient();
   const commonContext = useCommon();
   const searchParams = useSearchParams();
+  const { modelList, assoTypes, loading, fetchModelData } = useRelationships();
   const authList = useRef(commonContext?.authOrganizations || []);
   const organizationList: Organization[] = authList.current;
   const users = useRef(commonContext?.userList || []);
   const userList: UserItem[] = users.current;
   const assoListRef = useRef<AssoListRef>(null);
-  const [modelList, setModelList] = useState<ModelItem[]>([]);
   const [isExpand, setIsExpand] = useState<boolean>(true);
-  const [assoTypes, setAssoTypes] = useState<AssoTypeItem[]>([]);
-  const [pageLoading, setPageLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('list');
   const modelId: string = searchParams.get('model_id') || '';
   const instId: string = searchParams.get('inst_id') || '';
 
   useEffect(() => {
-    if (isLoading) return;
-    getInitData();
-  }, [isLoading]);
-
-  const getInitData = () => {
-    const getModelList = get('/cmdb/api/model/');
-    const getAssoType = get('/cmdb/api/model/model_association_type/');
-    setPageLoading(true);
-    try {
-      Promise.all([getModelList, getAssoType])
-        .then((res) => {
-          setModelList(res[0] || []);
-          setAssoTypes(res[1] || []);
-        })
-        .finally(() => {
-          setPageLoading(false);
-        });
-    } catch {
-      setPageLoading(false);
-    }
-  };
+    fetchModelData();
+  }, []);
 
   const handleTabChange = (val: string) => {
     setActiveTab(val);
@@ -75,7 +51,7 @@ const Ralationships = () => {
   };
 
   return (
-    <Spin spinning={pageLoading}>
+    <Spin spinning={loading}>
       <header className={relationshipsStyle.header}>
         <Segmented
           className="mb-[10px]"

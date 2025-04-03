@@ -27,8 +27,10 @@ export const InitNode: React.FC<TopoDataProps> = ({
     if (topoData.src_result || topoData.dst_result) {
       const srcResult: any = topoData.src_result;
       const dstResult: any = topoData.dst_result;
-      const srcData = transformData(srcResult, true);
-      const dstData = transformData(dstResult, false);
+      const hasSrc = srcResult?.children?.length > 0;
+      const hasDst = dstResult?.children?.length > 0;
+      const srcData = transformData(srcResult, true, { hasSrc, hasDst });
+      const dstData = transformData(dstResult, false, { hasSrc, hasDst });
       const srcFirstNode = srcData?.nodes?.[0];
       const dstFirstNode = dstData?.nodes?.[0];
       if (srcFirstNode && dstFirstNode) {
@@ -255,13 +257,16 @@ export const InitNode: React.FC<TopoDataProps> = ({
     nodePositions: { [key: string]: { x: number; y: number } },
     isSrc: boolean,
     nodes: any[],
-    edges: any[]
+    edges: any[],
+    layoutInfo: { hasSrc: boolean; hasDst: boolean }
   ) => {
     if (!node._id) return;
 
     const id = node._id.toString();
     const hasChild = !!node.children?.length;
     const position = nodePositions[id];
+    const { hasSrc, hasDst } = layoutInfo;
+
     if (!position) return;
 
     const level = Object.keys(levelNodes).find((lvl) =>
@@ -269,6 +274,8 @@ export const InitNode: React.FC<TopoDataProps> = ({
     );
     const currentLevel = Number(level);
     const isExpanded = currentLevel < CONFIG.maxExpandedLevel;
+    const hasLeftBtn =(currentLevel === 1 && hasSrc) || (currentLevel !== 1 && isSrc && hasChild)
+    const hasRightBtn = (currentLevel === 1 && hasDst) || (currentLevel !== 1 && !isSrc && hasChild);
 
     nodes.push({
       id,
@@ -293,14 +300,14 @@ export const InitNode: React.FC<TopoDataProps> = ({
           title: showModelName(node.model_id),
         },
         expandBtnL: {
-          stroke: isSrc && hasChild ? 'var(--color-border-3)' : '',
-          fill: isSrc && hasChild ? 'var(--color-bg-1)' : 'transparent',
-          d: getExpandBtnPath(isSrc && hasChild, isExpanded),
+          stroke: hasLeftBtn ? 'var(--color-border-3)' : '',
+          fill: hasLeftBtn ? 'var(--color-bg-1)' : 'transparent',
+          d: getExpandBtnPath(hasLeftBtn, isExpanded),
         },
         expandBtnR: {
-          stroke: hasChild ? 'var(--color-border-3)' : '',
-          fill: hasChild ? 'var(--color-bg-1)' : 'transparent',
-          d: getExpandBtnPath(hasChild, isExpanded),
+          stroke: hasRightBtn ? 'var(--color-border-3)' : '',
+          fill:  hasRightBtn ? 'var(--color-bg-1)' : 'transparent',
+          d: getExpandBtnPath(hasRightBtn, isExpanded),
         },
       },
       data: {
@@ -344,13 +351,14 @@ export const InitNode: React.FC<TopoDataProps> = ({
           nodePositions,
           isSrc,
           nodes,
-          edges
+          edges,
+          layoutInfo
         )
       );
     }
   };
 
-  const transformData = (data: NodeData, isSrc: boolean) => {
+  const transformData = (data: NodeData, isSrc: boolean, layoutInfo: { hasSrc: boolean; hasDst: boolean }) => {
     const nodes: any[] = [];
     const edges: any[] = [];
 
@@ -373,7 +381,8 @@ export const InitNode: React.FC<TopoDataProps> = ({
       nodePositions,
       isSrc,
       nodes,
-      edges
+      edges,
+      layoutInfo
     );
     return { nodes, edges };
   };

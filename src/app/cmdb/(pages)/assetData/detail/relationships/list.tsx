@@ -26,6 +26,7 @@ import useApiClient from '@/utils/request';
 import assoListStyle from './index.module.scss';
 import SelectInstance from './selectInstance';
 import PermissionWrapper from '@/components/permission';
+import { useRelationships } from '@/app/cmdb/context/relationships';
 
 const { confirm } = Modal;
 
@@ -44,17 +45,91 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
     const modelId: string = searchParams.get('model_id') || '';
     const instId: string = searchParams.get('inst_id') || '';
     const instanceRef = useRef<RelationInstanceRef>(null);
+    const prevModelLenRef = useRef(0);
+    const { fetchAssoInstances, loading, selectedAssoId } = useRelationships();
 
     useEffect(() => {
-      if (
-        modelList.length &&
-        userList.length &&
-        organizationList.length &&
-        assoTypeList.length
-      ) {
+      const prevLength = prevModelLenRef.current;
+      const currentLength = modelList.length;
+      if (prevLength === 0 && currentLength > 0) {
         getInitData();
       }
-    }, [modelList, userList, organizationList, assoTypeList]);
+      prevModelLenRef.current = currentLength;
+    }, [modelList]);
+
+    const processedData = (assoInstancesList: any) => {
+      if (loading || !assoInstancesList?.length) return [];
+      const newInstIds = assoInstancesList.reduce(
+        (pre: RelationListInstItem[], cur: CrentialsAssoInstItem) => {
+          if (!cur.inst_list) return pre;
+          const allInstIds = cur.inst_list.map((item) => ({
+            id: item._id,
+            inst_asst_id: item.inst_asst_id,
+          }));
+          return [...pre, ...allInstIds];
+        },
+        []
+      );
+      setInstIds(newInstIds);
+    };
+
+    const updateInstAttrList = async (
+      assoInstancesList: any,
+      targetId?: string
+    ) => {
+      if (targetId) {
+        const targetItem = assoInstancesList.find(
+          (item: any) => item.model_asst_id === targetId
+        );
+        if (targetItem) {
+          const updatedItem = await getModelAttrList(targetItem, {
+            assoList: assoInstancesList,
+            userData: userList,
+            organizationData: organizationList,
+            models: modelList,
+            assoTypeList,
+          });
+          setAssoCredentials((prev: any) => {
+            const newCredentials = prev.map((item: any) =>
+              item.model_asst_id === targetId ? updatedItem : item
+            );
+            const keys = newCredentials.map((item: any) => item.model_asst_id);
+            setActiveKey(keys);
+            setAllActiveKeys(keys);
+            return newCredentials;
+          });
+          return;
+        }
+      }
+
+      const updatedItems = await Promise.all(
+        assoInstancesList.map((item: any) =>
+          getModelAttrList(item, {
+            assoList: assoInstancesList,
+            userData: userList,
+            organizationData: organizationList,
+            models: modelList,
+            assoTypeList,
+          })
+        )
+      );
+      const keys = updatedItems.map((item) => item.model_asst_id);
+      setActiveKey(keys);
+      setAllActiveKeys(keys);
+      setAssoCredentials(updatedItems);
+    };
+
+    useEffect(() => {
+      if (selectedAssoId && assoCredentials.length) {
+        setActiveKey([...activeKey, selectedAssoId]);
+        setTimeout(() => {
+          const element = document.getElementById(`collapse-${selectedAssoId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    }, [selectedAssoId]);
 
     useImperativeHandle(ref, () => ({
       expandAll: (type: boolean) => {
@@ -86,38 +161,16 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
     };
 
     const getInitData = async () => {
-      setAssoCredentials([]);
       setPageLoading(true);
       try {
-        const assoInstData = await get(
-          `/cmdb/api/instance/association_instance_list/${modelId}/${instId}/`
-        );
-        const assoIds = assoInstData.reduce(
-          (pre: RelationListInstItem[], cur: CrentialsAssoInstItem) => {
-            const allInstIds = cur.inst_list.map((item) => ({
-              id: item._id,
-              inst_asst_id: item.inst_asst_id,
-            }));
-            pre = [...pre, ...allInstIds];
-            return pre;
-          },
-          []
-        );
-        setInstIds(assoIds);
-        Promise.all(
-          assoInstData.map((item: any) =>
-            getModelAttrList(item, {
-              assoList: assoInstData,
-              userData: userList,
-              organizationData: organizationList,
-              models: modelList,
-              assoTypeList,
-            })
-          )
-        ).finally(() => {
-          setPageLoading(false);
-        });
-      } catch {
+        const data = await fetchAssoInstances(modelId, instId);
+        processedData(data);
+        await updateInstAttrList(data);
+        if (!data?.length) {
+          setInstIds([]);
+          setAssoCredentials([]);
+        }
+      } finally {
         setPageLoading(false);
       }
     };
@@ -125,10 +178,6 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
     const getModelAttrList = async (item: any, config: any) => {
       const responseData = await get(
         `/cmdb/api/model/${getAttrId(item)}/attr_list/`
-      );
-      const targetIndex = config.assoList.findIndex(
-        (assoItem: CrentialsAssoDetailItem) =>
-          assoItem.model_asst_id === item.model_asst_id
       );
       const columns = [
         ...getAssetColumns({
@@ -147,7 +196,9 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
             <PermissionWrapper requiredPermissions={['Add']}>
               <Button
                 type="link"
-                onClick={() => cancelRelate(record.inst_asst_id)}
+                onClick={() =>
+                  cancelRelate(record.inst_asst_id, item.model_asst_id)
+                }
               >
                 {t('Model.disassociation')}
               </Button>
@@ -155,6 +206,7 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
           ),
         },
       ];
+
       if (columns[0]) {
         columns[0].fixed = 'left';
         columns[0].render = (_: unknown, record: any) => (
@@ -166,32 +218,27 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
           </a>
         );
       }
-      if (targetIndex !== -1) {
-        config.assoList[targetIndex] = {
-          key: item.model_asst_id,
-          label: showConnectName(item, config),
-          model_asst_id: item.model_asst_id,
-          children: (
-            <CustomTable
-              size="middle"
-              pagination={false}
-              dataSource={item.inst_list}
-              columns={columns}
-              scroll={{ x: 'calc(100vw - 306px)', y: 300 }}
-              rowKey="_id"
-            />
-          ),
-        };
-      }
-      setAssoCredentials(config.assoList);
-      const keys = config.assoList.map(
-        (item: CrentialsAssoDetailItem) => item.key
-      );
-      setActiveKey(keys);
-      setAllActiveKeys(keys);
+
+      const updatedItem = {
+        key: item.model_asst_id,
+        label: showConnectName(item, config),
+        model_asst_id: item.model_asst_id,
+        children: (
+          <CustomTable
+            size="middle"
+            pagination={false}
+            dataSource={item.inst_list}
+            columns={columns}
+            scroll={{ x: 'calc(100vw - 306px)', y: 300 }}
+            rowKey="_id"
+          />
+        ),
+      };
+
+      return updatedItem;
     };
 
-    const cancelRelate = async (id: unknown) => {
+    const cancelRelate = async (id: unknown, targetAssoId: string) => {
       confirm({
         title: t('disassociationTitle'),
         content: t('deleteContent'),
@@ -201,7 +248,9 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
             try {
               await del(`/cmdb/api/instance/association/${id}/`);
               message.success(t('successfullyDisassociated'));
-              getInitData();
+              const data = await fetchAssoInstances(modelId, instId);
+              processedData(data);
+              await updateInstAttrList(data, targetAssoId);
             } finally {
               resolve(true);
             }
@@ -243,7 +292,7 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
     };
 
     return (
-      <Spin spinning={pageLoading}>
+      <Spin spinning={!loading && pageLoading}>
         <div className={assoListStyle.relationships}>
           {assoCredentials.length ? (
             <Collapse
@@ -252,7 +301,10 @@ const AssoList = forwardRef<AssoListRef, AssoListProps>(
               expandIcon={({ isActive }) => (
                 <CaretRightOutlined rotate={isActive ? 90 : 0} />
               )}
-              items={assoCredentials}
+              items={assoCredentials.map((item) => ({
+                ...item,
+                id: `collapse-${item.key}`,
+              }))}
               onChange={handleCollapseChange}
             />
           ) : (
