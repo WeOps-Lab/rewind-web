@@ -90,8 +90,12 @@ const useApiCollector = () => {
   };
 
   // 获取包列表
-  const getPackageList = async () => {
-    return await get('/node_mgmt/api/package');
+  const getPackageList = async (object: string) => {
+    return await get('/node_mgmt/api/package',{
+      params:{
+        object
+      }
+    });
   }
 
   // 上传包
