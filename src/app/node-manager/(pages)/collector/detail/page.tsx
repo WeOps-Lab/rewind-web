@@ -6,7 +6,7 @@ import Icon from '@/components/icon';
 import { useTranslation } from '@/utils/i18n';
 import { useRouter } from 'next/navigation';
 import CustomTable from '@/components/custom-table';
-import Permission from '@/components/permission';
+// import Permission from '@/components/permission';
 import SubLayout from '@/components/sub-layout';
 import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import useApiCollector from '@/app/node-manager/api/collector';
