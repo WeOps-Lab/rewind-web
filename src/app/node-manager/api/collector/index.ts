@@ -10,6 +10,15 @@ interface CollectorParams {
   introduction?: string,
 }
 
+interface PackageParams {
+  os: string,
+  type: string,
+  name: string,
+  version: string,
+  object: string,
+  file: File
+}
+
 const useApiCollector = () => {
   const { get, post, del, put } = useApiClient();
 
@@ -30,6 +39,15 @@ const useApiCollector = () => {
     return await get('/node_mgmt/api/collector/', {
       params: { search, node_operating_system, name, page, page_size },
     });
+  };
+
+  // 获取采集器详情
+  const getCollectorDetail = async ({
+    id
+  }: {
+    id: string
+  }) => {
+    return await get(`/node_mgmt/api/collector/${id}`);
   };
 
   // 获取控制器列表
@@ -69,14 +87,37 @@ const useApiCollector = () => {
   // 编辑采集器
   const editCollecttor = async (params: CollectorParams) => {
     return await put(`/node_mgmt/api/collector/${params.id}`, params);
+  };
+
+  // 获取包列表
+  const getPackageList = async () => {
+    return await get('/node_mgmt/api/package');
   }
+
+  // 上传包
+  const uploadPackage = async (data: PackageParams) => {
+    return await post('/node_mgmt/api/package', data,{
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    })
+  };
+
+  // 删除包
+  const deletePackage = async (id: number) => {
+    return await del(`/node_mgmt/api/package/${id}`);
+  };
 
   return {
     getCollectorlist,
+    getCollectorDetail,
     getControllerList,
     addCollector,
     deleteCollector,
-    editCollecttor
+    editCollecttor,
+    uploadPackage,
+    getPackageList,
+    deletePackage
   };
 };
 

@@ -13,9 +13,9 @@ const useMenuItem = () => {
     },
     {
       key: 'upload',
-      title: 'uploadPackge',
+      title: 'uploadPackage',
       config: {
-        title: 'uploadPackge', type: 'upload'
+        title: 'uploadPackage', type: 'upload'
       }
     },
     {

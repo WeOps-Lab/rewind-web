@@ -12,7 +12,7 @@ import CollectorModal from "./collectorModal";
 import { ModalRef } from "@/app/node-manager/types";
 import { useMenuItem } from "@/app/node-manager/constants/collector";
 import { Option } from "@/types";
-import { Button } from "antd/lib";
+// import { Button } from "antd/lib";
 
 const Collector = () => {
   const router = useRouter();
@@ -21,10 +21,12 @@ const Collector = () => {
   const { getCollectorlist, getControllerList } = useApiCollector();
   const modalRef = useRef<ModalRef>(null);
   const [value, setValue] = useState<string | number>('controller');
-  const [cards, setCards] = useState<CardItem[]>([]);
+  const [controllerCards, setControllerCards] = useState<CardItem[]>([]);
+  const [collectorCards, setCollectorCards] = useState<CardItem[]>([]);
   const [controllerCount, setControllerCount] = useState<number>(0);
   const [collectorCount, setCollectorCount] = useState<number>(0);
   const [selected, setSelected] = useState<string[]>([]);
+  const [search, setSearch] = useState<string>('');
   const [options, setOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const menuItem = useMenuItem();
@@ -46,21 +48,20 @@ const Collector = () => {
   }, [isLoading])
 
   useEffect(() => {
-    fetchCollectorlist();
+    fetchCollectorlist(search, selected);
   }, [value])
 
   const navigateToCollectorDetail = (item: CardItem) => {
     router.push(`/node-manager/collector/detail?id=${item.id}`);
   };
 
-  const handleResult = (res: any, selected?: string[]) => {
+  const handleResult = (res: any, value: string, selected?: string[]) => {
     const _options: Option[] = [];
     let tempdata = res.map((item: any) => {
       const system = item.node_operating_system || item.os;
       if (system && !_options.find((option) => option.value === system)) {
         _options.push({ value: system, label: system });
       }
-
       return ({
         id: item.id,
         name: item.name,
@@ -69,7 +70,7 @@ const Collector = () => {
         execute_parameters: item.execute_parameters,
         description: item.introduction || '--',
         icon: 'caijiqizongshu',
-        system: item.node_operating_system || item.os
+        tagList: [item.node_operating_system || item.os]
       })
     });
     if (selected?.length) {
@@ -77,27 +78,28 @@ const Collector = () => {
         return item.tagList.every((tag: string) => selected?.includes(tag));
       });
     }
-    setCards(tempdata);
+    if (value === 'controller') {
+      setControllerCards(tempdata);
+    } else {
+      setCollectorCards(tempdata);
+    }
     setOptions(_options);
   }
 
-  const fetchCollectorlist = (search?: string, selected?: string[]) => {
+  const fetchCollectorlist = async (search?: string, selected?: string[]) => {
     const params = {
       name: search
     }
     try {
       setLoading(true);
-      const flag = value === 'controller';
-      const request = flag ? getControllerList(params) : getCollectorlist(params);
-      request.then((res) => {
-        if(flag){
-          setControllerCount(res.length);
-        } else {
-          setCollectorCount(res.length);
-        }
-        handleResult(res, selected);
-        setLoading(false);
-      })
+      const res = await Promise.all([getControllerList(params), getCollectorlist(params)]);
+      const controllerList = res[0];
+      const collectorList = res[1];
+      setControllerCount(controllerList.length);
+      setCollectorCount(collectorList.length);
+      handleResult(controllerList, 'controller', selected);
+      handleResult(collectorList, 'collector', selected);
+      setLoading(false);
     } catch (error) {
       console.log(error)
     }
@@ -107,7 +109,8 @@ const Collector = () => {
     modalRef.current?.showModal({
       title: config?.title,
       type: config?.type,
-      form: config?.form
+      form: config?.form,
+      key: config?.key
     })
   };
 
@@ -120,11 +123,11 @@ const Collector = () => {
       onClick={(e) => e.domEvent.preventDefault()}
     >
       {menuItem.map((item) => {
-        if (value === 'controller' && item.key === 'delete') return;
+        if (value === 'controller' && ['delete', 'edit'].includes(item.key)) return;
         return (
           <Menu.Item
             key={item.title}
-            onClick={() => openModal({ ...item.config, form: data })}>{t(`node-manager.collector.${item.title}`)}
+            onClick={() => openModal({ ...item.config, form: data, key: value })}>{t(`node-manager.collector.${item.title}`)}
           </Menu.Item>
         )
       }
@@ -146,10 +149,14 @@ const Collector = () => {
     return {}
   };
 
-  const handleAddCollector = () => {
-    openModal({ title: 'addCollector', type: 'add', form: {} })
-  }
+  // const handleAddCollector = () => {
+  //   openModal({ title: 'addCollector', type: 'add', form: {} })
+  // };
 
+  const onSearch = (search: string) => {
+    setSearch(search);
+    fetchCollectorlist(search, selected);
+  };
 
   return (
     <div className={`${collectorstyle.collection}`}>
@@ -158,18 +165,17 @@ const Collector = () => {
         className="custom-tabs"
         options={titleItem}
         defaultValue='controller'
-        // value={value}
         onChange={(value) => setValue(value)}
       />
-      <Button onClick={handleAddCollector}>添加采集器</Button>
+      {/* <Button onClick={handleAddCollector}>添加采集器</Button> */}
       {/* 卡片的渲染 */}
       <EntityList
-        data={cards}
+        data={value === 'controller' ? controllerCards : collectorCards}
         loading={loading}
         menuActions={(value) => menuActions(value)}
         filter filterOptions={options} changeFilter={changeFilter}
         {...ifOpenAddModal()}
-        onSearch={(search: string) => { fetchCollectorlist(search, selected) }}
+        onSearch={onSearch}
         onCardClick={(item: CardItem) => navigateToCollectorDetail(item)}></EntityList>
       <CollectorModal ref={modalRef} onSuccess={handleSubmit} />
     </div>

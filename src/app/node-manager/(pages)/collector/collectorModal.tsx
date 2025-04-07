@@ -7,6 +7,7 @@ import { FormInstance } from "antd/lib";
 import { useTranslation } from "@/utils/i18n";
 import OperateModal from "@/components/operate-modal";
 import useApiCollector from "@/app/node-manager/api/collector";
+import { cloneDeep } from "lodash";
 const { TextArea } = Input;
 const { Dragger } = Upload;
 const initData = {
@@ -20,42 +21,45 @@ const initData = {
 
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const { t } = useTranslation();
-  const { addCollector, deleteCollector, editCollecttor } = useApiCollector();
+  const {
+    uploadPackage,
+    addCollector,
+    deleteCollector,
+    editCollecttor,
+  } = useApiCollector();
   const formRef = useRef<FormInstance>(null);
   const [form] = Form.useForm();
-  const [title, setTitle] = useState<string>('');
-  const [type, setType] = useState<string>('');
+  const [title, setTitle] = useState<string>('editCollector');
+  const [type, setType] = useState<string>('edit');
   const [id, setId] = useState<string>('');
+  const [key, setKey] = useState<string>('');
   const [visible, setVisible] = useState<boolean>(false);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<TableDataItem>(initData);
+  const [fileList, setFileList] = useState<any>([]);
   //需要二次弹窗确定的类型
   const Popconfirmarr = ["delete"];
 
   useImperativeHandle(ref, () => ({
-    showModal: ({ type, form, title }) => {
+    showModal: ({ type, form, title, key }) => {
       console.log(type, form)
+      setKey(key as string);
       setId(form?.id as string);
       setType(type);
       setTitle(title as string);
-      setFormData(form as TableDataItem)
+      const info = cloneDeep(form) as TableDataItem;
       setVisible(true);
-      if (type === 'edit' || type === 'delete') {
-        const { name, system, description } = form as TableDataItem;
-        setFormData({
-          ...form,
-          name: name,
-          system: system ? system : 'windows',
-          description: description ? description : '--'
-        });
+      const { name, tagList, description } = form as TableDataItem;
+      if (type !== 'add') {
+        info.name = name || "";
+        info.system = tagList?.length ? tagList[0] : 'windows';
+        info.description = description || '--';
       } else {
-        setFormData({
-          ...form,
-          name: '',
-          system: 'windows',
-          description: ''
-        });
+        info.system = "windows";
+        info.name = "";
+        info.description = "";
       }
+      setFormData(info);
     }
   }));
 
@@ -69,6 +73,11 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
     setVisible(false);
   };
 
+  const errorCatch = (error: any) => {
+    message.error(error.code);
+    setConfirmLoading(false);
+  }
+
   const onSubmit = () => {
     if (Popconfirmarr.includes(type)) {
       return;
@@ -76,53 +85,71 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
     setConfirmLoading(true);
     formRef.current?.validateFields().then((values) => {
       const param = {
-        id: id ? id : `${values.name}_${values.system}`,
+        id: id || `${values.name}_${values.system}`,
         name: values.name,
-        service_type: formData.service_type ? formData.service_type : 'exec',
+        service_type: formData.service_type || 'exec',
         node_operating_system: values.system,
         introduction: values.description,
-        executable_path: formData.executable_path ? formData.executable_path : 'text/',
-        execute_parameters: formData.execute_parameters ? formData.execute_parameters : 'text',
+        executable_path: formData.executable_path || 'text/',
+        execute_parameters: formData.execute_parameters || 'text',
       };
       if (type === 'add') {
         addCollector(param).then(() => {
           setConfirmLoading(false);
           setVisible(false);
+          message.success(t('common.addSuccess'));
           onSuccess();
-        }).catch((e) => {
-          console.log(e);
-          setConfirmLoading(false);
-        })
+        }).catch(errorCatch)
       } else if (type === 'edit') {
         editCollecttor(param).then(() => {
           setConfirmLoading(false);
           setVisible(false);
+          message.success(t('common.updateSuccess'));
           onSuccess();
-        }).catch((e) => {
-          console.log(e);
-          setConfirmLoading(false);
-        })
+        }).catch(errorCatch)
+      } else if (type === 'upload') {
+        handleUpload(values);
       }
-    }).catch(()=>{
+    }).catch(() => {
       setConfirmLoading(false);
     });
   };
 
+  const handleChange: UploadProps['onChange'] = ({ fileList }) => {
+    setFileList(fileList);
+  };
+
+  const handleUpload = async (values: any) => {
+    const file = fileList.length ? fileList[0] : '';
+    if (file) {
+      const fd = new FormData();
+      fd.append('file', file.originFileObj);
+      const params = {
+        name: formData.name,
+        os: formData.system,
+        type: key,
+        version: values.version,
+        object: formData.id as string,
+        file: file.originFileObj
+      };
+      Object.entries(params).forEach(([k, v]) => {
+        fd.append(k, v);
+      });
+      uploadPackage(params).then(() => {
+        setConfirmLoading(false);
+        message.success(t('node-manager.collector.uploadSuccess'));
+        setVisible(false);
+      });
+    }
+  }
+
   const props: UploadProps = {
     name: 'file',
     multiple: false,
-    action: '',
-    onChange(info) {
-      const { status } = info.file;
-      if (status !== 'uploading') {
-        console.log(info.file, info.fileList)
-      }
-      if (status === 'done') {
-        message.success(`${info.file.name} file upload success`);
-      } else if (status === 'error') {
-        message.error(`${info.file.name} file upload failed`);
-      }
-    }
+    maxCount: 1,
+    fileList: fileList,
+    onChange: handleChange,
+    beforeUpload: () => false
   };
 
   const validateUpload = async (_: any, value: any) => {
@@ -139,21 +166,29 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
       deleteCollector({ id })
         .then(() => {
           setConfirmLoading(false);
+          message.success('common.delSuccess');
           setVisible(false);
           onSuccess();
         })
-        .catch((e) => {
-          console.log(e);
+        .catch(() => {
           setConfirmLoading(false);
         })
     })
-  }
+  };
+
+  const normFile = (e: any) => {
+    console.log('Upload event:', e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
 
   return (
     <div>
       <OperateModal
         title={t(`node-manager.collector.${title}`)}
-        visible={visible}
+        open={visible}
         onCancel={handleCancel}
         footer={
           <div>
@@ -189,7 +224,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
         >
           {(['edit', 'add', 'delete'].includes(type)) && (<>
             <Form.Item<any>
-              label={t('node-manager.cloudregion.variable.name')}
+              label={t('common.name')}
               name="name"
               rules={[{ required: true, message: t('common.inputRequired') }]}
             >
@@ -203,8 +238,8 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
               <Select
                 disabled={type !== 'add'}
                 options={[
-                  { value: 'linux', label: 'linux' },
-                  { value: 'windows', label: 'windows' }
+                  { value: 'linux', label: 'Linux' },
+                  { value: 'windows', label: 'Windows' }
                 ]}>
               </Select>
             </Form.Item>
@@ -227,6 +262,8 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
             <Form.Item<any>
               label={t('node-manager.collector.importFile')}
               name="upload"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
               rules={[{ required: true, validator: validateUpload }]}
             >
               <Dragger {...props}>

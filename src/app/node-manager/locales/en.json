@@ -129,13 +129,17 @@
       "controller": "Controller",
       "desc": "Introduce each collector, including basic information, usage scenarios, and collected data.",
       "editCollector": "Edit Collector",
-      "uploadPackge": "Upload Packge",
+      "uploadPackage": "Upload Package",
+      "uploadSuccess": "Upload Success",
+      "packageName": "Package Name",
       "version": "Version",
       "importFile": "Import File",
       "addCollector": "Add Collector",
       "deleteCollector": "Delete Collector",
       "deleteInfo": "Are you sure to delete this Collector?",
-      "single": "Single choice Windows/Linux"
+      "single": "Single choice Windows/Linux",
+      "updatedBy": "Updated By",
+      "updatedAt": "Updated At"
     }
   }
 }
