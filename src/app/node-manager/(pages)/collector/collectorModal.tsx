@@ -125,11 +125,11 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
       const fd = new FormData();
       fd.append('file', file.originFileObj);
       const params = {
-        name: formData.name,
+        name: file.name,
         os: formData.system,
         type: key,
         version: values.version,
-        object: formData.id as string,
+        object: formData.name,
         file: file.originFileObj
       };
       Object.entries(params).forEach(([k, v]) => {
