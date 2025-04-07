@@ -337,7 +337,7 @@ const ProfessionalCollection: React.FC = () => {
 
     if (selectedRef.current.nodeId === 'k8s') {
       return <K8sTask {...props} />;
-    } else if (selectedRef.current.nodeId === 'network') {
+    } else if (['network_topo', 'network'].includes(selectedRef.current.nodeId)) {
       return <SNMPTask {...props} />;
     }
     return <VMTask {...props} />;

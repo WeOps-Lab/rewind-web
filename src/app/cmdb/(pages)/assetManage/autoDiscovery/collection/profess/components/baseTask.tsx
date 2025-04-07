@@ -461,7 +461,7 @@ const BaseTaskForm = forwardRef<BaseTaskRef, BaseTaskFormProps>(
             )}
 
             {/* ip选择 */}
-            {nodeId === 'network' && (
+            {nodeId && ['network_topo', 'network'].includes(nodeId) && (
               <>
                 <Radio.Group
                   value={collectionType}
