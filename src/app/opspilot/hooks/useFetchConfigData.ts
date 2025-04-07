@@ -23,6 +23,7 @@ const useFetchConfigData = (id: string | null) => {
     textSearchMode: 'match',
     selectedEmbedModel: null,
     resultCount: 100,
+    rerankTopK: 10,
   });
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +52,7 @@ const useFetchConfigData = (id: string | null) => {
           textSearchMode: data.text_search_mode,
           selectedEmbedModel: data.embed_model || null,
           resultCount: data.result_count || 100,
+          rerankTopK: data.rerank_top_k || 10,
         });
       } catch (error) {
         message.error('Failed to fetch config data.');

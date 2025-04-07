@@ -55,6 +55,7 @@ export interface ConfigDataProps {
   candidate: number;
   selectedEmbedModel: string | null;
   resultCount: number | null;
+  rerankTopK: number;
 }
 
 export interface TableData {

@@ -199,6 +199,16 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
                 </div>
               </div>
             )}
+            <div className="flex items-center justify-between mb-4">
+              <label className="text-sm w-[100px]">{t('knowledge.rerankChunkCount')}</label>
+              <InputNumber
+                className='flex-1'
+                min={1}
+                value={configData.rerankTopK}
+                onChange={(value) => setConfigData(prevData => ({...prevData, rerankTopK: value ?? 1}))}
+                style={{width: '100%'}}
+              />
+            </div>
           </div>
           <div className="flex items-center justify-between mb-4">
             <label className="text-sm w-[100px] relative mr-4">

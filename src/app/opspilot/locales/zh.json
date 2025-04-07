@@ -51,6 +51,7 @@
     "candidateQuantity": "候选数量",
     "rerankModel": "重排模型",
     "rerankModelDesc": "在搜索结果初步生成后，通过特定的算法对结果进行再次排序，以提升结果的相关性。",
+    "rerankChunkCount": "重排块数量",
     "chunkCount": "分块数量",
     "chunkCountTip": "检索返回块的数量，表示每次搜索后返回的块的数量的上限",
     "documents": {

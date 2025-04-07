@@ -49,6 +49,7 @@ const SettingsPage: React.FC = () => {
           rag_k: configData.quantity,
           rag_num_candidates: configData.candidate,
           result_count: configData.resultCount,
+          rerank_top_k: configData.rerankTopK,
         };
 
         try {

@@ -51,6 +51,7 @@
     "candidateQuantity": "Candidate Quantity",
     "rerankModel": "Rerank Model",
     "rerankModelDesc": "After the initial generation of search results, specific algorithms are used to reorder the results to enhance their relevance.",
+    "rerankChunkCount": "Rerank Chunk Count",
     "chunkCount": "Chunk Count",
     "chunkCountTip": "The number of chunks returned by the retrieval, indicating the upper limit on the number of chunks returned after each search.",
     "documents": {
