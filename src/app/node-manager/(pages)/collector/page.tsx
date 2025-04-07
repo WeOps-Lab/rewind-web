@@ -52,7 +52,8 @@ const Collector = () => {
   }, [value])
 
   const navigateToCollectorDetail = (item: CardItem) => {
-    router.push(`/node-manager/collector/detail?id=${item.id}`);
+    router.push(`
+      /node-manager/collector/detail?id=${item.id}&name=${item.name}&introduction=${item.description}&system=${item.tagList[0]}`);
   };
 
   const handleResult = (res: any, value: string, selected?: string[]) => {
