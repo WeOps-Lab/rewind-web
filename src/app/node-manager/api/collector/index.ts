@@ -96,7 +96,11 @@ const useApiCollector = () => {
 
   // 上传包
   const uploadPackage = async (data: PackageParams) => {
-    return await post('/node_mgmt/api/package', data)
+    return await post('/node_mgmt/api/package', data,{
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    })
   };
 
   // 删除包

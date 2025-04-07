@@ -152,6 +152,7 @@ const Collectordetail = () => {
       ...prev,
       current: 1,
     }));
+    setTableLoading(false);
   }
 
   const handleTableChange = () => {

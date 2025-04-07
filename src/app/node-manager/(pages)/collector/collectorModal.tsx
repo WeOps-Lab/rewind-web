@@ -22,7 +22,7 @@ const initData = {
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const { t } = useTranslation();
   const {
-    // uploadPackage,
+    uploadPackage,
     addCollector,
     deleteCollector,
     editCollecttor,
@@ -120,24 +120,22 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
   const handleUpload = async (values: any) => {
     const file = fileList.length ? fileList[0] : '';
     if (file) {
-      // const fd = new FormData();
-      // fd.append('file',file.originFileObj);
+      const fd = new FormData();
+      fd.append('file',file.originFileObj);
       const params = {
         name: formData.name,
         os: formData.system,
         type: key,
         version: values.version,
-        object: JSON.stringify({
-          name: formData.name
-        }),
+        object: formData.id as string,
         file: file.originFileObj
       };
-      // Object.entries(params).forEach(([k,v]) => {
-      //   fd.append(k,v);
-      // });
-      // uploadPackage(params).then((res) => {
-      //   console.log(res)
-      // });
+      Object.entries(params).forEach(([k,v]) => {
+        fd.append(k,v);
+      });
+      uploadPackage(params).then((res) => {
+        console.log(res)
+      });
       console.log(values,params);
       setConfirmLoading(false);
       setVisible(false);
