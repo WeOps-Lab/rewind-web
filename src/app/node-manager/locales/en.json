@@ -130,6 +130,7 @@
       "desc": "Introduce each collector, including basic information, usage scenarios, and collected data.",
       "editCollector": "Edit Collector",
       "uploadPackage": "Upload Package",
+      "uploadSuccess": "Upload Success",
       "packageName": "Package Name",
       "version": "Version",
       "importFile": "Import File",

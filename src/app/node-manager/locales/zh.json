@@ -130,6 +130,7 @@
       "desc": "介绍每个收集器，包括基本信息、使用场景和收集的数据。",
       "editCollector": "编辑采集器",
       "uploadPackage": "上传包",
+      "uploadSuccess": "上传成功",
       "packageName": "包名称", 
       "uploadInfo": "确认上传吗？",
       "version": "版本",

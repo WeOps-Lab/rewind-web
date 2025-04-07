@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Button, Popconfirm } from 'antd';
+import { Button, message, Popconfirm } from 'antd';
 import { ColumnItem } from '@/types';
 import Icon from '@/components/icon';
 import { useTranslation } from '@/utils/i18n';
@@ -8,12 +8,14 @@ import { useRouter } from 'next/navigation';
 import CustomTable from '@/components/custom-table';
 import Permission from '@/components/permission';
 import SubLayout from '@/components/sub-layout';
+import { useLocalizedTime } from '@/hooks/useLocalizedTime';
 import useApiCollector from '@/app/node-manager/api/collector';
 import type { Collectorcardprops, Pagination, TableDataItem } from '@/app/node-manager/types/index';
 
 const Collectordetail = () => {
   const router = useRouter();
   const { t } = useTranslation();
+  const { convertToLocalizedTime } = useLocalizedTime();
   const { getCollectorDetail, getPackageList, deletePackage } = useApiCollector();
   const [detaildata, setDetaildata] = useState<Collectorcardprops>({
     id: '',
@@ -59,7 +61,7 @@ const Collectordetail = () => {
       key: 'updated_at',
       width: 120,
       ellipsis: true,
-      render: (_, record) => <>{record.updated_at || '--'}</>,
+      render: (_, { updated_at }) => <>{updated_at ? convertToLocalizedTime(new Date(updated_at) + '') : '--'}</>,
     },
     {
       title: t('common.actions'),
@@ -67,26 +69,41 @@ const Collectordetail = () => {
       dataIndex: 'action',
       width: 120,
       fixed: 'right',
-      render: (_, record) => (
+      render: (_, { id }) => (
+        // <>
+        //   <Permission requiredPermissions={['Operate']}>
+        //     <Popconfirm
+        //       title={t(`node-manager.collector.delete`)}
+        //       description={t(`node-manager.collector.deleteInfo`)}
+        //       okText={t("common.confirm")}
+        //       cancelText={t("common.cancel")}
+        //       onConfirm={() => {
+        //         deletePackage(record?.id)
+        //       }}
+        //     >
+        //       <Button
+        //         type="link"
+        //         disabled={record.status !== 'new'}
+        //       >
+        //         {t('common.delete')}
+        //       </Button>
+        //     </Popconfirm>
+        //   </Permission>
+        // </>
         <>
-          <Permission requiredPermissions={['Operate']}>
-            <Popconfirm
-              title={t(`node-manager.collector.delete`)}
-              description={t(`node-manager.collector.deleteInfo`)}
-              okText={t("common.confirm")}
-              cancelText={t("common.cancel")}
-              onConfirm={() => {
-                deletePackage(record?.id)
-              }}
+          <Popconfirm
+            title={t(`node-manager.collector.delete`)}
+            description={t(`node-manager.collector.deleteInfo`)}
+            okText={t("common.confirm")}
+            cancelText={t("common.cancel")}
+            onConfirm={() => handleDelete(id)}
+          >
+            <Button
+              type="link"
             >
-              <Button
-                type="link"
-                disabled={record.status !== 'new'}
-              >
-                {t('common.delete')}
-              </Button>
-            </Popconfirm>
-          </Permission>
+              {t('common.delete')}
+            </Button>
+          </Popconfirm>
         </>
       ),
     },
@@ -143,7 +160,6 @@ const Collectordetail = () => {
         });
         setTableData(packageInfo || []);
         setTableLoading(false);
-
       } catch (error) {
         console.log(error);
       }
@@ -153,10 +169,24 @@ const Collectordetail = () => {
       current: 1,
     }));
     setTableLoading(false);
+  };
+
+  const handleDelete = (id: number) => {
+    setTableLoading(true);
+    deletePackage(id).then(() => {
+      getTableData();
+      message.success(t('common.delSuccess'));
+      setTableLoading(false);
+    }).catch(()=>{
+      setTableLoading(false)
+    })
   }
 
   const handleTableChange = () => {
-
+    setPagination((prev: Pagination) => ({
+      ...prev,
+      current: 1,
+    }));
   }
 
   return (

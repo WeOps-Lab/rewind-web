@@ -97,12 +97,14 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
         addCollector(param).then(() => {
           setConfirmLoading(false);
           setVisible(false);
+          message.success(t('common.addSuccess'));
           onSuccess();
         }).catch(errorCatch)
       } else if (type === 'edit') {
         editCollecttor(param).then(() => {
           setConfirmLoading(false);
           setVisible(false);
+          message.success(t('common.updateSuccess'));
           onSuccess();
         }).catch(errorCatch)
       } else if (type === 'upload') {
@@ -121,7 +123,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
     const file = fileList.length ? fileList[0] : '';
     if (file) {
       const fd = new FormData();
-      fd.append('file',file.originFileObj);
+      fd.append('file', file.originFileObj);
       const params = {
         name: formData.name,
         os: formData.system,
@@ -130,15 +132,14 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
         object: formData.id as string,
         file: file.originFileObj
       };
-      Object.entries(params).forEach(([k,v]) => {
-        fd.append(k,v);
+      Object.entries(params).forEach(([k, v]) => {
+        fd.append(k, v);
       });
-      uploadPackage(params).then((res) => {
-        console.log(res)
+      uploadPackage(params).then(() => {
+        setConfirmLoading(false);
+        message.success(t('node-manager.collector.uploadSuccess'));
+        setVisible(false);
       });
-      console.log(values,params);
-      setConfirmLoading(false);
-      setVisible(false);
     }
   }
 
@@ -165,11 +166,11 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
       deleteCollector({ id })
         .then(() => {
           setConfirmLoading(false);
+          message.success('common.delSuccess');
           setVisible(false);
           onSuccess();
         })
-        .catch((error) => {
-          message.error(error.code);
+        .catch(() => {
           setConfirmLoading(false);
         })
     })

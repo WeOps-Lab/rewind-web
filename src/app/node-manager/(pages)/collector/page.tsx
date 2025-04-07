@@ -12,7 +12,7 @@ import CollectorModal from "./collectorModal";
 import { ModalRef } from "@/app/node-manager/types";
 import { useMenuItem } from "@/app/node-manager/constants/collector";
 import { Option } from "@/types";
-import { Button } from "antd/lib";
+// import { Button } from "antd/lib";
 
 const Collector = () => {
   const router = useRouter();
@@ -21,7 +21,8 @@ const Collector = () => {
   const { getCollectorlist, getControllerList } = useApiCollector();
   const modalRef = useRef<ModalRef>(null);
   const [value, setValue] = useState<string | number>('controller');
-  const [cards, setCards] = useState<CardItem[]>([]);
+  const [controllerCards, setControllerCards] = useState<CardItem[]>([]);
+  const [collectorCards, setCollectorCards] = useState<CardItem[]>([]);
   const [controllerCount, setControllerCount] = useState<number>(0);
   const [collectorCount, setCollectorCount] = useState<number>(0);
   const [selected, setSelected] = useState<string[]>([]);
@@ -47,14 +48,14 @@ const Collector = () => {
   }, [isLoading])
 
   useEffect(() => {
-    fetchCollectorlist(search,selected);
+    fetchCollectorlist(search, selected);
   }, [value])
 
   const navigateToCollectorDetail = (item: CardItem) => {
     router.push(`/node-manager/collector/detail?id=${item.id}`);
   };
 
-  const handleResult = (res: any, selected?: string[]) => {
+  const handleResult = (res: any, value: string, selected?: string[]) => {
     const _options: Option[] = [];
     let tempdata = res.map((item: any) => {
       const system = item.node_operating_system || item.os;
@@ -77,27 +78,28 @@ const Collector = () => {
         return item.tagList.every((tag: string) => selected?.includes(tag));
       });
     }
-    setCards(tempdata);
+    if (value === 'controller') {
+      setControllerCards(tempdata);
+    } else {
+      setCollectorCards(tempdata);
+    }
     setOptions(_options);
   }
 
-  const fetchCollectorlist = (search?: string, selected?: string[]) => {
+  const fetchCollectorlist = async (search?: string, selected?: string[]) => {
     const params = {
       name: search
     }
     try {
       setLoading(true);
-      const flag = value === 'controller';
-      const request = flag ? getControllerList(params) : getCollectorlist(params);
-      request.then((res) => {
-        if(flag){
-          setControllerCount(res.length);
-        } else {
-          setCollectorCount(res.length);
-        }
-        handleResult(res, selected);
-        setLoading(false);
-      })
+      const res = await Promise.all([getControllerList(params), getCollectorlist(params)]);
+      const controllerList = res[0];
+      const collectorList = res[1];
+      setControllerCount(controllerList.length);
+      setCollectorCount(collectorList.length);
+      handleResult(controllerList, 'controller', selected);
+      handleResult(collectorList, 'collector', selected);
+      setLoading(false);
     } catch (error) {
       console.log(error)
     }
@@ -147,11 +149,11 @@ const Collector = () => {
     return {}
   };
 
-  const handleAddCollector = () => {
-    openModal({ title: 'addCollector', type: 'add', form: {} })
-  };
+  // const handleAddCollector = () => {
+  //   openModal({ title: 'addCollector', type: 'add', form: {} })
+  // };
 
-  const onSearch = (search:string) => {
+  const onSearch = (search: string) => {
     setSearch(search);
     fetchCollectorlist(search, selected);
   };
@@ -165,10 +167,10 @@ const Collector = () => {
         defaultValue='controller'
         onChange={(value) => setValue(value)}
       />
-      <Button onClick={handleAddCollector}>添加采集器</Button>
+      {/* <Button onClick={handleAddCollector}>添加采集器</Button> */}
       {/* 卡片的渲染 */}
       <EntityList
-        data={cards}
+        data={value === 'controller' ? controllerCards : collectorCards}
         loading={loading}
         menuActions={(value) => menuActions(value)}
         filter filterOptions={options} changeFilter={changeFilter}

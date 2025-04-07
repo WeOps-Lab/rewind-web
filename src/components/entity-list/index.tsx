@@ -4,7 +4,7 @@ import { useTranslation } from '@/utils/i18n';
 import Icon from '@/components/icon';
 import styles from './index.module.scss';
 import { EntityListProps } from '@/types';
-import PermissionWrapper from '@/components/permission';
+// import PermissionWrapper from '@/components/permission';
 
 const { Search } = Input;
 
@@ -156,10 +156,14 @@ const EntityList = <T,>({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {openModal && (
-                <PermissionWrapper
-                  requiredPermissions={['Add']}
-                  className="shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer bg-[var(--color-bg)]"
-                >
+              // <PermissionWrapper
+              //   requiredPermissions={['Add']}
+              //   className="shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer bg-[var(--color-bg)]"
+              // >
+
+                // </PermissionWrapper>
+                <div
+                  className="shadow-md p-4 rounded-xl flex items-center justify-center cursor-pointer bg-[var(--color-bg)]">
                   <div
                     className="w-full h-full flex items-center justify-center"
                     onClick={() => openModal()}
@@ -169,7 +173,7 @@ const EntityList = <T,>({
                       <div className="mt-2">{t('common.addNew')}</div>
                     </div>
                   </div>
-                </PermissionWrapper>
+                </div>
               )}
               {filteredItems.map((item) => renderCard(item))}
             </div>
