@@ -64,7 +64,7 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
           disabled
           loading={loadingModels}
           value={configData.selectedEmbedModel}
-          onChange={(value) => setConfigData(prevData => ({ ...prevData, selectedEmbedModel: value }))}
+          onChange={(value) => setConfigData(prevData => ({...prevData, selectedEmbedModel: value}))}
         >
           {modelOptions.map((model) => (
             <Option key={model.id} value={model.id} disabled={!model.enabled}>
@@ -111,9 +111,9 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
                       max={1}
                       step={0.01}
                       value={configData.textSearchWeight}
-                      onChange={(value) => setConfigData(prevData => ({ ...prevData, textSearchWeight: value }))}
+                      onChange={(value) => setConfigData(prevData => ({...prevData, textSearchWeight: value}))}
                     />
-                    <Input className="w-14" value={configData.textSearchWeight.toFixed(2)} readOnly />
+                    <Input className="w-14" value={configData.textSearchWeight.toFixed(2)} readOnly/>
                   </div>
                 </div>
               </>
@@ -142,9 +142,9 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
                       max={1}
                       step={0.01}
                       value={configData.vectorSearchWeight}
-                      onChange={(value) => setConfigData(prevData => ({ ...prevData, vectorSearchWeight: value }))}
+                      onChange={(value) => setConfigData(prevData => ({...prevData, vectorSearchWeight: value}))}
                     />
-                    <Input className="w-14" value={configData.vectorSearchWeight.toFixed(2)} readOnly />
+                    <Input className="w-14" value={configData.vectorSearchWeight.toFixed(2)} readOnly/>
                   </div>
                 </div>
                 <div className="flex items-center justify-between mb-4">
@@ -153,8 +153,8 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
                     className='flex-1'
                     min={1}
                     value={configData.quantity}
-                    onChange={(value) => setConfigData(prevData => ({ ...prevData, quantity: value ?? 1 }))}
-                    style={{ width: '100%' }}
+                    onChange={(value) => setConfigData(prevData => ({...prevData, quantity: value ?? 1}))}
+                    style={{width: '100%'}}
                   />
                 </div>
                 <div className="flex items-center justify-between mb-4">
@@ -163,52 +163,12 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
                     className='flex-1'
                     min={1}
                     value={configData.candidate}
-                    onChange={(value) => setConfigData(prevData => ({ ...prevData, candidate: value ?? 1 }))}
-                    style={{ width: '100%' }}
+                    onChange={(value) => setConfigData(prevData => ({...prevData, candidate: value ?? 1}))}
+                    style={{width: '100%'}}
                   />
                 </div>
               </>
             )}
-          </div>
-          <div className="p-4 pb-0 border rounded-md mb-4">
-            <div className="flex items-center justify-between mb-4">
-              <label className="font-medium text-sm">{t('knowledge.rerankModel')}</label>
-              <Switch
-                size="small"
-                checked={configData.rerankModel}
-                onChange={(checked) => setConfigData(prevData => ({ ...prevData, rerankModel: checked, selectedRerankModel: null }))}
-              />
-            </div>
-            <p className="text-xs mb-4 text-[var(--color-text-4)]">{t('knowledge.rerankModelDesc')}</p>
-            {configData.rerankModel && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <Select
-                    className="flex-1"
-                    placeholder={`${t('common.selectMsg')}${t('knowledge.rerankModel')}`}
-                    loading={loadingModels}
-                    value={configData.selectedRerankModel}
-                    onChange={(value) => setConfigData(prevData => ({ ...prevData, selectedRerankModel: value }))}
-                  >
-                    {rerankModelOptions.map((model) => (
-                      <Option key={model.id} value={model.id} disabled={!model.enabled}>
-                        {model.name}
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
-            )}
-            <div className="flex items-center justify-between mb-4">
-              <label className="text-sm w-[100px]">{t('knowledge.rerankChunkCount')}</label>
-              <InputNumber
-                className='flex-1'
-                min={1}
-                value={configData.rerankTopK}
-                onChange={(value) => setConfigData(prevData => ({...prevData, rerankTopK: value ?? 1}))}
-                style={{width: '100%'}}
-              />
-            </div>
           </div>
           <div className="flex items-center justify-between mb-4">
             <label className="text-sm w-[100px] relative mr-4">
@@ -224,6 +184,55 @@ const ConfigComponent: React.FC<ConfigProps> = ({ configData, setConfigData }) =
               onChange={(value) => setConfigData(prevData => ({...prevData, resultCount: value}))}
               style={{width: '100%'}}
             />
+          </div>
+        </div>
+      </div>
+      <div className="mb-4 flex">
+        <label className="block text-sm font-medium mb-1 w-32">{t('knowledge.rerankSettings')}</label>
+        <div className="flex-1">
+          <div className="p-4 pb-0 border rounded-md mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <label className="font-medium text-sm">{t('knowledge.rerankModel')}</label>
+              <Switch
+                size="small"
+                checked={configData.rerankModel}
+                onChange={(checked) => setConfigData(prevData => ({
+                  ...prevData,
+                  rerankModel: checked,
+                  selectedRerankModel: null
+                }))}
+              />
+            </div>
+            <p className="text-xs mb-4 text-[var(--color-text-4)]">{t('knowledge.rerankModelDesc')}</p>
+            {configData.rerankModel && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <Select
+                    className="flex-1"
+                    placeholder={`${t('common.selectMsg')}${t('knowledge.rerankModel')}`}
+                    loading={loadingModels}
+                    value={configData.selectedRerankModel}
+                    onChange={(value) => setConfigData(prevData => ({...prevData, selectedRerankModel: value}))}
+                  >
+                    {rerankModelOptions.map((model) => (
+                      <Option key={model.id} value={model.id} disabled={!model.enabled}>
+                        {model.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-sm w-[100px]">{t('knowledge.rerankChunkCount')}</label>
+                  <InputNumber
+                    className='flex-1'
+                    min={1}
+                    value={configData.rerankTopK}
+                    onChange={(value) => setConfigData(prevData => ({...prevData, rerankTopK: value ?? 1}))}
+                    style={{width: '100%'}}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

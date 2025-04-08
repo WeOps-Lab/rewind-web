@@ -49,6 +49,7 @@
     "vectorSearchDesc": "Utilizing vector space models, it finds the best-matching data by calculating the similarity between vectors in high-dimensional space.",
     "returnQuantity": "Return Quantity",
     "candidateQuantity": "Candidate Quantity",
+    "rerankSettings": "Reorder Settings",
     "rerankModel": "Rerank Model",
     "rerankModelDesc": "After the initial generation of search results, specific algorithms are used to reorder the results to enhance their relevance.",
     "rerankChunkCount": "Rerank Chunk Count",

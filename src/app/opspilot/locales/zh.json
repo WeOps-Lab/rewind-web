@@ -49,6 +49,7 @@
     "vectorSearchDesc": "使用向量空间模型，通过计算高维空间中向量之间的相似度，找到最匹配的数据。",
     "returnQuantity": "返回数量",
     "candidateQuantity": "候选数量",
+    "rerankSettings": "重排序设置",
     "rerankModel": "重排模型",
     "rerankModelDesc": "在搜索结果初步生成后，通过特定的算法对结果进行再次排序，以提升结果的相关性。",
     "rerankChunkCount": "重排块数量",
