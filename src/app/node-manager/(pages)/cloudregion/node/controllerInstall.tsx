@@ -6,15 +6,11 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { Spin, Button, Form, Select, Input, Segmented } from 'antd';
+import { Spin, Button, Form, Select, Input, Segmented, message } from 'antd';
 import type { FormInstance } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
-import {
-  ModalRef,
-  SegmentedItem,
-  TableDataItem,
-} from '@/app/node-manager/types';
+import { ModalRef, TableDataItem } from '@/app/node-manager/types';
 import {
   ControllerInstallFields,
   ControllerInstallProps,
@@ -38,20 +34,25 @@ const { Option } = Select;
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
 import ControllerTable from './controllerTable';
+import ManualInstall from './manualInstall';
+import { useUserInfoContext } from '@/context/userInfo';
 
 const INFO_ITEM = {
   ip: null,
-  system: null,
-  group: null,
+  organizations: [],
   port: null,
-  account: null,
+  username: null,
   password: null,
 };
 
-const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
+const StrategyOperation: React.FC<ControllerInstallProps> = ({
+  cancel,
+  config,
+}) => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
-  const { getnodelist } = useApiCloudRegion();
+  const commonContext = useUserInfoContext();
+  const { getnodelist, getPackages, installController } = useApiCloudRegion();
   const cloudId = useCloudId();
   const searchParams = useSearchParams();
   const [form] = Form.useForm();
@@ -63,13 +64,13 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
   const [installMethod, setInstallMethod] = useState<string>('remoteInstall');
   const [showInstallTable, setShowInstallTable] = useState<boolean>(false);
   const [nodeList, setNodeList] = useState<TableDataItem[]>([]);
+  const [taskId, setTaskId] = useState<number | null>(null);
   const [sidecarVersionList, setSidecarVersionList] = useState<TableDataItem[]>(
     []
   );
   const [excutorVersionList, setExcutorVersionList] = useState<TableDataItem[]>(
     []
   );
-  const [groupList, setGroupList] = useState<SegmentedItem[]>([]);
   const [tableData, setTableData] = useState<TableDataItem[]>([
     {
       ...cloneDeep(INFO_ITEM),
@@ -83,6 +84,10 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
     },
   ]);
   const installWays = useInstallWays();
+  const groupList = (commonContext?.groups || []).map((item) => ({
+    label: item.name,
+    value: item.id,
+  }));
 
   const tableColumns = useMemo(() => {
     const columns: any = [
@@ -104,58 +109,27 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
       {
         title: (
           <>
-            {t('node-manager.cloudregion.node.operateSystem')}
-            <EditOutlined
-              className="cursor-pointer ml-[10px] text-[var(--color-primary)]"
-              onClick={() => batchEditModal('system')}
-            />
-          </>
-        ),
-        dataIndex: 'system',
-        width: 100,
-        key: 'system',
-        ellipsis: true,
-        render: (value: string, row: TableDataItem) => {
-          return (
-            <>
-              <Form.Item name={`system-${row.id}`}>
-                <Select
-                  value={row.system}
-                  onChange={(system) =>
-                    handleSelectChange(system, row, 'system')
-                  }
-                >
-                  {OPERATE_SYSTEMS.map((item) => (
-                    <Option value={item.value} key={item.value}>
-                      {item.label}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </>
-          );
-        },
-      },
-      {
-        title: (
-          <>
             {t('node-manager.cloudregion.node.organaziton')}
             <EditOutlined
               className="cursor-pointer ml-[10px] text-[var(--color-primary)]"
-              onClick={() => batchEditModal('group')}
+              onClick={() => batchEditModal('organizations')}
             />
           </>
         ),
-        dataIndex: 'group',
+        dataIndex: 'organizations',
         width: 100,
-        key: 'group',
+        key: 'organizations',
         render: (value: string, row: TableDataItem) => {
           return (
             <>
-              <Form.Item name={`group-${row.id}`}>
+              <Form.Item name={`organizations-${row.id}`}>
                 <Select
-                  value={row.group}
-                  onChange={(group) => handleSelectChange(group, row, 'group')}
+                  mode="multiple"
+                  maxTagCount="responsive"
+                  value={row.organizations}
+                  onChange={(group) =>
+                    handleSelectChange(group, row, 'organizations')
+                  }
                 >
                   {groupList.map((item) => (
                     <Option value={item.value} key={item.value}>
@@ -197,19 +171,19 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
             {t('node-manager.cloudregion.node.loginAccount')}
             <EditOutlined
               className="cursor-pointer ml-[10px] text-[var(--color-primary)]"
-              onClick={() => batchEditModal('account')}
+              onClick={() => batchEditModal('username')}
             />
           </>
         ),
-        dataIndex: 'account',
+        dataIndex: 'username',
         width: 100,
-        key: 'account',
+        key: 'username',
         render: (value: string, row: TableDataItem) => {
           return (
             <>
-              <Form.Item name={`account-${row.id}`}>
+              <Form.Item name={`username-${row.id}`}>
                 <Input
-                  onBlur={(e) => handleInputBlur(e, row, 'account')}
+                  onBlur={(e) => handleInputBlur(e, row, 'username')}
                 ></Input>
               </Form.Item>
             </>
@@ -278,15 +252,7 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
 
   useEffect(() => {
     if (!isLoading) {
-      getNodeList();
-      setSidecarVersionList([{ id: '1', name: 'version1' }]);
-      setExcutorVersionList([{ id: '1', name: 'version1' }]);
-      setGroupList([
-        {
-          label: '超管',
-          value: 'admin',
-        },
-      ]);
+      initPage();
     }
   }, [isLoading]);
 
@@ -328,6 +294,20 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
 
   const changeCollectType = (id: string) => {
     setInstallMethod(id);
+    form.setFieldsValue({
+      work_node: null,
+      sidecar_package: null,
+      executor_package: null,
+    });
+    tableFormRef.current?.resetFields();
+    const data = [
+      {
+        ...cloneDeep(INFO_ITEM),
+        id: '0',
+      },
+    ];
+    setTableData(data);
+    currentTableData.current = data;
   };
 
   const addInfoItem = (index: number) => {
@@ -377,33 +357,38 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
     }
   };
 
-  const getNodeList = async () => {
-    try {
-      setPageLoading(true);
-      const data = await getnodelist({ cloud_region_id: Number(cloudId) });
-      if (!data.length) {
-        setNodeList([
-          {
-            id: 1,
-            name: '123',
-          },
-        ]);
+  const initPage = () => {
+    setPageLoading(true);
+    Promise.all([getNodes(), getSidecarList(), getExcutorList()]).finally(
+      () => {
+        setPageLoading(false);
       }
-    } finally {
-      setPageLoading(false);
-    }
+    );
+  };
+
+  const getNodes = async () => {
+    const data = await getnodelist({
+      cloud_region_id: Number(cloudId),
+      operating_system: config.os,
+    });
+    setNodeList(data);
+  };
+
+  const getSidecarList = async () => {
+    const data = await getPackages({ object: 'Sidecar', os: config.os });
+    setSidecarVersionList(data);
+  };
+
+  const getExcutorList = async () => {
+    const data = await getPackages({ object: 'Nats Executor', os: config.os });
+    setExcutorVersionList(data);
   };
 
   const validateTableData = async () => {
-    let data = cloneDeep(currentTableData.current);
-    if (installMethod === 'manualInstall') {
-      data = data.map((item) => ({
-        ip: item.ip,
-        system: item.system,
-        group: item.group,
-      }));
-    }
-    if (data.every((item) => Object.values(item).every((tex) => !!tex))) {
+    const data = cloneDeep(currentTableData.current);
+    if (
+      data.every((item) => Object.values(item).every((tex) => !!tex?.length))
+    ) {
       return Promise.resolve();
     }
     return Promise.reject(new Error(t('common.valueValidate')));
@@ -416,9 +401,37 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
   const handleCreate = () => {
     setConfirmLoading(false);
     form.validateFields().then((values) => {
-      console.log(values);
-      setShowInstallTable(true);
+      const nodes = currentTableData.current.map((item) => ({
+        ip: item.ip,
+        os: config.os,
+        organizations: item.organizations,
+        port: +item.port,
+        username: item.username,
+        password: item.password,
+      }));
+      const params = {
+        cloud_region_id: +cloudId,
+        nodes,
+        work_node: values.work_node || '',
+        sidecar_package: values.sidecar_package || '',
+        executor_package: values.executor_package || '',
+      };
+      create(params);
     });
+  };
+
+  const create = async (params: ControllerInstallFields) => {
+    try {
+      setConfirmLoading(true);
+      const data = await installController(params);
+      message.success(t('common.operationSuccessful'));
+      setTaskId(data.task_id);
+      setShowInstallTable(true);
+    } catch {
+      setTaskId(null);
+    } finally {
+      setConfirmLoading(false);
+    }
   };
 
   const cancelInstall = useCallback(() => {
@@ -430,9 +443,8 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
       {showInstallTable ? (
         <ControllerTable
           config={{
-            type: installMethod,
-            sidecarVersionList,
-            excutorVersionList,
+            taskId,
+            groupList,
           }}
           cancel={cancelInstall}
         ></ControllerTable>
@@ -462,14 +474,14 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
                   {t('node-manager.cloudregion.node.installWayDes')}
                 </div>
               </Form.Item>
-              {isRemote && (
+              {isRemote ? (
                 <>
                   <Form.Item<ControllerInstallFields>
                     required
                     label={t('node-manager.cloudregion.node.defaultNode')}
                   >
                     <Form.Item
-                      name="node_id"
+                      name="work_node"
                       noStyle
                       rules={[
                         { required: true, message: t('common.required') },
@@ -499,7 +511,7 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
                     label={t('node-manager.cloudregion.node.sidecarVersion')}
                   >
                     <Form.Item
-                      name="sidecar_version"
+                      name="sidecar_package"
                       noStyle
                       rules={[
                         { required: true, message: t('common.required') },
@@ -529,7 +541,7 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
                     label={t('node-manager.cloudregion.node.executorVersion')}
                   >
                     <Form.Item
-                      name="executor_version"
+                      name="executor_package"
                       noStyle
                       rules={[
                         { required: true, message: t('common.required') },
@@ -554,32 +566,42 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({ cancel }) => {
                       {t('node-manager.cloudregion.node.executorVersionDes')}
                     </div>
                   </Form.Item>
+                  <Form.Item<ControllerInstallFields>
+                    name="nodes"
+                    label={t('node-manager.cloudregion.node.installInfo')}
+                    rules={[{ required: true, validator: validateTableData }]}
+                  >
+                    <Form ref={tableFormRef} component={false}>
+                      <CustomTable
+                        rowKey="id"
+                        columns={tableColumns}
+                        dataSource={tableData}
+                      />
+                    </Form>
+                  </Form.Item>
                 </>
+              ) : (
+                <ManualInstall
+                  config={{
+                    ...config,
+                    excutorVersionList,
+                    sidecarVersionList,
+                  }}
+                />
               )}
-              <Form.Item<ControllerInstallFields>
-                name="install_type"
-                label={t('node-manager.cloudregion.node.installInfo')}
-                rules={[{ required: true, validator: validateTableData }]}
-              >
-                <Form ref={tableFormRef} component={false}>
-                  <CustomTable
-                    rowKey="id"
-                    columns={tableColumns}
-                    dataSource={tableData}
-                  />
-                </Form>
-              </Form.Item>
             </Form>
           </div>
           <div className={controllerInstallSyle.footer}>
-            <Button
-              type="primary"
-              className="mr-[10px]"
-              loading={confirmLoading}
-              onClick={handleCreate}
-            >
-              {`${t('node-manager.cloudregion.node.toInstall')} (${tableData.length})`}
-            </Button>
+            {isRemote && (
+              <Button
+                type="primary"
+                className="mr-[10px]"
+                loading={confirmLoading}
+                onClick={handleCreate}
+              >
+                {`${t('node-manager.cloudregion.node.toInstall')} (${tableData.length})`}
+              </Button>
+            )}
             <Button onClick={goBack}>{t('common.cancel')}</Button>
           </div>
         </div>

@@ -92,11 +92,14 @@
         "installingTips": "仍有节点正在安装中，返回后可在列表中查看安装正常的节点。",
         "installationGuide": "安装指引",
         "log": "日志",
-        "downloadTips": "选择适用的版本下载控制器安装包",
-        "scriptTips": "执行如下脚本，进行控制器安装",
+        "downloadTips": "1、选择适用的版本下载控制器安装包和配置文件模板",
+        "scriptTips": "2、执行如下脚本，进行控制器安装",
+        "finishTips": "3、手动安装后，可在节点列表中查看控制器正常的节点",
         "uninstallSidecarTips": "确定卸载这些sidecar吗？",
         "restartSidecarTips": "确定重启这些sidecar吗？",
-        "version": "版本号"
+        "version": "版本号",
+        "downloadPackage": "下载安装包",
+        "downloadTemplate": "下载模板"
       },
       "Configuration": {
         "system": "操作系统",
@@ -131,7 +134,7 @@
       "editCollector": "编辑采集器",
       "uploadPackage": "上传包",
       "uploadSuccess": "上传成功",
-      "packageName": "包名称", 
+      "packageName": "包名称",
       "uploadInfo": "确认上传吗？",
       "version": "版本",
       "importFile": "导入文件",

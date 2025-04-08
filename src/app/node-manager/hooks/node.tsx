@@ -4,6 +4,7 @@ import { Tag, Tooltip, Button } from 'antd';
 import type { TableColumnsType } from 'antd';
 import { TableDataItem } from '@/app/node-manager/types/index';
 import { useTelegrafMap } from '@/app/node-manager/constants/cloudregion';
+import { useUserInfoContext } from '@/context/userInfo';
 
 interface HookParams {
   checkConfig: (row: TableDataItem) => void;
@@ -22,10 +23,10 @@ export const useColumns = ({
         dataIndex: 'ip',
         key: 'ip',
       },
-      {
-        title: t('node-manager.cloudregion.node.system'),
-        dataIndex: 'operating_system',
-      },
+      //   {
+      //     title: t('node-manager.cloudregion.node.system'),
+      //     dataIndex: 'operating_system',
+      //   },
       {
         title: 'Sidecar',
         dataIndex: 'sidecar',
@@ -106,4 +107,18 @@ export const useColumns = ({
   );
 
   return columns;
+};
+
+export const useGroupNames = () => {
+  const commonContext = useUserInfoContext();
+  const showGroupNames = (ids: string[]) => {
+    const groups = commonContext?.groups || [];
+    const groupName = ids.map(
+      (item) => groups.find((group) => group.id === item)?.name
+    );
+    return groupName.join(',');
+  };
+  return {
+    showGroupNames,
+  };
 };

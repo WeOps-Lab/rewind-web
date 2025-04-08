@@ -1,29 +1,20 @@
 'use client';
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { Spin, Button, Popconfirm } from 'antd';
+import React, { useEffect, useState, useRef } from 'react';
+import { Button, Popconfirm } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { ModalRef, TableDataItem } from '@/app/node-manager/types';
 import { ControllerInstallProps } from '@/app/node-manager/types/cloudregion';
 import controllerInstallSyle from './index.module.scss';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ReloadOutlined } from '@ant-design/icons';
 import {
   OPERATE_SYSTEMS,
   useInstallMap,
 } from '@/app/node-manager/constants/cloudregion';
+import { useGroupNames } from '@/app/node-manager/hooks/node';
 import CustomTable from '@/components/custom-table';
-import { cloneDeep } from 'lodash';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
-import useCloudId from '@/app/node-manager/hooks/useCloudid';
 import InstallGuidance from './installGuidance';
-
-const INFO_ITEM = {
-  ip: null,
-  system: null,
-  group: null,
-  nas_excutor: 'failed',
-  sidecar: 'installing',
-};
 
 const ControllerTable: React.FC<ControllerInstallProps> = ({
   cancel,
@@ -31,204 +22,184 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
 }) => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
-  const { getnodelist } = useApiCloudRegion();
-  const cloudId = useCloudId();
+  const { getControllerNodes } = useApiCloudRegion();
   const guidance = useRef<ModalRef>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [pageLoading, setPageLoading] = useState<boolean>(false);
-  const [nodeList, setNodeList] = useState<TableDataItem[]>([
-    {
-      id: 1,
-      name: '123',
-    },
-  ]);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const installMay = useInstallMap();
-
-  const isRemote = useMemo(() => {
-    return config?.type === 'remoteInstall';
-  }, [config]);
-
-  const tableColumns = useMemo(() => {
-    const columns: any = [
-      {
-        title: t('node-manager.cloudregion.node.ipAdrress'),
-        dataIndex: 'ip',
-        width: 100,
-        key: 'ip',
-        ellipsis: true,
-        render: (value: string, row: TableDataItem) => {
-          return <>{row.ip || '--'}</>;
-        },
+  const { showGroupNames } = useGroupNames();
+  const columns: any = [
+    {
+      title: t('node-manager.cloudregion.node.ipAdrress'),
+      dataIndex: 'ip',
+      width: 100,
+      key: 'ip',
+      ellipsis: true,
+      render: (value: string, row: TableDataItem) => {
+        return <>{row.ip || '--'}</>;
       },
-      {
-        title: t('node-manager.cloudregion.node.operateSystem'),
-        dataIndex: 'system',
-        width: 100,
-        key: 'system',
-        ellipsis: true,
-        render: (value: string) => {
-          return (
-            <>
-              {OPERATE_SYSTEMS.find((item) => item.value === value)?.label ||
-                '--'}
-            </>
-          );
-        },
+    },
+    {
+      title: t('node-manager.cloudregion.node.operateSystem'),
+      dataIndex: 'os',
+      width: 100,
+      key: 'os',
+      ellipsis: true,
+      render: (value: string) => {
+        return (
+          <>
+            {OPERATE_SYSTEMS.find((item) => item.value === value)?.label ||
+              '--'}
+          </>
+        );
       },
-      {
-        title: t('node-manager.cloudregion.node.organaziton'),
-        dataIndex: 'group',
-        width: 100,
-        key: 'group',
-        ellipsis: true,
-        render: (value: string) => {
-          return <>{value || '--'}</>;
-        },
+    },
+    {
+      title: t('node-manager.cloudregion.node.organaziton'),
+      dataIndex: 'organizations',
+      width: 100,
+      key: 'organizations',
+      ellipsis: true,
+      render: (value: string[]) => {
+        return <>{showGroupNames(value || [])}</>;
       },
-      {
-        title: 'Sidecar',
-        dataIndex: 'sidecar',
-        width: 100,
-        key: 'sidecar',
-        ellipsis: true,
-        render: (value: string) => {
-          return (
-            <span
-              style={{
-                color: installMay[value]?.color || 'var(--ant-color-text)',
-              }}
-            >
-              {installMay[value]?.text || '--'}
-            </span>
-          );
-        },
+    },
+    {
+      title: 'Sidecar',
+      dataIndex: 'sidecar_result',
+      width: 100,
+      key: 'sidecar_result',
+      ellipsis: true,
+      render: (value: Record<string, string>) => {
+        return (
+          <span
+            style={{
+              color: installMay[value.status]?.color || 'var(--ant-color-text)',
+            }}
+          >
+            {installMay[value.status]?.text || '--'}
+          </span>
+        );
       },
-      {
-        title: 'Nas Excutor',
-        dataIndex: 'nas_excutor',
-        width: 100,
-        key: 'nas_excutor',
-        ellipsis: true,
-        render: (value: string) => {
-          return (
-            <span
-              style={{
-                color: installMay[value]?.color || 'var(--ant-color-text)',
-              }}
-            >
-              {installMay[value]?.text || '--'}
-            </span>
-          );
-        },
+    },
+    {
+      title: 'Nas Excutor',
+      dataIndex: 'executor_result',
+      width: 100,
+      key: 'executor_result',
+      ellipsis: true,
+      render: (value: Record<string, string>) => {
+        return (
+          <span
+            style={{
+              color: installMay[value.status]?.color || 'var(--ant-color-text)',
+            }}
+          >
+            {installMay[value.status]?.text || '--'}
+          </span>
+        );
       },
-      {
-        title: '',
-        dataIndex: 'action',
-        width: 60,
-        fixed: 'right',
-        key: 'action',
-        render: (value: string, row: TableDataItem) => {
-          return (
-            <>
-              {isRemote ? (
-                <Button
-                  type="link"
-                  disabled={
-                    row.nas_excutor !== 'failed' && row.sidecar !== 'failed'
-                  }
-                  onClick={() => checkDetail('remoteInstall')}
-                >
-                  {t('node-manager.cloudregion.node.viewLog')}
-                </Button>
-              ) : (
-                <Button
-                  type="link"
-                  onClick={() => checkDetail('manualInstall')}
-                >
-                  {t('node-manager.cloudregion.node.viewGuide')}
-                </Button>
-              )}
-            </>
-          );
-        },
+    },
+    {
+      title: '',
+      dataIndex: 'action',
+      width: 60,
+      fixed: 'right',
+      key: 'action',
+      render: (value: string, row: TableDataItem) => {
+        return (
+          <Button
+            type="link"
+            disabled={
+              row.executor_result?.status !== 'failed' &&
+              row.sidecar_result?.status !== 'failed'
+            }
+            onClick={() => checkDetail('remoteInstall', row)}
+          >
+            {t('node-manager.cloudregion.node.viewLog')}
+          </Button>
+        );
       },
-    ];
-    return columns;
-  }, [isRemote]);
+    },
+  ];
 
   useEffect(() => {
-    if (!isLoading) {
+    if (isLoading) return;
+    clearTimer();
+    if (config.taskId) {
       getNodeList();
-      setTableData([
-        {
-          ...cloneDeep(INFO_ITEM),
-          id: '0',
-        },
-      ]);
-      console.log(nodeList);
+      timerRef.current = setInterval(() => {
+        getNodeList('timer');
+      }, 5000);
+      return () => {
+        clearTimer();
+      };
     }
-  }, [isLoading]);
+  }, [config.taskId, isLoading]);
 
-  const checkDetail = (type: string) => {
+  const clearTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+  };
+
+  const checkDetail = (type: string, row: TableDataItem) => {
+    let message = '';
+    if (row.sidecar_result?.status === 'failed') {
+      message += `Sidecar ${t('node-manager.cloudregion.node.failInstall')}\n${row.sidecar_result.message}`;
+    }
+    if (row.executor_result?.status === 'failed') {
+      message += `\nNas Excutor ${t('node-manager.cloudregion.node.failInstall')}\n${row.executor_result.message}`;
+    }
     guidance.current?.showModal({
-      title: t(
-        `node-manager.cloudregion.node.${isRemote ? 'log' : 'installationGuide'}`
-      ),
+      title: t('node-manager.cloudregion.node.log'),
       type,
-      form: {},
+      form: { message: message || '--' },
     });
   };
 
-  const getNodeList = async () => {
+  const getNodeList = async (type?: string) => {
     try {
-      setPageLoading(true);
-      const data = await getnodelist({ cloud_region_id: Number(cloudId) });
-      if (!data.length) {
-        setNodeList([
-          {
-            id: 1,
-            name: '123',
-          },
-        ]);
-      }
+      setPageLoading(type !== 'timer');
+      const data = await getControllerNodes({ taskId: config.taskId });
+      setTableData(
+        data.map((item: TableDataItem, index: number) => ({
+          id: index,
+          ...item,
+        }))
+      );
     } finally {
       setPageLoading(false);
     }
   };
 
   return (
-    <Spin spinning={pageLoading} className="w-full">
-      <div className={controllerInstallSyle.controllerInstall}>
-        <div className={controllerInstallSyle.title}>
-          <Popconfirm
-            title={t('common.prompt')}
-            description={t('node-manager.cloudregion.node.installingTips')}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-            onConfirm={cancel}
-          >
-            <ArrowLeftOutlined className="text-[var(--color-primary)] text-[20px] cursor-pointer mr-[10px]" />
-          </Popconfirm>
-          <span>
-            {t(
-              `node-manager.cloudregion.node.${isRemote ? 'autoInstall' : 'manuallyInstall'}`
-            )}
-          </span>
-        </div>
-        <div className={controllerInstallSyle.table}>
-          <CustomTable
-            rowKey="id"
-            columns={tableColumns}
-            dataSource={tableData}
-          />
-        </div>
+    <div className={controllerInstallSyle.controllerInstall}>
+      <div className={controllerInstallSyle.title}>
+        <Popconfirm
+          title={t('common.prompt')}
+          description={t('node-manager.cloudregion.node.installingTips')}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+          onConfirm={cancel}
+        >
+          <ArrowLeftOutlined className="text-[var(--color-primary)] text-[20px] cursor-pointer mr-[10px]" />
+        </Popconfirm>
+        <span>{t('node-manager.cloudregion.node.autoInstall')}</span>
       </div>
-      <InstallGuidance
-        ref={guidance}
-        sidecarVersionList={config.sidecarVersionList || []}
-        excutorVersionList={config.excutorVersionList || []}
-      />
-    </Spin>
+      <div className={controllerInstallSyle.table}>
+        <div className="flex justify-end mb-[16px]">
+          <ReloadOutlined onClick={() => getNodeList()} />
+        </div>
+        <CustomTable
+          rowKey="id"
+          loading={pageLoading}
+          columns={columns}
+          dataSource={tableData}
+        />
+      </div>
+      <InstallGuidance ref={guidance} />
+    </div>
   );
 };
 
