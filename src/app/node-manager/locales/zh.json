@@ -112,7 +112,9 @@
         "variable": "变量",
         "description": "描述",
         "parameterdes": "参数说明",
-        "varconfig": "这些变量可用于配置中"
+        "varconfig": "这些变量可用于配置中",
+        "subconfiguration": "子配置",
+        "configurationList": "配置文件列表"
       },
       "variable": {
         "value": "数值",

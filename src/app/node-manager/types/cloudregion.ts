@@ -9,6 +9,7 @@ interface ConfigHookParams {
     nodes: string[]
   ) => void;
   onDelSuccess: () => void;
+  openSub: (key: string, item?: any) => void;
 }
 interface VariableProps {
   openUerModal: (type: string, form: TableDataItem) => void;

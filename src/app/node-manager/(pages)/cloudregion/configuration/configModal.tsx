@@ -56,7 +56,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const [configid, setConfigid] = useState<string>('');
   const [editeConfigId, setEditeConfigId] = useState<string>('');
   const [type, setType] = useState<string>('add');
-  const [selectedsystem, setSelectedsystem] = useState<string>('Windows');
+  // const [selectedsystem, setSelectedsystem] = useState<string>('Windows');
   const [vardataSource, setVardataSource] = useState<VarSourceItem[]>([]);
   const [nodes, setNodes] = useState<string[]>([]);
 
@@ -81,7 +81,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
         //配置文件运用到那个节点
         setNodes(nodes);
         setConfigid(key);
-        setSelectedsystem(selectedsystem);
+        // setSelectedsystem(selectedsystem);
       } else {
         setEditeConfigId(form?.key);
       }
@@ -194,30 +194,31 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
             sidecar: !item.status.status ? 'Error' : 'Running',
           };
         });
-        const tempdata = data.filter(
-          (item: mappedNodeItem) => item.operatingsystem === selectedsystem
-        );
-        setApplydata(tempdata);
+        // const tempdata = data.filter(
+        //   (item: mappedNodeItem) => item.operatingsystem === selectedsystem
+        // );
+        // setApplydata(tempdata);
+        setApplydata(data);
       }
     );
   };
 
   //选择操作系统
-  const handleChangeOperatingsystem = (value: string) => {
-    getCollectorlist({ node_operating_system: value }).then((res) => {
-      const tempdate = res.map((item: any) => {
-        return {
-          value: item.id,
-          label: item.name,
-          template: item.default_template,
-        };
-      });
-      configformRef.current?.setFieldValue('collector', tempdate[0].value);
-      configformRef.current?.setFieldValue('configinfo', tempdate[0].template);
-      //设置采集器
-      setColselectitems(tempdate);
-    });
-  };
+  // const handleChangeOperatingsystem = (value: string) => {
+  //   getCollectorlist({ node_operating_system: value }).then((res) => {
+  //     const tempdate = res.map((item: any) => {
+  //       return {
+  //         value: item.id,
+  //         label: item.name,
+  //         template: item.default_template,
+  //       };
+  //     });
+  //     configformRef.current?.setFieldValue('collector', tempdate[0].value);
+  //     configformRef.current?.setFieldValue('configinfo', tempdate[0].template);
+  //     //设置采集器
+  //     setColselectitems(tempdate);
+  //   });
+  // };
 
   //选择采集器
   const handleChangeCollector = (value: string) => {
@@ -238,10 +239,11 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
           sidecar: !item.status.status ? 'Running' : 'Error',
         };
       });
-      const tempdata = data.filter(
-        (item: mappedNodeItem) => item.operatingsystem === selectedsystem
-      );
-      setApplydata(tempdata);
+      // const tempdata = data.filter(
+      //   (item: mappedNodeItem) => item.operatingsystem === selectedsystem
+      // );
+      // setApplydata(tempdata);
+      setApplydata(data);
     });
   };
 
@@ -342,6 +344,30 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
               <Input />
             </Form.Item>
             <Form.Item
+              name="nodes"
+              label={t('common.node')}
+              rules={[
+                {
+                  required: true,
+                  message: t('common.inputMsg'),
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+            {/* <Form.Item
+              name="sidecar"
+              label={t('node-manager.cloudregion.Configuration.sidecar')}
+              rules={[
+                {
+                  required: true,
+                  message: t('common.inputMsg'),
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item> */}
+            {/* <Form.Item
               name="operatingsystem"
               label={t('node-manager.cloudregion.Configuration.system')}
               rules={[
@@ -359,10 +385,11 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
                 ]}
                 onChange={handleChangeOperatingsystem}
               ></Select>
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item
               name="collector"
-              label={t('node-manager.cloudregion.Configuration.collector')}
+              // label={t('node-manager.cloudregion.Configuration.collector')}
+              label={t('node-manager.cloudregion.Configuration.sidecar')}
               rules={[
                 {
                   required: true,
