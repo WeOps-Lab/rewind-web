@@ -151,7 +151,7 @@ const Collectordetail = () => {
     }
     try {
       setTableLoading(true);
-      const getPackage = getPackageList(info.name);
+      const getPackage = getPackageList();
       const res = await Promise.all([getPackage]);
       const packageInfo = res[0];
       setDetaildata(info);
