@@ -45,7 +45,7 @@ const INFO_ITEM = {
   password: null,
 };
 
-const StrategyOperation: React.FC<ControllerInstallProps> = ({
+const ControllerInstall: React.FC<ControllerInstallProps> = ({
   cancel,
   config,
 }) => {
@@ -66,9 +66,6 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({
   const [nodeList, setNodeList] = useState<TableDataItem[]>([]);
   const [taskId, setTaskId] = useState<number | null>(null);
   const [sidecarVersionList, setSidecarVersionList] = useState<TableDataItem[]>(
-    []
-  );
-  const [excutorVersionList, setExcutorVersionList] = useState<TableDataItem[]>(
     []
   );
   const [tableData, setTableData] = useState<TableDataItem[]>([
@@ -359,11 +356,9 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({
 
   const initPage = () => {
     setPageLoading(true);
-    Promise.all([getNodes(), getSidecarList(), getExcutorList()]).finally(
-      () => {
-        setPageLoading(false);
-      }
-    );
+    Promise.all([getNodes(), getSidecarList()]).finally(() => {
+      setPageLoading(false);
+    });
   };
 
   const getNodes = async () => {
@@ -375,13 +370,8 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({
   };
 
   const getSidecarList = async () => {
-    const data = await getPackages({ object: 'Sidecar', os: config.os });
+    const data = await getPackages({ os: config.os });
     setSidecarVersionList(data);
-  };
-
-  const getExcutorList = async () => {
-    const data = await getPackages({ object: 'Nats Executor', os: config.os });
-    setExcutorVersionList(data);
   };
 
   const validateTableData = async () => {
@@ -414,7 +404,7 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({
         nodes,
         work_node: values.work_node || '',
         sidecar_package: values.sidecar_package || '',
-        executor_package: values.executor_package || '',
+        // executor_package: '',
       };
       create(params);
     });
@@ -537,36 +527,6 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({
                     </div>
                   </Form.Item>
                   <Form.Item<ControllerInstallFields>
-                    required
-                    label={t('node-manager.cloudregion.node.executorVersion')}
-                  >
-                    <Form.Item
-                      name="executor_package"
-                      noStyle
-                      rules={[
-                        { required: true, message: t('common.required') },
-                      ]}
-                    >
-                      <Select
-                        style={{
-                          width: 300,
-                        }}
-                        showSearch
-                        allowClear
-                        placeholder={t('common.pleaseSelect')}
-                      >
-                        {excutorVersionList.map((item) => (
-                          <Option value={item.id} key={item.id}>
-                            {item.name}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                    <div className={controllerInstallSyle.description}>
-                      {t('node-manager.cloudregion.node.executorVersionDes')}
-                    </div>
-                  </Form.Item>
-                  <Form.Item<ControllerInstallFields>
                     name="nodes"
                     label={t('node-manager.cloudregion.node.installInfo')}
                     rules={[{ required: true, validator: validateTableData }]}
@@ -584,7 +544,6 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({
                 <ManualInstall
                   config={{
                     ...config,
-                    excutorVersionList,
                     sidecarVersionList,
                   }}
                 />
@@ -618,4 +577,4 @@ const StrategyOperation: React.FC<ControllerInstallProps> = ({
   );
 };
 
-export default StrategyOperation;
+export default ControllerInstall;

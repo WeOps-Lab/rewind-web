@@ -20,12 +20,7 @@ const ManualInstall: React.FC<{ config: any }> = ({ config }) => {
     useState<boolean>(false);
   const [sidecarTemplateLoading, setSidecarTemplateLoading] =
     useState<boolean>(false);
-  const [excutorPackageLoading, setExcutorPackageLoading] =
-    useState<boolean>(false);
-  const [excutorTemplateLoading, setExcutorTemplateLoading] =
-    useState<boolean>(false);
   const [sidecar, setSidecar] = useState<string | null>(null);
-  const [excutor, setExcutor] = useState<string | null>(null);
   const [script, setScript] = useState<string>('--');
 
   useEffect(() => {
@@ -33,28 +28,18 @@ const ManualInstall: React.FC<{ config: any }> = ({ config }) => {
   }, []);
 
   const download = async (field: string) => {
-    let setLoading = setSidecarPackageLoading;
-    switch (field) {
-      case 'sidecarTemplate':
-        setLoading = setSidecarTemplateLoading;
-        break;
-      case 'excutorPackage':
-        setLoading = setExcutorPackageLoading;
-        break;
-      case 'excutorTemplate':
-        setLoading = setExcutorTemplateLoading;
-        break;
-    }
+    const setLoading =
+      field === 'sidecarTemplate'
+        ? setSidecarTemplateLoading
+        : setSidecarPackageLoading;
     try {
-      const id = field.includes('sidecar') ? sidecar : excutor;
-      const list = field.includes('sidecar')
-        ? config.sidecarVersionList
-        : config.excutorVersionList;
-      const name = list.find((item: TableDataItem) => item.id === id)?.name;
+      const name = config.sidecarVersionList.find(
+        (item: TableDataItem) => item.id === sidecar
+      )?.name;
       setLoading(true);
       // 发起请求，获取文件流
       const response = await axios({
-        url: `/api/proxy/node_mgmt/api/package/download/${id}/`,
+        url: `/api/proxy/node_mgmt/api/package/download/${sidecar}/`,
         method: 'GET',
         responseType: 'blob', // 确保返回的是二进制数据
         headers: {
@@ -142,51 +127,6 @@ const ManualInstall: React.FC<{ config: any }> = ({ config }) => {
                   icon={<DownloadOutlined />}
                   loading={sidecarTemplateLoading}
                   onClick={() => download('sidecarTemplate')}
-                >
-                  {t('node-manager.cloudregion.node.downloadTemplate')}
-                </Button>
-              </Form.Item>
-            </Form.Item>
-            <Form.Item
-              required
-              label={t('node-manager.cloudregion.node.executorVersion')}
-            >
-              <Form.Item name="excutor" noStyle>
-                <Select
-                  style={{
-                    width: 400,
-                  }}
-                  showSearch
-                  allowClear
-                  placeholder={t('common.pleaseSelect')}
-                  value={excutor}
-                  onChange={(value: string) => {
-                    setExcutor(value);
-                  }}
-                >
-                  {(config.excutorVersionList || []).map(
-                    (item: TableDataItem) => (
-                      <Option value={item.id} key={item.id}>
-                        {item.name}
-                      </Option>
-                    )
-                  )}
-                </Select>
-                <Button
-                  type="link"
-                  disabled={!excutor}
-                  icon={<DownloadOutlined />}
-                  loading={excutorPackageLoading}
-                  onClick={() => download('excutorPackage')}
-                >
-                  {t('node-manager.cloudregion.node.downloadPackage')}
-                </Button>
-                <Button
-                  type="link"
-                  disabled={true}
-                  icon={<DownloadOutlined />}
-                  loading={excutorTemplateLoading}
-                  onClick={() => download('excutorTemplate')}
                 >
                   {t('node-manager.cloudregion.node.downloadTemplate')}
                 </Button>
