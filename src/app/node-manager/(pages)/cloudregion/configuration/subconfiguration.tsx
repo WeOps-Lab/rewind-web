@@ -6,17 +6,15 @@ import type { TableColumnsType } from 'antd';
 import { TableDataItem } from '@/app/node-manager/types/index';
 import { useEffect, useState } from 'react';
 import type { ConfigDate } from '@/app/node-manager/types/cloudregion';
-const { Search } = Input;
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
-
+const { Search } = Input;
 
 const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, nodeData: ConfigDate }) => {
   const { t } = useTranslation();
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchText, setSearchText] = useState<string>('');
-
   const columns: TableColumnsType<TableDataItem> = [
     {
       title: t('common.name'),
@@ -56,31 +54,37 @@ const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, 
   useEffect(() => {
     setTableLoading(true);
     console.log(nodeData);
-    const data = [
-      {
-        key: '1',
-        name: '123',
-        collector: 'linux_test',
-        operatingsystem: 'linux',
-        sidecar: 'Telegraf',
-        nodecount: 2,
-        configinfo: '',
-        nodes: '1.1.1.1',
-      },
-      {
-        key: '2',
-        name: '456',
-        collector: 'linux_test',
-        operatingsystem: 'linux',
-        sidecar: 'Telegraf',
-        nodecount: 2,
-        configinfo: '',
-        nodes: '1.1.1.1',
-      }
-    ];
-    setTableData(data);
-    setTableLoading(false);
+    setTimeout(() => {
+      const data = [
+        {
+          key: '1',
+          name: '123',
+          collector: 'linux_test',
+          operatingsystem: 'linux',
+          sidecar: 'Telegraf',
+          nodecount: 2,
+          configinfo: '',
+          nodes: '1.1.1.1',
+        },
+        {
+          key: '2',
+          name: '456',
+          collector: 'linux_test',
+          operatingsystem: 'linux',
+          sidecar: 'Telegraf',
+          nodecount: 2,
+          configinfo: '',
+          nodes: '1.1.1.1',
+        }
+      ];
+      setTableData(data);
+      setTableLoading(false);
+    }, 1000)
   }, [])
+
+  useEffect(() => {
+    console.log(nodeData)
+  }, [nodeData])
 
   const goBack = () => {
     cancel();
@@ -89,7 +93,7 @@ const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, 
   const onSearch: SearchProps['onSearch'] = (value) => {
     console.log(searchText);
     setSearchText(value);
-  }
+  };
 
   return (
     <>

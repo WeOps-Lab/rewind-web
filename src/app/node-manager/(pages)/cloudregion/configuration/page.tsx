@@ -1,31 +1,19 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  // Button, 
-  Input,
-  // Popconfirm 
-} from 'antd';
-import type { TableProps } from 'antd';
+import { Input, } from 'antd';
+import type { TableProps, GetProps } from 'antd';
 import CustomTable from '@/components/custom-table';
-import ConfigModal from './configModal';
 import { ModalRef } from '@/app/node-manager/types/index';
-import type { IConfiglistprops } from '@/app/node-manager/types/cloudregion';
-// import type {
-//   CollectorItem,
-//   CollectorListResponse,
-// } from '@/app/node-manager/types/collector';
 import { useTranslation } from '@/utils/i18n';
-import type { GetProps } from 'antd';
-import { useConfigColumns } from './useConfigColumns';
-import Mainlayout from '../mainlayout/layout';
-// import { PlusOutlined } from '@ant-design/icons';
 import useApiClient from '@/utils/request';
+import type { IConfiglistprops, ConfigDate } from '@/app/node-manager/types/cloudregion';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
-// import useApiCollector from '@/app/node-manager/api/collector/index';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
-import type { ConfigDate } from '@/app/node-manager/types/cloudregion';
+import Mainlayout from '../mainlayout/layout';
 import configstyle from './index.module.scss';
-import SubConfiguration from './subconfiguration'
+import SubConfiguration from './subconfiguration';
+import { useConfigColumns } from './useConfigColumns';
+import ConfigModal from './configModal';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
@@ -35,16 +23,13 @@ const Configration = () => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
   const cloudid = useCloudId();
-  // const { getCollectorlist } = useApiCollector();
   const {
     getconfiglist,
-    // batchdeletecollector 
   } = useApiCloudRegion();
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [configdata, setConfigdata] = useState<ConfigDate[]>([]);
-  // const [addform, setAddform] = useState<CollectorListResponse[]>([]);
   const [showSub, setShowSub] = useState<boolean>(false);
   const [nodeData, setNodeData] = useState<ConfigDate>({
     key: '',
@@ -54,6 +39,36 @@ const Configration = () => {
     nodecount: 0,
     configinfo: '',
   });
+
+  const testData = [
+    {
+      key: '1',
+      name: '1.1.1.1_telegraf_base',
+      collector: 'linux_test',
+      operatingsystem: 'linux',
+      nodecount: 2,
+      configinfo: '',
+      nodes: '1.1.1.1',
+    },
+    {
+      key: '2',
+      name: '1.1.1.1_telegraf_base',
+      collector: 'linux_test',
+      operatingsystem: 'linux',
+      nodecount: 2,
+      configinfo: '',
+      nodes: '1.1.1.1',
+    },
+    {
+      key: '3',
+      name: '1.1.1.1_telegraf_base',
+      collector: 'linux_test',
+      operatingsystem: 'linux',
+      nodecount: 2,
+      configinfo: '',
+      nodes: '1.1.1.1',
+    },
+  ]
 
   //点击编辑配置文件的触发事件
   const configurationClick = (key: string) => {
@@ -67,39 +82,11 @@ const Configration = () => {
   // 子配置编辑触发弹窗事件
   const hanldeSubEditClick = (key: string, item: any) => {
     // const configurationformdata = configdata.find((item) => item.key === key);
-
     configurationRef.current?.showModal({
       type: 'edit',
       form: item,
     });
   }
-
-  //点击应用的配置文件的触发事件
-  const applyconfigurationClick = (
-    key: string,
-    selectedsystem: string,
-    nodes: string[]
-  ) => {
-    configurationRef.current?.showModal({
-      type: 'apply',
-      key,
-      selectedsystem,
-      nodes,
-    });
-  };
-
-  //批量删除的确定的弹窗
-  // const modifydeleteconfirm = () => {
-  //   batchdeletecollector({
-  //     ids: selectedconfigurationRowKeys as string[],
-  //   }).then(() => {
-  //     getConfiglist();
-  //   });
-  // };
-
-  const onDelSuccess = () => {
-    getConfiglist();
-  };
 
   const openSub = (key: string, item?: any) => {
     // const configurationformdata = configdata.find((item) => item.key === key);
@@ -110,18 +97,8 @@ const Configration = () => {
   // 表格的列
   const { columns } = useConfigColumns({
     configurationClick,
-    applyconfigurationClick,
-    onDelSuccess,
     openSub,
   });
-
-  // const emptytabledata = {
-  //   name: '',
-  //   key: '',
-  //   collector: '',
-  //   operatingsystem: 'linux',
-  //   configinfo: addform[0]?.template,
-  // };
 
   //组件初始化渲染
   useEffect(() => {
@@ -130,31 +107,12 @@ const Configration = () => {
     const id = searchParams.get('id');
 
     if (isLoading) return;
-
     if (id) {
       getConfiglist(id);
     } else {
       getConfiglist();
     }
   }, [isLoading]);
-
-  //为了给添加时，初始化一个form数据
-  // useEffect(() => {
-  //   getCollectorlist({ node_operating_system: 'linux' }).then(
-  //     (res: CollectorItem[]) => {
-  //       const tempdate: CollectorListResponse[] = res.map(
-  //         (item: CollectorItem) => {
-  //           return {
-  //             value: item.id,
-  //             label: item.name,
-  //             template: item.default_template,
-  //           };
-  //         }
-  //       );
-  //       setAddform(tempdate);
-  //     }
-  //   );
-  // }, []);
 
   //组价初始渲染
   useEffect(() => {
@@ -186,9 +144,9 @@ const Configration = () => {
 
   //获取配置文件列表
   const getConfiglist = (search?: string) => {
+    setLoading(true);
     getconfiglist(Number(cloudid), search)
       .then((res) => {
-        setLoading(true);
         const data = res.map((item: IConfiglistprops) => {
           return {
             key: item.id,
@@ -201,17 +159,7 @@ const Configration = () => {
           };
         });
         console.log(data);
-        const test = {
-          key: '1',
-          name: '1',
-          collector: 'linux_test',
-          operatingsystem: 'linux',
-          sidecar: 'Telegraf',
-          nodecount: 2,
-          configinfo: '',
-          nodes: '1.1.1.1',
-        }
-        setConfigdata([test]);
+        setConfigdata(testData);
         // setConfigdata(data);
       })
       .finally(() => {
@@ -219,17 +167,15 @@ const Configration = () => {
       });
   };
 
-  //点击添加的配置文件的触发事件
-  // const addconfigurationClick = () => {
-  //   configurationRef.current?.showModal({
-  //     type: 'add',
-  //     form: emptytabledata,
-  //   });
-  // };
-
   //搜索框的触发事件
   const onSearch: SearchProps['onSearch'] = (value) => {
     getConfiglist(value);
+  };
+
+  // 子配置返回配置页面事件
+  const handleCBack = () => {
+    getConfiglist();
+    setShowSub(false);
   };
 
   return (
@@ -244,29 +190,6 @@ const Configration = () => {
                 enterButton
                 onSearch={onSearch}
               />
-              {/* <Button
-                className="mr-[8px]"
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  addconfigurationClick();
-                }}
-              >
-                {t('common.add')}
-              </Button>
-              <Popconfirm
-                title={t('node-manager.cloudregion.Configuration.modifydeltitle')}
-                description={t(
-                  'node-manager.cloudregion.Configuration.modifydelinfo'
-                )}
-                okText={t('common.confirm')}
-                cancelText={t('common.cancel')}
-                onConfirm={modifydeleteconfirm}
-              >
-                <Button className="mr-[8px]" ref={modifydeleteconfigurationref}>
-                  {t('common.modifydelete')}
-                </Button>
-              </Popconfirm> */}
             </div>
             <div className="tablewidth">
               <CustomTable<any>
@@ -280,7 +203,7 @@ const Configration = () => {
           </>
         ) : (
           <SubConfiguration
-            cancel={() => setShowSub(false)}
+            cancel={() => handleCBack()}
             edit={hanldeSubEditClick}
             nodeData={nodeData}
           />

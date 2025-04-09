@@ -42,14 +42,13 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) =
 
   useImperativeHandle(ref, () => ({
     showModal: ({ type, form, title, key }) => {
-      console.log(type, form)
+      const info = cloneDeep(form) as TableDataItem;
+      const { name, tagList, description } = form as TableDataItem;
       setKey(key as string);
       setId(form?.id as string);
       setType(type);
       setTitle(title as string);
-      const info = cloneDeep(form) as TableDataItem;
       setVisible(true);
-      const { name, tagList, description } = form as TableDataItem;
       if (type !== 'add') {
         info.name = name || "";
         info.system = tagList?.length ? tagList[0] : 'windows';

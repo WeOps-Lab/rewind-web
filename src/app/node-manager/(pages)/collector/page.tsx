@@ -12,7 +12,6 @@ import CollectorModal from "./collectorModal";
 import { ModalRef } from "@/app/node-manager/types";
 import { useMenuItem } from "@/app/node-manager/constants/collector";
 import { Option } from "@/types";
-// import { Button } from "antd/lib";
 
 const Collector = () => {
   const router = useRouter();
@@ -150,10 +149,6 @@ const Collector = () => {
     return {}
   };
 
-  // const handleAddCollector = () => {
-  //   openModal({ title: 'addCollector', type: 'add', form: {} })
-  // };
-
   const onSearch = (search: string) => {
     setSearch(search);
     fetchCollectorlist(search, selected);
@@ -168,7 +163,6 @@ const Collector = () => {
         defaultValue='controller'
         onChange={(value) => setValue(value)}
       />
-      {/* <Button onClick={handleAddCollector}>添加采集器</Button> */}
       {/* 卡片的渲染 */}
       <EntityList
         data={value === 'controller' ? controllerCards : collectorCards}
