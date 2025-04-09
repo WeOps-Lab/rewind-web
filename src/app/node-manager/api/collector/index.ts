@@ -90,10 +90,8 @@ const useApiCollector = () => {
   };
 
   // 获取包列表
-  const getPackageList = async () => {
-    return await get('/node_mgmt/api/package',{
-      params: { object:"Sidecar" }
-    });
+  const getPackageList = async (params: { object?: string }) => {
+    return await get('/node_mgmt/api/package',{ params });
   }
 
   // 上传包

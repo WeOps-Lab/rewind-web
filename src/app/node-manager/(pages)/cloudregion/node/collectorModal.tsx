@@ -9,49 +9,37 @@ import React, {
 import { Form, Select, message, Button, Popconfirm } from 'antd';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
-import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/utils/i18n';
 import { ModalSuccess, ModalRef } from '@/app/node-manager/types/index';
+import useApiCollector from '@/app/node-manager/api/collector';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
-import type { OptionItem } from '@/app/node-manager/types/index';
-// import type {
-//   CollectorItem,
-//   IConfiglistprops,
-// } from '@/app/node-manager/types/cloudregion';
-import useCloudId from '@/app/node-manager/hooks/useCloudid';
+import type { TableDataItem } from '@/app/node-manager/types/index';
+const { Option } = Select;
 
 const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
   ({ onSuccess }, ref) => {
     const collectorformRef = useRef<FormInstance>(null);
-    const router = useRouter();
     const { t } = useTranslation();
-    const cloudid = useCloudId();
-    const {
-      getnodelist,
-      //   batchbindcollector,
-      batchoperationcollector,
-      getconfiglist,
-    } = useApiCloudRegion();
+    const { getCollectorlist, getPackageList } = useApiCollector();
+    const { installCollector, batchoperationcollector } = useApiCloudRegion();
     const [type, setType] = useState<string>('installCollector');
-    const [nodeids, setNodeids] = useState<string[]>(['']);
+    const [nodeIds, setNodeIds] = useState<string[]>(['']);
     const [collectorVisible, setCollectorVisible] = useState<boolean>(false);
     //需要二次弹窗确定的类型
     const Popconfirmarr = ['restartCollector', 'uninstallCollector'];
-    const [configlist, setConfiglist] = useState<OptionItem[]>([]);
-    const [collectorlist, setCollectorlist] = useState<OptionItem[]>([]);
-    const [selectedsystem, setSelectedsystem] = useState<string>();
+    const [packageList, setPackageList] = useState<TableDataItem[]>([]);
+    const [collectorlist, setCollectorlist] = useState<TableDataItem[]>([]);
     const [versionLoading, setVersionLoading] = useState<boolean>(false);
     const [collectorLoading, setCollectorLoading] = useState<boolean>(false);
+    const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
+    const [collector, setCollector] = useState<string | null>(null);
 
     useImperativeHandle(ref, () => ({
       showModal: ({ type, ids, selectedsystem }) => {
         setCollectorVisible(true);
         setType(type);
-        setSelectedsystem(selectedsystem);
-        if (ids) {
-          setNodeids(ids);
-        }
-        initPage(type);
+        setNodeIds(ids || []);
+        initPage(selectedsystem || '');
       },
     }));
 
@@ -59,85 +47,87 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
       collectorformRef.current?.resetFields();
     }, [collectorformRef]);
 
-    const initPage = (type: string) => {
-      console.log(selectedsystem);
-      Promise.all([
-        type === 'installCollector' &&
-          getnodelist({ cloud_region_id: Number(cloudid) }),
-        getconfiglist(Number(cloudid)),
-      ])
-        .then((res) => {
-          setConfiglist(res[0] || []);
-          setCollectorlist(res[1] || []);
-        })
-        .finally(() => {
-          setCollectorLoading(false);
-          setVersionLoading(false);
+    const initPage = async (selectedsystem: string) => {
+      setCollectorLoading(true);
+      try {
+        const data = await getCollectorlist({
+          node_operating_system: selectedsystem,
         });
+        setCollectorlist(data);
+      } finally {
+        setCollectorLoading(false);
+      }
     };
 
     //关闭用户的弹窗(取消和确定事件)
     const handleCancel = () => {
       setCollectorVisible(false);
-      setCollectorVisible(false);
       setVersionLoading(false);
+      setCollectorLoading(false);
     };
 
     //点击确定按钮的相关逻辑处理
     const handleConfirm = () => {
-      if (Popconfirmarr.includes(type)) {
-        return;
-      }
       //表单验证
       collectorformRef.current?.validateFields().then((values) => {
-        //处理更新和绑定配置
-        const collector_id = collectorlist?.find(
-          (item) => item.value === values?.Collector
-        )?.value;
-        const node_ids = nodeids;
-        if (typeof collector_id === 'string') {
-          batchoperationcollector({
-            node_ids,
-            collector_id,
-            operation: 'start',
-          }).then(() => {
-            onSuccess();
-          });
-          setCollectorVisible(false);
+        let request: any = installCollector;
+        let params: any = {
+          nodes: nodeIds,
+          collector_package: values.version,
+        };
+        switch (type) {
+          case 'startCollector':
+            params = {
+              node_ids: nodeIds,
+              collector_id: collector,
+              operation: 'start',
+            };
+            request = batchoperationcollector;
+            break;
+          case 'restartCollector':
+            params = {
+              node_ids: nodeIds,
+              collector_id: collector,
+              operation: 'restart',
+            };
+            request = batchoperationcollector;
+            break;
+          default:
+            break;
         }
+        operate(request, params);
       });
     };
 
-    //二次确认的弹窗
-    const secondconfirm = () => {
-      collectorformRef.current?.validateFields().then((values) => {
-        const collector_id = collectorlist?.find(
-          (item) => item.value === values?.Collector
-        )?.value;
-        const node_ids = nodeids;
-        if (typeof collector_id === 'string') {
-          batchoperationcollector({
-            node_ids,
-            collector_id,
-            operation: type,
-          }).then(() => {
-            message.success(t('node-manager.cloudregion.node.stopsuccess'));
-            onSuccess();
-          });
-        }
-        setCollectorVisible(false);
-        navigateToConfig();
-      });
+    const operate = async (callback: any, params: any) => {
+      try {
+        setConfirmLoading(true);
+        await callback(params);
+        message.success(t('common.operationSuccessful'));
+        handleCancel();
+        onSuccess();
+      } finally {
+        setConfirmLoading(false);
+      }
     };
 
-    const navigateToConfig = () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      const name = searchParams.get('name');
-      const cloud_region_id = searchParams.get('cloud_region_id');
-      router.push(
-        `/node-manager/cloudregion/configuration?could_region_id=${cloud_region_id}&name=${name}`
-      );
+    const handleCollectorChange = async (value: string) => {
+      setCollector(value);
+      setPackageList([]);
+      const object = collectorlist.find(
+        (item: TableDataItem) => item.id === value
+      )?.name;
+      if (type === 'installCollector' && value) {
+        try {
+          setVersionLoading(true);
+          const data = await getPackageList({ object });
+          setPackageList(data);
+        } finally {
+          setVersionLoading(false);
+        }
+      }
     };
+
     return (
       <OperateModal
         title={t(`node-manager.cloudregion.node.${type}`)}
@@ -148,7 +138,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
         onCancel={handleCancel}
         footer={
           <>
-            <Button key="back" onClick={handleCancel}>
+            <Button key="back" loading={confirmLoading} onClick={handleCancel}>
               {t('common.cancel')}
             </Button>
             {Popconfirmarr.includes(type) ? (
@@ -157,12 +147,16 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
                 description={t(`node-manager.cloudregion.node.${type}Info`)}
                 okText={t('common.confirm')}
                 cancelText={t('common.cancel')}
-                onConfirm={secondconfirm}
+                onConfirm={handleConfirm}
               >
                 <Button type="primary">{t('common.confirm')}</Button>
               </Popconfirm>
             ) : (
-              <Button type="primary" onClick={handleConfirm}>
+              <Button
+                type="primary"
+                loading={confirmLoading}
+                onClick={handleConfirm}
+              >
                 {t('common.confirm')}
               </Button>
             )}
@@ -180,7 +174,19 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
               },
             ]}
           >
-            <Select loading={collectorLoading} options={collectorlist}></Select>
+            <Select
+              value={collector}
+              loading={collectorLoading}
+              showSearch
+              allowClear
+              onChange={handleCollectorChange}
+            >
+              {collectorlist.map((item) => (
+                <Option value={item.id} key={item.id}>
+                  {item.name}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
           {type === 'installCollector' && (
             <Form.Item
@@ -193,7 +199,13 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
                 },
               ]}
             >
-              <Select loading={versionLoading} options={configlist}></Select>
+              <Select showSearch allowClear loading={versionLoading}>
+                {packageList.map((item) => (
+                  <Option value={item.id} key={item.id}>
+                    {item.name}
+                  </Option>
+                ))}
+              </Select>
             </Form.Item>
           )}
         </Form>
