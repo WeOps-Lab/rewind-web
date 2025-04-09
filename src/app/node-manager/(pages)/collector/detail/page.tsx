@@ -16,7 +16,7 @@ const Collectordetail = () => {
   const router = useRouter();
   const { t } = useTranslation();
   const { convertToLocalizedTime } = useLocalizedTime();
-  const { getCollectorDetail, getPackageList, deletePackage } = useApiCollector();
+  const { getPackageList, deletePackage } = useApiCollector();
   const [detaildata, setDetaildata] = useState<Collectorcardprops>({
     id: '',
     name: '',
@@ -143,26 +143,22 @@ const Collectordetail = () => {
 
   const getTableData = async () => {
     const searchParams = new URLSearchParams(window.location.search);
-    const id = searchParams.get('id');
-    if (typeof id === 'string') {
-      try {
-        setTableLoading(true);
-        const getDetail = getCollectorDetail({ id: id });
-        const getPackage = getPackageList();
-        const res = await Promise.all([getDetail, getPackage]);
-        const collectorInfo = res[0];
-        const packageInfo = res[1];
-        setDetaildata({
-          id: collectorInfo.id,
-          name: collectorInfo.name,
-          system: [collectorInfo.node_operating_system],
-          introduction: collectorInfo.introduction
-        });
-        setTableData(packageInfo || []);
-        setTableLoading(false);
-      } catch (error) {
-        console.log(error);
-      }
+    const info = {
+      id: searchParams.get('id') || '' ,
+      name: searchParams.get('name') || '',
+      system: [searchParams.get('system') || ''],
+      introduction: searchParams.get('introduction') || '',
+    }
+    try {
+      setTableLoading(true);
+      const getPackage = getPackageList();
+      const res = await Promise.all([getPackage]);
+      const packageInfo = res[0];
+      setDetaildata(info);
+      setTableData(packageInfo || []);
+      setTableLoading(false);
+    } catch (error) {
+      console.log(error);
     }
     setPagination((prev: Pagination) => ({
       ...prev,
@@ -177,7 +173,7 @@ const Collectordetail = () => {
       getTableData();
       message.success(t('common.delSuccess'));
       setTableLoading(false);
-    }).catch(()=>{
+    }).catch(() => {
       setTableLoading(false)
     })
   }

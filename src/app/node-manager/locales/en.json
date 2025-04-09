@@ -118,7 +118,9 @@
         "variable": "Variable",
         "description": "Description",
         "parameterdes": "Parameter description",
-        "varconfig": "These variables are available in the configuration"
+        "varconfig": "These variables are available in the configuration",
+        "subconfiguration": "Subconfiguration",
+        "configurationList": "Configuration List"
       },
       "variable": {
         "value": "Value",

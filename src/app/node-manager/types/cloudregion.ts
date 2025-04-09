@@ -3,12 +3,7 @@ import type { TableDataItem } from '@/app/node-manager/types/index';
 //配置页面的table的列定义
 interface ConfigHookParams {
   configurationClick: (key: string) => void;
-  applyconfigurationClick: (
-    key: string,
-    selectedsystem: string,
-    nodes: string[]
-  ) => void;
-  onDelSuccess: () => void;
+  openSub: (key: string, item?: any) => void;
 }
 interface VariableProps {
   openUerModal: (type: string, form: TableDataItem) => void;
