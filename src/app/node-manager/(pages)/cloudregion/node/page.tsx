@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { Button, Input, message, Space, Modal } from 'antd';
+import { Button, Input, message, Space, Modal, Tooltip, Tag } from 'antd';
 import { DownOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { MenuProps, TableProps } from 'antd';
 import nodeStyle from './index.module.scss';
@@ -21,12 +21,15 @@ import Mainlayout from '../mainlayout/layout';
 import useApiClient from '@/utils/request';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
+import { useTelegrafMap } from '@/app/node-manager/constants/cloudregion';
 import ControllerInstall from './controllerInstall';
+import ControllerUninstall from './controllerUninstall';
 import {
   OPERATE_SYSTEMS,
   useSidecaritems,
   useCollectoritems,
 } from '@/app/node-manager/constants/cloudregion';
+import { cloneDeep } from 'lodash';
 const { confirm } = Modal;
 const { Search } = Input;
 
@@ -36,6 +39,7 @@ type SearchProps = GetProps<typeof Input.Search>;
 
 const Node = () => {
   const collectorRef = useRef<ModalRef>(null);
+  const controllerRef = useRef<ModalRef>(null);
   const { t } = useTranslation();
   const cloudid = useCloudId();
   const { isLoading, del } = useApiClient();
@@ -54,28 +58,99 @@ const Node = () => {
   const columns = useColumns({ checkConfig });
   const sidecaritems = useSidecaritems();
   const collectoritems = useCollectoritems();
+  const statusMap = useTelegrafMap();
 
   const cancelInstall = useCallback(() => {
     setShowNodeTable(true);
     setShowInstallController(false);
   }, []);
 
+  const getCollectors = (collectors: TableDataItem) => {
+    const seenIds = new Set(); // 用于存储已经出现过的 id
+    const data = collectors.filter((item: TableDataItem) => {
+      if (!seenIds.has(item.id)) {
+        seenIds.add(item.id); // 如果 id 没有出现过，添加到集合中
+        return true; // 保留这个元素
+      }
+      return false; // 如果 id 已经出现过，过滤掉这个元素
+    });
+    return data.map((tex: TableDataItem) => {
+      if (tex.configuration_name === 'Nats Executor') {
+        return {
+          title: tex.configuration_name,
+          dataIndex: tex.configuration_name,
+          render: (key: string, item: TableDataItem) => {
+            const target = (item.status.collectors || []).find(
+              (item: TableDataItem) =>
+                item.configuration_name === tex.configuration_name
+            );
+            return (
+              <Tooltip title={`${target?.message}`}>
+                <Tag
+                  bordered={false}
+                  color={!target?.status ? 'success' : 'error'}
+                >
+                  {!item.status?.status ? 'Running' : 'Error'}
+                </Tag>
+              </Tooltip>
+            );
+          },
+        };
+      }
+      return {
+        title: tex.collector_name,
+        dataIndex: tex.collector_id,
+        render: (key: string, item: TableDataItem) => {
+          const target = (item.status.collectors || []).find(
+            (item: TableDataItem) => item.collector_id === tex.collector_id
+          );
+          return (
+            <div>
+              <span
+                className="recordStatus"
+                style={{
+                  backgroundColor:
+                    statusMap[target?.status]?.color || '#b2b5bd',
+                }}
+              ></span>
+              <span
+                style={{ color: statusMap[target?.status]?.color || '#b2b5bd' }}
+              >
+                {target?.message || '--'}
+              </span>
+            </div>
+          );
+        },
+      };
+    });
+  };
+
   const enableOperateSideCar = useMemo(() => {
     if (!selectedRowKeys.length) return true;
     const list = (nodelist || []).filter((item) =>
       selectedRowKeys.includes(item.key)
     );
-    return list.some((item) => item.nas_excutor !== 'Running');
+    return list.some((item) => item.status?.status !== 0);
   }, [selectedRowKeys, nodelist]);
+
+  const tableColumns = useMemo(() => {
+    if (!nodelist?.length) return columns;
+    const activeColumns = cloneDeep(columns);
+    const collectors = getCollectors(
+      nodelist.reduce((pre, cur) => {
+        return pre.concat(cur.status?.collectors || []);
+      }, [])
+    );
+    activeColumns.splice(2, 0, ...collectors);
+    return activeColumns;
+  }, [columns, nodelist, statusMap]);
 
   const enableOperateCollecter = useMemo(() => {
     if (!selectedRowKeys.length) return true;
     const list = (nodelist || []).filter((item) =>
       selectedRowKeys.includes(item.key)
     );
-    return list.some(
-      (item) => item.nas_excutor !== 'Running' || item.sidecar !== 'Running'
-    );
+    return list.some((item) => item.status?.status !== 0);
   }, [selectedRowKeys, nodelist]);
 
   useEffect(() => {
@@ -85,6 +160,16 @@ const Node = () => {
   }, [isLoading]);
 
   const handleSidecarMenuClick: MenuProps['onClick'] = (e) => {
+    if (e.key === 'uninstallSidecar') {
+      const list = (nodelist || []).filter((item) =>
+        selectedRowKeys.includes(item.key)
+      );
+      controllerRef.current?.showModal({
+        type: e.key,
+        form: { list },
+      });
+      return;
+    }
     confirm({
       title: t('common.prompt'),
       content: t(`node-manager.cloudregion.node.${e.key}Tips`),
@@ -164,8 +249,6 @@ const Node = () => {
     const data = res.map((item: TableDataItem) => ({
       ...item,
       key: item.id,
-      sidecar: 'Running',
-      nas_excutor: 'Running',
     }));
     setLoading(false);
     setNodelist(data);
@@ -246,7 +329,7 @@ const Node = () => {
             </div>
             <div className="tablewidth">
               <CustomTable
-                columns={columns}
+                columns={tableColumns}
                 loading={loading}
                 dataSource={nodelist}
                 scroll={{ y: 'calc(100vh - 400px)', x: 'calc(100vw - 300px)' }}
@@ -258,7 +341,13 @@ const Node = () => {
               onSuccess={() => {
                 handleCollectorSuccess();
               }}
-            ></CollectorModal>
+            />
+            <ControllerUninstall
+              ref={controllerRef}
+              onSuccess={() => {
+                getNodes();
+              }}
+            />
           </div>
         </div>
       )}

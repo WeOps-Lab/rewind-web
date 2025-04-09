@@ -7,15 +7,15 @@ const useTelegrafMap = (): Record<string, Record<string, string>> => {
   const { t } = useTranslation();
   return useMemo(
     () => ({
-      notInstall: {
+      1: {
         color: '#b2b5bd',
         text: t('node-manager.cloudregion.node.notInstalled'),
       },
-      running: {
+      0: {
         color: '#2dcb56',
         text: t('node-manager.cloudregion.node.running'),
       },
-      failed: {
+      2: {
         color: '#ea3636',
         text: t('node-manager.cloudregion.node.error'),
       },
@@ -95,14 +95,14 @@ const useSidecaritems = (): MenuProps['items'] => {
   const { t } = useTranslation();
   return useMemo(
     () => [
-      {
-        label: (
-          <div style={{ whiteSpace: 'nowrap' }}>
-            {t('node-manager.cloudregion.node.restartSidecar')}
-          </div>
-        ),
-        key: 'restartSidecar',
-      },
+      //   {
+      //     label: (
+      //       <div style={{ whiteSpace: 'nowrap' }}>
+      //         {t('node-manager.cloudregion.node.restartSidecar')}
+      //       </div>
+      //     ),
+      //     key: 'restartSidecar',
+      //   },
       {
         label: (
           <div style={{ whiteSpace: 'nowrap' }}>

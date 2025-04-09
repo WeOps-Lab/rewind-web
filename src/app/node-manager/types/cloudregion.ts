@@ -108,7 +108,7 @@ interface NodeItem {
   id?: string;
   os: string;
   ip: string;
-  organizations: string[];
+  organizations?: string[];
   username?: string;
   password?: string;
   port?: number;

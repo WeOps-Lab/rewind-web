@@ -2,6 +2,7 @@ import useApiClient from '@/utils/request';
 import type {
   updateConfigReq,
   ControllerInstallFields,
+  NodeItem,
 } from '@/app/node-manager/types/cloudregion';
 
 const useApiCloudRegion = () => {
@@ -43,7 +44,16 @@ const useApiCloudRegion = () => {
     });
   };
 
-  // 获取包列表
+  // 卸载控制器
+  const uninstallController = async (params: {
+    cloud_region_id?: number;
+    work_node?: number;
+    nodes?: NodeItem[];
+  }) => {
+    return await post('/node_mgmt/api/installer/controller/uninstall/', params);
+  };
+
+  // 安装控制器
   const installController = async (params: ControllerInstallFields) => {
     return await post('/node_mgmt/api/installer/controller/install/', params);
   };
@@ -195,6 +205,7 @@ const useApiCloudRegion = () => {
     getPackages,
     installController,
     getControllerNodes,
+    uninstallController,
   };
 };
 export default useApiCloudRegion;
