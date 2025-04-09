@@ -37,7 +37,7 @@ const BatchEditModal = forwardRef<ModalRef, ModalProps>(
     const [groupVisible, setGroupVisible] = useState<boolean>(false);
     const [groupForm, setGroupForm] = useState<TableDataItem>({});
     const [title, setTitle] = useState<string>('');
-    const [field, setField] = useState<string>('system');
+    const [field, setField] = useState<string>('os');
 
     useImperativeHandle(ref, () => ({
       showModal: ({ form, title, type }) => {
@@ -45,7 +45,7 @@ const BatchEditModal = forwardRef<ModalRef, ModalProps>(
         const formData = cloneDeep(form || {});
         setGroupForm(formData);
         setGroupVisible(true);
-        setField(type || 'system');
+        setField(type || 'os');
         setTitle(title || '');
       },
     }));
@@ -59,16 +59,24 @@ const BatchEditModal = forwardRef<ModalRef, ModalProps>(
 
     const renderFormItem = useCallback(() => {
       if (field === 'password') return <Input.Password />;
-      if (['system', 'group'].includes(field))
+      if (field === 'os')
         return (
           <Select>
-            {(field === 'system' ? systemList : groupList).map(
-              (item: SegmentedItem) => (
-                <Option key={item.value} value={item.value}>
-                  {item.label}
-                </Option>
-              )
-            )}
+            {systemList.map((item: SegmentedItem) => (
+              <Option key={item.value} value={item.value}>
+                {item.label}
+              </Option>
+            ))}
+          </Select>
+        );
+      if (field === 'organizations')
+        return (
+          <Select mode="multiple" maxTagCount="responsive">
+            {groupList.map((item: SegmentedItem) => (
+              <Option key={item.value} value={item.value}>
+                {item.label}
+              </Option>
+            ))}
           </Select>
         );
       return <Input />;

@@ -262,7 +262,9 @@ const Node = () => {
           </div>
         </div>
       )}
-      {showInstallController && <ControllerInstall cancel={cancelInstall} />}
+      {showInstallController && (
+        <ControllerInstall config={{ os: system }} cancel={cancelInstall} />
+      )}
     </Mainlayout>
   );
 };

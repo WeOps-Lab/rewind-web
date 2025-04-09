@@ -28,11 +28,15 @@ const useInstallMap = (): Record<string, Record<string, string>> => {
   const { t } = useTranslation();
   return useMemo(
     () => ({
-      installing: {
+      waiting: {
         color: 'var(--color-primary)',
         text: t('node-manager.cloudregion.node.installing'),
       },
-      success: {
+      running: {
+        color: 'var(--color-text-2)',
+        text: t('node-manager.cloudregion.node.running'),
+      },
+      finished: {
         color: '#2dcb56',
         text: t('node-manager.cloudregion.node.successInstall'),
       },
@@ -124,9 +128,9 @@ const OPERATE_SYSTEMS: SegmentedItem[] = [
 ];
 
 const BATCH_FIELD_MAPS: Record<string, string> = {
-  system: 'operateSystem',
-  group: 'organaziton',
-  account: 'loginAccount',
+  os: 'operateSystem',
+  organizations: 'organaziton',
+  username: 'loginAccount',
   port: 'loginPort',
   password: 'loginPassword',
 };

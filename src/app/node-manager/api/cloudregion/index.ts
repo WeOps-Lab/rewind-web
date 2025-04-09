@@ -1,5 +1,8 @@
 import useApiClient from '@/utils/request';
-import type { updateConfigReq } from '@/app/node-manager/types/cloudregion';
+import type {
+  updateConfigReq,
+  ControllerInstallFields,
+} from '@/app/node-manager/types/cloudregion';
 
 const useApiCloudRegion = () => {
   const { get, post, del, patch } = useApiClient();
@@ -27,6 +30,29 @@ const useApiCloudRegion = () => {
     return await get('/node_mgmt/api/node/', {
       params,
     });
+  };
+
+  // 获取包列表
+  const getPackages = async (params: {
+    os?: string;
+    object?: string;
+    operating_system?: string;
+  }) => {
+    return await get('/node_mgmt/api/package/', {
+      params,
+    });
+  };
+
+  // 获取包列表
+  const installController = async (params: ControllerInstallFields) => {
+    return await post('/node_mgmt/api/installer/controller/install/', params);
+  };
+
+  // 获控制器节点信息
+  const getControllerNodes = async (params: { taskId: number }) => {
+    return await post(
+      `/node_mgmt/api/installer/controller/task/${params.taskId}/nodes/`
+    );
   };
 
   //获取sidecar的安装步骤
@@ -166,6 +192,9 @@ const useApiCloudRegion = () => {
     batchbindcollector,
     batchoperationcollector,
     getnodstateenum,
+    getPackages,
+    installController,
+    getControllerNodes,
   };
 };
 export default useApiCloudRegion;

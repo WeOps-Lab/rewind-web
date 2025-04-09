@@ -104,12 +104,23 @@ interface CloudregioncardProps {
   [key: string]: any;
 }
 
+interface NodeItem {
+  id?: string;
+  os: string;
+  ip: string;
+  organizations: string[];
+  username?: string;
+  password?: string;
+  port?: number;
+}
+
 interface ControllerInstallFields {
   id?: number;
-  install_type?: number;
-  node_id?: number;
-  sidecar_version?: string;
-  executor_version: string;
+  cloud_region_id: number;
+  nodes: NodeItem[];
+  work_node?: string;
+  sidecar_package?: string;
+  executor_package?: string;
 }
 
 interface ControllerInstallProps {
@@ -133,4 +144,5 @@ export type {
   CloudregioncardProps,
   ControllerInstallFields,
   ControllerInstallProps,
+  NodeItem,
 };
