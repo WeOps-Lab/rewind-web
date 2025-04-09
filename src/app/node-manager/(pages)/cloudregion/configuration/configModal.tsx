@@ -6,7 +6,7 @@ import React, {
   useImperativeHandle,
   useEffect,
 } from 'react';
-import { Input, Form, Select, Button, message } from 'antd';
+import { Input, Form, Button, message } from 'antd';
 import CustomTable from '@/components/custom-table';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
@@ -21,9 +21,7 @@ import {
   VarSourceItem,
   VarResItem,
 } from '@/app/node-manager/types/cloudregion';
-import type { OptionItem } from '@/app/node-manager/types/index';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
-import useApiCollector from '@/app/node-manager/api/collector/index';
 import CodeEditor from '@/app/node-manager/components/codeEditor';
 import useConfigModalColumns from './configModalColumns';
 
@@ -34,14 +32,12 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const columns = useConfigModalColumns();
   //设置表当的数据
   const { t } = useTranslation();
-  const { getCollectorlist } = useApiCollector();
   const cloudid = useCloudId();
   const {
     updatecollector,
     getvariablelist,
   } = useApiCloudRegion();
   const [configForm, setConfigForm] = useState<TableDataItem>();
-  const [colselectitems, setColselectitems] = useState<OptionItem[]>([]);
   const [editeConfigId, setEditeConfigId] = useState<string>('');
   const [type, setType] = useState<string>('add');
   const [vardataSource, setVardataSource] = useState<VarSourceItem[]>([]);
@@ -76,23 +72,6 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
       configformRef.current?.resetFields();
       configformRef.current?.setFieldsValue(configForm);
     }
-
-    //获取系统的类型，并根据系统的类型设置采集器的列表
-    getCollectorlist({
-      node_operating_system: configForm?.operatingsystem,
-    }).then((res) => {
-      const tempdate = res.map((item: any) => {
-        return {
-          value: item.id,
-          label: item.name,
-          template: item.default_template,
-        };
-      });
-      if (!configformRef.current?.getFieldValue('collector')) {
-        configformRef.current?.setFieldValue('collector', tempdate[0].value);
-      }
-      setColselectitems(tempdate);
-    });
   }, [configVisible, configForm]);
 
   //关闭用户的弹窗(取消和确定事件)
@@ -127,14 +106,6 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
       const { name, nodes, collector, configinfo } = values;
       handleUpdate(name, nodes, collector, configinfo);
     });
-  };
-
-  //选择采集器
-  const handleChangeCollector = (value: string) => {
-    const tempdata = colselectitems.filter((item) => item.value === value);
-    if (tempdata) {
-      configformRef.current?.setFieldValue('configinfo', tempdata[0].template);
-    }
   };
 
   const ConfigEditorWithParams = ({
@@ -207,7 +178,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
               },
             ]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
           <Form.Item
             name="nodes"
@@ -219,23 +190,10 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
               },
             ]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
-          {/* <Form.Item
-              name="sidecar"
-              label={t('node-manager.cloudregion.Configuration.sidecar')}
-              rules={[
-                {
-                  required: true,
-                  message: t('common.inputMsg'),
-                },
-              ]}
-            >
-              <Input />
-            </Form.Item> */}
           <Form.Item
             name="collector"
-            // label={t('node-manager.cloudregion.Configuration.collector')}
             label={t('node-manager.cloudregion.Configuration.sidecar')}
             rules={[
               {
@@ -244,10 +202,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
               },
             ]}
           >
-            <Select
-              options={colselectitems}
-              onChange={handleChangeCollector}
-            ></Select>
+            <Input disabled />
           </Form.Item>
           <Form.Item
             name="configinfo"

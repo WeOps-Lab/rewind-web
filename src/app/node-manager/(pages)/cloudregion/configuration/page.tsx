@@ -23,9 +23,7 @@ const Configration = () => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
   const cloudid = useCloudId();
-  const {
-    getconfiglist,
-  } = useApiCloudRegion();
+  const { getconfiglist } = useApiCloudRegion();
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

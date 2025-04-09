@@ -53,7 +53,6 @@ const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, 
 
   useEffect(() => {
     setTableLoading(true);
-    console.log(nodeData);
     setTimeout(() => {
       const data = [
         {
