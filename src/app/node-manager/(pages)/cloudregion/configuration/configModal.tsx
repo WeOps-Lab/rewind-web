@@ -6,7 +6,7 @@ import React, {
   useImperativeHandle,
   useEffect,
 } from 'react';
-import { Input, Form, Select, Button, message } from 'antd';
+import { Input, Form, Button, message } from 'antd';
 import CustomTable from '@/components/custom-table';
 import OperateModal from '@/components/operate-modal';
 import type { FormInstance } from 'antd';
@@ -21,9 +21,7 @@ import {
   VarSourceItem,
   VarResItem,
 } from '@/app/node-manager/types/cloudregion';
-import type { OptionItem } from '@/app/node-manager/types/index';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
-import useApiCollector from '@/app/node-manager/api/collector/index';
 import CodeEditor from '@/app/node-manager/components/codeEditor';
 import { useConfigModalColumns } from '@/app/node-manager/hooks/configuration';
 
@@ -34,14 +32,13 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const columns = useConfigModalColumns();
   //设置表当的数据
   const { t } = useTranslation();
-  const { getCollectorlist } = useApiCollector();
   const cloudid = useCloudId();
   const {
     updatecollector,
     getvariablelist,
+    updatechildconfig,
   } = useApiCloudRegion();
   const [configForm, setConfigForm] = useState<TableDataItem>();
-  const [colselectitems, setColselectitems] = useState<OptionItem[]>([]);
   const [editeConfigId, setEditeConfigId] = useState<string>('');
   const [type, setType] = useState<string>('add');
   const [vardataSource, setVardataSource] = useState<VarSourceItem[]>([]);
@@ -72,27 +69,10 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
       setVardataSource(tempdata);
     });
     //add发起请求，设置表单的数据
-    if (configVisible && ['edit'].includes(type)) {
+    if (configVisible && ['edit', 'edit_child'].includes(type)) {
       configformRef.current?.resetFields();
       configformRef.current?.setFieldsValue(configForm);
     }
-
-    //获取系统的类型，并根据系统的类型设置采集器的列表
-    getCollectorlist({
-      node_operating_system: configForm?.operatingsystem,
-    }).then((res) => {
-      const tempdate = res.map((item: any) => {
-        return {
-          value: item.id,
-          label: item.name,
-          template: item.default_template,
-        };
-      });
-      if (!configformRef.current?.getFieldValue('collector')) {
-        configformRef.current?.setFieldValue('collector', tempdate[0].value);
-      }
-      setColselectitems(tempdate);
-    });
   }, [configVisible, configForm]);
 
   //关闭用户的弹窗(取消和确定事件)
@@ -103,7 +83,6 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const handleUpdate = (
     name: string,
     collector: string,
-    nodes: string[],
     configinfo: string
   ) => {
     updatecollector(editeConfigId, {
@@ -118,23 +97,36 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
     });
   };
 
+  const handleChildUpdate = (configinfo: string) => {
+    const { id,collect_type,config_type,collector_config } = configForm as TableDataItem;
+    updatechildconfig(id as string,{
+      collect_type,
+      config_type,
+      collector_config,
+      content: configinfo
+    }).then(()=>{
+      onSuccess();
+      setConfirmLoading(false);
+      setConfigVisible(false);
+      message.success(t('common.updateSuccess'));
+    })
+  }
+
   //处理添加和编辑的确定事件
   const handleConfirm = () => {
     // 校验表单
     configformRef.current?.validateFields().then((values) => {
       console.log(values);
       setConfirmLoading(true);
-      const { name, nodes, collector, configinfo } = values;
-      handleUpdate(name, nodes, collector, configinfo);
+      if(type === 'edit') {
+        const { name, collector, configinfo } = values;
+        console.log(values);
+        handleUpdate(name, collector, configinfo);
+      } else if (type === 'edit_child') {
+        const { configinfo } = values;
+        handleChildUpdate(configinfo);
+      }
     });
-  };
-
-  //选择采集器
-  const handleChangeCollector = (value: string) => {
-    const tempdata = colselectitems.filter((item) => item.value === value);
-    if (tempdata) {
-      configformRef.current?.setFieldValue('configinfo', tempdata[0].template);
-    }
   };
 
   const ConfigEditorWithParams = ({
@@ -207,7 +199,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
               },
             ]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
           <Form.Item
             name="nodes"
@@ -219,23 +211,10 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
               },
             ]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
-          {/* <Form.Item
-              name="sidecar"
-              label={t('node-manager.cloudregion.Configuration.sidecar')}
-              rules={[
-                {
-                  required: true,
-                  message: t('common.inputMsg'),
-                },
-              ]}
-            >
-              <Input />
-            </Form.Item> */}
           <Form.Item
             name="collector"
-            // label={t('node-manager.cloudregion.Configuration.collector')}
             label={t('node-manager.cloudregion.Configuration.sidecar')}
             rules={[
               {
@@ -244,10 +223,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
               },
             ]}
           >
-            <Select
-              options={colselectitems}
-              onChange={handleChangeCollector}
-            ></Select>
+            <Input disabled />
           </Form.Item>
           <Form.Item
             name="configinfo"
@@ -276,7 +252,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
 
   return (
     <OperateModal
-      title={t(`common.${type}`)}
+      title={t(`common.edit`)}
       open={configVisible}
       onCancel={handleCancel}
       width={800}
