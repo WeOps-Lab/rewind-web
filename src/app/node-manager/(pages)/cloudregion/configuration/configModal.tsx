@@ -33,11 +33,8 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   //设置表当的数据
   const { t } = useTranslation();
   const cloudid = useCloudId();
-  const {
-    updatecollector,
-    getvariablelist,
-    updatechildconfig,
-  } = useApiCloudRegion();
+  const { updatecollector, getvariablelist, updatechildconfig } =
+    useApiCloudRegion();
   const [configForm, setConfigForm] = useState<TableDataItem>();
   const [editeConfigId, setEditeConfigId] = useState<string>('');
   const [type, setType] = useState<string>('add');
@@ -56,6 +53,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
 
   //初始化表单的数据
   useEffect(() => {
+    if (!configVisible) return;
     //获取变量列表
     getvariablelist(Number(cloudid)).then((res) => {
       const tempdata: VarSourceItem[] = [];
@@ -69,11 +67,11 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
       setVardataSource(tempdata);
     });
     //add发起请求，设置表单的数据
-    if (configVisible && ['edit', 'edit_child'].includes(type)) {
+    if (['edit', 'edit_child'].includes(type)) {
       configformRef.current?.resetFields();
       configformRef.current?.setFieldsValue(configForm);
     }
-  }, [configForm]);
+  }, [configForm, configVisible]);
 
   //关闭用户的弹窗(取消和确定事件)
   const handleCancel = () => {
@@ -98,19 +96,20 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   };
 
   const handleChildUpdate = (configinfo: string) => {
-    const { id,collect_type,config_type,collector_config } = configForm as TableDataItem;
-    updatechildconfig(id as string,{
+    const { id, collect_type, config_type, collector_config } =
+      configForm as TableDataItem;
+    updatechildconfig(id as string, {
       collect_type,
       config_type,
       collector_config,
-      content: configinfo
-    }).then(()=>{
+      content: configinfo,
+    }).then(() => {
       onSuccess();
       setConfirmLoading(false);
       setConfigVisible(false);
       message.success(t('common.updateSuccess'));
-    })
-  }
+    });
+  };
 
   //处理添加和编辑的确定事件
   const handleConfirm = () => {
@@ -118,7 +117,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
     configformRef.current?.validateFields().then((values) => {
       console.log(values);
       setConfirmLoading(true);
-      if(type === 'edit') {
+      if (type === 'edit') {
         const { name, collector, configinfo } = values;
         console.log(values);
         handleUpdate(name, collector, configinfo);
@@ -258,7 +257,14 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
       width={800}
       footer={
         <div>
-          <Button type="primary" className="mr-[10px]" loading={confirmLoading} onClick={handleConfirm}>{t('common.confirm')}</Button>
+          <Button
+            type="primary"
+            className="mr-[10px]"
+            loading={confirmLoading}
+            onClick={handleConfirm}
+          >
+            {t('common.confirm')}
+          </Button>
           <Button onClick={handleCancel}>{t('common.cancel')}</Button>
         </div>
       }
