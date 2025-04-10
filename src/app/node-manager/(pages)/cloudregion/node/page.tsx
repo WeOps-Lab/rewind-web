@@ -340,6 +340,7 @@ const Node = () => {
             />
             <ControllerUninstall
               ref={controllerRef}
+              config={{ os: system }}
               onSuccess={() => {
                 getNodes();
               }}

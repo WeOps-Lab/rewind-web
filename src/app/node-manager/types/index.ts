@@ -6,6 +6,7 @@ interface TableDataItem {
 //传入modal的参数类型成功的回调
 interface ModalSuccess {
   onSuccess: () => void;
+  config?: any;
 }
 
 //调用弹窗接口传入的类型

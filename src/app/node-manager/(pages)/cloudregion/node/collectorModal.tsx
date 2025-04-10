@@ -33,11 +33,13 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const [collectorLoading, setCollectorLoading] = useState<boolean>(false);
     const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
     const [collector, setCollector] = useState<string | null>(null);
+    const [system, setSystem] = useState<string>('');
 
     useImperativeHandle(ref, () => ({
       showModal: ({ type, ids, selectedsystem }) => {
         setCollectorVisible(true);
         setType(type);
+        setSystem(selectedsystem as string);
         setNodeIds(ids || []);
         initPage(selectedsystem || '');
       },
@@ -120,7 +122,7 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
       if (type === 'installCollector' && value) {
         try {
           setVersionLoading(true);
-          const data = await getPackageList({ object });
+          const data = await getPackageList({ object, os: system });
           setPackageList(data);
         } finally {
           setVersionLoading(false);

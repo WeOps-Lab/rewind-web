@@ -24,7 +24,7 @@ import { cloneDeep } from 'lodash';
 const { Option } = Select;
 
 const ControllerUninstall = forwardRef<ModalRef, ModalSuccess>(
-  ({ onSuccess }, ref) => {
+  ({ onSuccess, config }, ref) => {
     const collectorformRef = useRef<FormInstance>(null);
     const { t } = useTranslation();
     const cloudid = useCloudId();
@@ -192,7 +192,10 @@ const ControllerUninstall = forwardRef<ModalRef, ModalSuccess>(
     const initPage = async () => {
       setCollectorLoading(true);
       try {
-        const res = await getnodelist({ cloud_region_id: Number(cloudid) });
+        const res = await getnodelist({
+          cloud_region_id: Number(cloudid),
+          operating_system: config.os,
+        });
         setNodeList(res || []);
       } finally {
         setCollectorLoading(false);
