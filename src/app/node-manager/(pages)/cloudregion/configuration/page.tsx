@@ -9,7 +9,7 @@ import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
 import type {
   IConfiglistprops,
-  ConfigDate, 
+  ConfigDate,
   SubRef,
 } from '@/app/node-manager/types/cloudregion';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
@@ -144,11 +144,11 @@ const Configration = () => {
 
   // 弹窗确认成功后的回调
   const onSuccess = () => {
-    if(!showSub){
+    if (!showSub) {
       getConfiglist();
-    }else{
-      subConfiguration.current?.getChildConfig();
+      return;
     }
+    subConfiguration.current?.getChildConfig();
   }
 
   return (

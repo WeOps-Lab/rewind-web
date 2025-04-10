@@ -72,11 +72,6 @@ const SubConfiguration = forwardRef<SubRef, SubProps>(({ cancel, edit, nodeData 
     }
   ))
 
-  // useEffect(() => {
-  //   setTableLoading(true);
-  //   getChildConfigList();
-  // }, [])
-
   useEffect(() => {
     if(isLoading) return;
     setTableLoading(true);
