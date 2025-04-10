@@ -1,12 +1,16 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { Input, } from 'antd';
+import { Input } from 'antd';
 import type { TableProps, GetProps } from 'antd';
+import { useSearchParams } from 'next/navigation';
 import CustomTable from '@/components/custom-table';
 import { ModalRef } from '@/app/node-manager/types/index';
 import { useTranslation } from '@/utils/i18n';
 import useApiClient from '@/utils/request';
-import type { IConfiglistprops, ConfigDate } from '@/app/node-manager/types/cloudregion';
+import type {
+  IConfiglistprops,
+  ConfigDate,
+} from '@/app/node-manager/types/cloudregion';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
 import Mainlayout from '../mainlayout/layout';
@@ -23,6 +27,8 @@ const Configration = () => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
   const cloudid = useCloudId();
+  const searchParams = useSearchParams();
+  const nodeId = searchParams.get('id') || '';
   const { getconfiglist } = useApiCloudRegion();
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
@@ -36,7 +42,7 @@ const Configration = () => {
     operatingsystem: '',
     nodecount: 0,
     configinfo: '',
-    nodes: []
+    nodes: [],
   });
 
   //点击编辑配置文件的触发事件
@@ -50,19 +56,16 @@ const Configration = () => {
 
   // 子配置编辑触发弹窗事件
   const hanldeSubEditClick = (item: any) => {
-    // const configurationformdata = configdata.find((item) => item.key === key);
     configurationRef.current?.showModal({
       type: 'edit_child',
       form: item,
     });
-  }
+  };
 
   const openSub = (key: string, item?: any) => {
-    // const configurationformdata = configdata.find((item) => item.key === key);
-    // setNodeData(configurationformdata as ConfigDate);
     setNodeData(item);
     setShowSub(true);
-  }
+  };
   // 表格的列
   const { columns } = useConfigColumns({
     configurationClick,
@@ -71,16 +74,8 @@ const Configration = () => {
 
   //组件初始化渲染
   useEffect(() => {
-    // 根据 URL 查询参数决定查询逻辑
-    const searchParams = new URLSearchParams(window.location.search);
-    const id = searchParams.get('id');
-
     if (isLoading) return;
-    if (id) {
-      getConfiglist(id);
-    } else {
-      getConfiglist();
-    }
+    getConfiglist(nodeId || '');
   }, [isLoading]);
 
   //组价初始渲染
