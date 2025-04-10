@@ -75,6 +75,7 @@ interface ConfigDate {
   operatingsystem: string;
   nodecount: number;
   configinfo: string;
+  nodes: string[]
 }
 
 interface cloudRegionItem {

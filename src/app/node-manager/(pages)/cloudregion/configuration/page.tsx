@@ -23,9 +23,7 @@ const Configration = () => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
   const cloudid = useCloudId();
-  const {
-    getconfiglist,
-  } = useApiCloudRegion();
+  const { getconfiglist } = useApiCloudRegion();
   const [selectedconfigurationRowKeys, setSelectedconfigurationRowKeys] =
     useState<React.Key[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -38,37 +36,8 @@ const Configration = () => {
     operatingsystem: '',
     nodecount: 0,
     configinfo: '',
+    nodes: []
   });
-
-  const testData = [
-    {
-      key: '1',
-      name: '1.1.1.1_telegraf_base',
-      collector: 'linux_test',
-      operatingsystem: 'linux',
-      nodecount: 2,
-      configinfo: '',
-      nodes: '1.1.1.1',
-    },
-    {
-      key: '2',
-      name: '1.1.1.1_telegraf_base',
-      collector: 'linux_test',
-      operatingsystem: 'linux',
-      nodecount: 2,
-      configinfo: '',
-      nodes: '1.1.1.1',
-    },
-    {
-      key: '3',
-      name: '1.1.1.1_telegraf_base',
-      collector: 'linux_test',
-      operatingsystem: 'linux',
-      nodecount: 2,
-      configinfo: '',
-      nodes: '1.1.1.1',
-    },
-  ]
 
   //点击编辑配置文件的触发事件
   const configurationClick = (key: string) => {
@@ -80,10 +49,10 @@ const Configration = () => {
   };
 
   // 子配置编辑触发弹窗事件
-  const hanldeSubEditClick = (key: string, item: any) => {
+  const hanldeSubEditClick = (item: any) => {
     // const configurationformdata = configdata.find((item) => item.key === key);
     configurationRef.current?.showModal({
-      type: 'edit',
+      type: 'edit_child',
       form: item,
     });
   }
@@ -155,12 +124,10 @@ const Configration = () => {
             operatingsystem: item.operating_system,
             nodecount: item.node_count,
             configinfo: item.config_template,
-            nodes: item.nodes,
+            nodes: item.nodes?.length ? item.nodes[0] : '--',
           };
         });
-        console.log(data);
-        setConfigdata(testData);
-        // setConfigdata(data);
+        setConfigdata(data);
       })
       .finally(() => {
         setLoading(false);
