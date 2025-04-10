@@ -116,6 +116,9 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const handleCollectorChange = async (value: string) => {
       setCollector(value);
       setPackageList([]);
+      collectorformRef.current?.setFieldsValue({
+        version: null,
+      });
       const object = collectorlist.find(
         (item: TableDataItem) => item.id === value
       )?.name;
