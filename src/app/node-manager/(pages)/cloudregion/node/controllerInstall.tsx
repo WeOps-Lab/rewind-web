@@ -213,7 +213,7 @@ const ControllerInstall: React.FC<ControllerInstallProps> = ({
         },
       },
       {
-        title: t("common.actions"),
+        title: t('common.actions'),
         dataIndex: 'action',
         width: 60,
         fixed: 'right',
@@ -433,6 +433,7 @@ const ControllerInstall: React.FC<ControllerInstallProps> = ({
         <ControllerTable
           config={{
             taskId,
+            type: 'controller',
             groupList,
           }}
           cancel={cancelInstall}

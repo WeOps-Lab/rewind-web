@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Button, Popconfirm } from 'antd';
 import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
@@ -22,93 +22,98 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
 }) => {
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
-  const { getControllerNodes } = useApiCloudRegion();
+  const { getControllerNodes, getCollectorNodes } = useApiCloudRegion();
   const guidance = useRef<ModalRef>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [pageLoading, setPageLoading] = useState<boolean>(false);
   const [tableData, setTableData] = useState<TableDataItem[]>([]);
   const installMay = useInstallMap();
   const { showGroupNames } = useGroupNames();
-  const columns: any = [
-    {
-      title: t('node-manager.cloudregion.node.ipAdrress'),
-      dataIndex: 'ip',
-      width: 100,
-      key: 'ip',
-      ellipsis: true,
-      render: (value: string, row: TableDataItem) => {
-        return <>{row.ip || '--'}</>;
+
+  const columns: any = useMemo(() => {
+    return [
+      {
+        title: t('node-manager.cloudregion.node.ipAdrress'),
+        dataIndex: 'ip',
+        width: 100,
+        key: 'ip',
+        ellipsis: true,
+        render: (value: string, row: TableDataItem) => {
+          return <>{row.ip || '--'}</>;
+        },
       },
-    },
-    {
-      title: t('node-manager.cloudregion.node.operateSystem'),
-      dataIndex: 'os',
-      width: 100,
-      key: 'os',
-      ellipsis: true,
-      render: (value: string) => {
-        return (
-          <>
-            {OPERATE_SYSTEMS.find((item) => item.value === value)?.label ||
-              '--'}
-          </>
-        );
+      {
+        title: t('node-manager.cloudregion.node.operateSystem'),
+        dataIndex: 'os',
+        width: 100,
+        key: 'os',
+        ellipsis: true,
+        render: (value: string) => {
+          return (
+            <>
+              {OPERATE_SYSTEMS.find((item) => item.value === value)?.label ||
+                '--'}
+            </>
+          );
+        },
       },
-    },
-    {
-      title: t('node-manager.cloudregion.node.organaziton'),
-      dataIndex: 'organizations',
-      width: 100,
-      key: 'organizations',
-      ellipsis: true,
-      render: (value: string[]) => {
-        return <>{showGroupNames(value || [])}</>;
+      {
+        title: t('node-manager.cloudregion.node.organaziton'),
+        dataIndex: 'organizations',
+        width: 100,
+        key: 'organizations',
+        ellipsis: true,
+        render: (value: string[]) => {
+          return <>{showGroupNames(value || []) || '--'}</>;
+        },
       },
-    },
-    {
-      title: t('node-manager.cloudregion.node.sidecar'),
-      dataIndex: 'result',
-      width: 100,
-      key: 'result',
-      ellipsis: true,
-      render: (value: Record<string, string>) => {
-        return (
-          <span
-            style={{
-              color:
-                installMay[value?.status]?.color || 'var(--ant-color-text)',
-            }}
-          >
-            {installMay[value?.status]?.text || '--'}
-          </span>
-        );
+      {
+        title: t(
+          `node-manager.cloudregion.node.${config.type === 'collector' ? 'collector' : 'sidecar'}`
+        ),
+        dataIndex: 'result',
+        width: 100,
+        key: 'result',
+        ellipsis: true,
+        render: (value: Record<string, string>) => {
+          return (
+            <span
+              style={{
+                color:
+                  installMay[value?.status]?.color || 'var(--ant-color-text)',
+              }}
+            >
+              {installMay[value?.status]?.text || '--'}
+            </span>
+          );
+        },
       },
-    },
-    {
-      title: t('common.actions'),
-      dataIndex: 'action',
-      width: 60,
-      fixed: 'right',
-      key: 'action',
-      render: (value: string, row: TableDataItem) => {
-        return (
-          <Button
-            type="link"
-            disabled={row.result?.status !== 'failed'}
-            onClick={() => checkDetail('remoteInstall', row)}
-          >
-            {t('node-manager.cloudregion.node.viewLog')}
-          </Button>
-        );
+      {
+        title: t('common.actions'),
+        dataIndex: 'action',
+        width: 60,
+        fixed: 'right',
+        key: 'action',
+        render: (value: string, row: TableDataItem) => {
+          return (
+            <Button
+              type="link"
+              disabled={row.result?.status !== 'failed'}
+              onClick={() => checkDetail('remoteInstall', row)}
+            >
+              {t('node-manager.cloudregion.node.viewLog')}
+            </Button>
+          );
+        },
       },
-    },
-  ];
+    ];
+  }, [config.type]);
 
   useEffect(() => {
     if (isLoading) return;
     clearTimer();
     if (config.taskId) {
-      getNodeList();
+      getNodeList('refresh');
       timerRef.current = setInterval(() => {
         getNodeList('timer');
       }, 5000);
@@ -116,7 +121,7 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
         clearTimer();
       };
     }
-  }, [config.taskId, isLoading]);
+  }, [config.taskId, config.type, isLoading]);
 
   const clearTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -135,10 +140,12 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
     });
   };
 
-  const getNodeList = async (type?: string) => {
+  const getNodeList = async (refreshType: string) => {
     try {
-      setPageLoading(type !== 'timer');
-      const data = await getControllerNodes({ taskId: config.taskId });
+      setPageLoading(refreshType !== 'timer');
+      const request =
+        config.type === 'collector' ? getCollectorNodes : getControllerNodes;
+      const data = await request({ taskId: config.taskId });
       setTableData(
         data.map((item: TableDataItem, index: number) => ({
           id: index,
@@ -166,7 +173,7 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
       </div>
       <div className={controllerInstallSyle.table}>
         <div className="flex justify-end mb-[16px]">
-          <ReloadOutlined onClick={() => getNodeList()} />
+          <ReloadOutlined onClick={() => getNodeList('refresh')} />
         </div>
         <CustomTable
           rowKey="id"
