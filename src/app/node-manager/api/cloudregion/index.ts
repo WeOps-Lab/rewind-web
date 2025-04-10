@@ -73,6 +73,13 @@ const useApiCloudRegion = () => {
     );
   };
 
+  // 获采集器节点信息
+  const getCollectorNodes = async (params: { taskId: number }) => {
+    return await post(
+      `/node_mgmt/api/installer/collector/install/${params.taskId}/nodes/`
+    );
+  };
+
   //获取sidecar的安装步骤
   const getsidecarstep = async (
     ip: string,
@@ -251,6 +258,7 @@ const useApiCloudRegion = () => {
     createchildconfig,
     updatechildconfig,
     installCollector,
+    getCollectorNodes,
   };
 };
 export default useApiCloudRegion;

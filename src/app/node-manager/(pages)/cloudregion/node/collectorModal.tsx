@@ -104,10 +104,14 @@ const CollectorModal = forwardRef<ModalRef, ModalSuccess>(
     const operate = async (callback: any, params: any) => {
       try {
         setConfirmLoading(true);
-        await callback(params);
+        const data = await callback(params);
+        const config = {
+          taskId: data.task_id || '',
+          type,
+        };
         message.success(t('common.operationSuccessful'));
         handleCancel();
-        onSuccess();
+        onSuccess(config);
       } finally {
         setConfirmLoading(false);
       }

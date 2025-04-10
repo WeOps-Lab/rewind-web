@@ -27,7 +27,7 @@
       ]
     },
     {
-      "title": "采集器",
+      "title": "探针",
       "icon": "xiaocaijiqi",
       "url": "/node-manager/collector",
       "name": "collector_list",
@@ -69,7 +69,7 @@
       ]
     },
     {
-      "title": "Collector",
+      "title": "Sidecar",
       "icon": "xiaocaijiqi",
       "url": "/node-manager/collector",
       "name": "collector_list",

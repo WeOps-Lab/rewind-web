@@ -24,6 +24,8 @@ import useCloudId from '@/app/node-manager/hooks/useCloudid';
 import { useTelegrafMap } from '@/app/node-manager/constants/cloudregion';
 import ControllerInstall from './controllerInstall';
 import ControllerUninstall from './controllerUninstall';
+import CollectorInstallTable from './controllerTable';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   OPERATE_SYSTEMS,
   useSidecaritems,
@@ -41,7 +43,9 @@ const Node = () => {
   const collectorRef = useRef<ModalRef>(null);
   const controllerRef = useRef<ModalRef>(null);
   const { t } = useTranslation();
-  const cloudid = useCloudId();
+  const cloudId = useCloudId();
+  const searchParams = useSearchParams();
+  const name = searchParams.get('name') || '';
   const { isLoading, del } = useApiClient();
   const { getnodelist } = useApiCloudRegion();
   const [nodelist, setNodelist] = useState<TableDataItem[]>();
@@ -49,11 +53,22 @@ const Node = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showNodeTable, setShowNodeTable] = useState<boolean>(true);
   const [searchText, setSearchText] = useState<string>('');
+  const [taskId, setTaskId] = useState<string>('');
   const [showInstallController, setShowInstallController] =
     useState<boolean>(false);
-  const [system, setSystem] = useState<string>('windows');
+  const [showInstallCollectorTable, setShowInstallCollectorTable] =
+    useState<boolean>(false);
+  const [system, setSystem] = useState<string>('linux');
+  const router = useRouter();
   const checkConfig = (row: TableDataItem) => {
-    console.log(row);
+    const data = {
+      cloud_region_id: cloudId,
+      name,
+      id: row.id + '',
+    };
+    const params = new URLSearchParams(data);
+    const targetUrl = `/node-manager/cloudregion/configuration?${params.toString()}`;
+    router.push(targetUrl);
   };
   const columns = useColumns({ checkConfig });
   const sidecaritems = useSidecaritems();
@@ -63,6 +78,11 @@ const Node = () => {
   const cancelInstall = useCallback(() => {
     setShowNodeTable(true);
     setShowInstallController(false);
+  }, []);
+
+  const cancelWait = useCallback(() => {
+    setShowNodeTable(true);
+    setShowInstallCollectorTable(false);
   }, []);
 
   const getCollectors = (collectors: TableDataItem) => {
@@ -235,7 +255,7 @@ const Node = () => {
     return {
       name: searchText,
       operating_system: system,
-      cloud_region_id: Number(cloudid),
+      cloud_region_id: Number(cloudId),
     };
   };
 
@@ -264,6 +284,15 @@ const Node = () => {
     const params = getParams();
     params.operating_system = id;
     getNodes(params);
+  };
+
+  const handleCollector = (config = { type: '', taskId: '' }) => {
+    getNodes();
+    if (config.type === 'installCollector') {
+      setTaskId(config.taskId);
+      setShowNodeTable(false);
+      setShowInstallCollectorTable(true);
+    }
   };
 
   return (
@@ -334,8 +363,8 @@ const Node = () => {
             </div>
             <CollectorModal
               ref={collectorRef}
-              onSuccess={() => {
-                getNodes();
+              onSuccess={(config) => {
+                handleCollector(config);
               }}
             />
             <ControllerUninstall
@@ -350,6 +379,12 @@ const Node = () => {
       )}
       {showInstallController && (
         <ControllerInstall config={{ os: system }} cancel={cancelInstall} />
+      )}
+      {showInstallCollectorTable && (
+        <CollectorInstallTable
+          config={{ taskId, type: 'collector' }}
+          cancel={cancelWait}
+        />
       )}
     </Mainlayout>
   );
