@@ -73,7 +73,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
       configformRef.current?.resetFields();
       configformRef.current?.setFieldsValue(configForm);
     }
-  }, [configVisible, configForm]);
+  }, [configForm]);
 
   //关闭用户的弹窗(取消和确定事件)
   const handleCancel = () => {

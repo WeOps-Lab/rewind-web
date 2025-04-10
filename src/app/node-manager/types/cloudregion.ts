@@ -78,6 +78,16 @@ interface ConfigDate {
   nodes: string[]
 }
 
+interface SubRef {
+  getChildConfig: () => void;
+}
+
+interface SubProps { 
+  cancel: any, 
+  edit: any, 
+  nodeData: ConfigDate 
+}
+
 interface cloudRegionItem {
   id: string;
   name: string;
@@ -139,6 +149,8 @@ export type {
   nodeItemtRes,
   mappedNodeItem,
   ConfigDate,
+  SubRef,
+  SubProps,
   cloudRegionItem,
   VarSourceItem,
   VarResItem,

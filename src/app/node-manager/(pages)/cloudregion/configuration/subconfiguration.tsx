@@ -1,20 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import useApiClient from '@/utils/request';
 import { useTranslation } from '@/utils/i18n';
 import { Input, Button } from 'antd';
 import { TableDataItem } from '@/app/node-manager/types/index';
 import CustomTable from '@/components/custom-table';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
+import type { SubRef, SubProps } from '@/app/node-manager/types/cloudregion'; 
 import type { TableColumnsType } from 'antd';
-import type { ConfigDate } from '@/app/node-manager/types/cloudregion';
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;
 
-const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, nodeData: ConfigDate }) => {
+const SubConfiguration = forwardRef<SubRef, SubProps>(({ cancel, edit, nodeData }, ref) => {
   const { t } = useTranslation();
   const { getchildconfig } = useApiCloudRegion();
-
+  const { isLoading } = useApiClient();
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchText, setSearchText] = useState<string>('');
@@ -63,22 +64,31 @@ const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, 
     },
   ];
 
-  useEffect(() => {
-    console.log(nodeData);
-    setTableLoading(true);
-    getChildConfigList();
-  }, [])
+  useImperativeHandle(ref, () => (
+    {
+      getChildConfig: () => {
+        getChildConfigList(searchText)
+      }
+    }
+  ))
+
+  // useEffect(() => {
+  //   setTableLoading(true);
+  //   getChildConfigList();
+  // }, [])
 
   useEffect(() => {
-    getChildConfigList();
-  }, [nodeData])
-
-  const getChildConfigList = () => {
+    if(isLoading) return;
     setTableLoading(true);
-    getchildconfig(nodeData.key).then((res) => {
+    getChildConfigList(searchText);
+  }, [isLoading])
+
+  const getChildConfigList = (search?: string) => {
+    setTableLoading(true);
+    getchildconfig(nodeData.key, search).then((res) => {
       const data = res.map((item: any) => {
         return {
-          name: `${nodeData.nodes.length ? nodeData.nodes[0] : '--'}_${nodeData.name}_子配置`,
+          name: `${nodeData.nodes || '--'}_${nodeData.name}_子配置`,
           ...item
         }
       });
@@ -94,7 +104,7 @@ const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, 
   };
 
   const onSearch: SearchProps['onSearch'] = (value) => {
-    console.log(searchText);
+    getChildConfigList(value);
     setSearchText(value);
   };
 
@@ -125,6 +135,6 @@ const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, 
       </div>
     </>
   )
-};
-
+})
+SubConfiguration.displayName = 'SubConfiguration';
 export default SubConfiguration;
