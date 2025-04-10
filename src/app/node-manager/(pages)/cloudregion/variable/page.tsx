@@ -5,7 +5,7 @@ import CustomTable from '@/components/custom-table/index';
 import { useTranslation } from '@/utils/i18n';
 import VariableModal from './variableModal';
 import { ModalRef } from '@/app/node-manager/types/index';
-import { useVarColumns } from './useVarColumns';
+import { useVarColumns } from '@/app/node-manager/hooks/variable';
 import type { GetProps } from 'antd';
 import type { TableDataItem } from '@/app/node-manager/types/index';
 import Mainlayout from '../mainlayout/layout';

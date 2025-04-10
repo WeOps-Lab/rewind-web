@@ -25,7 +25,7 @@ import type { OptionItem } from '@/app/node-manager/types/index';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
 import useApiCollector from '@/app/node-manager/api/collector/index';
 import CodeEditor from '@/app/node-manager/components/codeEditor';
-import useConfigModalColumns from './configModalColumns';
+import { useConfigModalColumns } from '@/app/node-manager/hooks/configuration';
 
 const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const configformRef = useRef<FormInstance>(null);
