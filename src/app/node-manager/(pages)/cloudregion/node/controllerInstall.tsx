@@ -213,7 +213,7 @@ const ControllerInstall: React.FC<ControllerInstallProps> = ({
         },
       },
       {
-        title: '',
+        title: t("common.actions"),
         dataIndex: 'action',
         width: 60,
         fixed: 'right',
@@ -403,8 +403,7 @@ const ControllerInstall: React.FC<ControllerInstallProps> = ({
         cloud_region_id: +cloudId,
         nodes,
         work_node: values.work_node || '',
-        sidecar_package: values.sidecar_package || '',
-        // executor_package: '',
+        package_id: values.sidecar_package || '',
       };
       create(params);
     });

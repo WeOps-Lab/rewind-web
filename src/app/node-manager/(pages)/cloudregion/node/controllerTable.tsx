@@ -66,43 +66,26 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
       },
     },
     {
-      title: 'Sidecar',
-      dataIndex: 'sidecar_result',
+      title: t('node-manager.cloudregion.node.sidecar'),
+      dataIndex: 'result',
       width: 100,
-      key: 'sidecar_result',
+      key: 'result',
       ellipsis: true,
       render: (value: Record<string, string>) => {
         return (
           <span
             style={{
-              color: installMay[value.status]?.color || 'var(--ant-color-text)',
+              color:
+                installMay[value?.status]?.color || 'var(--ant-color-text)',
             }}
           >
-            {installMay[value.status]?.text || '--'}
+            {installMay[value?.status]?.text || '--'}
           </span>
         );
       },
     },
     {
-      title: 'Nas Excutor',
-      dataIndex: 'executor_result',
-      width: 100,
-      key: 'executor_result',
-      ellipsis: true,
-      render: (value: Record<string, string>) => {
-        return (
-          <span
-            style={{
-              color: installMay[value.status]?.color || 'var(--ant-color-text)',
-            }}
-          >
-            {installMay[value.status]?.text || '--'}
-          </span>
-        );
-      },
-    },
-    {
-      title: '',
+      title: t('common.actions'),
       dataIndex: 'action',
       width: 60,
       fixed: 'right',
@@ -111,10 +94,7 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
         return (
           <Button
             type="link"
-            disabled={
-              row.executor_result?.status !== 'failed' &&
-              row.sidecar_result?.status !== 'failed'
-            }
+            disabled={row.result?.status !== 'failed'}
             onClick={() => checkDetail('remoteInstall', row)}
           >
             {t('node-manager.cloudregion.node.viewLog')}
@@ -145,11 +125,8 @@ const ControllerTable: React.FC<ControllerInstallProps> = ({
 
   const checkDetail = (type: string, row: TableDataItem) => {
     let message = '';
-    if (row.sidecar_result?.status === 'failed') {
-      message += `Sidecar ${t('node-manager.cloudregion.node.failInstall')}\n${row.sidecar_result.message}`;
-    }
-    if (row.executor_result?.status === 'failed') {
-      message += `\nNas Excutor ${t('node-manager.cloudregion.node.failInstall')}\n${row.executor_result.message}`;
+    if (row.result?.status === 'failed') {
+      message += row.result?.message;
     }
     guidance.current?.showModal({
       title: t('node-manager.cloudregion.node.log'),

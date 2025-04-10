@@ -58,6 +58,14 @@ const useApiCloudRegion = () => {
     return await post('/node_mgmt/api/installer/controller/install/', params);
   };
 
+  // 安装采集器
+  const installCollector = async (params: {
+    collector_package: number;
+    nodes: string[];
+  }) => {
+    return await post('/node_mgmt/api/installer/collector/install/', params);
+  };
+
   // 获控制器节点信息
   const getControllerNodes = async (params: { taskId: number }) => {
     return await post(
@@ -87,9 +95,9 @@ const useApiCloudRegion = () => {
 
   //批量操作节点的采集器（启动、停止、重启）
   const batchoperationcollector = async (data: {
-    node_ids: string[];
-    collector_id: string;
-    operation: string;
+    node_ids?: string[];
+    collector_id?: string;
+    operation?: string;
   }) => {
     return await post('/node_mgmt/api/node/batch_operate_collector/', data);
   };
@@ -240,7 +248,8 @@ const useApiCloudRegion = () => {
     uninstallController,
     getchildconfig,
     createchildconfig,
-    updatechildconfig
+    updatechildconfig,
+    installCollector,
   };
 };
 export default useApiCloudRegion;

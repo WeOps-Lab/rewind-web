@@ -12,7 +12,7 @@ import useCloudId from '@/app/node-manager/hooks/useCloudid';
 import Mainlayout from '../mainlayout/layout';
 import configstyle from './index.module.scss';
 import SubConfiguration from './subconfiguration';
-import { useConfigColumns } from './useConfigColumns';
+import { useConfigColumns } from '@/app/node-manager/hooks/configuration';
 import ConfigModal from './configModal';
 type SearchProps = GetProps<typeof Input.Search>;
 const { Search } = Input;

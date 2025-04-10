@@ -23,7 +23,7 @@ import {
 } from '@/app/node-manager/types/cloudregion';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
 import CodeEditor from '@/app/node-manager/components/codeEditor';
-import useConfigModalColumns from './configModalColumns';
+import { useConfigModalColumns } from '@/app/node-manager/hooks/configuration';
 
 const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const configformRef = useRef<FormInstance>(null);

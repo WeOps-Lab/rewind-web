@@ -193,7 +193,7 @@ const Node = () => {
     collectorRef.current?.showModal({
       type: e.key,
       ids: selectedRowKeys as string[],
-      selectedsystem: '',
+      selectedsystem: system,
     });
   };
 
@@ -252,10 +252,6 @@ const Node = () => {
     }));
     setLoading(false);
     setNodelist(data);
-  };
-
-  const handleCollectorSuccess = async () => {
-    getNodes();
   };
 
   const handleInstallController = () => {
@@ -339,11 +335,12 @@ const Node = () => {
             <CollectorModal
               ref={collectorRef}
               onSuccess={() => {
-                handleCollectorSuccess();
+                getNodes();
               }}
             />
             <ControllerUninstall
               ref={controllerRef}
+              config={{ os: system }}
               onSuccess={() => {
                 getNodes();
               }}
