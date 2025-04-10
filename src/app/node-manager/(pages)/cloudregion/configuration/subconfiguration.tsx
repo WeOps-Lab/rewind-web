@@ -1,10 +1,11 @@
+import { useEffect, useState } from 'react';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/utils/i18n';
 import { Input, Button } from 'antd';
-import CustomTable from '@/components/custom-table';
-import type { TableColumnsType } from 'antd';
 import { TableDataItem } from '@/app/node-manager/types/index';
-import { useEffect, useState } from 'react';
+import CustomTable from '@/components/custom-table';
+import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
+import type { TableColumnsType } from 'antd';
 import type { ConfigDate } from '@/app/node-manager/types/cloudregion';
 import type { GetProps } from 'antd';
 type SearchProps = GetProps<typeof Input.Search>;
@@ -12,6 +13,8 @@ const { Search } = Input;
 
 const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, nodeData: ConfigDate }) => {
   const { t } = useTranslation();
+  const { getchildconfig } = useApiCloudRegion();
+
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchText, setSearchText] = useState<string>('');
@@ -35,13 +38,22 @@ const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, 
       fixed: 'right',
       align: 'center',
       width: 180,
-      render: (key: any, item: any) => (
+      render: (_: any, record: any) => (
         <div className="flex justify-center">
           <Button
             color="primary"
             variant="link"
             onClick={() => {
-              edit(key, item);
+              edit({
+                id: record.id,
+                name: record.name,
+                nodes: nodeData.nodes || '--',
+                collector: nodeData.collector,
+                configinfo: record.content,
+                collect_type: record.collect_type,
+                config_type: record.config_type,
+                collector_config: record.collector_config
+              });
             }}
           >
             {t('common.edit')}
@@ -52,38 +64,30 @@ const SubConfiguration = ({ cancel, edit, nodeData }: { cancel: any, edit: any, 
   ];
 
   useEffect(() => {
+    console.log(nodeData);
     setTableLoading(true);
-    setTimeout(() => {
-      const data = [
-        {
-          key: '1',
-          name: '123',
-          collector: 'linux_test',
-          operatingsystem: 'linux',
-          sidecar: 'Telegraf',
-          nodecount: 2,
-          configinfo: '',
-          nodes: '1.1.1.1',
-        },
-        {
-          key: '2',
-          name: '456',
-          collector: 'linux_test',
-          operatingsystem: 'linux',
-          sidecar: 'Telegraf',
-          nodecount: 2,
-          configinfo: '',
-          nodes: '1.1.1.1',
-        }
-      ];
-      setTableData(data);
-      setTableLoading(false);
-    }, 1000)
+    getChildConfigList();
   }, [])
 
   useEffect(() => {
-    console.log(nodeData)
+    getChildConfigList();
   }, [nodeData])
+
+  const getChildConfigList = () => {
+    setTableLoading(true);
+    getchildconfig(nodeData.key).then((res) => {
+      const data = res.map((item: any) => {
+        return {
+          name: `${nodeData.nodes.length ? nodeData.nodes[0] : '--'}_${nodeData.name}_子配置`,
+          ...item
+        }
+      });
+      setTableData(data);
+      setTableLoading(false);
+    }).catch((e) => {
+      console.log(e);
+    });
+  };
 
   const goBack = () => {
     cancel();

@@ -14,13 +14,13 @@ export const useConfigColumns = ({
       dataIndex: 'name',
       fixed: 'left',
       width: 300,
-      render: (text: string) => <p>{text}</p>,
+      render: (text: string) => <p>{text || '--'}</p>,
     },
     {
       title: t('node-manager.cloudregion.node.node'),
       dataIndex: 'nodes',
       width: 150,
-      render: (text: string) => <p>{text}</p>,
+      render: (text: string) => <p>{text || '--'}</p>,
     },
     {
       title: t('node-manager.cloudregion.Configuration.sidecar'),
@@ -38,7 +38,7 @@ export const useConfigColumns = ({
       ],
       width: 150,
       onFilter: (value, record) => record?.sidecar === value,
-      render: (text: string) => <p>{text}</p>,
+      render: (text: string) => <p>{text || '--'}</p>,
     },
     {
       title: t('common.actions'),

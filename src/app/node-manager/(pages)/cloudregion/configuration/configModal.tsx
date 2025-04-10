@@ -36,6 +36,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const {
     updatecollector,
     getvariablelist,
+    updatechildconfig,
   } = useApiCloudRegion();
   const [configForm, setConfigForm] = useState<TableDataItem>();
   const [editeConfigId, setEditeConfigId] = useState<string>('');
@@ -68,7 +69,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
       setVardataSource(tempdata);
     });
     //add发起请求，设置表单的数据
-    if (configVisible && ['edit'].includes(type)) {
+    if (configVisible && ['edit', 'edit_child'].includes(type)) {
       configformRef.current?.resetFields();
       configformRef.current?.setFieldsValue(configForm);
     }
@@ -82,7 +83,6 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
   const handleUpdate = (
     name: string,
     collector: string,
-    nodes: string[],
     configinfo: string
   ) => {
     updatecollector(editeConfigId, {
@@ -97,14 +97,35 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
     });
   };
 
+  const handleChildUpdate = (configinfo: string) => {
+    const { id,collect_type,config_type,collector_config } = configForm as TableDataItem;
+    updatechildconfig(id as string,{
+      collect_type,
+      config_type,
+      collector_config,
+      content: configinfo
+    }).then(()=>{
+      onSuccess();
+      setConfirmLoading(false);
+      setConfigVisible(false);
+      message.success(t('common.updateSuccess'));
+    })
+  }
+
   //处理添加和编辑的确定事件
   const handleConfirm = () => {
     // 校验表单
     configformRef.current?.validateFields().then((values) => {
       console.log(values);
       setConfirmLoading(true);
-      const { name, nodes, collector, configinfo } = values;
-      handleUpdate(name, nodes, collector, configinfo);
+      if(type === 'edit') {
+        const { name, collector, configinfo } = values;
+        console.log(values);
+        handleUpdate(name, collector, configinfo);
+      } else if (type === 'edit_child') {
+        const { configinfo } = values;
+        handleChildUpdate(configinfo);
+      }
     });
   };
 
@@ -231,7 +252,7 @@ const ConfigModal = forwardRef<ModalRef, ModalSuccess>(({ onSuccess }, ref) => {
 
   return (
     <OperateModal
-      title={t(`common.${type}`)}
+      title={t(`common.edit`)}
       open={configVisible}
       onCancel={handleCancel}
       width={800}

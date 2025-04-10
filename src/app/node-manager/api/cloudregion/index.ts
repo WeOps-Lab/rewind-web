@@ -107,6 +107,15 @@ const useApiCloudRegion = () => {
     });
   };
 
+  // 获取子配置文件列表
+  const getchildconfig = async (collector_config_id: string) => {
+    return await get('/node_mgmt/api/child_config', {
+      params: {
+        collector_config_id
+      }
+    })
+  };
+
   //创建一个配置文件
   const createconfig = async (data: {
     name: string;
@@ -115,6 +124,29 @@ const useApiCloudRegion = () => {
     config_template: string;
   }) => {
     return await post('/node_mgmt/api/configuration/', data);
+  };
+
+  // 创建一个子配置文件
+  const createchildconfig = async (data:{
+    collect_type: string,
+    config_type: string,
+    content: string,
+    collector_config: string
+  }) => {
+    return await post('/node_mgmt/api/child_config', data)
+  };
+
+  // 更新子配置内容
+  const updatechildconfig = async (
+    id: string,
+    data: {
+      collect_type: string,
+      config_type: string,
+      content: string,
+      collector_config: string
+    }
+  ) => {
+    return await patch(`/node_mgmt/api/child_config/${id}`, data)
   };
 
   //部分更新采集器
@@ -206,6 +238,9 @@ const useApiCloudRegion = () => {
     installController,
     getControllerNodes,
     uninstallController,
+    getchildconfig,
+    createchildconfig,
+    updatechildconfig
   };
 };
 export default useApiCloudRegion;
