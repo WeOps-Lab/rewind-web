@@ -10,6 +10,7 @@ import useApiClient from '@/utils/request';
 import type {
   IConfiglistprops,
   ConfigDate,
+  SubRef,
 } from '@/app/node-manager/types/cloudregion';
 import useApiCloudRegion from '@/app/node-manager/api/cloudregion';
 import useCloudId from '@/app/node-manager/hooks/useCloudid';
@@ -23,6 +24,7 @@ const { Search } = Input;
 
 const Configration = () => {
   const configurationRef = useRef<ModalRef>(null);
+  const subConfiguration = useRef<SubRef>(null);
   const modifydeleteconfigurationref = useRef<HTMLButtonElement>(null);
   const { t } = useTranslation();
   const { isLoading } = useApiClient();
@@ -140,6 +142,15 @@ const Configration = () => {
     setShowSub(false);
   };
 
+  // 弹窗确认成功后的回调
+  const onSuccess = () => {
+    if (!showSub) {
+      getConfiglist();
+      return;
+    }
+    subConfiguration.current?.getChildConfig();
+  }
+
   return (
     <Mainlayout>
       <div className={`${configstyle.config} w-full h-full`}>
@@ -165,6 +176,7 @@ const Configration = () => {
           </>
         ) : (
           <SubConfiguration
+            ref={subConfiguration}
             cancel={() => handleCBack()}
             edit={hanldeSubEditClick}
             nodeData={nodeData}
@@ -173,9 +185,7 @@ const Configration = () => {
         {/* 弹窗组件（添加，编辑，应用）用于刷新页面 */}
         <ConfigModal
           ref={configurationRef}
-          onSuccess={() => {
-            getConfiglist();
-          }}
+          onSuccess={onSuccess}
         ></ConfigModal>
       </div>
     </Mainlayout>

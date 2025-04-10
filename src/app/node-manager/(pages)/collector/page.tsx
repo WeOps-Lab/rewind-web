@@ -19,7 +19,7 @@ const Collector = () => {
   const { isLoading } = useApiClient();
   const { getCollectorlist, getControllerList } = useApiCollector();
   const modalRef = useRef<ModalRef>(null);
-  const [value, setValue] = useState<string | number>('controller');
+  const [value, setValue] = useState<string | number>('collector');
   const [controllerCards, setControllerCards] = useState<CardItem[]>([]);
   const [collectorCards, setCollectorCards] = useState<CardItem[]>([]);
   const [controllerCount, setControllerCount] = useState<number>(0);
@@ -31,13 +31,14 @@ const Collector = () => {
   const menuItem = useMenuItem();
   const titleItem = [
     {
+      label: `${t('node-manager.collector.collector')}(${collectorCount})`,
+      value: 'collector',
+    },
+    {
       label: `${t('node-manager.collector.controller')}(${controllerCount})`,
       value: 'controller',
     },
-    {
-      label: `${t('node-manager.collector.collector')}(${collectorCount})`,
-      value: 'collector',
-    }
+    
   ];
 
   useEffect(() => {
@@ -160,7 +161,7 @@ const Collector = () => {
       <Segmented
         className="custom-tabs"
         options={titleItem}
-        defaultValue='controller'
+        defaultValue='collector'
         onChange={(value) => setValue(value)}
       />
       {/* 卡片的渲染 */}
@@ -170,6 +171,7 @@ const Collector = () => {
         menuActions={(value) => menuActions(value)}
         filter filterOptions={options} changeFilter={changeFilter}
         {...ifOpenAddModal()}
+        isPermission={false}
         onSearch={onSearch}
         onCardClick={(item: CardItem) => navigateToCollectorDetail(item)}></EntityList>
       <CollectorModal ref={modalRef} onSuccess={handleSubmit} />

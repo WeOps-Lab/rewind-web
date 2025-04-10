@@ -123,10 +123,11 @@ const useApiCloudRegion = () => {
   };
 
   // 获取子配置文件列表
-  const getchildconfig = async (collector_config_id: string) => {
+  const getchildconfig = async (collector_config_id: string, search?: string) => {
     return await get('/node_mgmt/api/child_config', {
       params: {
-        collector_config_id
+        collector_config_id,
+        search
       }
     })
   };
